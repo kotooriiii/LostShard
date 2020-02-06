@@ -1,0 +1,12 @@
+name: LostShardK
+main: com.github.kotooriiii.LostShardK
+author: kotooriiii
+version: 1.0
+api-version: 1.8.8
+commands:
+  ff:
+    description:
+    usage:
+  clans:
+    description:
+    usage:
