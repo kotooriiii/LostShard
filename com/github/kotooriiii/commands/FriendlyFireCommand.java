@@ -5,9 +5,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
+
+import static com.github.kotooriiii.data.Maps.*;
 
 public class FriendlyFireCommand implements CommandExecutor {
 
@@ -23,21 +26,22 @@ public class FriendlyFireCommand implements CommandExecutor {
                 if (args.length == 0) {
                     Clan clan = Clan.getClan(playerUUID);
                     if (clan == null)
-                        playerSender.sendMessage(ChatColor.RED + "You are not in a clan.");
+                        playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
 
-                    if (clan.getFriendlyFire()) {
-                        clan.broadcast(ChatColor.GREEN + "Clan friendly fire has been disabled.");
+                    if (clan.isFriendlyFire()) {
+                        clan.broadcast(STANDARD_COLOR + "Clan friendly fire has been disabled.");
                     } else {
-                        clan.broadcast(ChatColor.GREEN + "Clan friendly fire has been enabled.");
+                        clan.broadcast(STANDARD_COLOR + "Clan friendly fire has been enabled.");
                     }
-                    clan.setFriendlyFire(!clan.getFriendlyFire());
+                    clan.setFriendlyFire(!clan.isFriendlyFire());
 
                 } else {
-                    playerSender.sendMessage("You provided too many arguments: /ff");
+                    playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/ff" + ERROR_COLOR + ".");
                 }
             }
-        }
-
+        } else if (sender instanceof ConsoleCommandSender) {
+            sender.sendMessage("This command is not yet optimized for the console. Bother the developer to add commands :)");
+        } //end of console sending commands
 
         //end of commands
         return true;

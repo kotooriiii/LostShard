@@ -1,6 +1,7 @@
 package com.github.kotooriiii.data;
 
 import com.github.kotooriiii.clans.Clan;
+import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,4 +25,12 @@ public final class Maps {
 
     //The array list targets the non-clan user deciding if they'd like to join a clan. They have a set timer in order to confirm their request.
     public static HashMap<UUID, ArrayList<Clan>> invitationConfirmation = new HashMap<>();
+
+    public final static ChatColor ERROR_COLOR = ChatColor.DARK_RED;
+    public final static ChatColor CLAN_COLOR = ChatColor.GOLD;
+    public final static ChatColor STANDARD_COLOR = ChatColor.DARK_GREEN;
+    public final static ChatColor PLAYER_COLOR = ChatColor.YELLOW;
+    public final static ChatColor COMMAND_COLOR = ChatColor.GOLD;
+    public final static ChatColor RANK_COLOR = ChatColor.GOLD;
+
 }

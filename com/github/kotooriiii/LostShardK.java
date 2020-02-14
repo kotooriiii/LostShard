@@ -2,14 +2,18 @@ package com.github.kotooriiii;
 
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.ClanCommand;
+import com.github.kotooriiii.commands.FriendlyFireCommand;
+import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.listeners.ClanCreateTagListener;
 import com.github.kotooriiii.listeners.PlayerHitEvent;
 import com.github.kotooriiii.listeners.PlayerLeaveListener;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -31,9 +35,12 @@ public class LostShardK extends JavaPlugin {
         plugin = this;
         pluginDescriptionFile = this.getDescription();
 
+        FileManager.init();
+
         //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
         registerCommands();
         registerEvents();
+
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
@@ -42,30 +49,34 @@ public class LostShardK extends JavaPlugin {
     @Override
     public void onDisable() {
 
+        saveData();
+        logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
         plugin = null;
         logger = null;
         pluginDescriptionFile = null;
 
-
-        saveData();
-
-        logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
     }
 
     private void saveData() {
-        clanTagCreators = new HashMap<>();
-        clanColorCreators = new HashMap<>();
-        clanDisbandTimer = new ArrayList<>();
-        leaderConfirmation = new ArrayList<>();
-        invitationConfirmation = new HashMap<>();
-        //todo SAVE FILE for CLANS
 
+        for(Clan clan : clans)
+        {
+            FileManager.write(clan);
+        }
+    }
+
+    private void loop() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(LostShardK.plugin, new Runnable() {
+            public void run() {
+               saveData();
+            }
+        }, 0L,6*60*60*20L);//every 6hrs
     }
 
 
     public void registerCommands() {
         getCommand("clan").setExecutor(new ClanCommand());
-        getCommand("ff").setExecutor(new ClanCommand());
+        getCommand("ff").setExecutor(new FriendlyFireCommand());
     }
 
     public void registerEvents() {
