@@ -93,6 +93,13 @@ public class ClanCommand implements CommandExecutor {
                         case "help":
                             sendHelp(playerSender);
                             break;
+                        case "staff":
+                            if (!playerSender.hasPermission("lostshardsk.staff")) {
+                                playerSender.sendMessage(ERROR_COLOR + "You do not have access to staff commands.");
+                                return true;
+                            }
+                            sendStaffHelp(playerSender);
+                            break;
                         default: //Not a premade command. This means something like: /clans chocolatebunnies
                             sendUnknownCommand(playerSender);
                             break;
@@ -181,7 +188,7 @@ public class ClanCommand implements CommandExecutor {
                                 return true;
                             }
 
-                            if (args.length == 2) {
+                            if (args.length <= 2) {
                                 sendStaffHelp(playerSender);
                             } else {
                                 switch (args[1].toLowerCase()) {
@@ -203,9 +210,9 @@ public class ClanCommand implements CommandExecutor {
                                     case "disband":
                                         if (args.length == 2)
                                             playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/clan staff disband <clanName>" + ERROR_COLOR + "."); //clan staff uuid
-                                            //clan staff disbadn
+                                            //clan staff disbadn sss
                                         else if (args.length > 2)
-                                            forceDisband(playerSender, supply);
+                                            forceDisband(playerSender, stringBuilder(args, 2));
 
                                         break;
                                     case "leader":
@@ -244,7 +251,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void forceLeader(Player playerSender, String playerName, String clanName) {
         if (clanName == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
@@ -256,7 +263,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         if (clan == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
@@ -274,10 +281,10 @@ public class ClanCommand implements CommandExecutor {
         switch (clan.forceLeader(targetPlayer.getUniqueId())) {
 
             case 0:
-                clan.broadcast(PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " has forcibly been assigned the new " + RANK_COLOR + ClanRank.LEADER + STANDARD_COLOR + " of the clan.");
-                playerSender.sendMessage(STANDARD_COLOR + "You have forcibly assigned a new leader to " + CLAN_COLOR + clan.getName() + STANDARD_COLOR + ".");
+                clan.broadcast(PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " has forcibly been assigned the new " + STANDARD_COLOR + ClanRank.LEADER + STANDARD_COLOR + " of the clan.");
+                playerSender.sendMessage(STANDARD_COLOR + "You have forcibly assigned a new leader to " + STANDARD_COLOR + "\"" +  clan.getName() + "\""  + STANDARD_COLOR + ".");
                 if (targetPlayer.isOnline())
-                    ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "You have been forcibly assigned " + RANK_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".");
+                    ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "You have been forcibly assigned " + STANDARD_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".");
                 break;
             case 1:
             case 30:
@@ -291,7 +298,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void forceDisband(Player playerSender, String clanName) {
         if (clanName == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
@@ -303,20 +310,20 @@ public class ClanCommand implements CommandExecutor {
         }
 
         if (clan == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
         clan.broadcast(STANDARD_COLOR + "You have been forcibly kicked from the clan.");
         clan.broadcast(STANDARD_COLOR + "Your clan has been forcibly disbanded.");
-        playerSender.sendMessage(STANDARD_COLOR + "You have forcibly disbanded " + CLAN_COLOR + clan.getName() + STANDARD_COLOR + ".");
+        playerSender.sendMessage(STANDARD_COLOR + "You have forcibly disbanded " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + ".");
         clan.forceDisband();
         return;
     }
 
     private void sendClanUUID(Player playerSender, String clanName) {
         if (clanName == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
@@ -328,11 +335,11 @@ public class ClanCommand implements CommandExecutor {
         }
 
         if (clan == null) {
-            playerSender.sendMessage(ERROR_COLOR + "The clan " + CLAN_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
+            playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
             return;
         }
 
-        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The clan " + CLAN_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + clan.getID().toString() + ". Hover and click to copy.")
+        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + clan.getID().toString() + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, clan.getID().toString()))
                 .create());
@@ -361,7 +368,7 @@ public class ClanCommand implements CommandExecutor {
     }
 
     private void sendUnknownCommand(Player playerSender) {
-        playerSender.sendMessage(ERROR_COLOR + "The sub-command you provided does not exist in clans. Use " + COMMAND_COLOR + "/clans" + ERROR_COLOR + " for help.");
+        playerSender.sendMessage(ERROR_COLOR + "The sub-command you provided does not exist in clans. Use " + "/clan" + ERROR_COLOR + " for help.");
     }
 
     private void clanWho(final Player playerSender, String targetPlayerName) {
@@ -406,12 +413,13 @@ public class ClanCommand implements CommandExecutor {
                 senderClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has left the clan.", new UUID[]{playerUUID});
                 playerSender.sendMessage(STANDARD_COLOR + "You have left the clan.");
                 break;
+            case 30:
             case 1:
                 //rare to happen, must be error since already covered when you GOT player clan
                 playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
                 break;
             case 3:
-                playerSender.sendMessage(ERROR_COLOR + "You can not leave before promoting someone else to " + RANK_COLOR + ClanRank.LEADER + ERROR_COLOR + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You can not leave before promoting someone else to " + ERROR_COLOR + ClanRank.LEADER + ERROR_COLOR + ".");
                 break;
 
         }
@@ -519,18 +527,20 @@ public class ClanCommand implements CommandExecutor {
                     ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "You have been kicked from the clan by " + PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + ".");
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
                 break;
             case 2:
                 playerSender.sendMessage(ERROR_COLOR + "That player is not in your clan.");
                 break;
+            case 4:
+                playerSender.sendMessage(ERROR_COLOR + "You do not have permission to kick a player from your clan.");
+                break;
             case 3:
             case 5:
                 playerSender.sendMessage(ERROR_COLOR + "You have no authority to kick someone of equal or higher rank of you.");
                 break;
-            case 4:
-                playerSender.sendMessage(ERROR_COLOR + "You do not have permission to kick a player from your clan.");
-                break;
+
         }
     }
 
@@ -573,7 +583,7 @@ public class ClanCommand implements CommandExecutor {
                 senderClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited " + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to your clan. The player has 60 seconds to confirm.", new UUID[]{playerUUID});
                 playerSender.sendMessage(STANDARD_COLOR + "You have invited " + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to your clan. The player has 60 seconds to confirm.");
                 if (targetPlayer.isOnline())
-                    ((Player) targetPlayer).sendMessage(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited you to join " + CLAN_COLOR + senderClan.getName() + STANDARD_COLOR + ". You have 60 seconds to accept the invitation. Type " + COMMAND_COLOR + "/clan accept" + STANDARD_COLOR + " or " + COMMAND_COLOR + "/clan accept <clanName>" + STANDARD_COLOR + " to join.");
+                    ((Player) targetPlayer).sendMessage(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited you to join \"" + STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + "\". You have 60 seconds to accept the invitation. Type " + STANDARD_COLOR + "/clan accept to join" + STANDARD_COLOR + " or " + STANDARD_COLOR + "/clan deny to deny" + STANDARD_COLOR + ".");
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
                     public void run() {
@@ -584,9 +594,9 @@ public class ClanCommand implements CommandExecutor {
                             return;
 
                         //Else, the time expired.
-                        senderClan.broadcast(targetPlayer.getName() + "'s time to join your clan has expired.", new UUID[]{playerUUID});
+                        senderClan.broadcast(PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + "'s time to join your clan has expired.", new UUID[]{playerUUID});
                         if (targetPlayer.isOnline())
-                            ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "Your invitation to " + PLAYER_COLOR + senderClan.getName() + STANDARD_COLOR + " has expired.");
+                            ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "Your invitation to " + STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + " has expired.");
                         invitationConfirmation.get(targetPlayerUUID).remove(senderClan);
                         if (invitationConfirmation.get(targetPlayerUUID).size() == 0)
                             invitationConfirmation.remove(targetPlayerUUID);
@@ -594,6 +604,7 @@ public class ClanCommand implements CommandExecutor {
                 }, 60 * 20L); // 1200L (ticks) is equal to 60 seconds (20 ticks = 1 second)
                 break;
             case 1:
+            case 30:
                 //Unlikely scenario.
                 playerSender.sendMessage(ERROR_COLOR + "You are not in the clan.");
                 break;
@@ -612,7 +623,7 @@ public class ClanCommand implements CommandExecutor {
             case 20:
                 playerSender.sendMessage(STANDARD_COLOR + "You canceled the invitation for" + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to join your clan.");
                 if (targetPlayer.isOnline())
-                    ((Player) targetPlayer).sendMessage(CLAN_COLOR + senderClan.getName() + STANDARD_COLOR + " has canceled your invitation to join the clan.");
+                    ((Player) targetPlayer).sendMessage(STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + " has canceled your invitation to join the clan.");
                 invitationConfirmation.get(targetPlayerUUID).remove(senderClan);
                 if (invitationConfirmation.get(targetPlayerUUID).size() == 0)
                     invitationConfirmation.remove(targetPlayerUUID);
@@ -644,9 +655,10 @@ public class ClanCommand implements CommandExecutor {
                 if (invitationConfirmation.get(playerUUID).size() == 0)
                     invitationConfirmation.remove(playerUUID);
                 potentialClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has refused to join your clan.", new UUID[]{playerUUID});
-                playerSender.sendMessage(STANDARD_COLOR + " You have refused to join " + CLAN_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + " You have refused to join " + STANDARD_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
             case 4:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
+            case 30:
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
                 break;
         }
     }
@@ -674,19 +686,20 @@ public class ClanCommand implements CommandExecutor {
                 if (invitationConfirmation.get(playerUUID).size() == 0)
                     invitationConfirmation.remove(playerUUID);
                 potentialClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has joined your clan.", new UUID[]{playerUUID});
-                playerSender.sendMessage(STANDARD_COLOR + "You have joined " + CLAN_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + "You have joined " + STANDARD_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
                 break;
             case 2:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "You are already in a clan.");
                 break;
             case 3:
                 playerSender.sendMessage(ERROR_COLOR + "You are already in this clan.");
                 break;
             case 4:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
                 break;
             case 5:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has reached max capacity.");
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has reached max capacity.");
                 break;
         }
     }
@@ -695,7 +708,7 @@ public class ClanCommand implements CommandExecutor {
 
         Clan potentialClan = Clan.getClan(clanName);
         if (potentialClan == null) {
-            playerSender.sendMessage(CLAN_COLOR + clanName + ERROR_COLOR + " does not exist.");
+            playerSender.sendMessage(ERROR_COLOR + clanName + ERROR_COLOR + " does not exist.");
             return;
         }
 
@@ -711,9 +724,10 @@ public class ClanCommand implements CommandExecutor {
                 if (invitationConfirmation.get(playerUUID).size() == 0)
                     invitationConfirmation.remove(playerUUID);
                 potentialClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has refused to join your clan.", new UUID[]{playerUUID});
-                playerSender.sendMessage(STANDARD_COLOR + " You have refused to join " + CLAN_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + " You have refused to join " + STANDARD_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
             case 4:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
+            case 30:
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
                 break;
         }
     }
@@ -722,7 +736,7 @@ public class ClanCommand implements CommandExecutor {
 
         Clan potentialClan = Clan.getClan(clanName);
         if (potentialClan == null) {
-            playerSender.sendMessage(CLAN_COLOR + clanName + STANDARD_COLOR + " does not exist.");
+            playerSender.sendMessage(STANDARD_COLOR + clanName + STANDARD_COLOR + " does not exist.");
             return;
         }
 
@@ -738,19 +752,20 @@ public class ClanCommand implements CommandExecutor {
                 if (invitationConfirmation.get(playerUUID).size() == 0)
                     invitationConfirmation.remove(playerUUID);
                 potentialClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has joined your clan.", new UUID[]{playerUUID});
-                playerSender.sendMessage(STANDARD_COLOR + "You have joined " + CLAN_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + "You have joined " + STANDARD_COLOR + potentialClan.getName() + STANDARD_COLOR + ".");
                 break;
             case 2:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "You are already in a clan.");
                 break;
             case 3:
                 playerSender.sendMessage(ERROR_COLOR + "You are already in this clan.");
                 break;
             case 4:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has not invited you to join their clan.");
                 break;
             case 5:
-                playerSender.sendMessage(CLAN_COLOR + potentialClan.getName() + ERROR_COLOR + " has reached max capacity.");
+                playerSender.sendMessage(ERROR_COLOR + potentialClan.getName() + ERROR_COLOR + " has reached max capacity.");
                 break;
         }
     }
@@ -785,10 +800,10 @@ public class ClanCommand implements CommandExecutor {
         switch (senderClan.leader(playerUUID, newLeaderUUID)) {
             case 0:
                 leaderConfirmation.remove(playerUUID);
-                senderClan.broadcast(PLAYER_COLOR + newLeaderPlayer.getName() + STANDARD_COLOR + " has been assigned " + RANK_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".", new UUID[]{newLeaderUUID});
+                senderClan.broadcast(PLAYER_COLOR + newLeaderPlayer.getName() + STANDARD_COLOR + " has been assigned " + STANDARD_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".", new UUID[]{newLeaderUUID});
                 if (newLeaderPlayer.isOnline())
                     ((Player) newLeaderPlayer).sendMessage(STANDARD_COLOR + "You have been assigned " + RANK_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".");
-                playerSender.sendMessage(STANDARD_COLOR + "You have stepped down to " + CLAN_COLOR + retiredRank + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + "You have stepped down to " + RANK_COLOR + retiredRank + STANDARD_COLOR + ".");
                 break;
             case 1:
             case 30:
@@ -803,7 +818,7 @@ public class ClanCommand implements CommandExecutor {
             case 20:
                 //Ask for confirmation
                 leaderConfirmation.add(playerUUID);
-                playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to assign a new leader to the clan? Type /clan leader <playerName> in chat again to revoke your leadership. You have 60 seconds to confirm.");
+                playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to assign a new leader to the clan? Type /clan leader (username) in chat again to revoke your leadership. You have 60 seconds to confirm.");
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
                     public void run() {
@@ -812,7 +827,7 @@ public class ClanCommand implements CommandExecutor {
 
                         //Else, the time expired.
                         if (playerSender.isOnline())
-                            playerSender.sendMessage(STANDARD_COLOR + "The time has expired to assign a new leader.");
+                            playerSender.sendMessage(STANDARD_COLOR + "The time to assign a new leader has expired.");
                         leaderConfirmation.remove(playerUUID);
                     }
                 }, 60 * 20L); // 1200L (ticks) is equal to 60 seconds (20 ticks = 1 second)
@@ -862,6 +877,7 @@ public class ClanCommand implements CommandExecutor {
                     ((Player) playerDemoted).sendMessage(STANDARD_COLOR + "You have been demoted to " + RANK_COLOR + newRank + STANDARD_COLOR + ".");
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "The player is not in the same clan as you.");
                 break;
             case 2:
@@ -926,11 +942,12 @@ public class ClanCommand implements CommandExecutor {
         switch (senderClan.demote(playerUUID, demotedUUID, givenRank)) {
             case 0:
                 ClanRank newRank = senderClan.getClanRank(demotedUUID);
-                senderClan.broadcast(PLAYER_COLOR + playerDemoted.getName() + STANDARD_COLOR + " has been demoted to " + CLAN_COLOR + newRank + STANDARD_COLOR + ".", new UUID[]{demotedUUID});
+                senderClan.broadcast(PLAYER_COLOR + playerDemoted.getName() + STANDARD_COLOR + " has been demoted to " + RANK_COLOR + newRank + STANDARD_COLOR + ".", new UUID[]{demotedUUID});
                 if (playerDemoted.isOnline())
                     ((Player) playerDemoted).sendMessage(STANDARD_COLOR + "You have been demoted to " + RANK_COLOR + newRank + STANDARD_COLOR + ".");
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "The player is not in the same clan as you.");
                 break;
             case 2:
@@ -979,6 +996,7 @@ public class ClanCommand implements CommandExecutor {
                 if (playerPromoted.isOnline())
                     ((Player) playerPromoted).sendMessage(STANDARD_COLOR + "You have been promoted to " + RANK_COLOR + newRank + STANDARD_COLOR + ".");
                 break;
+            case 30:
             case 1:
                 playerSender.sendMessage(ERROR_COLOR + "The player is not in the same clan as you.");
                 break;
@@ -1041,6 +1059,7 @@ public class ClanCommand implements CommandExecutor {
                     ((Player) playerPromoted).sendMessage(STANDARD_COLOR + "You have been promoted to " + RANK_COLOR + newRank + STANDARD_COLOR + ".");
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "The player is not in the same clan as you.");
                 break;
             case 2:
@@ -1067,7 +1086,7 @@ public class ClanCommand implements CommandExecutor {
         switch (potentialClan.setName(playerUUID, clanName)) {
             case 0:
                 //todo take gold here
-                potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to " + CLAN_COLOR + clanName + ".");
+                potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to \"" + clanName + "\".");
                 break;
             case 30:
             case 1:
@@ -1109,9 +1128,10 @@ public class ClanCommand implements CommandExecutor {
         switch (potentialClan.setTag(playerUUID, tag)) {
             case 0:
                 //todo take gold here
-                potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to " + CLAN_COLOR + tag + STANDARD_COLOR + ".");
+                potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
                 break;
             case 4:
@@ -1147,6 +1167,7 @@ public class ClanCommand implements CommandExecutor {
                 //From here the player will chat the responses and the HashMap will take care of the clan customization.
                 break;
             case 1:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "You are already in clan.");
                 break;
             case 10:
@@ -1195,7 +1216,7 @@ public class ClanCommand implements CommandExecutor {
         playerSender.sendMessage(ChatColor.GOLD + "------Clan Help------");
 
         playerSender.sendMessage(COMMAND_COLOR + "/clan create " + ChatColor.YELLOW + "(name)");
-        playerSender.sendMessage(COMMAND_COLOR + "/clan disband " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/clan disband");
 
         playerSender.sendMessage(COMMAND_COLOR + "/clan rename " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/clan tag " + ChatColor.YELLOW + "(tag)");
@@ -1211,8 +1232,8 @@ public class ClanCommand implements CommandExecutor {
 
         playerSender.sendMessage(COMMAND_COLOR + "/clan chat " + ChatColor.YELLOW + "(switches to clan chat)");
 
-        playerSender.sendMessage(COMMAND_COLOR + "/clan accept " + ChatColor.YELLOW + "[opt: name]");
-        playerSender.sendMessage(COMMAND_COLOR + "/clan deny " + ChatColor.YELLOW + "[opt: name]");
+        playerSender.sendMessage(COMMAND_COLOR + "/clan accept " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/clan deny " + ChatColor.YELLOW + "(name)");
 
         playerSender.sendMessage(COMMAND_COLOR + "/clan info " + ChatColor.YELLOW + "");
         playerSender.sendMessage(COMMAND_COLOR + "/clan who " + ChatColor.YELLOW + "(username)");
@@ -1254,12 +1275,13 @@ public class ClanCommand implements CommandExecutor {
                 }
                 break;
             case 4:
+            case 30:
                 playerSender.sendMessage(ERROR_COLOR + "Only the leader can disband the clan.");
                 break;
             case 20:
                 //Ask for confirmation
                 clanDisbandTimer.add(playerUUID);
-                playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to disband the clan? Type " + COMMAND_COLOR + "/clan disband" + STANDARD_COLOR + " in chat again to disband your clan. You have 60 seconds to confirm.");
+                playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to disband the clan? Type " + "/clan disband" + STANDARD_COLOR + " in chat again to disband your clan. You have 60 seconds to confirm.");
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
                     public void run() {
@@ -1268,7 +1290,7 @@ public class ClanCommand implements CommandExecutor {
 
                         //Else, the time expired.
                         if (playerSender.isOnline())
-                            playerSender.sendMessage(STANDARD_COLOR + "The time has expired to disband clan.");
+                            playerSender.sendMessage(STANDARD_COLOR + "The time to disband a clan has expired.");
                         clanDisbandTimer.remove(playerUUID);
                     }
                 }, 60 * 20L); // 1200L (ticks) is equal to 60 seconds (20 ticks = 1 second)

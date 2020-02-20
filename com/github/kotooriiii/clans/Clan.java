@@ -1,6 +1,7 @@
 package com.github.kotooriiii.clans;
 
 import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.files.FileManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -419,8 +420,6 @@ public class Clan {
             Collections.sort(list);
             UUID[] rankListUUIDList = list.toArray(new UUID[list.size()]);
             for (int j = 0; j < rankListUUIDList.length; j++) {
-                LostShardK.logger.info(rankListUUIDList[j].toString());
-
                 OfflinePlayer player = Bukkit.getOfflinePlayer(rankListUUIDList[j]);
 
                 if (j == 0)
@@ -809,12 +808,6 @@ public class Clan {
         //Create an array of that rank minus the player who is leaving
         UUID[] newCandidateLeaderLeaving = new UUID[candidateLeaderLeaving.length - 1];
 
-        ClanRank currLeaderNextRank = ClanRank.values()[ClanRank.values().length - 2];
-        //Get all the players in the second to last rank. LEADER being last.
-        UUID[] currentLeaderJoining = this.getPlayerUUIDSBy(currLeaderNextRank);
-        //The current leader will be joining this group so add an element.
-        UUID[] newCurrentLeaderJoining = new UUID[currentLeaderJoining.length + 1];
-
         //Looping the length of the small array because we could get IndexOutOfBounds exception
         for (int i = 0; i < newCandidateLeaderLeaving.length; i++) {
             //This remover is in charge of adding one to the element so we can skip!
@@ -828,14 +821,24 @@ public class Clan {
             newCandidateLeaderLeaving[i] = candidateLeaderLeaving[i + remover];
         }
 
+
+        updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
+
+        ClanRank currLeaderNextRank = ClanRank.values()[ClanRank.values().length - 2];
+        //Get all the players in the second to last rank. LEADER being last.
+        UUID[] currentLeaderJoining = this.getPlayerUUIDSBy(currLeaderNextRank);
+        //The current leader will be joining this group so add an element.
+        UUID[] newCurrentLeaderJoining = new UUID[currentLeaderJoining.length + 1];
+
+
         for (int i = 0; i < currentLeaderJoining.length; i++) {
+
             newCurrentLeaderJoining[i] = currentLeaderJoining[i];
         }
         newCurrentLeaderJoining[newCurrentLeaderJoining.length - 1] = this.leader;
 
-        this.leader = candidateLeader;
-        updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
+        this.leader = candidateLeader;
         return 0;
     }
 
@@ -1275,8 +1278,9 @@ public class Clan {
         }
 
         //Remove cache clan
+
         clans.remove(this);
-        //todo call an event and maybe listen to the event to call a save event?
+        FileManager.removeFile(this);
         return 0;
     }
 
@@ -1581,7 +1585,7 @@ public class Clan {
             return false;
 
         Clan clan = (Clan) obj;
-        return clan.getName().equals(this.getID());
+        return clan.getID().equals(this.getID());
     }
 
     /**

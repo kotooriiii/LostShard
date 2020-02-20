@@ -41,11 +41,11 @@ public final class FileManager {
                 LostShardK.logger.info("\n\n" + "There was a clan file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            clans.add(clan);
+            clan.forceCreate();
         }
     }
 
-    private static Clan read(File clanFile)  {
+    private static Clan read(File clanFile) {
         final String delimiter = ", ";
 
 
@@ -60,12 +60,6 @@ public final class FileManager {
             return null;
         }
         ChatColor clanColor = ChatColor.getByChar(clanStringColor.replace('&', ChatColor.COLOR_CHAR));
-
-        if(clanColor == null || !clanColor.isColor())
-        {
-            LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The color of the clan was unable to be read.");
-            return null;
-        }
 
         boolean clanFriendlyFire = Boolean.valueOf(clanStringBoolean);
 
@@ -95,7 +89,6 @@ public final class FileManager {
         }
         clan.setColor(clanColor);
         clan.setFriendlyFire(clanFriendlyFire);
-        clan.forceCreate();
 
         ClanRank[] ranks = ClanRank.values();
 
@@ -178,6 +171,16 @@ public final class FileManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static void removeFile(Clan clan) {
+        UUID clanID = clan.getID();
+        String fileName = clanID + ".yml";
+        File clanFile = new File(clans_folder + File.separator + fileName);
+
+        clanFile.delete();
+
     }
 
 

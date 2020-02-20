@@ -25,8 +25,10 @@ public class FriendlyFireCommand implements CommandExecutor {
                 //No arguments regarding this command
                 if (args.length == 0) {
                     Clan clan = Clan.getClan(playerUUID);
-                    if (clan == null)
+                    if (clan == null) {
                         playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
+                        return true;
+                    }
 
                     if (clan.isFriendlyFire()) {
                         clan.broadcast(STANDARD_COLOR + "Clan friendly fire has been disabled.");

@@ -41,7 +41,7 @@ public class LostShardK extends JavaPlugin {
         registerCommands();
         registerEvents();
 
-
+        loop();
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
     }
@@ -59,8 +59,7 @@ public class LostShardK extends JavaPlugin {
 
     private void saveData() {
 
-        for(Clan clan : clans)
-        {
+        for (Clan clan : clans) {
             FileManager.write(clan);
         }
     }
@@ -68,9 +67,9 @@ public class LostShardK extends JavaPlugin {
     private void loop() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(LostShardK.plugin, new Runnable() {
             public void run() {
-               saveData();
+                saveData();
             }
-        }, 0L,6*60*60*20L);//every 6hrs
+        }, 5*60*20L, 6 * 60 * 60 * 20L);//every 6hrs
     }
 
 

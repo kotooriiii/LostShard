@@ -27,7 +27,7 @@ public class PlayerHitEvent implements Listener {
             {
                 if(attackerClan.equals(defenderClan))
                 {
-                    if(!attackerClan.isFriendlyFire())
+                    if(attackerClan.isFriendlyFire())
                         event.setCancelled(true);
                 }
             }

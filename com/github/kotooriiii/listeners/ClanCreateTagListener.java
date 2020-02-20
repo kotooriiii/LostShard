@@ -53,7 +53,7 @@ public class ClanCreateTagListener implements Listener {
             }
 
 
-            player.sendMessage(STANDARD_COLOR + "Clan tag has been set to " + CLAN_COLOR + tag + STANDARD_COLOR + ".");
+            clan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
 
             // player.sendMessage("Now choose a color! like &6 etc");
 
