@@ -360,7 +360,7 @@ public class ClanCommand implements CommandExecutor {
         //chatcomponent hover click
 
 
-        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "\"" + targetPlayer.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + targetPlayer.getUniqueId().toString() + ". Hover and click to copy.")
+        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "" + targetPlayer.getName() + "" + STANDARD_COLOR + "'s UUID is " + targetPlayer.getUniqueId().toString() + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, targetPlayer.getUniqueId().toString()))
                 .create());
@@ -583,7 +583,7 @@ public class ClanCommand implements CommandExecutor {
                 senderClan.broadcast(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited " + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to your clan. The player has 60 seconds to confirm.", new UUID[]{playerUUID});
                 playerSender.sendMessage(STANDARD_COLOR + "You have invited " + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to your clan. The player has 60 seconds to confirm.");
                 if (targetPlayer.isOnline())
-                    ((Player) targetPlayer).sendMessage(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited you to join \"" + STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + "\". You have 60 seconds to accept the invitation. Type " + STANDARD_COLOR + "/clan accept to join" + STANDARD_COLOR + " or " + STANDARD_COLOR + "/clan deny to deny" + STANDARD_COLOR + ".");
+                    ((Player) targetPlayer).sendMessage(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited you to join " + STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + ". You have 60 seconds to accept the invitation. Type " + STANDARD_COLOR + "/clan accept to join" + STANDARD_COLOR + " or " + STANDARD_COLOR + "/clan deny to deny" + STANDARD_COLOR + ".");
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
                     public void run() {

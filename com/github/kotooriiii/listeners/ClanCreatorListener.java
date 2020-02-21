@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
 
-public class ClanCreateTagListener implements Listener {
+public class ClanCreatorListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {

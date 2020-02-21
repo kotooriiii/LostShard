@@ -138,6 +138,7 @@ public final class FileManager {
         File clanFile = new File(clans_folder + File.separator + fileName);
 
         try {
+            if(!clanFile.exists())
             clanFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
@@ -179,6 +180,7 @@ public final class FileManager {
         String fileName = clanID + ".yml";
         File clanFile = new File(clans_folder + File.separator + fileName);
 
+        if(clanFile.exists())
         clanFile.delete();
 
     }
