@@ -1,13 +1,18 @@
 package com.github.kotooriiii.data;
 
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.hostility.Hostility;
+import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.ChatColor;
+import org.bukkit.permissions.Permission;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
 public final class Maps {
+
+    private Maps(){}
     //This hash map targets the clan creators who are making a clan and need to specify a tag. they will not be able to chat until the message they send is an acceptable tag.
     public static HashMap<UUID, Clan> clanTagCreators = new HashMap<>();
 
@@ -26,11 +31,27 @@ public final class Maps {
     //The array list targets the non-clan user deciding if they'd like to join a clan. They have a set timer in order to confirm their request.
     public static HashMap<UUID, ArrayList<Clan>> invitationConfirmation = new HashMap<>();
 
+    //END CLANS //
+    //START HOST//
+
+    //The arraylist targets a staff member trying to create a hostility platform. Confirm to understand that it will clear inventory.
+    public static ArrayList<UUID> hostilityCreatorConfirmation = new ArrayList<>();
+    //The arraylist targets a staff member trying to remove a hostility platform. Confirm to understand that it is permanent deletion.
+    public static ArrayList<UUID> hostilityRemoverConfirmation = new ArrayList<>();
+
+    //The hashmap targets the staff member creating hostility platform. They have tools and are in process of creating
+    public static HashMap<UUID, HostilityPlatform> hostilityPlatformCreator = new HashMap<>();
+
+    //ALL platforms in an arraylist that are ready to be used.
+    public static ArrayList<HostilityPlatform> platforms = new ArrayList<>();
+
     public final static ChatColor ERROR_COLOR = ChatColor.DARK_RED;
     public final static ChatColor CLAN_COLOR = ChatColor.DARK_GREEN;
     public final static ChatColor STANDARD_COLOR = ChatColor.DARK_GREEN;
     public final static ChatColor PLAYER_COLOR = ChatColor.YELLOW;
     public final static ChatColor COMMAND_COLOR = ChatColor.GOLD;
     public final static ChatColor RANK_COLOR = ChatColor.DARK_GREEN;
+
+    public final static Permission STAFF_PERMISSION = new Permission("lostshardsk.staff");
 
 }

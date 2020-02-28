@@ -3,6 +3,7 @@ package com.github.kotooriiii.files;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,12 +13,12 @@ import java.io.*;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import static com.github.kotooriiii.data.Maps.clans;
+import static com.github.kotooriiii.data.Maps.platforms;
 
 public final class FileManager {
     private static File plugin_folder = LostShardK.plugin.getDataFolder();
     private static File clans_folder = new File(plugin_folder + File.separator + "clans");
-    private static File clans_warning_file = new File(clans_folder + File.separator + "readme.txt");
+    private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
 
     private FileManager() {
     }
@@ -36,16 +37,63 @@ public final class FileManager {
             if (!file.getName().endsWith(".yml"))
                 continue;
 
-            Clan clan = read(file);
+            Clan clan = readClanFile(file);
             if (clan == null) {
                 LostShardK.logger.info("\n\n" + "There was a clan file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
             clan.forceCreate();
         }
+
+        for (File file : hostility_platform_folder.listFiles())
+        {
+            HostilityPlatform platform = readPlatformFile(file);
+            if(platform == null)
+            {
+                LostShardK.logger.info("\n\n" + "There was a hostility file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            platforms.add(platform);
+        }
     }
 
-    private static Clan read(File clanFile) {
+    public static void write(HostilityPlatform platform) {
+        try {
+            File file = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
+            if(file.exists())
+            {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(platform);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static HostilityPlatform readPlatformFile(File platformFile) {
+        try {
+            FileInputStream fis = new FileInputStream(platformFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            HostilityPlatform platform = (HostilityPlatform) ois.readObject();
+            return platform;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Clan readClanFile(File clanFile) {
         final String delimiter = ", ";
 
 
@@ -138,8 +186,8 @@ public final class FileManager {
         File clanFile = new File(clans_folder + File.separator + fileName);
 
         try {
-            if(!clanFile.exists())
-            clanFile.createNewFile();
+            if (!clanFile.exists())
+                clanFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -180,10 +228,18 @@ public final class FileManager {
         String fileName = clanID + ".yml";
         File clanFile = new File(clans_folder + File.separator + fileName);
 
-        if(clanFile.exists())
-        clanFile.delete();
+        if (clanFile.exists())
+            clanFile.delete();
 
     }
+
+    public static void removeFile(HostilityPlatform platform) {
+        File clanFile = new File(clans_folder + File.separator + platform.getName() + ".obj");
+
+        if (clanFile.exists())
+            clanFile.delete();
+    }
+
 
 
     private static void saveResource(String resourcePath, File out_to_folder, boolean replace) {

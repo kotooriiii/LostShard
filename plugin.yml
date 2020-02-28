@@ -9,3 +9,8 @@ commands:
   clan:
     description:
     usage:
+  hostility:
+    description:
+    usage:
+    aliases:
+      - host

@@ -41,10 +41,7 @@ public class FriendlyFireCommand implements CommandExecutor {
                     playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/ff" + ERROR_COLOR + ".");
                 }
             }
-        } else if (sender instanceof ConsoleCommandSender) {
-            sender.sendMessage("This command is not yet optimized for the console. Bother the developer to add commands :)");
-        } //end of console sending commands
-
+        }
         //end of commands
         return true;
     }

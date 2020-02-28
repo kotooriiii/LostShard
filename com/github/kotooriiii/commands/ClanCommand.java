@@ -12,13 +12,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
+
+import static com.github.kotooriiii.util.HelperMethods.*;
 
 
 public class ClanCommand implements CommandExecutor {
@@ -47,34 +48,34 @@ public class ClanCommand implements CommandExecutor {
                     //Sub-commands
                     switch (args[0].toLowerCase()) {
                         case "create":
-                            playerSender.sendMessage(ERROR_COLOR + "You must have a name for your clan: " + COMMAND_COLOR + "/clan create <clanName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "You must have a name for your clan: " + COMMAND_COLOR + "/clan create (name)" + ERROR_COLOR + ".");
                             break;
                         case "disband":
                             disbandClan(playerSender, playerUUID);
                             break;
                         case "tag":
-                            playerSender.sendMessage(ERROR_COLOR + "You must have a tag for your clan: " + COMMAND_COLOR + " /clan tag <tagName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "You must have a tag for your clan: " + COMMAND_COLOR + " /clan tag (name)" + ERROR_COLOR + ".");
                             break;
                         case "rename":
-                            playerSender.sendMessage(ERROR_COLOR + "You must have a name for your clan: " + COMMAND_COLOR + "/clan rename <clanName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "You must have a name for your clan: " + COMMAND_COLOR + "/clan rename (name)" + ERROR_COLOR + ".");
                             break;
                         case "invite":
-                            playerSender.sendMessage(ERROR_COLOR + "To invite a player to your clan: " + COMMAND_COLOR + "/clan invite <playerName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To invite a player to your clan: " + COMMAND_COLOR + "/clan invite (username)" + ERROR_COLOR + ".");
                             break;
                         case "kick":
-                            playerSender.sendMessage(ERROR_COLOR + "To kick a player from your clan: " + COMMAND_COLOR + "/clan kick <playerName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To kick a player from your clan: " + COMMAND_COLOR + "/clan kick (username)" + ERROR_COLOR + ".");
                             break;
                         case "leave":
                             clanLeave(playerSender, playerUUID);
                             break;
                         case "leader":
-                            playerSender.sendMessage(ERROR_COLOR + "To assign leadership to another player: " + COMMAND_COLOR + "/clan leader <playerName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To assign leadership to another player: " + COMMAND_COLOR + "/clan leader (username)" + ERROR_COLOR + ".");
                             break;
                         case "promote":
-                            playerSender.sendMessage(ERROR_COLOR + "To promote a member to co-leader: " + COMMAND_COLOR + "/clan promote <playerName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To promote a member to co-leader: " + COMMAND_COLOR + "/clan promote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
                         case "demote":
-                            playerSender.sendMessage(ERROR_COLOR + "To demote a co-leader to member: " + COMMAND_COLOR + "/clan demote <playerName> [opt: rankName]" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To demote a co-leader to member: " + COMMAND_COLOR + "/clan demote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
                         case "chat": //TODO LATER
                             break;
@@ -88,13 +89,13 @@ public class ClanCommand implements CommandExecutor {
                             clanInfo(playerSender, playerUUID);
                             break;
                         case "who":
-                            playerSender.sendMessage(ERROR_COLOR + "To find information about another player's clan: " + COMMAND_COLOR + "/clan who <playerName>" + ERROR_COLOR + ".");
+                            playerSender.sendMessage(ERROR_COLOR + "To find information about another player's clan: " + COMMAND_COLOR + "/clan who (username)" + ERROR_COLOR + ".");
                             break;
                         case "help":
                             sendHelp(playerSender);
                             break;
                         case "staff":
-                            if (!playerSender.hasPermission("lostshardsk.staff")) {
+                            if (!playerSender.hasPermission(STAFF_PERMISSION)) {
                                 playerSender.sendMessage(ERROR_COLOR + "You do not have access to staff commands.");
                                 return true;
                             }
@@ -127,13 +128,13 @@ public class ClanCommand implements CommandExecutor {
                             if (args.length == 2)
                                 clanInvite(playerSender, playerUUID, args[1]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan invite <playerName>" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan invite (username)" + ERROR_COLOR + ".");
                             break;
                         case "kick":
                             if (args.length == 2)
                                 clanKick(playerSender, playerUUID, args[1]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan kick <playerName>" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan kick (username)" + ERROR_COLOR + ".");
                             break;
                         case "leave":
                             playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan leave" + ERROR_COLOR + ".");
@@ -142,7 +143,7 @@ public class ClanCommand implements CommandExecutor {
                             if (args.length == 2)
                                 clanLeader(playerSender, playerUUID, args[1]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan leader <playerName>" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan leader (username)" + ERROR_COLOR + ".");
                             break;
                         case "promote":
                             if (args.length == 2)
@@ -150,7 +151,7 @@ public class ClanCommand implements CommandExecutor {
                             else if (args.length == 3)
                                 clanPromote(playerSender, playerUUID, args[1], args[2]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan promote <playerName> [opt: rankName]" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan promote (username) [opt: rank]" + ERROR_COLOR + ".");
 
                             break;
                         case "demote":
@@ -159,7 +160,7 @@ public class ClanCommand implements CommandExecutor {
                             else if (args.length == 3)
                                 clanDemote(playerSender, playerUUID, args[1], args[2]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan demote <playerName> [opt: rankName]" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan demote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
                         case "chat": //TODO LATER
                             break;
@@ -176,14 +177,14 @@ public class ClanCommand implements CommandExecutor {
                             if (args.length == 2)
                                 clanWho(playerSender, args[1]);
                             else
-                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan who <playerName>" + ERROR_COLOR + ".");
+                                playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan who (username)" + ERROR_COLOR + ".");
                             break;
                         case "help":
                             sendHelp(playerSender);
                             break;
                         case "staff":
 
-                            if (!playerSender.hasPermission("lostshardsk.staff")) {
+                            if (!playerSender.hasPermission(STAFF_PERMISSION)) {
                                 playerSender.sendMessage(ERROR_COLOR + "You do not have access to staff commands.");
                                 return true;
                             }
@@ -230,6 +231,9 @@ public class ClanCommand implements CommandExecutor {
                                         else
                                             playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan staff kick <playerName>" + ERROR_COLOR + ".");
                                         break;
+                                    default:
+                                        sendStaffUnknownCommand(playerSender);
+                                        break;
                                 }
                             }
                             break;
@@ -243,12 +247,12 @@ public class ClanCommand implements CommandExecutor {
 
             }
 
-        } else if (sender instanceof ConsoleCommandSender) {
-            sender.sendMessage("This command is not yet optimized for the console. Bother the developer (Kotori#4236) to add commands :)");
-        } //end of console sending commands
+        }
         return false;
     }//end of commands
-
+    private void sendStaffUnknownCommand(Player playerSender) {
+        playerSender.sendMessage(ERROR_COLOR + "The sub-command you provided does not exist in Clan's Staff. Use " + "/clan staff" + ERROR_COLOR + " for help.");
+    }
     private void forceLeader(Player playerSender, String playerName, String clanName) {
         if (clanName == null) {
             playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
@@ -1186,18 +1190,6 @@ public class ClanCommand implements CommandExecutor {
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that name.");
                 break;
         }
-    }
-
-    private String stringBuilder(String[] args, int n) {
-
-        String string = "";
-        for (int i = n; i < args.length; i++) {
-            if (i == n)
-                string += args[i];
-            else
-                string += " " + args[i];
-        }
-        return string;
     }
 
     private void sendStaffHelp(Player playerSender) {
