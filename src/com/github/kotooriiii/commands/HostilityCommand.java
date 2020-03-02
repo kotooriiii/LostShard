@@ -3,6 +3,8 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.hostility.Hostility;
+import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -132,7 +134,7 @@ public class HostilityCommand implements CommandExecutor {
                                                         }
                                                     }, 60 * 20L);
 
-                                                }else {
+                                                } else {
                                                     hostilityRemoverConfirmation.remove(playerUUID);
                                                     platforms.remove(platform);
                                                     FileManager.removeFile(platform);
@@ -147,12 +149,11 @@ public class HostilityCommand implements CommandExecutor {
                                     }
                                     break;
                                 case "edit":
-                                    playerSender.sendMessage("WORK IN PROGRESS");
+                                    playerSender.sendMessage("This sub-command is currently a work-in-progress.");
                                     break;
                                 case "show":
                                     playerSender.sendMessage(STANDARD_COLOR + "-=[Hostility Platform(s)]=-");
-                                    for(HostilityPlatform platform : platforms)
-                                    {
+                                    for (HostilityPlatform platform : platforms) {
                                         playerSender.sendMessage(STANDARD_COLOR + platform.getName());
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "-----------------");
@@ -182,12 +183,40 @@ public class HostilityCommand implements CommandExecutor {
                                         // /host <arg 0/staff> <arg 1/delete> ......... <arg n>
                                         String name = stringBuilder(args, 2);
                                         for (HostilityPlatform platform : platforms) {
+
                                             if (platform.getName().equalsIgnoreCase(name)) {
-                                                playerSender.sendMessage(STANDARD_COLOR + platform.getName() + " has begun!");
+
+                                                for (HostilityMatch match : activeHostilityGames) {
+                                                    if (match.getPlatform().getName().equalsIgnoreCase(name)) {
+                                                        playerSender.sendMessage(ERROR_COLOR + "This platform is currently being played in a match. You must cancel the ongoing playing match in order to create a new one.");
+                                                        return true;
+                                                    }
+                                                }
+                                                HostilityMatch match = new HostilityMatch(platform);
+                                                activeHostilityGames.add(match);
+                                                match.startGame();
                                                 return true;
                                             }
                                         }
                                         playerSender.sendMessage(ERROR_COLOR + "We could not find " + name + " in our records of Hostility Platforms.");
+                                    }
+                                    break;
+                                case "end":
+                                    if (args.length == 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/host staff end (name of hostility map)" + ERROR_COLOR + "."); //clan staff uuid
+                                        return true;
+                                    } else {
+                                        // /host <arg 0/staff> <arg 1/delete> ......... <arg n>
+                                        String name = stringBuilder(args, 2);
+
+                                        for (HostilityMatch match : activeHostilityGames) {
+                                            if (match.getPlatform().getName().equalsIgnoreCase(name)) {
+                                                activeHostilityGames.remove(match);
+                                                match.endGame(true);
+                                                return true;
+                                            }
+                                        }
+                                        playerSender.sendMessage(ERROR_COLOR + "" + name + " isn't being played as an active map or it isn't found in our records of Hostility Platforms.");
                                     }
                                     break;
                                 default:
@@ -218,6 +247,7 @@ public class HostilityCommand implements CommandExecutor {
         areaLoreList.add(STANDARD_COLOR + "Takes the area of a square.");
         areaLoreList.add(STANDARD_COLOR + "Left-Click to mark Position 1.");
         areaLoreList.add(STANDARD_COLOR + "Right-Click to mark Position 2.");
+        areaLoreList.add(STANDARD_COLOR + "You must add the height when creating the area!");
         areaLoreList.add("ID:AREA_AXE");
         areaItemMeta.setLore(areaLoreList);
         areaItemStack.setItemMeta(areaItemMeta);
@@ -229,6 +259,7 @@ public class HostilityCommand implements CommandExecutor {
         List<String> singleLoreList = new ArrayList<>(3);
         singleLoreList.add(STANDARD_COLOR + "Takes a single block.");
         singleLoreList.add(STANDARD_COLOR + "Left-Click to mark a block.");
+        areaLoreList.add(STANDARD_COLOR + "Automatically adds 2 blocks of height!");
         singleLoreList.add("ID:SINGLE_SWORD");
         singleItemMeta.setLore(singleLoreList);
         singleItemStack.setItemMeta(singleItemMeta);

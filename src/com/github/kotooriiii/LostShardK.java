@@ -3,9 +3,10 @@ package com.github.kotooriiii;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.ClanCommand;
 import com.github.kotooriiii.commands.FriendlyFireCommand;
+import com.github.kotooriiii.commands.HostilityCommand;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.listeners.ClanCreatorListener;
-import com.github.kotooriiii.listeners.PlayerHitEvent;
+import com.github.kotooriiii.listeners.PlayerHitListener;
 import com.github.kotooriiii.listeners.PlayerLeaveListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -72,13 +73,16 @@ public class LostShardK extends JavaPlugin {
     public void registerCommands() {
         getCommand("clan").setExecutor(new ClanCommand());
         getCommand("ff").setExecutor(new FriendlyFireCommand());
+        getCommand("hostility").setExecutor(new HostilityCommand());
+
     }
 
     public void registerEvents() {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new ClanCreatorListener(), this);
         pm.registerEvents(new PlayerLeaveListener(), this);
-        pm.registerEvents(new PlayerHitEvent(), this);
+        pm.registerEvents(new PlayerHitListener(), this);
+        pm.registerEvents(new ClanCreatorListener(), this);
 
 
     }

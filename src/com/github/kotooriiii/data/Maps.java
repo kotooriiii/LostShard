@@ -2,6 +2,7 @@ package com.github.kotooriiii.data;
 
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.hostility.Hostility;
+import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.ChatColor;
 import org.bukkit.permissions.Permission;
@@ -42,8 +43,10 @@ public final class Maps {
     //The hashmap targets the staff member creating hostility platform. They have tools and are in process of creating
     public static HashMap<UUID, HostilityPlatform> hostilityPlatformCreator = new HashMap<>();
 
-    //ALL platforms in an arraylist that are ready to be used.
+    //ALL platforms in an arraylist that are ready to be used. Loaded from files
     public static ArrayList<HostilityPlatform> platforms = new ArrayList<>();
+    //ACTIVE GAMES OF HOSTILITY. These are the matches players are playing currently.
+    public static ArrayList<HostilityMatch> activeHostilityGames = new ArrayList<>();
 
     public final static ChatColor ERROR_COLOR = ChatColor.DARK_RED;
     public final static ChatColor CLAN_COLOR = ChatColor.DARK_GREEN;

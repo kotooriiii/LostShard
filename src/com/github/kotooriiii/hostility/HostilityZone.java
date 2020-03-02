@@ -7,14 +7,20 @@ public class HostilityZone {
     private int x1;
     private int x2;
 
+    private int y1;
+    private int y2;
+
     private int z1;
     private int z2;
 
 
-    public HostilityZone(int x1, int z1)
+    public HostilityZone(int x1, int y1, int z1)
     {
         this.x1 = x1;
         this.x2 = x1;
+
+        this.y1 = y1;
+        this.y2= y1;
 
         this.z1 = z1;
         this.z2 = z1;
@@ -25,14 +31,20 @@ public class HostilityZone {
         this.x1 = loc1.getBlockX();
         this.x2 = loc1.getBlockX();
 
+        this.y1 = loc1.getBlockY();
+        this.y2 = loc1.getBlockY();
+
         this.z1 = loc1.getBlockZ();
         this.z2 = loc1.getBlockZ(); }
 
 
-    public HostilityZone(int x1, int x2, int z1, int z2)
+    public HostilityZone(int x1, int x2, int y1, int y2, int z1, int z2)
     {
         this.x1 = x1;
         this.x2 = x2;
+
+        this.y1 = y1;
+        this.y2 = y2;
 
         this.z1 = z1;
         this.z2 = z2;
@@ -45,18 +57,22 @@ public class HostilityZone {
         this.x1 = loc1.getBlockX();
         this.x2 = loc2.getBlockX();
 
+        this.y1 = loc1.getBlockY();
+        this.y2 = loc2.getBlockY();
+
         this.z1 = loc1.getBlockZ();
         this.z2 = loc2.getBlockZ();
 
         clean();
     }
 
-    public boolean contains(int x, int z)
+    public boolean contains(int x, int y, int z)
     {
         if(x1 <= x && x <= x2)
         {
             if(z1 <= z && z <= z2)
             {
+                if(y1 <= y && z <= y2)
                 return true;
             }
         }
@@ -66,12 +82,14 @@ public class HostilityZone {
     public boolean contains(Block block)
     {
         int x = block.getX();
+        int y = block.getY();
         int z = block.getZ();
 
         if(x1 <= x && x <= x2)
         {
             if(z1 <= z && z <= z2)
             {
+                if(y1 <= y && y<=y2)
                 return true;
             }
         }
@@ -82,6 +100,9 @@ public class HostilityZone {
     {
         this.x1 = Math.min(x1, x2);
         this.x2 = Math.max(x1, x2);
+
+        this.y1 = Math.min(y1, y2);
+        this.y2 = Math.max(y1, y2);
 
         this.z1 = Math.min(z1,z2);
         this.z2 = Math.max(z1,z2);
