@@ -1,5 +1,6 @@
 package com.github.kotooriiii.hostility;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -26,6 +27,25 @@ public class HostilityPlatform implements Serializable {
             }
         }
         return false;
+    }
+
+    public Player[] getPlayers()
+    {
+        ArrayList<Player> playersInRegion = new ArrayList<Player>();
+
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOnline() && this.contains(player))
+            {
+                playersInRegion.add(player);
+            }
+        }
+
+        return playersInRegion.toArray(new Player[playersInRegion.size()]);
+    }
+
+    public boolean hasPlayers()
+    {
+return this.getPlayers().length > 0;
     }
 
     public boolean contains(Block block) {

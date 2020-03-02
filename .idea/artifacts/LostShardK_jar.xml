@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="LostShardK:jar">
+    <output-path>$PROJECT_DIR$/../../../../../Servers/server mc 1/plugins</output-path>
+    <root id="archive" name="LostShardK.jar">
+      <element id="module-output" name="LostShardK" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-lang/commons-lang/2.6/commons-lang-2.6.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

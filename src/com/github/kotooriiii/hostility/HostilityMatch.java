@@ -35,7 +35,11 @@ public class HostilityMatch {
     /**
      * The max ticks. The beginning of the countdown
      */
-    private final int maxTicks;
+    private int maxTicks;
+    /**
+     * grace period for capturing point after win
+     */
+    private final int gracePeriod = 20 * 30;
     /**
      * The looping task
      */
@@ -43,12 +47,15 @@ public class HostilityMatch {
 
     public HostilityMatch(HostilityPlatform platform) {
         this.platform = platform;
+        this.maxTicks = toTicks(8);
+        init();
+    }
 
+    private void init() {
         this.winStreak = 0;
         this.capturingClan = null;
         this.capturingPlayer = null;
 
-        this.maxTicks = toTicks(8);
         this.currentTicks = maxTicks;
 
         this.task = null;
@@ -58,14 +65,30 @@ public class HostilityMatch {
         this.task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!platform.contains(capturingPlayer)) {
 
+                if (!platform.contains(capturingPlayer)) {
+                    broadcast(ChatColor.YELLOW + capturingClan.getName() + ChatColor.GOLD + " has lost control of Hostility. " + toTicks(currentTicks));
+                    init();
+                    this.cancel();
+                    return;
                 }
 
                 currentTicks--;
             }
         }.runTaskTimer(LostShardK.plugin, 0, 1);
 
+    }
+
+    public void checkForCapturer()
+    {
+        new BukkitRunnable(){
+
+            @Override
+            public void run() {
+               // if()
+
+            }
+        }.runTaskTimer(LostShardK.plugin, 0, 1);
     }
 
     public final boolean isActive() {
@@ -80,32 +103,58 @@ public class HostilityMatch {
         return (minutes * 60 * 20) + (seconds * 20);
     }
 
-    private void announce() {
-        int[][] countdownAnnouncement = new int[][]
+    private void alert() {
+
+        int[] timerMinAlert = new int[]
                 {
-                        
+                        8, 6, 4, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
                 };
-        final int sixMins = toTicks(6);
-        final int fourMins = toTicks(4);
-        final int twoMins = toTicks(2);
-        final int oneMin = toTicks(1);
-        final int thirtySecs = toTicks(0, 30);
-        final int fifteenSecs = toTicks(0, 15);
-        final int tenSecs = toTicks(0, 10);
-        final int fiveSecs = toTicks(0, 5);
-        final int fourSecs = toTicks(0, 4);
-        final int threeSecs = toTicks(0, 3);
-        final int twoSecs = toTicks(0, 2);
-        final int oneSecs = toTicks(0, 1);
-        final int zeroSecs = toTicks(0, 0);
+        int[] timerSecAlert = new int[]
+                {
+                        0, 0, 0, 0, 0, 30, 15, 10, 5, 4, 3, 2, 1, 0
 
-        if (sixMins == this.currentTicks)
-            broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has begun con");
+                };
 
+        for (int i = 0; i < timerMinAlert.length; i++) {
+
+            int tickAlert = toTicks(timerMinAlert[i], timerSecAlert[i]);
+
+            if (tickAlert == this.currentTicks) {
+                if (i == 0) {
+                    this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has begun capturing Hostility for their " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks));
+
+                } else if (i > 0 && i < timerMinAlert.length - 1)
+                    this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " is currently capturing Hostility for their " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks));
+                else if (i == timerMinAlert.length - 1) {
+                    winStreak++;
+                    if (winStreak == 3) {
+                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured Hostility.");
+
+                        //win host
+                    } else {
+                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has successfully captured Hostility for their " + tryingToPlace(winStreak - 1) + " time. Hostility will be active for capture in " + toMinutesSeconds(gracePeriod));
+                    }
+                }
+            }
+        }
     }
 
-    private String toMinutesSeconds() {
-        int ticksToSecond = (int) (this.currentTicks / 20);
+    private String tryingToPlace(int winStreak) {
+        switch (winStreak) {
+            case 0:
+                return "first";
+            case 1:
+                return "second";
+            case 2:
+                return "third";
+        }
+        return "null";
+    }
+
+
+    private String toMinutesSeconds(int currentTicks) {
+        int ticksToSecond = (int) (currentTicks / 20);
 
         int minutes = ticksToSecond / 60;
         int seconds = ticksToSecond % 60;
@@ -144,7 +193,7 @@ public class HostilityMatch {
             desiredSeconds[i] = rawSeconds[i - skippedSecsNum];
         }
 
-        return String.valueOf(desiredMinutes) + ":" + String.valueOf(desiredSeconds);
+        return "[" + String.valueOf(desiredMinutes) + ":" + String.valueOf(desiredSeconds) + "]";
     }
 
     public void broadcast(String message) {
