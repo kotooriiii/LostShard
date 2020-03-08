@@ -1,26 +1,23 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardK;
-import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.Hostility;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,8 +71,15 @@ public class HostilityCommand implements CommandExecutor {
                                             }
                                         }
 
+                                        if (hostilityPlatformCreator.containsKey(playerUUID)) {
+                                            playerSender.sendMessage(ERROR_COLOR + "You are already creating a Hostility Platform for " + ((HostilityPlatform) hostilityPlatformCreator.get(playerUUID)).getName() + ".");
+                                            playerSender.sendMessage(ERROR_COLOR + "To cancel the creation of this platform type: /host staff cancel.\nTo get your tools back type: /host staff tools.");
+                                            return true;
+                                        }
+
                                         if (!hostilityCreatorConfirmation.contains(playerUUID)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to create a new Hostility Platform? Your inventory will be cleared after confirming. To confirm execute the command again: " + COMMAND_COLOR + "/clan create" + STANDARD_COLOR + ". You have 60 seconds to confirm.");
+                                            playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to create a new Hostility Platform? Your inventory will be cleared after confirming. To confirm execute the command again: " + COMMAND_COLOR + "/host staff create" + STANDARD_COLOR + ". You have 60 seconds to confirm.");
+
                                             hostilityCreatorConfirmation.add(playerUUID);
 
                                             Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
@@ -92,15 +96,11 @@ public class HostilityCommand implements CommandExecutor {
                                             return true;
                                         }
 
+
+                                        playerSender.sendMessage(STANDARD_COLOR + "You have enabled editing mode.");
+
                                         giveTools(playerSender);
                                         hostilityCreatorConfirmation.remove(playerUUID);
-
-                                        if (hostilityPlatformCreator.containsKey(playerUUID)) {
-                                            playerSender.sendMessage(ERROR_COLOR + "You are already creating a Hostility Platform for " + ((HostilityPlatform) hostilityPlatformCreator.get(playerUUID)).getName() + ".");
-                                            playerSender.sendMessage(ERROR_COLOR + "To cancel the creation of this platform type: /host staff cancel.\nTo get your tools back type: /host staff.");
-                                            return true;
-                                        }
-
 
                                         //add to hostility platform creator
                                         HostilityPlatform platform = new HostilityPlatform(name);
@@ -193,7 +193,6 @@ public class HostilityCommand implements CommandExecutor {
                                                     }
                                                 }
                                                 HostilityMatch match = new HostilityMatch(platform);
-                                                activeHostilityGames.add(match);
                                                 match.startGame();
                                                 return true;
                                             }
@@ -211,7 +210,6 @@ public class HostilityCommand implements CommandExecutor {
 
                                         for (HostilityMatch match : activeHostilityGames) {
                                             if (match.getPlatform().getName().equalsIgnoreCase(name)) {
-                                                activeHostilityGames.remove(match);
                                                 match.endGame(true);
                                                 return true;
                                             }
@@ -297,11 +295,53 @@ public class HostilityCommand implements CommandExecutor {
     }
 
     private void sendHelp(Player playerSender) {
+        playerSender.sendMessage(ChatColor.GOLD + "------Hostility Help------");
+//        Currently active: Hostility, Havoc
+//        Current captor of Host: (clan name)
+//        Current captor of Havoc: (clan name)
+//        Next Hostility: 6PM EST
+//        Next Havoc:  8PM EST
+        String active = ChatColor.DARK_RED + "NONE";
+        if(activeHostilityGames.size()>0)
+            active = "";
+       HostilityMatch[] matches = activeHostilityGames.toArray(new HostilityMatch[activeHostilityGames.size()]);
+        for(int i = 0; i < matches.length; i++)
+        {
+            if(i != matches.length-1)
+            active += matches[i].getPlatform().getName() + ", ";
+            else
+                active += matches[i].getPlatform().getName();
+        }
 
+        playerSender.sendMessage(COMMAND_COLOR + "Currently active: " + ChatColor.YELLOW + active);
+
+        for(int i = 0; i < matches.length; i++)
+        {
+            if(matches[i].getCapturingClan() == null)
+            {
+                playerSender.sendMessage(COMMAND_COLOR + "Current Captor of " + matches[i].getPlatform().getName() + ": " + ChatColor.DARK_RED + "NONE");
+
+            } else {
+                playerSender.sendMessage(COMMAND_COLOR + "Current Captor of " + matches[i].getPlatform().getName() + ": " + ChatColor.YELLOW + matches[i].getCapturingClan().getName());
+
+            }
+
+        }
+
+        playerSender.sendMessage(COMMAND_COLOR + "Next Hostility: " + ChatColor.YELLOW + "6PM PST");
     }
 
     private void sendStaffHelp(Player playerSender) {
+        playerSender.sendMessage(ChatColor.GOLD + "------Hostility Staff Help------");
 
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff create " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff delete " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff edit " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff show " + ChatColor.YELLOW + "");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff cancel " + ChatColor.YELLOW + "");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff tools " + ChatColor.YELLOW + "");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff start " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/hostility staff end " + ChatColor.YELLOW + "(name)");
     }
 
     private void sendUnknownCommand(Player playerSender) {

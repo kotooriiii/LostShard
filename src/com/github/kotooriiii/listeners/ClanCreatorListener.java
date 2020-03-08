@@ -58,6 +58,7 @@ public class ClanCreatorListener implements Listener {
             // player.sendMessage("Now choose a color! like &6 etc");
 
             clan.forceTag(tag);
+            clan.saveFile();
             clanTagCreators.remove(uuid);
             //+   clanColorCreators.put(uuid, clan);
         } else if (clanColorCreators.containsKey(uuid)) {
@@ -79,6 +80,7 @@ public class ClanCreatorListener implements Listener {
 
             ChatColor color = ChatColor.getByChar(message.replace('&', ChatColor.COLOR_CHAR));
             clan.setColor(color);
+            clan.saveFile();
             clanColorCreators.remove(uuid);
             player.sendMessage(STANDARD_COLOR + "The customization of your clan is complete!");
 

@@ -1,20 +1,18 @@
 package com.github.kotooriiii.listeners;
 
-import com.avaje.ebeaninternal.server.cluster.mcast.McastSender;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.Hostility;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.hostility.HostilityZone;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -27,6 +25,7 @@ import java.util.UUID;
 public class HostilityCreateListener implements Listener {
     @EventHandler
     public void onClickWithItem(PlayerInteractEvent playerInteractEvent) {
+
         Player player = playerInteractEvent.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
@@ -67,8 +66,10 @@ public class HostilityCreateListener implements Listener {
                     }
 
                     //The string now contains the new position.
-                    player.sendMessage(STANDARD_COLOR + "You have selected Pos1(" + Math.floor(block.getX()) + "," + Math.floor(block.getY()) + "," + Math.floor(block.getZ()) + ").");
-                    possiblePos1 = possiblePos1 + " (Pos1:" + Math.floor(block.getX()) + "," + Math.floor(block.getY()) + "," + Math.floor(block.getZ()) + ")";
+                    player.sendMessage(STANDARD_COLOR + "You have selected Pos1(" + (int) Math.floor(block.getX()) + "," + (int) Math.floor(block.getY()) + "," + (int) Math.floor(block.getZ()) + ").");
+                    possiblePos1 = possiblePos1 + " (Pos1:" + (int) Math.floor(block.getX()) + "," + (int) Math.floor(block.getY()) + "," + (int) Math.floor(block.getZ()) + ")";
+
+                    playerInteractEvent.setCancelled(true);
 
                 } else if (action.equals(Action.RIGHT_CLICK_BLOCK)) {
                     //if the right click lore has a position found.
@@ -78,8 +79,8 @@ public class HostilityCreateListener implements Listener {
                     }
 
                     //The string now contains the new position.
-                    player.sendMessage(STANDARD_COLOR + "You have selected Pos2(" + Math.floor(block.getX()) + "," + Math.floor(block.getY()) + "," + Math.floor(block.getZ()) + ").");
-                    possiblePos2 = possiblePos2 + " (Pos2:" + Math.floor(block.getX()) + "," + Math.floor(block.getY()) + "," + Math.floor(block.getZ()) + ")";
+                    player.sendMessage(STANDARD_COLOR + "You have selected Pos2(" + (int) Math.floor(block.getX()) + "," + (int) Math.floor(block.getY()) + "," + (int) Math.floor(block.getZ()) + ").");
+                    possiblePos2 = possiblePos2 + " (Pos2:" + (int) Math.floor(block.getX()) + "," + (int) Math.floor(block.getY()) + "," + (int) Math.floor(block.getZ()) + ")";
                 }
 
                 //Both have a set position value
@@ -105,7 +106,8 @@ public class HostilityCreateListener implements Listener {
 
                     //set area
                     HostilityZone zone = new HostilityZone(loc1, loc2);
-                    HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
+
+                    HostilityPlatform platform = (HostilityPlatform) hostilityPlatformCreator.get(playerUUID);
                     platform.addZone(zone);
                     //reset
                     possiblePos1 = possiblePos1.substring(0, possiblePos1.indexOf('('));
@@ -126,39 +128,68 @@ public class HostilityCreateListener implements Listener {
                 //if you left click
                 if (action.equals(Action.LEFT_CLICK_BLOCK)) {
                     Location loc1 = block.getLocation();
-                    Location loc2 = new Location(loc1.getWorld(), loc1.getBlockX(), loc1.getY()+2, loc1.getBlockZ());
+                    Location loc2 = new Location(loc1.getWorld(), loc1.getBlockX(), loc1.getY() + 2, loc1.getBlockZ());
                     //set area
                     HostilityZone zone = new HostilityZone(loc1, loc2);
                     HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
                     platform.addZone(zone);
                     player.sendMessage(STANDARD_COLOR + "You have added a zone.");
+
+                    playerInteractEvent.setCancelled(true);
+
                 }
                 break;
             case "ID:FINALIZE_FLOWER":
-                if(!action.equals(Action.PHYSICAL))
-                {
+                if (!action.equals(Action.PHYSICAL)) {
                     HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
                     platforms.add(platform);
                     FileManager.write(platform);
-                    hostilityPlatformCreator.remove(playerUUID);
                     player.getInventory().clear();
                     player.sendMessage(STANDARD_COLOR + "You have saved " + platform.getName() + ".");
+                    hostilityPlatformCreator.remove(player.getUniqueId());
+                    playerInteractEvent.setCancelled(true);
+
+                    //removed in block event
+
                 }
                 break;
             case "ID:UNDO_RED":
-                if(!action.equals(Action.PHYSICAL))
-                {
+                if (!action.equals(Action.PHYSICAL)) {
                     HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
-                    if(platform.undo()) {
+                    if (platform.undo()) {
                         player.sendMessage(STANDARD_COLOR + "You have just removed the most recently added zone.");
                     } else {
                         player.sendMessage(STANDARD_COLOR + "There are no zones to undo.");
 
                     }
+
+                    playerInteractEvent.setCancelled(true);
+
                 }
                 break;
             default:
                 return;
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
+
+        ItemStack item = blockPlaceEvent.getItemInHand();
+        if (item == null)
+            return;
+        ItemMeta itemMeta = item.getItemMeta();
+        if (itemMeta == null)
+            return;
+        List<String> loreList = itemMeta.getLore();
+        if (loreList == null || loreList.size() == 0)
+            return;
+        String id = loreList.get(loreList.size() - 1);
+
+
+        switch (id) {
+            case "ID:FINALIZE_FLOWER":
+                blockPlaceEvent.setCancelled(true);
         }
     }
 }

@@ -6,6 +6,7 @@ import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import static com.github.kotooriiii.data.Maps.platforms;
+import static com.github.kotooriiii.data.Maps.playerUUIDClanMap;
 
 public final class FileManager {
     private static File plugin_folder = LostShardK.plugin.getDataFolder();
@@ -26,12 +28,16 @@ public final class FileManager {
     public static void init() {
         plugin_folder.mkdir();
         clans_folder.mkdir();
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "readme.txt", clans_folder, true);
+        hostility_platform_folder.mkdirs();
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
+
         load();
 
     }
 
     public static void load() {
+
         for (File file : clans_folder.listFiles()) {
 
             if (!file.getName().endsWith(".yml"))
@@ -43,13 +49,21 @@ public final class FileManager {
                 continue;
             }
             clan.forceCreate();
+            for (UUID playerUUID : clan.getAllUUIDS()) {
+                playerUUIDClanMap.put(playerUUID, clan);
+            }
+
         }
 
-        for (File file : hostility_platform_folder.listFiles())
-        {
+        //DONE loading all clans to arraylist! We should now map players!!
+
+
+        for (File file : hostility_platform_folder.listFiles()) {
+            if (!file.getName().endsWith(".obj"))
+                continue;
+
             HostilityPlatform platform = readPlatformFile(file);
-            if(platform == null)
-            {
+            if (platform == null) {
                 LostShardK.logger.info("\n\n" + "There was a hostility file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
@@ -60,8 +74,7 @@ public final class FileManager {
     public static void write(HostilityPlatform platform) {
         try {
             File file = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
-            if(file.exists())
-            {
+            if (file.exists()) {
                 file.delete();
             }
             file.createNewFile();
@@ -94,22 +107,28 @@ public final class FileManager {
     }
 
     public static Clan readClanFile(File clanFile) {
-        final String delimiter = ", ";
 
+        final String delimiter = ", ";
 
         UUID clanID = UUID.fromString(clanFile.getName().substring(0, clanFile.getName().indexOf('.')));
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(clanFile);
         String clanName = yaml.getString("Name");
         String clanTag = yaml.getString("Tag");
         String clanStringColor = yaml.getString("Color");
-        String clanStringBoolean = yaml.getString("FriendlyFire");
-        if (clanName == null || clanTag == null || clanStringColor == null || clanStringBoolean == null || clanID == null) {
-            LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, or id of the clan is corrupted/missing.");
+        String clanStringFriendlyFireBoolean = yaml.getString("FriendlyFire");
+        String clanStringHostilityBuffBoolean = yaml.getString("HostilityBuff");
+        String clanStringHostilityWinsInt = yaml.getString("HostilityWins");
+        if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null || clanStringHostilityBuffBoolean == null || clanStringHostilityWinsInt == null) {
+            LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
             return null;
         }
-        ChatColor clanColor = ChatColor.getByChar(clanStringColor.replace('&', ChatColor.COLOR_CHAR));
 
-        boolean clanFriendlyFire = Boolean.valueOf(clanStringBoolean);
+
+        ChatColor clanColor = ChatColor.getByChar(clanStringColor.substring(1));
+
+        boolean clanFriendlyFire = Boolean.valueOf(clanStringFriendlyFireBoolean);
+        boolean clanHostilityBuff = Boolean.valueOf(clanStringHostilityBuffBoolean);
+        int clanHostilityWins = Integer.parseInt(clanStringHostilityWinsInt);
 
         Clan clan = new Clan(clanID);
         switch (clan.forceName(clanName)) {
@@ -137,6 +156,8 @@ public final class FileManager {
         }
         clan.setColor(clanColor);
         clan.setFriendlyFire(clanFriendlyFire);
+        clan.setHostilityBuff(clanHostilityBuff);
+        clan.setHostilityWins(clanHostilityWins);
 
         ClanRank[] ranks = ClanRank.values();
 
@@ -194,8 +215,11 @@ public final class FileManager {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(clanFile);
         yaml.set("Name", clan.getName());
         yaml.set("Tag", clan.getTag());
-        yaml.set("Color", clan.getColor().toString().replace("§", "&") + "");
+        yaml.set("Color", clan.getColor().toString().replace(ChatColor.COLOR_CHAR + "", "&") + "");
         yaml.set("FriendlyFire", clan.isFriendlyFire() + "");
+        yaml.set("HostilityWins", clan.getHostilityWins() + "");
+        yaml.set("HostilityBuff", clan.hasHostilityBuff() + "");
+
 
         ClanRank[] ranks = ClanRank.values();
 
@@ -205,7 +229,7 @@ public final class FileManager {
 
             UUID[] uuids = clan.getPlayerUUIDSBy(rank);
             for (int i = 0; i < uuids.length; i++) {
-                Player player = Bukkit.getPlayer(uuids[i]);
+                OfflinePlayer player = Bukkit.getOfflinePlayer(uuids[i]);
 
                 if (i == uuids.length - 1)
                     list += uuids[i].toString() + "(" + player.getName() + ")";
@@ -239,7 +263,6 @@ public final class FileManager {
         if (clanFile.exists())
             clanFile.delete();
     }
-
 
 
     private static void saveResource(String resourcePath, File out_to_folder, boolean replace) {

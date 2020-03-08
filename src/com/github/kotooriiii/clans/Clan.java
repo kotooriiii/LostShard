@@ -1,6 +1,5 @@
 package com.github.kotooriiii.clans;
 
-import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.files.FileManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -48,6 +47,15 @@ public class Clan {
      * Whether players are able to hurt each other.
      */
     private boolean isFriendlyFire;
+
+    /**
+     * The amount of wins in Hostility
+     */
+    private int hostilityWins;
+    /**
+     * Whether the clan members have the hostility buff from a recent hostility victory
+     */
+    private boolean hasHostilityBuff;
 
     /**
      * The leader of the clan
@@ -103,6 +111,8 @@ public class Clan {
         this.tag = "null";
         this.color = ChatColor.WHITE;
         this.isFriendlyFire = false;
+        this.hasHostilityBuff=false;
+        this.hostilityWins=0;
 
         //Assign a leader
         if (leaderUUID == null)
@@ -135,14 +145,7 @@ public class Clan {
         if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
             return null;
 
-        for (Clan clan : clans) {
-            for (UUID clanUUID : clan.getAllUUIDS()) {
-                if (clanUUID.equals(uuid)) {
-                    return clan;
-                }
-            }
-        }
-        return null;
+        return playerUUIDClanMap.get(uuid);
     }
 
     /**
@@ -278,6 +281,25 @@ public class Clan {
             }
         }
         return clanmates;
+    }
+
+
+    /**
+     * Gets the online {@link Player}s of the clan.
+     *
+     * @return an array of {@link Player}s in the clan.
+     */
+    public Player[] getOnlinePlayers() {
+        OfflinePlayer[] offlinePlayers = getPlayers();
+        ArrayList<Player> players = new ArrayList<>(offlinePlayers.length);
+        for(OfflinePlayer offlinePlayer : offlinePlayers)
+        {
+            if(offlinePlayer.isOnline() && offlinePlayer.hasPlayedBefore())
+            {
+                players.add(offlinePlayer.getPlayer());
+            }
+        }
+        return players.toArray(new Player[players.size()]);
     }
 
     /**
@@ -434,8 +456,8 @@ public class Clan {
         }
         /** end of rank lists */
 
-        result += ChatColor.GOLD + "Number of Hostility’s captured: " + ChatColor.YELLOW + "" + 326 + "\n" +
-                ChatColor.GOLD + "Current Host buff: " + ChatColor.YELLOW + "true\n" +
+        result += ChatColor.GOLD + "Number of Hostility’s captured: " + ChatColor.YELLOW + "" + getHostilityWins() + "\n" +
+                ChatColor.GOLD + "Current Host buff: " + ChatColor.YELLOW + hasHostilityBuff + "\n" +
                 ChatColor.GOLD + "Clan Tag: " + ChatColor.YELLOW + this.getTag();
         return basic + result;
     }
@@ -547,6 +569,13 @@ public class Clan {
         this.isFriendlyFire = friendlyFire;
     }
 
+    public void setHostilityWins(int hostilityWins) {
+        this.hostilityWins = hostilityWins;
+    }
+    public void setHostilityBuff(boolean hasHostilityBuff) {
+        this.hasHostilityBuff = hasHostilityBuff;
+    }
+
     //END OF BASIC SETTERS
     //START OF BASIC GETTERS
 
@@ -593,6 +622,15 @@ public class Clan {
     public boolean isFriendlyFire() {
         return isFriendlyFire;
     }
+
+    public int getHostilityWins() {
+        return hostilityWins;
+    }
+
+    public boolean hasHostilityBuff() {
+        return hasHostilityBuff;
+    }
+
 
     //END OF BASIC GETTERS
     //START OF ADMIN CLAN COMMANDS
@@ -704,6 +742,7 @@ public class Clan {
         this.leader = candidateLeader;
         updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
+        saveFile();
         return 0;
     }
 
@@ -745,6 +784,8 @@ public class Clan {
         }
 
         updateRankUUIDS(kickedRank, newLeavingUUIDS);
+        update(kickedUUID, true);
+        saveFile();
         return 0;
     }
 
@@ -753,7 +794,6 @@ public class Clan {
      */
     public void forceCreate() {
         clans.add(this);
-        ;
     }
 
     /**
@@ -761,6 +801,8 @@ public class Clan {
      */
     public void forceDisband() {
         clans.remove(this);
+        update(this.getAllUUIDS(), true);
+        removeFile();
     }
 
     //END OF ADMIN CLAN COMMANDS
@@ -839,6 +881,7 @@ public class Clan {
 
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
         this.leader = candidateLeader;
+        saveFile();
         return 0;
     }
 
@@ -934,7 +977,7 @@ public class Clan {
 
         updateRankUUIDS(demotedCurrRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-
+saveFile();
         return 0;
     }
 
@@ -1026,7 +1069,7 @@ public class Clan {
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-
+saveFile();
         return 0;
 
     }
@@ -1119,7 +1162,7 @@ public class Clan {
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-
+saveFile();
         return 0;
 
     }
@@ -1207,6 +1250,7 @@ public class Clan {
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
+        saveFile();
         return 0;
 
     }
@@ -1251,6 +1295,8 @@ public class Clan {
         }
 
         clans.add(this);
+        update(playerUUID, false);
+        saveFile();
         return 0;
     }
 
@@ -1280,7 +1326,8 @@ public class Clan {
         //Remove cache clan
 
         clans.remove(this);
-        FileManager.removeFile(this);
+        update(this.getAllUUIDS(), true);
+        removeFile();
         return 0;
     }
 
@@ -1323,6 +1370,8 @@ public class Clan {
         }
 
         updateRankUUIDS(leaverRank, newLeavingUUIDS);
+        update(leaverUUID, true);
+        saveFile();
         return 0;
     }
 
@@ -1367,6 +1416,8 @@ public class Clan {
         }
         tempLowestRank[tempLowestRank.length - 1] = inviteeUUID;
         updateRankUUIDS(lowestRank, tempLowestRank);
+        update(inviteeUUID, false);
+        saveFile();
         return 0;
     }
 
@@ -1431,7 +1482,6 @@ public class Clan {
 
         if (invitationConfirmation.containsKey(inviteeUUID) && invitationConfirmation.get(inviteeUUID).contains(this))
             return 20;
-
 
         return 0;
     }
@@ -1499,10 +1549,46 @@ public class Clan {
         }
 
         updateRankUUIDS(kickedRank, newLeavingUUIDS);
+        update(kickedUUID, true);
+        saveFile();
         return 0;
     }
 
     //END OF CLAN COMMANDS
+
+    //START MAP
+
+    public void update(UUID uuid, boolean isLeaving)
+    {
+        if(isLeaving)
+            playerUUIDClanMap.remove(uuid);
+        else
+            playerUUIDClanMap.put(uuid, this);
+
+    }
+
+    public void update(UUID[] uuids, boolean leaving)
+    {
+        for(UUID uuid : uuids)
+            update(uuid, leaving);
+
+    }
+
+    //END MAP
+
+    //START OF FILE
+
+    public void saveFile()
+    {
+        FileManager.write(this);
+    }
+
+    public void removeFile()
+    {
+        FileManager.removeFile(this);
+    }
+
+    //END OF FILE
 
     //START OF PERMISSIONS
 

@@ -13,12 +13,15 @@ import java.util.UUID;
 
 public class HostilityPlatform implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String name;
 
     private ArrayList<HostilityZone> zones;
 
     public HostilityPlatform(String name) {
         this.name = name;
+        this.zones = new ArrayList<>();
     }
 
     public boolean contains(int x, int y, int z) {
@@ -67,6 +70,7 @@ public class HostilityPlatform implements Serializable {
                 if (uniqueClan == null)
                     continue;
             }
+
 
             if (!uniqueClan.isInThisClan(players[i].getUniqueId())) {
                 Clan clan = Clan.getClan(players[i].getUniqueId());

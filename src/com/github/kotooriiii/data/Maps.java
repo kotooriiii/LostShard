@@ -1,7 +1,6 @@
 package com.github.kotooriiii.data;
 
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.hostility.Hostility;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.ChatColor;
@@ -31,6 +30,9 @@ public final class Maps {
 
     //The array list targets the non-clan user deciding if they'd like to join a clan. They have a set timer in order to confirm their request.
     public static HashMap<UUID, ArrayList<Clan>> invitationConfirmation = new HashMap<>();
+
+    //The most ESSENTIAL HASHMAP!! This makes an organized pair between player and clan. It updates too! More efficient than checking by iterating all clans.
+    public static HashMap<UUID, Clan> playerUUIDClanMap = new HashMap<>(199);
 
     //END CLANS //
     //START HOST//

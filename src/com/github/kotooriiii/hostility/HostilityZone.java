@@ -1,9 +1,17 @@
 package com.github.kotooriiii.hostility;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.event.player.PlayerInteractEvent;
 
-public class HostilityZone {
+import java.io.Serializable;
+
+public class HostilityZone implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+
     private int x1;
     private int x2;
 
@@ -63,7 +71,7 @@ public class HostilityZone {
         this.z1 = loc1.getBlockZ();
         this.z2 = loc2.getBlockZ();
 
-        clean();
+      clean();
     }
 
     public boolean contains(int x, int y, int z)
@@ -98,13 +106,22 @@ public class HostilityZone {
 
     private void clean()
     {
-        this.x1 = Math.min(x1, x2);
+        int x1Temp = Math.min(x1, x2);
         this.x2 = Math.max(x1, x2);
 
-        this.y1 = Math.min(y1, y2);
+        int y1Temp = Math.min(y1, y2);
         this.y2 = Math.max(y1, y2);
 
-        this.z1 = Math.min(z1,z2);
+        int z1Temp = Math.min(z1,z2);
         this.z2 = Math.max(z1,z2);
+
+        this.x1 = x1Temp;
+        this.y1=  y1Temp;
+        this.z1 = z1Temp;
+    }
+
+    public String toString()
+    {
+        return "[x1:" + this.x1 + "x2:" + this.x2 + "][y1:" + y1 + "y2:" + this.y2 + "][z1:"  + z1 + "z2:" + z2+"]";
     }
 }

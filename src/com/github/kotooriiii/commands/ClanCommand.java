@@ -1090,6 +1090,7 @@ public class ClanCommand implements CommandExecutor {
         switch (potentialClan.setName(playerUUID, clanName)) {
             case 0:
                 //todo take gold here
+                potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to \"" + clanName + "\".");
                 break;
             case 30:
@@ -1132,6 +1133,7 @@ public class ClanCommand implements CommandExecutor {
         switch (potentialClan.setTag(playerUUID, tag)) {
             case 0:
                 //todo take gold here
+                potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
                 break;
             case 1:

@@ -1,5 +1,10 @@
 package com.github.kotooriiii.util;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+
 public final class HelperMethods {
     private HelperMethods() {}
 
@@ -13,5 +18,13 @@ public final class HelperMethods {
                 string += " " + args[i];
         }
         return string;
+    }
+
+    public static void playSound(Player[] players, Sound sound)
+    {
+        for(Player player : players)
+        {
+            player.playSound(player.getLocation(), sound, 10F, 1F);
+        }
     }
 }

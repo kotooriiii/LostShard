@@ -6,6 +6,7 @@ import com.github.kotooriiii.commands.FriendlyFireCommand;
 import com.github.kotooriiii.commands.HostilityCommand;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.listeners.ClanCreatorListener;
+import com.github.kotooriiii.listeners.HostilityCreateListener;
 import com.github.kotooriiii.listeners.PlayerHitListener;
 import com.github.kotooriiii.listeners.PlayerLeaveListener;
 import org.bukkit.Bukkit;
@@ -38,7 +39,6 @@ public class LostShardK extends JavaPlugin {
         registerCommands();
         registerEvents();
 
-        loop();
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
     }
@@ -61,14 +61,6 @@ public class LostShardK extends JavaPlugin {
         }
     }
 
-    private void loop() {
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(LostShardK.plugin, new Runnable() {
-            public void run() {
-                saveData();
-            }
-        }, 5*60*20L, 6 * 60 * 60 * 20L);//every 6hrs
-    }
-
 
     public void registerCommands() {
         getCommand("clan").setExecutor(new ClanCommand());
@@ -82,7 +74,7 @@ public class LostShardK extends JavaPlugin {
         pm.registerEvents(new ClanCreatorListener(), this);
         pm.registerEvents(new PlayerLeaveListener(), this);
         pm.registerEvents(new PlayerHitListener(), this);
-        pm.registerEvents(new ClanCreatorListener(), this);
+        pm.registerEvents(new HostilityCreateListener(), this);
 
 
     }

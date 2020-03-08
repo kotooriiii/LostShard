@@ -36,6 +36,7 @@ public class FriendlyFireCommand implements CommandExecutor {
                         clan.broadcast(STANDARD_COLOR + "Clan friendly fire has been enabled.");
                     }
                     clan.setFriendlyFire(!clan.isFriendlyFire());
+                    clan.saveFile();
 
                 } else {
                     playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/ff" + ERROR_COLOR + ".");
