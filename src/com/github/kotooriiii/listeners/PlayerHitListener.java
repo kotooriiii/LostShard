@@ -48,32 +48,32 @@ public class PlayerHitListener implements Listener {
 
     }
 
-    @EventHandler
-    public void onSomethingRandomJustDeleteItLater(final PlayerInteractEvent e) {
-        if (e.getItem() != null && e.getItem().getType().equals(Material.JUKEBOX) && e.getAction().equals(Action.LEFT_CLICK_AIR)) {
-            if (players.contains(e.getPlayer())) {
-                players.remove(e.getPlayer());
-            } else {
-                players.add(e.getPlayer());
-
-                new BukkitRunnable()
-                {
-                    int i = 0;
-                    @Override
-                    public void run() {
-                        if(!players.contains(e.getPlayer()))
-                        {
-                            cancel();
-                        }
-
-                        HelperMethods.playSound(new Player[]{e.getPlayer()}, Sound.values()[i]);
-                        e.getPlayer().sendMessage("Playing - " + Sound.values()[i]);
-                        i++;
-                    }
-                }.runTaskTimer(LostShardK.plugin, 0, 20);
-
-            }
-        }
-    }
+//    @EventHandler
+//    public void onSomethingRandomJustDeleteItLater(final PlayerInteractEvent e) {
+//        if (e.getItem() != null && e.getItem().getType().equals(Material.JUKEBOX) && e.getAction().equals(Action.LEFT_CLICK_AIR)) {
+//            if (players.contains(e.getPlayer())) {
+//                players.remove(e.getPlayer());
+//            } else {
+//                players.add(e.getPlayer());
+//
+//                new BukkitRunnable()
+//                {
+//                    int i = 0;
+//                    @Override
+//                    public void run() {
+//                        if(!players.contains(e.getPlayer()))
+//                        {
+//                            cancel();
+//                        }
+//
+//                        HelperMethods.playSound(new Player[]{e.getPlayer()}, Sound.values()[i]);
+//                        e.getPlayer().sendMessage("Playing - " + Sound.values()[i]);
+//                        i++;
+//                    }
+//                }.runTaskTimer(LostShardK.plugin, 0, 20);
+//
+//            }
+//        }
+//    }
 
 }
