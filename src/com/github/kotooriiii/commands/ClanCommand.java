@@ -110,7 +110,7 @@ public class ClanCommand implements CommandExecutor {
                 //This statement refers to: /clans <argument 0> <argument 1> ...
                 else if (args.length > 1) {
                     //Sub-commands again however with proper argument.
-                    String supply = stringBuilder(args, 1);
+                    String supply = stringBuilder(args, 1, " ");
                     switch (args[0].toLowerCase()) {
                         case "create":
                             createClan(playerSender, playerUUID, supply);
@@ -206,21 +206,21 @@ public class ClanCommand implements CommandExecutor {
                                         if (args.length == 2)
                                             playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/clan staff cuuid <clanName>" + ERROR_COLOR + "."); //clan staff uuid
                                         else if (args.length > 2)
-                                            sendClanUUID(playerSender, stringBuilder(args, 2));
+                                            sendClanUUID(playerSender, stringBuilder(args, 2, " "));
                                         break;
                                     case "disband":
                                         if (args.length == 2)
                                             playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/clan staff disband <clanName>" + ERROR_COLOR + "."); //clan staff uuid
                                             //clan staff disbadn sss
                                         else if (args.length > 2)
-                                            forceDisband(playerSender, stringBuilder(args, 2));
+                                            forceDisband(playerSender, stringBuilder(args, 2, " "));
 
                                         break;
                                     case "leader":
                                         if (args.length < 4) //clan staff leader <playerName> <clan>
                                             playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/clan staff leader <playerName> <clanName>" + ERROR_COLOR + "."); //clan staff uuid
                                         else {
-                                            forceLeader(playerSender, args[2], stringBuilder(args, 3));
+                                            forceLeader(playerSender, args[2], stringBuilder(args, 3, " "));
                                         }
                                         break;
                                     case "kick": //clan staff kick <playerName>

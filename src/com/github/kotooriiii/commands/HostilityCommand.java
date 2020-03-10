@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -16,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +37,7 @@ public class HostilityCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("hostility")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    sendHelp(playerSender);
+                    sendAllActiveGames(playerSender);
                     // cmd is /host
                 }
                 //This statement refers to: /host <argument 0> <argument 1> ... <argument n>
@@ -62,7 +62,7 @@ public class HostilityCommand implements CommandExecutor {
                                         return true;
                                     } else {
                                         // /host <arg 0/staff> <arg 1/create> ......... <arg n>
-                                        String name = stringBuilder(args, 2);
+                                        String name = stringBuilder(args, 2, " ");
 
                                         for (HostilityPlatform platform : platforms) {
                                             if (platform.getName().equalsIgnoreCase(name)) {
@@ -113,7 +113,7 @@ public class HostilityCommand implements CommandExecutor {
                                         return true;
                                     } else {
                                         // /host <arg 0/staff> <arg 1/delete> ......... <arg n>
-                                        String name = stringBuilder(args, 2);
+                                        String name = stringBuilder(args, 2, " ");
 
                                         for (HostilityPlatform platform : platforms) {
                                             if (platform.getName().equalsIgnoreCase(name)) {
@@ -181,7 +181,7 @@ public class HostilityCommand implements CommandExecutor {
                                         return true;
                                     } else {
                                         // /host <arg 0/staff> <arg 1/delete> ......... <arg n>
-                                        String name = stringBuilder(args, 2);
+                                        String name = stringBuilder(args, 2, " ");
                                         for (HostilityPlatform platform : platforms) {
 
                                             if (platform.getName().equalsIgnoreCase(name)) {
@@ -206,7 +206,7 @@ public class HostilityCommand implements CommandExecutor {
                                         return true;
                                     } else {
                                         // /host <arg 0/staff> <arg 1/delete> ......... <arg n>
-                                        String name = stringBuilder(args, 2);
+                                        String name = stringBuilder(args, 2, " ");
 
                                         for (HostilityMatch match : activeHostilityGames) {
                                             if (match.getPlatform().getName().equalsIgnoreCase(name)) {
@@ -222,9 +222,13 @@ public class HostilityCommand implements CommandExecutor {
                                     break;
                             }
                             break;
-                        case "":
-                            break;
                         default:
+                            String name = HelperMethods.stringBuilder(args, 0, " ");
+                            for (HostilityPlatform platform : platforms) {
+                                if (platform.getName().equalsIgnoreCase(name)) {
+
+                                }
+                            }
                             sendUnknownCommand(playerSender);
                             break;
                     }
@@ -294,7 +298,7 @@ public class HostilityCommand implements CommandExecutor {
 
     }
 
-    private void sendHelp(Player playerSender) {
+    private void sendAllActiveGames(Player playerSender) {
         playerSender.sendMessage(ChatColor.GOLD + "------Hostility Help------");
 //        Currently active: Hostility, Havoc
 //        Current captor of Host: (clan name)
@@ -302,23 +306,20 @@ public class HostilityCommand implements CommandExecutor {
 //        Next Hostility: 6PM EST
 //        Next Havoc:  8PM EST
         String active = ChatColor.DARK_RED + "NONE";
-        if(activeHostilityGames.size()>0)
+        if (activeHostilityGames.size() > 0)
             active = "";
-       HostilityMatch[] matches = activeHostilityGames.toArray(new HostilityMatch[activeHostilityGames.size()]);
-        for(int i = 0; i < matches.length; i++)
-        {
-            if(i != matches.length-1)
-            active += matches[i].getPlatform().getName() + ", ";
+        HostilityMatch[] matches = activeHostilityGames.toArray(new HostilityMatch[activeHostilityGames.size()]);
+        for (int i = 0; i < matches.length; i++) {
+            if (i != matches.length - 1)
+                active += matches[i].getPlatform().getName() + ", ";
             else
                 active += matches[i].getPlatform().getName();
         }
 
         playerSender.sendMessage(COMMAND_COLOR + "Currently active: " + ChatColor.YELLOW + active);
 
-        for(int i = 0; i < matches.length; i++)
-        {
-            if(matches[i].getCapturingClan() == null)
-            {
+        for (int i = 0; i < matches.length; i++) {
+            if (matches[i].getCapturingClan() == null) {
                 playerSender.sendMessage(COMMAND_COLOR + "Current Captor of " + matches[i].getPlatform().getName() + ": " + ChatColor.DARK_RED + "NONE");
 
             } else {
@@ -329,6 +330,38 @@ public class HostilityCommand implements CommandExecutor {
         }
 
         playerSender.sendMessage(COMMAND_COLOR + "Next Hostility: " + ChatColor.YELLOW + "6PM PST");
+    }
+
+    private String getHostilityInfo(String platformName) {
+        boolean isActive = false;
+        boolean exists = false;
+
+        for (HostilityMatch match : activeHostilityGames) {
+            HostilityPlatform platform = match.getPlatform();
+            if (platform.getName().equalsIgnoreCase(platformName)) {
+                isActive = true;
+                exists = true;
+            }
+        }
+
+        if (!isActive) {
+            for (HostilityPlatform platform : platforms) {
+                if (platform.getName().equalsIgnoreCase(platformName))
+                    exists = true;
+            }
+        }
+
+        String result = "";
+        if (isActive && exists) {
+
+        } else if (!isActive && exists) {
+
+        } else if (!isActive && !exists) {
+
+        } else if (isActive && !exists) {
+            //Does NOT EXIST
+        }
+        return result;
     }
 
     private void sendStaffHelp(Player playerSender) {

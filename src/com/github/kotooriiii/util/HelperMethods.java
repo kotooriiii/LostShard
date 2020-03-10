@@ -8,14 +8,14 @@ import org.bukkit.entity.Player;
 public final class HelperMethods {
     private HelperMethods() {}
 
-    public static String stringBuilder(String[] args, int n) {
+    public static String stringBuilder(String[] args, int n, String concat) {
 
         String string = "";
         for (int i = n; i < args.length; i++) {
             if (i == n)
                 string += args[i];
             else
-                string += " " + args[i];
+                string += concat + args[i];
         }
         return string;
     }
