@@ -3,16 +3,17 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Player.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -343,10 +344,14 @@ public class ClanCommand implements CommandExecutor {
             return;
         }
 
-        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + clan.getID().toString() + ". Hover and click to copy.")
+        BaseComponent[] tc = new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + clan.getID().toString() + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, clan.getID().toString()))
-                .create());
+                .create();
+
+        ((Spigot)playerSender).sendMessage(ChatMessageType.CHAT, tc);
+        CraftPlayer player;
+
         return;
     }
 
@@ -364,7 +369,7 @@ public class ClanCommand implements CommandExecutor {
         //chatcomponent hover click
 
 
-        playerSender.spigot().sendMessage(new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "" + targetPlayer.getName() + "" + STANDARD_COLOR + "'s UUID is " + targetPlayer.getUniqueId().toString() + ". Hover and click to copy.")
+        ((Spigot)playerSender).sendMessage(ChatMessageType.CHAT, new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "" + targetPlayer.getName() + "" + STANDARD_COLOR + "'s UUID is " + targetPlayer.getUniqueId().toString() + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, targetPlayer.getUniqueId().toString()))
                 .create());

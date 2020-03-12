@@ -5,11 +5,11 @@ import com.github.kotooriiii.commands.ClanCommand;
 import com.github.kotooriiii.commands.FriendlyFireCommand;
 import com.github.kotooriiii.commands.HostilityCommand;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.guards.Guard;
 import com.github.kotooriiii.listeners.ClanCreatorListener;
 import com.github.kotooriiii.listeners.HostilityCreateListener;
 import com.github.kotooriiii.listeners.PlayerHitListener;
 import com.github.kotooriiii.listeners.PlayerLeaveListener;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -24,6 +24,7 @@ public class LostShardK extends JavaPlugin {
     public static Plugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
+
 
     @Override
     public void onEnable() {
@@ -47,6 +48,12 @@ public class LostShardK extends JavaPlugin {
     public void onDisable() {
 
         saveData();
+
+        for(Guard guard : Guard.activeGuards)
+        {
+            guard.destroy();
+        }
+
         logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
         plugin = null;
         logger = null;

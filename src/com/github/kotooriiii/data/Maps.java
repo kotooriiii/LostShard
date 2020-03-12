@@ -50,6 +50,7 @@ public final class Maps {
     //ACTIVE GAMES OF HOSTILITY. These are the matches players are playing currently.
     public static ArrayList<HostilityMatch> activeHostilityGames = new ArrayList<>();
 
+
     public final static ChatColor ERROR_COLOR = ChatColor.DARK_RED;
     public final static ChatColor CLAN_COLOR = ChatColor.DARK_GREEN;
     public final static ChatColor STANDARD_COLOR = ChatColor.DARK_GREEN;

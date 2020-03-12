@@ -242,7 +242,7 @@ public class HostilityCommand implements CommandExecutor {
 
     private void giveTools(Player playerSender) {
         //Create AREA AXE item
-        ItemStack areaItemStack = new ItemStack(Material.WOOD_AXE, 1);
+        ItemStack areaItemStack = new ItemStack(Material.WOODEN_AXE, 1);
         ItemMeta areaItemMeta = areaItemStack.getItemMeta();
         areaItemMeta.setDisplayName(STANDARD_COLOR + "Area Axe");
         List<String> areaLoreList = new ArrayList<>(4);
@@ -255,7 +255,7 @@ public class HostilityCommand implements CommandExecutor {
         areaItemStack.setItemMeta(areaItemMeta);
 
         //Create SINGLE SWORD item
-        ItemStack singleItemStack = new ItemStack(Material.WOOD_SWORD, 1);
+        ItemStack singleItemStack = new ItemStack(Material.WOODEN_SWORD, 1);
         ItemMeta singleItemMeta = singleItemStack.getItemMeta();
         singleItemMeta.setDisplayName(STANDARD_COLOR + "Single Sword");
         List<String> singleLoreList = new ArrayList<>(3);
@@ -267,7 +267,7 @@ public class HostilityCommand implements CommandExecutor {
         singleItemStack.setItemMeta(singleItemMeta);
 
         //Create FINALIZE FLOWER item
-        ItemStack finalizeItemStack = new ItemStack(Material.DOUBLE_PLANT, 1);
+        ItemStack finalizeItemStack = new ItemStack(Material.SUNFLOWER, 1);
         ItemMeta finalizeItemMeta = finalizeItemStack.getItemMeta();
         finalizeItemMeta.setDisplayName(STANDARD_COLOR + "Finalize Flower");
         List<String> finalizeLoreList = new ArrayList<>(3);
@@ -278,7 +278,7 @@ public class HostilityCommand implements CommandExecutor {
         finalizeItemStack.setItemMeta(finalizeItemMeta);
 
         //Create UNDO RED item
-        ItemStack undoItemStack = new ItemStack(Material.WOOL, 1, DyeColor.RED.getData());
+        ItemStack undoItemStack = new ItemStack(Material.RED_WOOL, 1);
         ItemMeta undoItemMeta = undoItemStack.getItemMeta();
         undoItemMeta.setDisplayName(STANDARD_COLOR + "Undo Red");
         List<String> undoLoreList = new ArrayList<>(3);

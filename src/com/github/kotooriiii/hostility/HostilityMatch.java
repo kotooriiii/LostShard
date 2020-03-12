@@ -41,7 +41,6 @@ public class HostilityMatch {
     /**
      * Old win streak
      */
-
     private int lastWinStreak;
 
     /**
@@ -291,7 +290,7 @@ public class HostilityMatch {
                         },  (long) gracePeriod);
                     }
 
-                    HelperMethods.playSound(Bukkit.getOnlinePlayers().toArray(new Player[0]), Sound.AMBIENCE_THUNDER);
+                    HelperMethods.playSound(Bukkit.getOnlinePlayers().toArray(new Player[0]), Sound.ENTITY_LIGHTNING_BOLT_THUNDER);
 
                 }
             }
