@@ -2,12 +2,12 @@ package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.guards.Guard;
-import net.minecraft.server.v1_15_R1.*;
+import com.github.kotooriiii.events.PlayerLeftClickShardNPCEvent;
+import com.github.kotooriiii.events.PlayerRightClickShardNPCEvent;
+import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.guards.Skin;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -54,14 +53,23 @@ public class PlayerHitListener implements Listener {
 
     @EventHandler
     public void OIC2(EntityDamageByEntityEvent entityEvent) {
-        org.bukkit.entity.Entity en = entityEvent.getEntity();
-        if (en instanceof ArmorStand) {
-            for (Guard guard : Guard.activeGuards) {
-                if (guard.isId(en.getEntityId())) {
-                    entityEvent.setCancelled(true);
+        org.bukkit.entity.Entity entityDamaged = entityEvent.getEntity();
+        org.bukkit.entity.Entity damager = entityEvent.getDamager();
+        if (entityDamaged instanceof ArmorStand) {
+            if (damager instanceof Player) {
+                Player player = (Player) damager;
+                for (ShardGuard shardGuard : ShardGuard.getActiveShardGuards()) {
+                    if (shardGuard.isId(entityDamaged.getEntityId())) {
+                        PlayerLeftClickShardNPCEvent playerLeftClickShardNPCEvent = new PlayerLeftClickShardNPCEvent(player, shardGuard);
+                        Bukkit.getPluginManager().callEvent(playerLeftClickShardNPCEvent);
+                        if (playerLeftClickShardNPCEvent.isCancelled())
+                            return;
+                        entityEvent.setCancelled(true);
+
+                        //Add what happens when left click with playerleftclick
+                    }
                 }
             }
-
 
         }
     }
@@ -70,9 +78,16 @@ public class PlayerHitListener implements Listener {
     public void OIC(PlayerInteractAtEntityEvent entityEvent) {
         org.bukkit.entity.Entity en = entityEvent.getRightClicked();
         if (en instanceof ArmorStand) {
-            for (Guard guard : Guard.activeGuards) {
-                if (guard.isId(en.getEntityId())) {
+            for (ShardGuard shardGuard : ShardGuard.getActiveShardGuards()) {
+                if (shardGuard.isId(en.getEntityId())) {
+                    PlayerRightClickShardNPCEvent playerRightClickShardNPCEvent = new PlayerRightClickShardNPCEvent(entityEvent.getPlayer(), shardGuard);
+                    Bukkit.getPluginManager().callEvent(playerRightClickShardNPCEvent);
+                    if (playerRightClickShardNPCEvent.isCancelled())
+                        return;
                     entityEvent.setCancelled(true);
+
+                    //Add what happens when rightclick with playerInteractShardNPC
+
                 }
             }
         }
@@ -82,54 +97,19 @@ public class PlayerHitListener implements Listener {
     public void onCrouch(PlayerToggleSneakEvent event) {
         if (event.isSneaking()) {
             Player player = event.getPlayer();
-            Bukkit.broadcastMessage("Start");
 
-            Guard guard = new Guard("Manny");
-            guard.spawn(player.getLocation());
+            ShardGuard shardGuard = new ShardGuard("GuardName");
+            shardGuard.spawn(player.getLocation());
             Bukkit.broadcastMessage("Spawn");
 
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Bukkit.broadcastMessage("Teleport");
-
-                    guard.teleport(event.getPlayer().getLocation(), true);
-                }
-            }.runTaskLater(LostShardK.plugin, 20);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-//                   Bukkit.broadcastMessage("Bounds");
-//                   guard.showBounds();
-                }
-            }.runTaskLater(LostShardK.plugin, 40);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Bukkit.broadcastMessage("Search");
-                    guard.checkForEnemy();
-                }
-            }.runTaskLater(LostShardK.plugin, 80);
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-
-
-                }
-            }.runTaskLater(LostShardK.plugin, 160);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
                     Bukkit.broadcastMessage("Destroy");
-
-                    guard.destroy();
+                    shardGuard.destroy();
                 }
             }.runTaskLater(LostShardK.plugin, 700);
 
-            Bukkit.broadcastMessage("End");
 
         }
     }

@@ -7,11 +7,20 @@ commands:
   ff:
     description:
     usage:
+    aliases:
+      - friendlyfire
   clan:
     description:
     usage:
+    aliases:
+      - clans
   hostility:
     description:
     usage:
     aliases:
       - host
+  guards:
+    description:
+    usage:
+    aliases:
+      - guards

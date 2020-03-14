@@ -3,9 +3,11 @@ package com.github.kotooriiii.files;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.guards.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -21,6 +23,8 @@ public final class FileManager {
     private static File plugin_folder = LostShardK.plugin.getDataFolder();
     private static File clans_folder = new File(plugin_folder + File.separator + "clans");
     private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
+    private static File guards_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "guards");
+
 
     private FileManager() {
     }
@@ -29,8 +33,10 @@ public final class FileManager {
         plugin_folder.mkdir();
         clans_folder.mkdir();
         hostility_platform_folder.mkdirs();
+        guards_folder.mkdirs();
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
 
         load();
 
@@ -69,23 +75,17 @@ public final class FileManager {
             }
             platforms.add(platform);
         }
-    }
 
-    public static void write(HostilityPlatform platform) {
-        try {
-            File file = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
-            if (file.exists()) {
-                file.delete();
+        for(File file : guards_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            ShardGuard guard = readShardGuardFile(file);
+            if (guard == null) {
+                LostShardK.logger.info("\n\n" + "There was a guard file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
             }
-            file.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-            oos.writeObject(platform);
-            oos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -201,6 +201,24 @@ public final class FileManager {
         return clan;
     }
 
+    public static ShardGuard readShardGuardFile(File shardGuardFile) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardGuardFile);
+        String guardName = shardGuardFile.getName().split(".")[0];
+        Location guardPostLocation = yaml.getLocation("GuardPostLocation");
+
+
+        if (guardPostLocation == null) {
+            LostShardK.logger.info("There was an error reading the clan in file \"" + shardGuardFile.getName() + "\". The guard post location in the file might be corrupted or missing.");
+            return null;
+        }
+
+        ShardGuard guard = new ShardGuard(guardName);
+        guard.spawn(guardPostLocation);
+
+        return guard;
+    }
+
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -246,6 +264,73 @@ public final class FileManager {
         }
     }
 
+    public static void write(HostilityPlatform platform) {
+        try {
+            File file = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(platform);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(ShardGuard guard) {
+        String name = guard.getName();
+        String fileName = name + ".yml";
+        File guardFile = new File(guards_folder + File.separator + fileName);
+
+        try {
+            if (!guardFile.exists())
+                guardFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(guardFile);
+        yaml.set("GuardPostLocation", guard.getGuardPost());
+
+        try {
+            yaml.save(guardFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    public static void write(ShardGuard guard, String oldName) {
+//        String oldFileName = oldName + ".yml";
+//        File oldGuardFile = new File(guards_folder + File.separator + oldFileName);
+//
+//        if (oldGuardFile.exists())
+//            oldGuardFile.delete();
+//
+//        String name = guard.getName();
+//        String fileName = name + ".yml";
+//        File guardFile = new File(guards_folder + File.separator + fileName);
+//
+//        try {
+//            if (!guardFile.exists())
+//                guardFile.createNewFile();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(guardFile);
+//        yaml.set("GuardPostLocation", guard.getGuardPost());
+//
+//        try {
+//            yaml.save(guardFile);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public static void removeFile(Clan clan) {
         UUID clanID = clan.getID();
@@ -262,6 +347,16 @@ public final class FileManager {
 
         if (clanFile.exists())
             clanFile.delete();
+    }
+
+    public static void removeFile(ShardGuard guard) {
+        String name = guard.getName();
+        String fileName = name + ".yml";
+        File guardFile = new File(guards_folder + File.separator + fileName);
+
+        if (guardFile.exists())
+            guardFile.delete();
+
     }
 
 
