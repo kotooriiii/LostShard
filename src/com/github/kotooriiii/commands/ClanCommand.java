@@ -344,12 +344,12 @@ public class ClanCommand implements CommandExecutor {
             return;
         }
 
-        BaseComponent[] tc = new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + clan.getID().toString() + ". Hover and click to copy.")
+        BaseComponent[] tc = new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + STANDARD_COLOR + clan.getID().toString() + STANDARD_COLOR+ ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, clan.getID().toString()))
                 .create();
 
-        ((Spigot)playerSender).sendMessage(ChatMessageType.CHAT, tc);
+        playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);
 
         return;
     }
@@ -368,7 +368,7 @@ public class ClanCommand implements CommandExecutor {
         //chatcomponent hover click
 
 
-        ((Spigot)playerSender).sendMessage(ChatMessageType.CHAT, new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "" + targetPlayer.getName() + "" + STANDARD_COLOR + "'s UUID is " + targetPlayer.getUniqueId().toString() + ". Hover and click to copy.")
+        playerSender.spigot().sendMessage(ChatMessageType.CHAT, new ComponentBuilder(STANDARD_COLOR + "The player " + PLAYER_COLOR + "" + targetPlayer.getName() + "" + STANDARD_COLOR + "'s UUID is " + STANDARD_COLOR + targetPlayer.getUniqueId().toString() + STANDARD_COLOR + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, targetPlayer.getUniqueId().toString()))
                 .create());

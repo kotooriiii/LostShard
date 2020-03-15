@@ -38,6 +38,11 @@ public class GuardCommand implements CommandExecutor {
                     final Location playerLocation = playerSender.getLocation();
                     if ("bad guy is near".isEmpty() == false) {
                         ShardGuard guard = ShardGuard.getNearestGuard(playerLocation);
+                        if(guard==null)
+                        {
+                            playerSender.sendMessage(ERROR_COLOR + "No guard nearby!!!");
+                            return true;
+                        }
                         guard.teleport(playerLocation);
 
                         new BukkitRunnable() {
@@ -109,7 +114,7 @@ public class GuardCommand implements CommandExecutor {
                                             return true;
                                         }
                                     }
-                                    playerSender.sendMessage(STANDARD_COLOR + "You have hired " + GUARD_COLOR + nameCreate + STANDARD_COLOR + "to stand in this position.");
+                                    playerSender.sendMessage(STANDARD_COLOR + "You have hired " + GUARD_COLOR + nameCreate + STANDARD_COLOR + " to stand in this position.");
                                     ShardGuard guard = new ShardGuard(nameCreate);
                                     guard.spawn(playerSender.getLocation());
                                     FileManager.write(guard);
@@ -172,12 +177,11 @@ public class GuardCommand implements CommandExecutor {
                                         int x = iteratingGuard.getCurrentLocation().getBlockX();
                                         int y = iteratingGuard.getCurrentLocation().getBlockY();
                                         int z = iteratingGuard.getCurrentLocation().getBlockZ();
-                                        BaseComponent[] tc = new ComponentBuilder(GUARD_COLOR + "" + iteratingGuard.getName() + STANDARD_COLOR + " is positioned at x:" + x + ", y:" + y + ", z:" + ".")
+                                        BaseComponent[] tc = new ComponentBuilder(GUARD_COLOR + "" + iteratingGuard.getName() + STANDARD_COLOR + " is positioned at x:" +STANDARD_COLOR +  x + ", y:" + y + ", z:" + z + ".")
                                                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + GUARD_COLOR + iteratingGuard.getName() + STANDARD_COLOR + ".").create()))
-                                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
+                                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
 
-                                        ((Player.Spigot) playerSender).sendMessage(ChatMessageType.CHAT, tc);
-                                        ((Player.Spigot) playerSender).sendMessage();
+                                       playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "-----------------");
                                     break;
@@ -205,7 +209,7 @@ public class GuardCommand implements CommandExecutor {
 
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff create " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff delete " + ChatColor.YELLOW + "(name)");
-        playerSender.sendMessage(COMMAND_COLOR + "/guard staff edit " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/guard staff setguardpost " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff show " + ChatColor.YELLOW + "");
     }
 

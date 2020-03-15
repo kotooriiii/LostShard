@@ -39,7 +39,7 @@ public final class FileManager {
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankerREADME.txt", guards_folder, true);
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankerREADME.txt", bankers_folder, true);
 
         load();
 
@@ -219,7 +219,7 @@ public final class FileManager {
     public static ShardGuard readShardGuardFile(File shardGuardFile) {
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardGuardFile);
-        String guardName = shardGuardFile.getName().split(".")[0];
+        String guardName = shardGuardFile.getName().substring(0, shardGuardFile.getName().indexOf('.'));
         Location guardPostLocation = yaml.getLocation("GuardPostLocation");
 
 
@@ -230,6 +230,7 @@ public final class FileManager {
 
         ShardGuard guard = new ShardGuard(guardName);
         guard.spawn(guardPostLocation);
+
 
         return guard;
     }

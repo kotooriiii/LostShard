@@ -14,12 +14,13 @@ public class ShardNMS {
 
     private ArrayList<Packet> packetsStored = new ArrayList<>();
 
-    protected ShardNMS()
-    {}
+    protected ShardNMS() {
+    }
 
     /**
      * Gets the value of the given object's field.
-     * @param obj The object being referenced
+     *
+     * @param obj        The object being referenced
      * @param field_name The private field of the object
      * @return The value of the given field
      */
@@ -36,9 +37,10 @@ public class ShardNMS {
 
     /**
      * Sets the value of the given object's field.
-     * @param obj The object being referenced
+     *
+     * @param obj        The object being referenced
      * @param field_name The private field of the object
-     * @param value The value of the given field
+     * @param value      The value of the given field
      */
     protected void setField(Object obj, String field_name, Object value) {
         try {
@@ -52,33 +54,48 @@ public class ShardNMS {
 
     /**
      * Sends a packet to the player
+     *
      * @param packet The NMS packet being sent to the client
      * @param player The player receiving the packet
      */
     protected void sendPacket(Packet<?> packet, Player player) {
+
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-        packetsStored.add(packet);
+        if(!packetsStored.contains(packet))
+        addPacket(packet);
     }
 
     /**
+     * Sends a packet to the player
+     *
+     * @param packet The NMS packet being sent to the client
+     */
+    protected void addPacket(Packet<?> packet) {
+        packetsStored.add(packet);
+    }
+
+
+    /**
      * Sends the packet to all online players
+     *
      * @param packet The NMS packet being sent to the client.
      */
     protected void sendPacket(Packet<?> packet) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             this.sendPacket(packet, p);
         }
+        addPacket(packet);
     }
 
-    protected void updatePackets(Player player)
-    {
-        for(Packet packet : packetsStored){
-            this.sendPacket(packet, player);
+    protected void updatePackets(Player player) {
+        for (Packet packet : packetsStored) {
+            sendPacket(packet, player);
         }
     }
 
     /**
      * Freezes the entity from behavior movement.
+     *
      * @param nmsEn The given entity
      */
     protected void freezeEntity(Entity nmsEn) {

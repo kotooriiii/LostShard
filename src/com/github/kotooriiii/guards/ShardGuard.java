@@ -269,7 +269,12 @@ public class ShardGuard extends ShardLocationNPC {
         return blocks;
     }
 
-
+    @Override
+    public void update(Player player)
+    {
+        super.update(player);
+        showBounds();
+    }
     private void clearBounds() {
         //Clear last ones
         for (Block block : boundingBlocks) {

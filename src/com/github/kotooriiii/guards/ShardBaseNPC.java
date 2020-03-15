@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Score;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,6 +61,7 @@ public class ShardBaseNPC extends ShardNMS {
      */
     private String name;
     private String prefix;
+    private ScoreboardTeam team;
 
     /**
      * Creates a new NPC with the given name and following skin.
@@ -77,7 +79,7 @@ public class ShardBaseNPC extends ShardNMS {
         //Get the NMS world
         WorldServer minecraftWorld = ((CraftWorld) world).getHandle();
         //Name the Guard: GUARD=5 []=2 2colors=4 total =11
-        GameProfile gameProfile = new GameProfile(UUID.randomUUID(), " ");
+        GameProfile gameProfile = new GameProfile(UUID.randomUUID(), ChatColor.YELLOW + name);
         //Don't spam it if we have it cached, tell player that if it has been spammed.
 
         /*Old code for http requests
@@ -111,6 +113,8 @@ public class ShardBaseNPC extends ShardNMS {
             }
         };
 
+        npc.persist = true;
+
         //Save the location as just the world with init coords.
         setCurrentLocation(new Location(world, 0, 0, 0));
         //Freeze the NPC
@@ -125,11 +129,15 @@ public class ShardBaseNPC extends ShardNMS {
     public boolean setName(String prefix, String name) {
 
         //Name
-        ScoreboardTeam team = new ScoreboardTeam(new Scoreboard(), "arbitrary");
-        IChatBaseComponent prefixComponent = new ChatMessage(prefix);
-        IChatBaseComponent suffixComponent = new ChatMessage(ChatColor.YELLOW + name);
+        if(team==null)
+        {
+            team = new ScoreboardTeam(new Scoreboard(), "arbitrary");
+
+        }
+        IChatBaseComponent prefixComponent = new ChatMessage(prefix + " ");
+     //   IChatBaseComponent suffixComponent = new ChatMessage(ChatColor.YELLOW + name);
         team.setPrefix(prefixComponent);
-        team.setSuffix(suffixComponent);
+        //team.setSuffix(suffixComponent);
         this.name = ChatColor.stripColor(name);
         this.prefix = prefix;
 
@@ -222,8 +230,8 @@ public class ShardBaseNPC extends ShardNMS {
 
         for (EntityArmorStand armorStand : armorStands) //loop all target points
         {
-            PacketPlayOutEntityDestroy playerDestroyPacket2 = new PacketPlayOutEntityDestroy(armorStand.getId()); //Create destroy packet
-            sendPacket(playerDestroyPacket2); //Destroy
+//            PacketPlayOutEntityDestroy playerDestroyPacket2 = new PacketPlayOutEntityDestroy(armorStand.getId()); //Create destroy packet
+//            sendPacket(playerDestroyPacket2); //Destroy
             armorStand.killEntity(); //Since it's also alive in memory on the server, kill it.
         }
         setDestroyed(true);
@@ -241,6 +249,7 @@ public class ShardBaseNPC extends ShardNMS {
             return false;
         //Teleport the target points
         this.currentLocation = location;
+
         if (!rotateHead(location.getYaw(), location.getPitch()))
             return false;
 
