@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class ShardNPC extends ShardNMS {
+public class ShardBaseNPC extends ShardNMS {
     //NPC Skin Cache
     static private HashMap<String, String[]> skinProperties = new HashMap<>(10);
 
@@ -67,7 +67,7 @@ public class ShardNPC extends ShardNMS {
      * @param name The name of the NPC
      * @param skin The skin of the NPC
      */
-    public ShardNPC(String prefix, String name, Skin skin) {
+    public ShardBaseNPC(String prefix, String name, Skin skin) {
 
         //Get the NMS server
         MinecraftServer minecraftServer = ((CraftServer) Bukkit.getServer()).getServer();
@@ -358,6 +358,13 @@ public class ShardNPC extends ShardNMS {
         return true;
 
     }
+
+    public void update(Player player)
+    {
+        updatePackets(player);
+    }
+
+
 
     /**
      * Returns an array of String containing the texture and signature of the player respectively in index order.

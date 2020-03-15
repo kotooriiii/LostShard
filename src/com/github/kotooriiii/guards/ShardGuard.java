@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ShardGuard extends ShardNPC {
+public class ShardGuard extends ShardLocationNPC {
 
     static public ArrayList<ShardGuard> activeShardGuards = new ArrayList<>();
 
@@ -25,7 +25,6 @@ public class ShardGuard extends ShardNPC {
 
     private boolean isBusy = false;
 
-    private Location guardPost;
 
     private List<org.bukkit.block.Block> boundingBlocks = new ArrayList<>();
 
@@ -35,20 +34,6 @@ public class ShardGuard extends ShardNPC {
 
         super(ChatColor.GRAY + "[" + "Guard" + "]", name, Skin.GUARD);
         //Set as active Guard
-        getActiveShardGuards().add(this);
-    }
-
-
-    /**
-     * Sets the new location for the Guard to watch over. Teleports the Guard to the desired location as well.
-     *
-     * @param location The new desired guard post location.
-     */
-    public void setGuardPost(Location location) {
-        if (isDestroyed() || !isSpawned())
-            return;
-        this.guardPost = location;
-        teleport(location);
     }
 
     /**
@@ -76,11 +61,13 @@ public class ShardGuard extends ShardNPC {
         if (!super.spawn(x, y, z, yaw, pitch))
             return false;
 
+        getActiveShardGuards().add(this);
+
         if (!setEquipment(Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS, Material.IRON_SWORD, Material.SHIELD))
             return false;
 
         //Update location, remember the world is here already!
-        guardPost = new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch);
+        updateLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
         showBounds();
         observe();
         return true;
@@ -91,12 +78,10 @@ public class ShardGuard extends ShardNPC {
      */
     @Override
     public boolean destroy() {
+        if(!super.destroy())
+            return false;
         //Clear last ones
-        for (Player players : Bukkit.getOnlinePlayers()) {
-            for (Block block : boundingBlocks) {
-                players.sendBlockChange(block.getLocation(), Material.AIR.createBlockData());
-            }
-        }
+      clearBounds();
 
         if (task != null)
             task.cancel();
@@ -109,12 +94,10 @@ public class ShardGuard extends ShardNPC {
      * Destroys the Guard.
      */
     public boolean forceDestroy() {
+        if(!super.destroy())
+            return false;
         //Clear last ones
-        for (Player players : Bukkit.getOnlinePlayers()) {
-            for (Block block : boundingBlocks) {
-                players.sendBlockChange(block.getLocation(), Material.AIR.createBlockData());
-            }
-        }
+        clearBounds();
 
         if (task != null)
             task.cancel();
@@ -188,7 +171,7 @@ public class ShardGuard extends ShardNPC {
                 if (isDestroyed())
                     return;
                 isBusy = false;
-                teleport(guardPost);
+                teleport(getSpawnLocation());
                 observe();
             }
         }.runTaskLater(LostShardK.plugin, 70);
@@ -390,7 +373,7 @@ public class ShardGuard extends ShardNPC {
         for (ShardGuard guard : getActiveShardGuards()) {
             if(guard.isBusy())
                 continue;
-            double distance = guard.getGuardPost().distance(location);
+            double distance = guard.getSpawnLocation().distance(location);
             if(distance < nearestDistance)
             {
                 nearestDistance=distance;
@@ -407,9 +390,5 @@ public class ShardGuard extends ShardNPC {
 
     public boolean isBusy() {
         return isBusy;
-    }
-
-    public Location getGuardPost() {
-        return guardPost;
     }
 }

@@ -350,7 +350,6 @@ public class ClanCommand implements CommandExecutor {
                 .create();
 
         ((Spigot)playerSender).sendMessage(ChatMessageType.CHAT, tc);
-        CraftPlayer player;
 
         return;
     }

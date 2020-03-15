@@ -3,6 +3,11 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.guards.ShardGuard;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -41,11 +46,11 @@ public class GuardCommand implements CommandExecutor {
                                 if (guard.isBusy())
                                     return;
                                 int curX = guard.getCurrentLocation().getBlockX();
-                                int postX = guard.getGuardPost().getBlockX();
+                                int postX = guard.getSpawnLocation().getBlockX();
                                 int curY = guard.getCurrentLocation().getBlockY();
-                                int postY = guard.getGuardPost().getBlockY();
+                                int postY = guard.getSpawnLocation().getBlockY();
                                 int curZ = guard.getCurrentLocation().getBlockZ();
-                                int postZ = guard.getGuardPost().getBlockZ();
+                                int postZ = guard.getSpawnLocation().getBlockZ();
 
                                 if (curX != postX && curY != postY && curZ != postZ) {
                                     guard.getCurrentLocation().getWorld().playSound(guard.getCurrentLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
@@ -60,14 +65,14 @@ public class GuardCommand implements CommandExecutor {
                                 if (guard.isBusy())
                                     return;
                                 int curX = guard.getCurrentLocation().getBlockX();
-                                int postX = guard.getGuardPost().getBlockX();
+                                int postX = guard.getSpawnLocation().getBlockX();
                                 int curY = guard.getCurrentLocation().getBlockY();
-                                int postY = guard.getGuardPost().getBlockY();
+                                int postY = guard.getSpawnLocation().getBlockY();
                                 int curZ = guard.getCurrentLocation().getBlockZ();
-                                int postZ = guard.getGuardPost().getBlockZ();
+                                int postZ = guard.getSpawnLocation().getBlockZ();
 
                                 if (curX != postX && curY != postY && curZ != postZ) {
-                                    guard.teleport(guard.getGuardPost());
+                                    guard.teleport(guard.getSpawnLocation());
                                 }
                             }
 
@@ -104,7 +109,7 @@ public class GuardCommand implements CommandExecutor {
                                             return true;
                                         }
                                     }
-                                    playerSender.sendMessage(STANDARD_COLOR + "You have hired " + nameCreate + "to stand in this position.");
+                                    playerSender.sendMessage(STANDARD_COLOR + "You have hired " + GUARD_COLOR + nameCreate + STANDARD_COLOR + "to stand in this position.");
                                     ShardGuard guard = new ShardGuard(nameCreate);
                                     guard.spawn(playerSender.getLocation());
                                     FileManager.write(guard);
@@ -118,13 +123,13 @@ public class GuardCommand implements CommandExecutor {
                                     String nameDelete = stringBuilder(args, 2, " ");
                                     for (ShardGuard iteratingGuard : ShardGuard.getActiveShardGuards()) {
                                         if (iteratingGuard.getName().equalsIgnoreCase(nameDelete)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "You have relieved " + iteratingGuard.getName() + " from his duty.");
+                                            playerSender.sendMessage(STANDARD_COLOR + "You have relieved " + GUARD_COLOR + iteratingGuard.getName() + STANDARD_COLOR + " from his duty.");
                                             iteratingGuard.destroy();
                                             FileManager.removeFile(iteratingGuard);
                                             return true;
                                         }
                                     }
-                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + nameDelete + " in our records of Guards.");
+                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + GUARD_COLOR + nameDelete + ERROR_COLOR+  " in our records of Guards.");
                                     break;
                                 case "setguardpost":
                                     if (args.length == 2) {
@@ -135,13 +140,13 @@ public class GuardCommand implements CommandExecutor {
                                     String nameSetGuardPost = stringBuilder(args, 2, " ");
                                     for (ShardGuard iteratingGuard : ShardGuard.getActiveShardGuards()) {
                                         if (iteratingGuard.getName().equalsIgnoreCase(nameSetGuardPost)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "You have set a new location for the guard to.. well uh, guard. Thanks, " + iteratingGuard.getName() + "!");
-                                            iteratingGuard.setGuardPost(playerSender.getLocation());
+                                            playerSender.sendMessage(STANDARD_COLOR + "You have set a new location for the guard to.. well uh, guard. Thanks, " + GUARD_COLOR + iteratingGuard.getName() + STANDARD_COLOR + "!");
+                                            iteratingGuard.setSpawnLocation(playerSender.getLocation());
                                             FileManager.write(iteratingGuard);
                                             return true;
                                         }
                                     }
-                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + nameSetGuardPost + " in our records of Guards.");
+                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + GUARD_COLOR + nameSetGuardPost + ERROR_COLOR + " in our records of Guards.");
                                     break;
 //                                case "setname":
 //                                    if (args.length == 2 || args.length == 3) {
@@ -162,7 +167,19 @@ public class GuardCommand implements CommandExecutor {
 //                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + setName + " in our records of Guards.");
 //                                    break;
                                 case "show":
-//todo
+                                    playerSender.sendMessage(STANDARD_COLOR + "-=[Guards Active]=-");
+                                    for (ShardGuard iteratingGuard : ShardGuard.getActiveShardGuards()) {
+                                        int x = iteratingGuard.getCurrentLocation().getBlockX();
+                                        int y = iteratingGuard.getCurrentLocation().getBlockY();
+                                        int z = iteratingGuard.getCurrentLocation().getBlockZ();
+                                        BaseComponent[] tc = new ComponentBuilder(GUARD_COLOR + "" + iteratingGuard.getName() + STANDARD_COLOR + " is positioned at x:" + x + ", y:" + y + ", z:" + ".")
+                                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + GUARD_COLOR + iteratingGuard.getName() + STANDARD_COLOR + ".").create()))
+                                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
+
+                                        ((Player.Spigot) playerSender).sendMessage(ChatMessageType.CHAT, tc);
+                                        ((Player.Spigot) playerSender).sendMessage();
+                                    }
+                                    playerSender.sendMessage(STANDARD_COLOR + "-----------------");
                                     break;
                                 default:
                                     sendStaffUnknownCommand(playerSender);

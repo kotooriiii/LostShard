@@ -8,8 +8,15 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 public class ShardNMS {
+
+    private ArrayList<Packet> packetsStored = new ArrayList<>();
+
+    protected ShardNMS()
+    {}
+
     /**
      * Gets the value of the given object's field.
      * @param obj The object being referenced
@@ -50,6 +57,7 @@ public class ShardNMS {
      */
     protected void sendPacket(Packet<?> packet, Player player) {
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+        packetsStored.add(packet);
     }
 
     /**
@@ -59,6 +67,13 @@ public class ShardNMS {
     protected void sendPacket(Packet<?> packet) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             this.sendPacket(packet, p);
+        }
+    }
+
+    protected void updatePackets(Player player)
+    {
+        for(Packet packet : packetsStored){
+            this.sendPacket(packet, player);
         }
     }
 

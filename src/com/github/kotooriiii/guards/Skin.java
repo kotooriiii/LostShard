@@ -7,9 +7,8 @@ public enum Skin {
             "+e9KrFZuB4RwHYgpYSaUmlktL1axV9so6C523OOdE22ZIY2sTP58sh1iQFYq35KXiy162O0Rt73stqzve2IoYLhjnaoRmopuhbBZbOuPceCsOg/" +
             "RkjTfiSc7bvIe5/6ZI7GSrCoCbTxjqWFyqgR2IwY25S2tXiwjwTzAxZeNeYt2wOA7EMRJPT5XIAVFuwa1f/bn9skX5uVrBgTpRxw2h/QNV2BoqgDUEg91vavkKXUlZS8PWYHJvvhg3N2d0dNAGqjm5nnYP4V3oqjiJfdSSi" +
             "+N4hpB1DLUBqKAOhqMy6SQ+QzF4IOb4=", "eyJ0aW1lc3RhbXAiOjE1ODQwNzExNDc5MzgsInByb2ZpbGVJZCI6ImQyNDEzM2MwMGJlYTQ5OTFhZDJkNDRkZjNhYTg0MzUzIiwicHJvZmlsZU5hbWUiOiJTaGVsdmllIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQv" +
-            "dGV4dHVyZS80NjEyNmE2Zjk5MmFlODhiNjAzM2JjMjEyY2ExMTJmZjNkZDNmNzI3ZWFhN2VkOTFjNzU0ZTY5NTViMDFjYjUwIn19fQ==");
-
-
+            "dGV4dHVyZS80NjEyNmE2Zjk5MmFlODhiNjAzM2JjMjEyY2ExMTJmZjNkZDNmNzI3ZWFhN2VkOTFjNzU0ZTY5NTViMDFjYjUwIn19fQ=="),
+    BANKER("","");
 
     private String texture;
     private String signature;

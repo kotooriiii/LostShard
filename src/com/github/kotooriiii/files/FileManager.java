@@ -3,6 +3,7 @@ package com.github.kotooriiii.files;
 import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;
@@ -10,7 +11,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.util.UUID;
@@ -24,6 +24,7 @@ public final class FileManager {
     private static File clans_folder = new File(plugin_folder + File.separator + "clans");
     private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
     private static File guards_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "guards");
+    private static File bankers_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "bankers");
 
 
     private FileManager() {
@@ -34,9 +35,11 @@ public final class FileManager {
         clans_folder.mkdir();
         hostility_platform_folder.mkdirs();
         guards_folder.mkdirs();
+        bankers_folder.mkdirs();
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankerREADME.txt", guards_folder, true);
 
         load();
 
@@ -84,6 +87,18 @@ public final class FileManager {
             ShardGuard guard = readShardGuardFile(file);
             if (guard == null) {
                 LostShardK.logger.info("\n\n" + "There was a guard file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+        }
+
+        for(File file : bankers_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            ShardBanker banker = readShardBankerFile(file);
+            if (banker == null) {
+                LostShardK.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
         }
@@ -219,6 +234,24 @@ public final class FileManager {
         return guard;
     }
 
+    public static ShardBanker readShardBankerFile(File shardBankerFile) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardBankerFile);
+        String bankerName = shardBankerFile.getName().split(".")[0];
+        Location guardPostLocation = yaml.getLocation("BankerPostLocation");
+
+
+        if (guardPostLocation == null) {
+            LostShardK.logger.info("There was an error reading the clan in file \"" + shardBankerFile.getName() + "\". The banker post location in the file might be corrupted or missing.");
+            return null;
+        }
+
+        ShardBanker banker = new ShardBanker(bankerName);
+        banker.spawn(guardPostLocation);
+
+        return banker;
+    }
+
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -295,10 +328,32 @@ public final class FileManager {
             e.printStackTrace();
         }
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(guardFile);
-        yaml.set("GuardPostLocation", guard.getGuardPost());
+        yaml.set("GuardPostLocation", guard.getSpawnLocation());
 
         try {
             yaml.save(guardFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(ShardBanker banker) {
+        String name = banker.getName();
+        String fileName = name + ".yml";
+        File bankerFile = new File(bankers_folder + File.separator + fileName);
+
+        try {
+            if (!bankerFile.exists())
+                bankerFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankerFile);
+        yaml.set("BankerPostLocation", banker.getSpawnLocation());
+
+        try {
+            yaml.save(bankerFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -356,6 +411,16 @@ public final class FileManager {
 
         if (guardFile.exists())
             guardFile.delete();
+
+    }
+
+    public static void removeFile(ShardBanker banker) {
+        String name = banker.getName();
+        String fileName = name + ".yml";
+        File bankerFile = new File(bankers_folder + File.separator + fileName);
+
+        if (bankerFile.exists())
+            bankerFile.delete();
 
     }
 

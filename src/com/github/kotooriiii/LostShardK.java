@@ -5,17 +5,15 @@ import com.github.kotooriiii.commands.ClanCommand;
 import com.github.kotooriiii.commands.FriendlyFireCommand;
 import com.github.kotooriiii.commands.HostilityCommand;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
-import com.github.kotooriiii.listeners.ClanCreatorListener;
-import com.github.kotooriiii.listeners.HostilityCreateListener;
-import com.github.kotooriiii.listeners.PlayerHitListener;
-import com.github.kotooriiii.listeners.PlayerLeaveListener;
+import com.github.kotooriiii.listeners.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
+import java.security.Guard;
 import java.util.logging.Logger;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -55,6 +53,11 @@ public class LostShardK extends JavaPlugin {
         }
         ShardGuard.getActiveShardGuards().clear();
 
+        for (int i = 0; i < ShardBanker.getActiveShardBankers().size(); i++) {
+            ShardBanker.getActiveShardBankers().get(i).forceDestroy();
+        }
+        ShardBanker.getActiveShardBankers().clear();
+
         logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
         plugin = null;
         logger = null;
@@ -81,8 +84,12 @@ public class LostShardK extends JavaPlugin {
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new ClanCreatorListener(), this);
         pm.registerEvents(new PlayerLeaveListener(), this);
-        pm.registerEvents(new PlayerHitListener(), this);
+        pm.registerEvents(new PlayerFriendlyFireHitListener(), this);
         pm.registerEvents(new HostilityCreateListener(), this);
+        pm.registerEvents(new GuardChatMessageListener(), this);
+        pm.registerEvents(new NPCInteractRedirectListener(), this);
+        pm.registerEvents(new UpdatePacketOnJoinListener(), this);
+
 
 
     }
