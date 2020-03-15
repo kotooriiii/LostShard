@@ -1,18 +1,24 @@
 package com.github.kotooriiii.files;
 
 import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.bank.DonorTitle;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -25,6 +31,7 @@ public final class FileManager {
     private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
     private static File guards_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "guards");
     private static File bankers_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "bankers");
+    private static File bank_folder = new File(plugin_folder + File.separator + "bank");
 
 
     private FileManager() {
@@ -36,10 +43,12 @@ public final class FileManager {
         hostility_platform_folder.mkdirs();
         guards_folder.mkdirs();
         bankers_folder.mkdirs();
+        bank_folder.mkdirs();
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankerREADME.txt", bankers_folder, true);
+        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankREADME.txt", bank_folder, true);
 
         load();
 
@@ -79,8 +88,7 @@ public final class FileManager {
             platforms.add(platform);
         }
 
-        for(File file : guards_folder.listFiles())
-        {
+        for (File file : guards_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
 
@@ -91,8 +99,18 @@ public final class FileManager {
             }
         }
 
-        for(File file : bankers_folder.listFiles())
-        {
+        for (File file : bankers_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            ShardBanker banker = readShardBankerFile(file);
+            if (banker == null) {
+                LostShardK.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+        }
+
+        for (File file : bank_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
 
@@ -238,7 +256,7 @@ public final class FileManager {
     public static ShardBanker readShardBankerFile(File shardBankerFile) {
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardBankerFile);
-        String bankerName = shardBankerFile.getName().split(".")[0];
+        String bankerName = shardBankerFile.getName().substring(0, shardBankerFile.getName().indexOf('.'));
         Location guardPostLocation = yaml.getLocation("BankerPostLocation");
 
 
@@ -251,6 +269,53 @@ public final class FileManager {
         banker.spawn(guardPostLocation);
 
         return banker;
+    }
+
+    public static Bank readBankFile(File bankFile) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankFile);
+        String bankerName = bankFile.getName().substring(0, bankFile.getName().indexOf('.'));
+
+        Inventory inventory = null;
+        ArrayList<ItemStack> itemStackArrayList = new ArrayList<>();
+        for (int i = 0; i != -1; i++) {
+            ItemStack itemStack = yaml.getItemStack("" + i);
+            if (itemStack == null)
+                break;
+            itemStackArrayList.add(itemStack);
+        }
+        ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
+
+        //todo get rank to see slots
+        inventory = Bukkit.createInventory(Bukkit.getPlayer(UUID.fromString(bankerName)), DonorTitle.getMaxSize(), Bank.NAME);
+        inventory.addItem(itemStacks);
+
+        Bank bank = new Bank(UUID.fromString(bankerName), inventory);
+        return bank;
+    }
+
+    public static Bank readBankFile(UUID uuid) {
+
+        File bankFile = new File(bank_folder + File.separator + uuid + ".yml");
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankFile);
+        String bankerName = bankFile.getName().substring(0, bankFile.getName().indexOf('.'));
+
+        Inventory inventory = null;
+        ArrayList<ItemStack> itemStackArrayList = new ArrayList<>();
+        for (int i = 0; i != -1; i++) {
+            ItemStack itemStack = yaml.getItemStack("" + i);
+            if (itemStack == null)
+                break;
+            itemStackArrayList.add(itemStack);
+        }
+        ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
+
+        //todo get rank to see slots
+        inventory = Bukkit.createInventory(Bukkit.getPlayer(UUID.fromString(bankerName)), DonorTitle.getMaxSize(), Bank.NAME);
+        inventory.addItem(itemStacks);
+
+        Bank bank = new Bank(UUID.fromString(bankerName), inventory);
+        return bank;
     }
 
     public static void write(Clan clan) {
@@ -360,6 +425,28 @@ public final class FileManager {
         }
     }
 
+    public static void write(Bank bank) {
+        String fileName = bank.getPlayerUUID() + ".yml";
+        File bankFile = new File(bank_folder + File.separator + fileName);
+
+        try {
+            if (!bankFile.exists())
+                bankFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankFile);
+        for (int i = 0; i < bank.getInventory().getSize(); i++) {
+            yaml.set("" + i, bank.getInventory().getItem(i));
+        }
+        try {
+            yaml.save(bankFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 //    public static void write(ShardGuard guard, String oldName) {
 //        String oldFileName = oldName + ".yml";
 //        File oldGuardFile = new File(guards_folder + File.separator + oldFileName);
@@ -419,6 +506,15 @@ public final class FileManager {
         String name = banker.getName();
         String fileName = name + ".yml";
         File bankerFile = new File(bankers_folder + File.separator + fileName);
+
+        if (bankerFile.exists())
+            bankerFile.delete();
+
+    }
+
+    public static void removeFile(Bank bank) {
+        String fileName = bank.getPlayerUUID() + ".yml";
+        File bankerFile = new File(bank_folder + File.separator + fileName);
 
         if (bankerFile.exists())
             bankerFile.delete();

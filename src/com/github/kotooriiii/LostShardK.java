@@ -1,10 +1,7 @@
 package com.github.kotooriiii;
 
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.commands.ClanCommand;
-import com.github.kotooriiii.commands.FriendlyFireCommand;
-import com.github.kotooriiii.commands.GuardCommand;
-import com.github.kotooriiii.commands.HostilityCommand;
+import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
@@ -79,6 +76,7 @@ public class LostShardK extends JavaPlugin {
         getCommand("ff").setExecutor(new FriendlyFireCommand());
         getCommand("hostility").setExecutor(new HostilityCommand());
         getCommand("guard").setExecutor(new GuardCommand());
+        getCommand("chest").setExecutor(new ChestCommand());
 
 
     }
@@ -92,6 +90,7 @@ public class LostShardK extends JavaPlugin {
         pm.registerEvents(new GuardChatMessageListener(), this);
         pm.registerEvents(new NPCInteractRedirectListener(), this);
         pm.registerEvents(new UpdatePacketOnJoinListener(), this);
+        pm.registerEvents(new PlayerBankUpdateInventory(), this);
 
 
 

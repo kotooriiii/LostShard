@@ -44,6 +44,21 @@ public class ShardBanker extends ShardLocationNPC {
         return true;
     }
 
+    public static ShardBanker getNearestBanker(final Location location) {
+        ShardBanker shardBanker = null;
+        double nearestDistance = -1;
+        for (ShardBanker banker : getActiveShardBankers()) {
+            double distance = banker.getSpawnLocation().distance(location);
+            if(distance < nearestDistance)
+            {
+                nearestDistance=distance;
+                shardBanker=banker;
+            }
+        }
+
+        return shardBanker;
+    }
+
     public boolean forceDestroy()
     {
         return super.destroy();
