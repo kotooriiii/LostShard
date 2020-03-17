@@ -26,7 +26,7 @@ public class UpdatePacketOnJoinListener implements Listener {
                 {
                     banker.update(player);
                 }}
-        }.runTaskLater(LostShardK.plugin, 10);
+        }.runTaskLater(LostShardK.plugin, 40);
     }
 
 
@@ -47,7 +47,7 @@ public class UpdatePacketOnJoinListener implements Listener {
                 {
                     banker.update(player);
                 }}
-            }.runTaskLater(LostShardK.plugin, 10);
+            }.runTaskLater(LostShardK.plugin, 40);
         }
 
 

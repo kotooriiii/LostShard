@@ -11,13 +11,15 @@ import java.util.UUID;
 public class Bank {
     private UUID playerUUID;
     private Inventory inventory;
+    private double currency=-1;
     public final static String NAME = ChatColor.GRAY + "Bank";
-    private final static HashMap<UUID, Inventory> banks = new HashMap<>();
+    private final static HashMap<UUID, Bank> banks = new HashMap<>();
 
-    public Bank(UUID playerUUID, Inventory inventory)
+    public Bank(UUID playerUUID, Inventory inventory, double currency)
     {
         this.inventory = inventory;
         this.playerUUID = playerUUID;
+        this.currency=currency;
     }
 
     public UUID getPlayerUUID() {
@@ -28,7 +30,20 @@ public class Bank {
         return inventory;
     }
 
-    public static HashMap<UUID, Inventory> getBanks() {
+    public double getCurrency()
+    {
+        return currency;
+    }
+
+    public void setCurrency(double currency) {
+        this.currency = currency;
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
+
+    public static HashMap<UUID, Bank> getBanks() {
         return banks;
     }
 }

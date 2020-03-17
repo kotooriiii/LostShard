@@ -27,3 +27,17 @@ commands:
   chest:
     description:
     usage:
+  bank:
+    description:
+    usage:
+  withdraw:
+    description:
+    usage:
+  deposit:
+    description:
+    usage:
+  balance:
+    description:
+    usage:
+
+

@@ -1,34 +1,28 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.LostShardK;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.util.HelperMethods.stringBuilder;
 
-public class ChestCommand implements CommandExecutor {
+public class BalanceCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         //If the player is sending this message
@@ -36,7 +30,7 @@ public class ChestCommand implements CommandExecutor {
             final Player playerSender = (Player) sender;
             final UUID playerUUID = playerSender.getUniqueId();
             //If the command is the "guards" command
-            if (cmd.getName().equalsIgnoreCase("chest")) {
+            if (cmd.getName().equalsIgnoreCase("balance")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
                     final Location playerLocation = playerSender.getLocation();
@@ -46,21 +40,11 @@ public class ChestCommand implements CommandExecutor {
                         return true;
                     }
 
-                    //get rank player
-                    int rankSize = 27;
-                    //todo make a way to get rank
-                    Inventory inventory = Bank.getBanks().get(playerUUID).getInventory();
+                    Bank bank = Bank.getBanks().get(playerUUID);
+                    playerSender.sendMessage(STANDARD_COLOR + "You currently have " + MONEY_COLOR + bank.getCurrency() + STANDARD_COLOR + " in your bank account.");
 
-                    ItemStack[] itemStacks = inventory.getContents();
-                    inventory = Bukkit.createInventory(playerSender, rankSize, Bank.NAME); //hashmap get
-                    for(int i = 0; i < itemStacks.length ; i++)
-                    {
-                        if(itemStacks[i] != null)
-                            inventory.addItem(itemStacks[i]);
-
-                    }
-                    playerSender.openInventory(inventory);
-
+                } else {
+                    playerSender.sendMessage(ERROR_COLOR + "Did you mean " + COMMAND_COLOR + "/balance" + ERROR_COLOR + "?");
                 }
             }
         }

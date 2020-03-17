@@ -14,10 +14,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -109,17 +111,13 @@ public final class FileManager {
                 continue;
             }
         }
-
-        for (File file : bank_folder.listFiles()) {
-            if (!file.getName().endsWith(".yml"))
-                continue;
-
-            ShardBanker banker = readShardBankerFile(file);
-            if (banker == null) {
-                LostShardK.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
-                continue;
-            }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Bank bank = FileManager.readBankFile(player.getUniqueId());
+            if (bank == null)
+                return;
+            Bank.getBanks().put(player.getUniqueId(), bank);
         }
+
     }
 
     public static HostilityPlatform readPlatformFile(File platformFile) {
@@ -284,38 +282,34 @@ public final class FileManager {
                 break;
             itemStackArrayList.add(itemStack);
         }
+
         ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
 
         //todo get rank to see slots
         inventory = Bukkit.createInventory(Bukkit.getPlayer(UUID.fromString(bankerName)), DonorTitle.getMaxSize(), Bank.NAME);
-        inventory.addItem(itemStacks);
+        for (int i = 0; i < itemStacks.length; i++) {
+            if (itemStacks[i] != null)
+                inventory.addItem(itemStacks[i]);
 
-        Bank bank = new Bank(UUID.fromString(bankerName), inventory);
+        }
+
+        String currencyString = yaml.getString("Currency");
+        double currencyNum=0.0F;
+        if(currencyString==null)
+        {
+
+        } else {
+            currencyNum = Double.parseDouble(currencyString);
+        }
+
+        Bank bank = new Bank(UUID.fromString(bankerName), inventory, currencyNum);
         return bank;
     }
 
     public static Bank readBankFile(UUID uuid) {
 
         File bankFile = new File(bank_folder + File.separator + uuid + ".yml");
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankFile);
-        String bankerName = bankFile.getName().substring(0, bankFile.getName().indexOf('.'));
-
-        Inventory inventory = null;
-        ArrayList<ItemStack> itemStackArrayList = new ArrayList<>();
-        for (int i = 0; i != -1; i++) {
-            ItemStack itemStack = yaml.getItemStack("" + i);
-            if (itemStack == null)
-                break;
-            itemStackArrayList.add(itemStack);
-        }
-        ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
-
-        //todo get rank to see slots
-        inventory = Bukkit.createInventory(Bukkit.getPlayer(UUID.fromString(bankerName)), DonorTitle.getMaxSize(), Bank.NAME);
-        inventory.addItem(itemStacks);
-
-        Bank bank = new Bank(UUID.fromString(bankerName), inventory);
-        return bank;
+        return readBankFile(bankFile);
     }
 
     public static void write(Clan clan) {
@@ -440,6 +434,7 @@ public final class FileManager {
         for (int i = 0; i < bank.getInventory().getSize(); i++) {
             yaml.set("" + i, bank.getInventory().getItem(i));
         }
+        yaml.set("Currency", bank.getCurrency());
         try {
             yaml.save(bankFile);
         } catch (IOException e) {

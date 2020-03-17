@@ -20,10 +20,11 @@ public class ShardGuard extends ShardLocationNPC {
 
     static public ArrayList<ShardGuard> activeShardGuards = new ArrayList<>();
 
-    private final int warningRadius = 4;
+    private final int warningRadius = 7;
     private final int alertRadius = warningRadius - 2;
 
     private boolean isBusy = false;
+    private boolean isCalled = false;
 
 
     private List<org.bukkit.block.Block> boundingBlocks = new ArrayList<>();
@@ -78,10 +79,10 @@ public class ShardGuard extends ShardLocationNPC {
      */
     @Override
     public boolean destroy() {
-        if(!super.destroy())
+        if (!super.destroy())
             return false;
         //Clear last ones
-      clearBounds();
+        clearBounds();
 
         if (task != null)
             task.cancel();
@@ -94,7 +95,7 @@ public class ShardGuard extends ShardLocationNPC {
      * Destroys the Guard.
      */
     public boolean forceDestroy() {
-        if(!super.destroy())
+        if (!super.destroy())
             return false;
         //Clear last ones
         clearBounds();
@@ -134,8 +135,6 @@ public class ShardGuard extends ShardLocationNPC {
         w.playSound(loc, Sound.ENTITY_ENDERMAN_SCREAM, 10, 0);
         //Spawn particle at location
         w.spawnParticle(Particle.FIREWORKS_SPARK, getCurrentLocation(), 20, 0.3, 0.3, 0.3);
-        //Force player to look at Guard
-        lookAtThis(player);
         //Slow player
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 15, 127, false, false, false));
         //Get location of player in case of logging out
@@ -152,9 +151,9 @@ public class ShardGuard extends ShardLocationNPC {
 
                 w.playSound(playerLocation, Sound.ENTITY_DROWNED_DEATH, 10, 0);
                 if (player.isOnline())
-                    player.setHealth(1);
+                    player.setHealth(0);
             }
-        }.runTaskLater(LostShardK.plugin, 15);
+        }.runTaskLater(LostShardK.plugin, 0);
 
         new BukkitRunnable() {
             @Override
@@ -163,7 +162,7 @@ public class ShardGuard extends ShardLocationNPC {
                     return;
                 w.playSound(playerLocation, Sound.ENTITY_PLAYER_BURP, 10, 0);
             }
-        }.runTaskLater(LostShardK.plugin, 35);
+        }.runTaskLater(LostShardK.plugin, 10);
 
         new BukkitRunnable() {
             @Override
@@ -174,7 +173,7 @@ public class ShardGuard extends ShardLocationNPC {
                 teleport(getSpawnLocation());
                 observe();
             }
-        }.runTaskLater(LostShardK.plugin, 70);
+        }.runTaskLater(LostShardK.plugin, 20);
         return true;
     }
 
@@ -270,11 +269,11 @@ public class ShardGuard extends ShardLocationNPC {
     }
 
     @Override
-    public void update(Player player)
-    {
+    public void update(Player player) {
         super.update(player);
         showBounds();
     }
+
     private void clearBounds() {
         //Clear last ones
         for (Block block : boundingBlocks) {
@@ -347,6 +346,8 @@ public class ShardGuard extends ShardLocationNPC {
                             float pitch = (float) newPitch;
 
                             if (Math.abs(xIntDiff) <= alertRadius && Math.abs(yIntDiff) <= alertRadius && Math.abs(zIntDiff) <= alertRadius) {
+                                if(player.getGameMode().equals(GameMode.CREATIVE))
+                                    continue;
                                 isBusy = true;
                                 teleportKill(player, new Location(entity.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), yaw, pitch));
                                 this.cancel();
@@ -356,9 +357,8 @@ public class ShardGuard extends ShardLocationNPC {
                                 int randomInt = new Random().nextInt(3);
                                 double randomChance = Math.random();
                                 if (randomInt != 0) {
-                                    if (randomChance <= 0.045)
+                                    if (randomChance <= 0.1)
                                         player.spawnParticle(Particle.VILLAGER_ANGRY, getCurrentLocation().getBlockX() + 0.5, getCurrentLocation().getBlockY() + 2, getCurrentLocation().getBlockZ() + 0.5, randomInt, 0.25, 0, 0.25);
-                                    player.spawnParticle(Particle.SMOKE_NORMAL, getCurrentLocation().getBlockX() + 0.5, getCurrentLocation().getBlockY() + 1, getCurrentLocation().getBlockZ() + 0.5, 1, 0, 0, 0);
                                 }
 
                             }
@@ -374,15 +374,14 @@ public class ShardGuard extends ShardLocationNPC {
 
     public static ShardGuard getNearestGuard(final Location location) {
         ShardGuard nearestGuard = null;
-        double nearestDistance = -1;
+        double nearestDistance = Double.MAX_VALUE;
         for (ShardGuard guard : getActiveShardGuards()) {
-            if(guard.isBusy())
+            if (guard.isBusy() || guard.isCalled())
                 continue;
             double distance = guard.getSpawnLocation().distance(location);
-            if(distance < nearestDistance)
-            {
-                nearestDistance=distance;
-                nearestGuard=guard;
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestGuard = guard;
             }
         }
 
@@ -395,5 +394,19 @@ public class ShardGuard extends ShardLocationNPC {
 
     public boolean isBusy() {
         return isBusy;
+    }
+
+    public void setBusy(boolean isBusy)
+    {
+        this.isBusy=isBusy;
+    }
+
+    public boolean isCalled() {
+        return isCalled;
+    }
+
+    public void setCalled(boolean isCalled)
+    {
+        this.isCalled = isCalled;
     }
 }

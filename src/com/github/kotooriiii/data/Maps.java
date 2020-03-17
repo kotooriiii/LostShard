@@ -56,6 +56,9 @@ public final class Maps {
     public final static ChatColor STANDARD_COLOR = ChatColor.DARK_GREEN;
     public final static ChatColor PLAYER_COLOR = ChatColor.YELLOW;
     public final static ChatColor GUARD_COLOR = ChatColor.YELLOW;
+    public final static ChatColor BANKER_COLOR = ChatColor.YELLOW;
+    public final static ChatColor MONEY_COLOR = ChatColor.YELLOW;
+
     public final static ChatColor COMMAND_COLOR = ChatColor.GOLD;
     public final static ChatColor RANK_COLOR = ChatColor.DARK_GREEN;
 

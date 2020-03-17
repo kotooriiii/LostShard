@@ -1,18 +1,21 @@
 package com.github.kotooriiii.guards;
 
+import com.github.kotooriiii.LostShardK;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.Packet;
+import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class ShardNMS {
 
-    private ArrayList<Packet> packetsStored = new ArrayList<>();
+    private  ArrayList<Packet> packetsStored = new ArrayList<>();
 
     protected ShardNMS() {
     }
@@ -61,8 +64,8 @@ public class ShardNMS {
     protected void sendPacket(Packet<?> packet, Player player) {
 
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-        if(!packetsStored.contains(packet))
-        addPacket(packet);
+        if (!packetsStored.contains(packet))
+            addPacket(packet);
     }
 
     /**
@@ -88,8 +91,24 @@ public class ShardNMS {
     }
 
     protected void updatePackets(Player player) {
+        boolean isReady = false;
         for (Packet packet : packetsStored) {
+
+            if (packet instanceof PacketPlayOutPlayerInfo) {
+                if (isReady) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            sendPacket(packet, player);
+                        }
+                    }.runTaskLater(LostShardK.plugin, 80);
+                    continue;
+                }
+                isReady = true;
+            }
+
             sendPacket(packet, player);
+
         }
     }
 
@@ -104,4 +123,5 @@ public class ShardNMS {
         compound.setByte("NoAI", (byte) 1);
         nmsEn.f(compound);
     }
+
 }

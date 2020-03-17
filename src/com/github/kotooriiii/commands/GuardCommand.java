@@ -8,9 +8,12 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.minecraft.server.v1_15_R1.PacketPlayOutWorldParticles;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -42,13 +45,19 @@ public class GuardCommand implements CommandExecutor {
                         {
                             playerSender.sendMessage(ERROR_COLOR + "No guard nearby!!!");
                             return true;
+                        } else if("if no enemy nearby".length() == 1)
+                        {
+                            return true;
                         }
+
+                        guard.setCalled(true);
                         guard.teleport(playerLocation);
 
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                if (guard.isBusy())
+
+                                if(guard.isBusy())
                                     return;
                                 int curX = guard.getCurrentLocation().getBlockX();
                                 int postX = guard.getSpawnLocation().getBlockX();
@@ -57,9 +66,9 @@ public class GuardCommand implements CommandExecutor {
                                 int curZ = guard.getCurrentLocation().getBlockZ();
                                 int postZ = guard.getSpawnLocation().getBlockZ();
 
+                                guard.getCurrentLocation().getWorld().spawnParticle(Particle.BARRIER, new Location(guard.getCurrentLocation().getWorld(), guard.getCurrentLocation().getBlockX()+0.5, guard.getCurrentLocation().getBlockY()+3, guard.getCurrentLocation().getBlockZ()+0.5), 1);
                                 if (curX != postX && curY != postY && curZ != postZ) {
                                     guard.getCurrentLocation().getWorld().playSound(guard.getCurrentLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
-
                                 }
                             }
                         }.runTaskLater(LostShardK.plugin, 40);
@@ -67,8 +76,7 @@ public class GuardCommand implements CommandExecutor {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                if (guard.isBusy())
-                                    return;
+
                                 int curX = guard.getCurrentLocation().getBlockX();
                                 int postX = guard.getSpawnLocation().getBlockX();
                                 int curY = guard.getCurrentLocation().getBlockY();
@@ -78,10 +86,11 @@ public class GuardCommand implements CommandExecutor {
 
                                 if (curX != postX && curY != postY && curZ != postZ) {
                                     guard.teleport(guard.getSpawnLocation());
+                                    guard.setCalled(false);
                                 }
                             }
 
-                        }.runTaskLater(LostShardK.plugin, 60);
+                        }.runTaskLater(LostShardK.plugin, 120);
 
                     }
                 }
@@ -108,6 +117,13 @@ public class GuardCommand implements CommandExecutor {
                                     }
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String nameCreate = stringBuilder(args, 2, " ");
+
+                                    if(nameCreate.length() > 14)
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "You can't have a name that big! Shrink it or else the game crashes.");
+                                        return true;
+                                    }
+
                                     for (ShardGuard iteratingGuard : ShardGuard.getActiveShardGuards()) {
                                         if (iteratingGuard.getName().equalsIgnoreCase(nameCreate)) {
                                             playerSender.sendMessage(ERROR_COLOR + "The name you chose is already taken by another Guard.");
@@ -136,9 +152,9 @@ public class GuardCommand implements CommandExecutor {
                                     }
                                     playerSender.sendMessage(ERROR_COLOR + "We could not find " + GUARD_COLOR + nameDelete + ERROR_COLOR+  " in our records of Guards.");
                                     break;
-                                case "setguardpost":
+                                case "setspawn":
                                     if (args.length == 2) {
-                                        playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/guard staff setguardpost (name)" + ERROR_COLOR + "."); //clan staff uuid
+                                        playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/guard staff setspawn (name)" + ERROR_COLOR + "."); //clan staff uuid
                                         return true;
                                     }
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
@@ -209,7 +225,7 @@ public class GuardCommand implements CommandExecutor {
 
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff create " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff delete " + ChatColor.YELLOW + "(name)");
-        playerSender.sendMessage(COMMAND_COLOR + "/guard staff setguardpost " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/guard staff setspawn " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/guard staff show " + ChatColor.YELLOW + "");
     }
 

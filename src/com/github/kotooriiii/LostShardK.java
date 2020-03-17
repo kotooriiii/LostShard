@@ -1,10 +1,13 @@
 package com.github.kotooriiii;
 
+import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.guards.ShardBanker;
+import com.github.kotooriiii.guards.ShardBaseNPC;
 import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.guards.ShardNMS;
 import com.github.kotooriiii.listeners.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -55,6 +58,7 @@ public class LostShardK extends JavaPlugin {
             ShardBanker.getActiveShardBankers().get(i).forceDestroy();
         }
         ShardBanker.getActiveShardBankers().clear();
+        Bank.getBanks().clear();
 
         logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
         plugin = null;
@@ -77,6 +81,10 @@ public class LostShardK extends JavaPlugin {
         getCommand("hostility").setExecutor(new HostilityCommand());
         getCommand("guard").setExecutor(new GuardCommand());
         getCommand("chest").setExecutor(new ChestCommand());
+getCommand("bank").setExecutor(new BankCommand());
+getCommand("deposit").setExecutor(new DepositCommand());
+getCommand("withdraw").setExecutor(new WithdrawCommand());
+        getCommand("balance").setExecutor(new BalanceCommand());
 
 
     }

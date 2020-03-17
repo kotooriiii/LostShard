@@ -131,7 +131,7 @@ public class ShardBaseNPC extends ShardNMS {
         //Name
         if(team==null)
         {
-            team = new ScoreboardTeam(new Scoreboard(), "arbitrary");
+            team = new ScoreboardTeam(new Scoreboard(), prefix);
 
         }
         IChatBaseComponent prefixComponent = new ChatMessage(prefix + " ");
@@ -140,10 +140,9 @@ public class ShardBaseNPC extends ShardNMS {
         //team.setSuffix(suffixComponent);
         this.name = ChatColor.stripColor(name);
         this.prefix = prefix;
+        this.sendPacket(new PacketPlayOutScoreboardTeam(team, 0));
 
         //Adding to Scoreboard
-        PacketPlayOutScoreboardTeam scoreboardTeamPacketInit = new PacketPlayOutScoreboardTeam(team, 0);
-        this.sendPacket(scoreboardTeamPacketInit);
         ArrayList<String> playerToAdd = new ArrayList<>();
         playerToAdd.add(npc.getName());
         PacketPlayOutScoreboardTeam scoreboardTeamPacketUpdate = new PacketPlayOutScoreboardTeam(team, playerToAdd, 3);
@@ -174,12 +173,12 @@ public class ShardBaseNPC extends ShardNMS {
             return false;
         //Set spawn to true
         setSpawned(true);
+
         //Set location to the center of a block.
         setCurrentLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
         npc.setLocation(x + 0.5, y, z + 0.5, yaw, pitch);
         //Rotate the head. Fix it since for some reason nms has it only working of yaw
-        if (!rotateHead(yaw, pitch))
-            return false;
+
         //Packet for playing out a player
         PacketPlayOutPlayerInfo playerDeclarePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npc);
         //Spawn the player
@@ -193,6 +192,7 @@ public class ShardBaseNPC extends ShardNMS {
         new BukkitRunnable() {
             @Override
             public void run() {
+                rotateHead(yaw, pitch);
                 PacketPlayOutPlayerInfo playerRedeclarePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc);
                 sendPacket(playerRedeclarePacket);
             }
@@ -210,7 +210,7 @@ public class ShardBaseNPC extends ShardNMS {
         for (EntityArmorStand armorStand : armorStands) {
             armorStand.setNoGravity(true);//float
             armorStand.setInvulnerable(false);//make sure its false so events are called
-            armorStand.setInvisible(false); //FIX THIS AT COMPILETIME
+            armorStand.setInvisible(true); //FIX THIS AT COMPILETIME
             freezeEntity(armorStand); //FREEZE entity cannot move this.
             ((CraftWorld) getCurrentLocation().getWorld()).addEntity(armorStand, CreatureSpawnEvent.SpawnReason.CUSTOM); //Add entity to the world. get out of packets and put to server
         }
@@ -249,9 +249,15 @@ public class ShardBaseNPC extends ShardNMS {
             return false;
         //Teleport the target points
         this.currentLocation = location;
-
-        if (!rotateHead(location.getYaw(), location.getPitch()))
-            return false;
+        //Delay and then remove from Tablist
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                rotateHead(location.getYaw(), location.getPitch());
+                PacketPlayOutPlayerInfo playerRedeclarePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc);
+                sendPacket(playerRedeclarePacket);
+            }
+        }.runTaskLater(LostShardK.plugin, 40);
 
         //Teleport the player
         PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport();

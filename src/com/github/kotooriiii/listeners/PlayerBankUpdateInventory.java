@@ -22,7 +22,9 @@ public class PlayerBankUpdateInventory implements Listener {
             HumanEntity player = inventoryCloseEvent.getPlayer();
             if(player instanceof Player) {
                 Inventory inventory = inventoryCloseEvent.getInventory();
-                Bank.getBanks().put(((Player) player).getUniqueId(), inventory);
+                Bank bank = Bank.getBanks().get(player.getUniqueId());
+                bank.setInventory(inventory);
+                FileManager.write(bank);
             }
             //save inventory
         }
@@ -32,7 +34,7 @@ public class PlayerBankUpdateInventory implements Listener {
     public void onLeave(PlayerQuitEvent event)
     {
         Player player = event.getPlayer();
-        Bank.getBanks().remove(player);
+        Bank.getBanks().remove(player.getUniqueId());
     }
 
     @EventHandler
@@ -42,6 +44,7 @@ public class PlayerBankUpdateInventory implements Listener {
         Bank bank = FileManager.readBankFile(player.getUniqueId());
         if(bank==null)
             return;
-        Bank.getBanks().put(player.getUniqueId(), bank.getInventory());
+        Bank.getBanks().put(player.getUniqueId(), bank);
     }
+
 }
