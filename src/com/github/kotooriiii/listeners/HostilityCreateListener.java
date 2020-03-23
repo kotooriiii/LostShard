@@ -1,10 +1,9 @@
 package com.github.kotooriiii.listeners;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.hostility.HostilityZone;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -101,8 +100,8 @@ public class HostilityCreateListener implements Listener {
                     int blockPos2Y = Integer.parseInt(coordsPos2[1]);
                     int blockPos2Z = Integer.parseInt(coordsPos2[2]);
 
-                    Location loc1 = new Location(LostShardK.plugin.getServer().getWorld("world"), blockPos1X, blockPos1Y, blockPos1Z);
-                    Location loc2 = new Location(LostShardK.plugin.getServer().getWorld("world"), blockPos2X, blockPos2Y, blockPos2Z);
+                    Location loc1 = new Location(LostShardPlugin.plugin.getServer().getWorld("world"), blockPos1X, blockPos1Y, blockPos1Z);
+                    Location loc2 = new Location(LostShardPlugin.plugin.getServer().getWorld("world"), blockPos2X, blockPos2Y, blockPos2Z);
 
                     //set area
                     HostilityZone zone = new HostilityZone(loc1, loc2);
@@ -142,6 +141,7 @@ public class HostilityCreateListener implements Listener {
             case "ID:FINALIZE_FLOWER":
                 if (!action.equals(Action.PHYSICAL)) {
                     HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
+                    platform.runCountdown();
                     platforms.add(platform);
                     FileManager.write(platform);
                     player.getInventory().clear();

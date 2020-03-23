@@ -1,6 +1,6 @@
 package com.github.kotooriiii.guards;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
@@ -19,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Score;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -129,13 +128,12 @@ public class ShardBaseNPC extends ShardNMS {
     public boolean setName(String prefix, String name) {
 
         //Name
-        if(team==null)
-        {
+        if (team == null) {
             team = new ScoreboardTeam(new Scoreboard(), prefix);
 
         }
         IChatBaseComponent prefixComponent = new ChatMessage(prefix + " ");
-     //   IChatBaseComponent suffixComponent = new ChatMessage(ChatColor.YELLOW + name);
+        //   IChatBaseComponent suffixComponent = new ChatMessage(ChatColor.YELLOW + name);
         team.setPrefix(prefixComponent);
         //team.setSuffix(suffixComponent);
         this.name = ChatColor.stripColor(name);
@@ -196,7 +194,7 @@ public class ShardBaseNPC extends ShardNMS {
                 PacketPlayOutPlayerInfo playerRedeclarePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc);
                 sendPacket(playerRedeclarePacket);
             }
-        }.runTaskLater(LostShardK.plugin, 40);
+        }.runTaskLater(LostShardPlugin.plugin, 40);
 
         //Points to all corners
         this.armorStands = new EntityArmorStand[4];
@@ -206,13 +204,16 @@ public class ShardBaseNPC extends ShardNMS {
         armorStands[2] = new EntityArmorStand(((CraftWorld) getCurrentLocation().getWorld()).getHandle(), getCurrentLocation().getBlockX() + 0.25, getCurrentLocation().getBlockY(), getCurrentLocation().getBlockZ() + 0.75); //combo min,max
         armorStands[3] = new EntityArmorStand(((CraftWorld) getCurrentLocation().getWorld()).getHandle(), getCurrentLocation().getBlockX() + 0.25, getCurrentLocation().getBlockY(), getCurrentLocation().getBlockZ() + 0.25); //min min,min
 
-        //EntityArmorStand init
+
         for (EntityArmorStand armorStand : armorStands) {
+            armorStand.setCustomName(new ChatMessage("NPCHitBox"));
             armorStand.setNoGravity(true);//float
             armorStand.setInvulnerable(false);//make sure its false so events are called
             armorStand.setInvisible(true); //FIX THIS AT COMPILETIME
             freezeEntity(armorStand); //FREEZE entity cannot move this.
+
             ((CraftWorld) getCurrentLocation().getWorld()).addEntity(armorStand, CreatureSpawnEvent.SpawnReason.CUSTOM); //Add entity to the world. get out of packets and put to server
+
         }
 
         return true;
@@ -230,8 +231,8 @@ public class ShardBaseNPC extends ShardNMS {
 
         for (EntityArmorStand armorStand : armorStands) //loop all target points
         {
-//            PacketPlayOutEntityDestroy playerDestroyPacket2 = new PacketPlayOutEntityDestroy(armorStand.getId()); //Create destroy packet
-//            sendPacket(playerDestroyPacket2); //Destroy
+            PacketPlayOutEntityDestroy playerDestroyPacket2 = new PacketPlayOutEntityDestroy(armorStand.getId()); //Create destroy packet
+           sendPacket(playerDestroyPacket2); //Destroy
             armorStand.killEntity(); //Since it's also alive in memory on the server, kill it.
         }
         setDestroyed(true);
@@ -250,14 +251,14 @@ public class ShardBaseNPC extends ShardNMS {
         //Teleport the target points
         this.currentLocation = location;
         //Delay and then remove from Tablist
-        new BukkitRunnable() {
-            @Override
-            public void run() {
+       // new BukkitRunnable() {
+       //     @Override
+       //     public void run() {
                 rotateHead(location.getYaw(), location.getPitch());
                 PacketPlayOutPlayerInfo playerRedeclarePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc);
                 sendPacket(playerRedeclarePacket);
-            }
-        }.runTaskLater(LostShardK.plugin, 40);
+       //     }
+       // }.runTaskLater(LostShardK.plugin, 40);
 
         //Teleport the player
         PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport();
@@ -374,11 +375,9 @@ public class ShardBaseNPC extends ShardNMS {
 
     }
 
-    public void update(Player player)
-    {
+    public void update(Player player) {
         updatePackets(player);
     }
-
 
 
     /**
@@ -416,7 +415,7 @@ public class ShardBaseNPC extends ShardNMS {
 
             return new String[]{texture, signature};
         } catch (IOException e) {
-            LostShardK.logger.info("Error occurred: Could not apply skin due to high traffic requests being sent to the HTTP server.");
+            LostShardPlugin.logger.info("Error occurred: Could not apply skin due to high traffic requests being sent to the HTTP server.");
             return null;
         }
     }

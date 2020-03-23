@@ -1,19 +1,19 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.status.Status;
+import com.github.kotooriiii.status.StatusPlayer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.minecraft.server.v1_15_R1.PacketPlayOutWorldParticles;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.block.data.type.Bed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,14 +39,22 @@ public class GuardCommand implements CommandExecutor {
                 //No arguments regarding this command
                 if (args.length == 0) {
                     final Location playerLocation = playerSender.getLocation();
-                    if ("bad guy is near".isEmpty() == false) {
+
+                    StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
+                    if(!statusPlayer.getStatus().equals(Status.WORTHY))
+                    {
+                        playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
+                        return true;
+                    }
+
                         ShardGuard guard = ShardGuard.getNearestGuard(playerLocation);
                         if(guard==null)
                         {
                             playerSender.sendMessage(ERROR_COLOR + "No guard nearby!!!");
                             return true;
-                        } else if("if no enemy nearby".length() == 1)
+                        } else if(!statusPlayer.hasNearbyEnemy(5))
                         {
+                            playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
                             return true;
                         }
 
@@ -71,7 +79,7 @@ public class GuardCommand implements CommandExecutor {
                                     guard.getCurrentLocation().getWorld().playSound(guard.getCurrentLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
                                 }
                             }
-                        }.runTaskLater(LostShardK.plugin, 40);
+                        }.runTaskLater(LostShardPlugin.plugin, 40);
 
                         new BukkitRunnable() {
                             @Override
@@ -90,9 +98,9 @@ public class GuardCommand implements CommandExecutor {
                                 }
                             }
 
-                        }.runTaskLater(LostShardK.plugin, 120);
+                        }.runTaskLater(LostShardPlugin.plugin, 120);
 
-                    }
+
                 }
                 //This statement refers to: /guards <argument 0> <argument 1> ... <argument n>
                 else if (args.length >= 1) {

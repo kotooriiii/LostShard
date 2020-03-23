@@ -42,6 +42,8 @@ public final class Maps {
     //The arraylist targets a staff member trying to remove a hostility platform. Confirm to understand that it is permanent deletion.
     public static ArrayList<UUID> hostilityRemoverConfirmation = new ArrayList<>();
 
+    //The hashmap targets the staff member creating hostility platform and has to input time format.
+    public static HashMap<UUID, HostilityPlatform> hostilityTimeCreator = new HashMap<>();
     //The hashmap targets the staff member creating hostility platform. They have tools and are in process of creating
     public static HashMap<UUID, HostilityPlatform> hostilityPlatformCreator = new HashMap<>();
 

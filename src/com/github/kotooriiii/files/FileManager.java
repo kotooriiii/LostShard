@@ -1,25 +1,24 @@
 package com.github.kotooriiii.files;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.DonorTitle;
+import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.Status;
+import com.github.kotooriiii.status.StatusPlayer;
+import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -28,12 +27,15 @@ import static com.github.kotooriiii.data.Maps.platforms;
 import static com.github.kotooriiii.data.Maps.playerUUIDClanMap;
 
 public final class FileManager {
-    private static File plugin_folder = LostShardK.plugin.getDataFolder();
+    private static File plugin_folder = LostShardPlugin.plugin.getDataFolder();
     private static File clans_folder = new File(plugin_folder + File.separator + "clans");
     private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
     private static File guards_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "guards");
     private static File bankers_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "bankers");
     private static File bank_folder = new File(plugin_folder + File.separator + "bank");
+    private static File status_folder = new File(plugin_folder + File.separator + "statuses");
+    private static File sales_folder = new File(plugin_folder + File.separator + "sales");
+    private static File stats_folder = new File(plugin_folder + File.separator + "stats");
 
 
     private FileManager() {
@@ -46,6 +48,9 @@ public final class FileManager {
         guards_folder.mkdirs();
         bankers_folder.mkdirs();
         bank_folder.mkdirs();
+        status_folder.mkdirs();
+        sales_folder.mkdirs();
+        stats_folder.mkdirs();
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
@@ -65,7 +70,7 @@ public final class FileManager {
 
             Clan clan = readClanFile(file);
             if (clan == null) {
-                LostShardK.logger.info("\n\n" + "There was a clan file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                LostShardPlugin.logger.info("\n\n" + "There was a clan file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
             clan.forceCreate();
@@ -84,9 +89,10 @@ public final class FileManager {
 
             HostilityPlatform platform = readPlatformFile(file);
             if (platform == null) {
-                LostShardK.logger.info("\n\n" + "There was a hostility file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                LostShardPlugin.logger.info("\n\n" + "There was a hostility file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
+            platform.runCountdown();
             platforms.add(platform);
         }
 
@@ -96,7 +102,7 @@ public final class FileManager {
 
             ShardGuard guard = readShardGuardFile(file);
             if (guard == null) {
-                LostShardK.logger.info("\n\n" + "There was a guard file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                LostShardPlugin.logger.info("\n\n" + "There was a guard file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
         }
@@ -107,7 +113,7 @@ public final class FileManager {
 
             ShardBanker banker = readShardBankerFile(file);
             if (banker == null) {
-                LostShardK.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                LostShardPlugin.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
         }
@@ -116,6 +122,44 @@ public final class FileManager {
             if (bank == null)
                 return;
             Bank.getBanks().put(player.getUniqueId(), bank);
+        }
+
+        for (File file : status_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            StatusPlayer statusPlayer = readStatusPlayer(file);
+
+            if (statusPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a status file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+        }
+
+        for(File file : sales_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            Sale sale = readSale(file);
+
+            if (sale == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a sale file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+        }
+
+        for(File file : stats_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            Stat stat = readStat(file);
+
+            if (stat == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a stat file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
         }
 
     }
@@ -150,7 +194,7 @@ public final class FileManager {
         String clanStringHostilityBuffBoolean = yaml.getString("HostilityBuff");
         String clanStringHostilityWinsInt = yaml.getString("HostilityWins");
         if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null || clanStringHostilityBuffBoolean == null || clanStringHostilityWinsInt == null) {
-            LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
+            LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
             return null;
         }
 
@@ -167,10 +211,10 @@ public final class FileManager {
                 //we could use a logger
                 break;
             case 30:
-                LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name of the clan was unable to be read.");
+                LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name of the clan was unable to be read.");
                 return null;
             case 21:
-                LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". There is already a clan with that name.");
+                LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". There is already a clan with that name.");
                 return null;
         }
 
@@ -179,10 +223,10 @@ public final class FileManager {
                 //we could use a logger
                 break;
             case 30:
-                LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The tag of the clan was unable to be read.");
+                LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The tag of the clan was unable to be read.");
                 return null;
             case 21:
-                LostShardK.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". There is already a clan with that tag.");
+                LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". There is already a clan with that tag.");
                 return null;
         }
         clan.setColor(clanColor);
@@ -197,7 +241,7 @@ public final class FileManager {
             //get list
             String clanRankList = yaml.getString(ranks[i].toString());
             if (clanRankList == null) {
-                LostShardK.logger.info("There was an error reading the clan rank list of: " + ranks[i]);
+                LostShardPlugin.logger.info("There was an error reading the clan rank list of: " + ranks[i]);
                 return null;
             }
 
@@ -221,7 +265,7 @@ public final class FileManager {
             for (int j = 0; j < uuids.length; j++) {
                 UUID tempUUID = UUID.fromString(clanRankUsers[j]);
                 if (tempUUID == null) {
-                    LostShardK.logger.info("There was an error reading a player uuid");
+                    LostShardPlugin.logger.info("There was an error reading a player uuid");
                     return null;
                 }
                 uuids[j] = tempUUID;
@@ -240,11 +284,12 @@ public final class FileManager {
 
 
         if (guardPostLocation == null) {
-            LostShardK.logger.info("There was an error reading the clan in file \"" + shardGuardFile.getName() + "\". The guard post location in the file might be corrupted or missing.");
+            LostShardPlugin.logger.info("There was an error reading the clan in file \"" + shardGuardFile.getName() + "\". The guard post location in the file might be corrupted or missing.");
             return null;
         }
-
         ShardGuard guard = new ShardGuard(guardName);
+
+
         guard.spawn(guardPostLocation);
 
 
@@ -259,12 +304,14 @@ public final class FileManager {
 
 
         if (guardPostLocation == null) {
-            LostShardK.logger.info("There was an error reading the clan in file \"" + shardBankerFile.getName() + "\". The banker post location in the file might be corrupted or missing.");
+            LostShardPlugin.logger.info("There was an error reading the clan in file \"" + shardBankerFile.getName() + "\". The banker post location in the file might be corrupted or missing.");
             return null;
         }
 
         ShardBanker banker = new ShardBanker(bankerName);
+
         banker.spawn(guardPostLocation);
+
 
         return banker;
     }
@@ -294,9 +341,8 @@ public final class FileManager {
         }
 
         String currencyString = yaml.getString("Currency");
-        double currencyNum=0.0F;
-        if(currencyString==null)
-        {
+        double currencyNum = 0.0F;
+        if (currencyString == null) {
 
         } else {
             currencyNum = Double.parseDouble(currencyString);
@@ -311,6 +357,64 @@ public final class FileManager {
         File bankFile = new File(bank_folder + File.separator + uuid + ".yml");
         return readBankFile(bankFile);
     }
+
+    public static StatusPlayer readStatusPlayer(File statusFile) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statusFile);
+        String uuid = statusFile.getName().substring(0, statusFile.getName().indexOf('.'));
+
+        String name = yaml.getString("Status");
+        int kills = yaml.getInt("MurderCount");
+        Status status = Status.matchStatus(name);
+        StatusPlayer statusPlayer = new StatusPlayer(UUID.fromString(uuid), status, kills);
+        return statusPlayer;
+    }
+
+    public static StatusPlayer readStatusPlayer(UUID uuid) {
+        File statusFile = new File(status_folder + File.separator + uuid + ".yml");
+        return readStatusPlayer(statusFile);
+
+    }
+
+    public static Sale readSale(File saleFile) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(saleFile);
+        String idString = saleFile.getName().substring(0, saleFile.getName().indexOf('.'));
+
+        String uuidString = yaml.getString("SellerUUID");
+        String materialName = yaml.getString("Material");
+        int amount = yaml.getInt("Amount");
+        double price = yaml.getDouble("Price");
+        if (materialName == null || uuidString == null || idString == null)
+            return null;
+        Material possibleMaterial = Material.matchMaterial(materialName);
+        UUID id = UUID.fromString(idString);
+        UUID sellerUUID = UUID.fromString(uuidString);
+
+        if (possibleMaterial == null || id == null || sellerUUID == null)
+            return null;
+
+        Sale sale = new Sale(id, UUID.fromString(uuidString), possibleMaterial, amount, price);
+        return sale;
+    }
+
+    public static Stat readStat(File statFile) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statFile);
+        String uuidString = statFile.getName().substring(0, statFile.getName().indexOf('.'));
+
+        double stamina = yaml.getDouble("Stamina");
+        double mana = yaml.getDouble("Mana");
+
+        UUID playerUUID = UUID.fromString(uuidString);
+
+        if (playerUUID == null)
+            return null;
+
+        Stat stat = new Stat(playerUUID);
+        stat.setStamina(stamina);
+        stat.setMana(mana);
+        return stat;
+    }
+
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -442,6 +546,71 @@ public final class FileManager {
         }
     }
 
+    public static void write(StatusPlayer statusPlayer) {
+        String fileName = statusPlayer.getPlayerUUID() + ".yml";
+        File statusFile = new File(status_folder + File.separator + fileName);
+
+        try {
+            if (!statusFile.exists())
+                statusFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statusFile);
+        yaml.set("Status", statusPlayer.getStatus().getName());
+        yaml.set("MurderCount", statusPlayer.getKills());
+        try {
+            yaml.save(statusFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(Sale sale) {
+        String fileName = sale.getID() + ".yml";
+        File saleFile = new File(sales_folder + File.separator + fileName);
+
+        try {
+            if (!saleFile.exists())
+                saleFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(saleFile);
+        yaml.set("SellerUUID", sale.getSellerUUID().toString());
+        yaml.set("Material", sale.getMaterial().name().toUpperCase());
+        yaml.set("Amount", sale.getAmount());
+        yaml.set("Price", sale.getPrice());
+        try {
+            yaml.save(saleFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(Stat stat) {
+        String fileName = stat.getPlayerUUID() + ".yml";
+        File statFile = new File(stats_folder + File.separator + fileName);
+
+        try {
+            if (!statFile.exists())
+                statFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statFile);
+        yaml.set("Stamina", stat.getStamina());
+        yaml.set("Mana", stat.getMana());
+        try {
+            yaml.save(statFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 //    public static void write(ShardGuard guard, String oldName) {
 //        String oldFileName = oldName + ".yml";
 //        File oldGuardFile = new File(guards_folder + File.separator + oldFileName);
@@ -516,13 +685,31 @@ public final class FileManager {
 
     }
 
+    public static void removeFile(Sale sale) {
+        String fileName = sale.getID() + ".yml";
+        File bankerFile = new File(sales_folder + File.separator + fileName);
+
+        if (bankerFile.exists())
+            bankerFile.delete();
+
+    }
+
+    public static void removeFile(Stat stat) {
+        String fileName = stat.getPlayerUUID() + ".yml";
+        File statFile = new File(stats_folder + File.separator + fileName);
+
+        if (statFile.exists())
+            statFile.delete();
+
+    }
+
 
     private static void saveResource(String resourcePath, File out_to_folder, boolean replace) {
         if (resourcePath != null && !resourcePath.equals("")) {
             resourcePath = resourcePath.replace('\\', '/');
-            InputStream in = LostShardK.plugin.getResource(resourcePath);
+            InputStream in = LostShardPlugin.plugin.getResource(resourcePath);
             if (in == null) {
-                throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found in " + LostShardK.plugin.getName());
+                throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found in " + LostShardPlugin.plugin.getName());
             } else {
                 int lastIndex = resourcePath.lastIndexOf(47) + 1;
 
@@ -535,7 +722,7 @@ public final class FileManager {
 
                 try {
                     if (outFile.exists() && !replace) {
-                        LostShardK.plugin.getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
+                        LostShardPlugin.plugin.getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
                     } else {
                         OutputStream out = new FileOutputStream(outFile);
                         byte[] buf = new byte[4096];
@@ -549,7 +736,7 @@ public final class FileManager {
                         in.close();
                     }
                 } catch (IOException var10) {
-                    LostShardK.plugin.getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, var10);
+                    LostShardPlugin.plugin.getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, var10);
                 }
 
             }

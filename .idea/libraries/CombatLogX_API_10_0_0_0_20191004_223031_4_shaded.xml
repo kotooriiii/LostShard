@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="CombatLogX-API-10.0.0.0-20191004.223031-4-shaded">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/CombatLogX-API-10.0.0.0-20191004.223031-4-shaded.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

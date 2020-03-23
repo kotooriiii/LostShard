@@ -1,11 +1,12 @@
 package com.github.kotooriiii.guards;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -68,7 +69,7 @@ public class ShardGuard extends ShardLocationNPC {
             return false;
 
         //Update location, remember the world is here already!
-        updateLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
+        updateSpawnLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
         showBounds();
         observe();
         return true;
@@ -153,7 +154,7 @@ public class ShardGuard extends ShardLocationNPC {
                 if (player.isOnline())
                     player.setHealth(0);
             }
-        }.runTaskLater(LostShardK.plugin, 0);
+        }.runTaskLater(LostShardPlugin.plugin, 0);
 
         new BukkitRunnable() {
             @Override
@@ -162,7 +163,7 @@ public class ShardGuard extends ShardLocationNPC {
                     return;
                 w.playSound(playerLocation, Sound.ENTITY_PLAYER_BURP, 10, 0);
             }
-        }.runTaskLater(LostShardK.plugin, 10);
+        }.runTaskLater(LostShardPlugin.plugin, 10);
 
         new BukkitRunnable() {
             @Override
@@ -173,7 +174,7 @@ public class ShardGuard extends ShardLocationNPC {
                 teleport(getSpawnLocation());
                 observe();
             }
-        }.runTaskLater(LostShardK.plugin, 20);
+        }.runTaskLater(LostShardPlugin.plugin, 20);
         return true;
     }
 
@@ -319,55 +320,57 @@ public class ShardGuard extends ShardLocationNPC {
             @Override
             public void run() {
 
-                for (org.bukkit.entity.Entity entity : getCurrentLocation().getWorld().getNearbyEntities(getCurrentLocation(), warningRadius, warningRadius, warningRadius)) {
+                for (Entity entity : getCurrentLocation().getWorld().getNearbyEntities(getCurrentLocation(), warningRadius, warningRadius, warningRadius)) {
                     if (entity instanceof Player) {
-                        if (!"is not in order".isEmpty()) {
-                            Player player = (Player) entity;
+                        Player player = (Player) entity;
 
-                            Location loc = entity.getLocation();
+//                        if (PlayerUtil.getInstance().getGroup(player).equalsIgnoreCase("worthy"))
+//                            continue;
 
-                            double xDiff = loc.getX() - getCurrentLocation().getX();
-                            double yDiff = loc.getY() - getCurrentLocation().getY();
-                            double zDiff = loc.getZ() - getCurrentLocation().getZ();
+                        Location loc = entity.getLocation();
 
-                            int xIntDiff = loc.getBlockX() - getCurrentLocation().getBlockX();
-                            int yIntDiff = loc.getBlockY() - getCurrentLocation().getBlockY();
-                            int zIntDiff = loc.getBlockZ() - getCurrentLocation().getBlockZ();
+                        double xDiff = loc.getX() - getCurrentLocation().getX();
+                        double yDiff = loc.getY() - getCurrentLocation().getY();
+                        double zDiff = loc.getZ() - getCurrentLocation().getZ();
 
-                            double DistanceXZ = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
-                            double DistanceY = Math.sqrt(DistanceXZ * DistanceXZ + yDiff * yDiff);
-                            double newYaw = Math.acos(xDiff / DistanceXZ) * 180 / Math.PI;
-                            double newPitch = Math.acos(yDiff / DistanceY) * 180 / Math.PI - 90;
-                            if (zDiff < 0.0)
-                                newYaw = newYaw + Math.abs(180 - newYaw) * 2;
-                            newYaw = (newYaw - 90);
+                        int xIntDiff = loc.getBlockX() - getCurrentLocation().getBlockX();
+                        int yIntDiff = loc.getBlockY() - getCurrentLocation().getBlockY();
+                        int zIntDiff = loc.getBlockZ() - getCurrentLocation().getBlockZ();
 
-                            float yaw = (float) newYaw;
-                            float pitch = (float) newPitch;
+                        double DistanceXZ = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+                        double DistanceY = Math.sqrt(DistanceXZ * DistanceXZ + yDiff * yDiff);
+                        double newYaw = Math.acos(xDiff / DistanceXZ) * 180 / Math.PI;
+                        double newPitch = Math.acos(yDiff / DistanceY) * 180 / Math.PI - 90;
+                        if (zDiff < 0.0)
+                            newYaw = newYaw + Math.abs(180 - newYaw) * 2;
+                        newYaw = (newYaw - 90);
 
-                            if (Math.abs(xIntDiff) <= alertRadius && Math.abs(yIntDiff) <= alertRadius && Math.abs(zIntDiff) <= alertRadius) {
-                                if(player.getGameMode().equals(GameMode.CREATIVE))
-                                    continue;
-                                isBusy = true;
-                                teleportKill(player, new Location(entity.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), yaw, pitch));
-                                this.cancel();
-                                return;
-                            } else {
-                                rotateHead(yaw, pitch);
-                                int randomInt = new Random().nextInt(3);
-                                double randomChance = Math.random();
-                                if (randomInt != 0) {
-                                    if (randomChance <= 0.1)
-                                        player.spawnParticle(Particle.VILLAGER_ANGRY, getCurrentLocation().getBlockX() + 0.5, getCurrentLocation().getBlockY() + 2, getCurrentLocation().getBlockZ() + 0.5, randomInt, 0.25, 0, 0.25);
-                                }
+                        float yaw = (float) newYaw;
+                        float pitch = (float) newPitch;
 
+                        if (Math.abs(xIntDiff) <= alertRadius && Math.abs(yIntDiff) <= alertRadius && Math.abs(zIntDiff) <= alertRadius) {
+                            isCalled = false;
+                            isBusy = true;
+
+                            teleportKill(player, new Location(entity.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), yaw, pitch));
+                            this.cancel();
+                            return;
+                        } else {
+                            rotateHead(yaw, pitch);
+                            int randomInt = new Random().nextInt(3);
+                            double randomChance = Math.random();
+                            if (randomInt != 0) {
+                                if (randomChance <= 0.1)
+                                    player.spawnParticle(Particle.VILLAGER_ANGRY, getCurrentLocation().getBlockX() + 0.5, getCurrentLocation().getBlockY() + 2, getCurrentLocation().getBlockZ() + 0.5, randomInt, 0.25, 0, 0.25);
                             }
+
                         }
+
                     }
                 }
 
             }
-        }.runTaskTimer(LostShardK.plugin, 5, 1);
+        }.runTaskTimer(LostShardPlugin.plugin, 5, 1);
     }
 
     //BASIC GETTER/SETTER
@@ -396,17 +399,15 @@ public class ShardGuard extends ShardLocationNPC {
         return isBusy;
     }
 
-    public void setBusy(boolean isBusy)
-    {
-        this.isBusy=isBusy;
+    public void setBusy(boolean isBusy) {
+        this.isBusy = isBusy;
     }
 
     public boolean isCalled() {
         return isCalled;
     }
 
-    public void setCalled(boolean isCalled)
-    {
+    public void setCalled(boolean isCalled) {
         this.isCalled = isCalled;
     }
 }

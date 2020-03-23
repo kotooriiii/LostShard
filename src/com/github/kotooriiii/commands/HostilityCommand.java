@@ -1,13 +1,14 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.util.HelperMethods;
+import net.md_5.bungee.api.chat.*;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -78,11 +79,11 @@ public class HostilityCommand implements CommandExecutor {
                                         }
 
                                         if (!hostilityCreatorConfirmation.contains(playerUUID)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to create a new Hostility Platform? Your inventory will be cleared after confirming. To confirm execute the command again: " + COMMAND_COLOR + "/host staff create" + STANDARD_COLOR + ". You have 60 seconds to confirm.");
+                                            playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to create a new Hostility Platform? Your inventory will be cleared after setting the time. To confirm execute the command again: " + COMMAND_COLOR + "/host staff create" + STANDARD_COLOR + ". You have 60 seconds to confirm.");
 
                                             hostilityCreatorConfirmation.add(playerUUID);
 
-                                            Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                                            Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                                                 public void run() {
                                                     if (!hostilityCreatorConfirmation.contains(playerUUID)) //If he was removed from the confirmation list, don't do anything.
                                                         return;
@@ -97,14 +98,12 @@ public class HostilityCommand implements CommandExecutor {
                                         }
 
 
-                                        playerSender.sendMessage(STANDARD_COLOR + "You have enabled editing mode.");
-
-                                        giveTools(playerSender);
+                                        playerSender.sendMessage(STANDARD_COLOR + "Enter the time (EST) in which the match will begin for " + name + ".\nFormat: Day HourOf24:Minute" + "\nExample 1: Tue 23:25 for every Tuesday at 11:25pm.\nExample 2: Sun 0:20 for every Sunday at 12:20am.");
                                         hostilityCreatorConfirmation.remove(playerUUID);
-
-                                        //add to hostility platform creator
                                         HostilityPlatform platform = new HostilityPlatform(name);
-                                        hostilityPlatformCreator.put(playerUUID, platform);
+                                        hostilityTimeCreator.put(playerUUID, platform);
+
+
                                     }
                                     break;
                                 case "delete":
@@ -122,7 +121,7 @@ public class HostilityCommand implements CommandExecutor {
                                                     hostilityRemoverConfirmation.add(playerUUID);
 
 
-                                                    Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                                                    Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                                                         public void run() {
                                                             if (!hostilityRemoverConfirmation.contains(playerUUID)) //If he was removed from the confirmation list, don't do anything.
                                                                 return;
@@ -226,7 +225,8 @@ public class HostilityCommand implements CommandExecutor {
                             String name = HelperMethods.stringBuilder(args, 0, " ");
                             for (HostilityPlatform platform : platforms) {
                                 if (platform.getName().equalsIgnoreCase(name)) {
-
+                                    playerSender.sendMessage(getHostilityInfo(platform.getName()));
+                                    return true;
                                 }
                             }
                             sendUnknownCommand(playerSender);
@@ -240,7 +240,7 @@ public class HostilityCommand implements CommandExecutor {
         return true;
     }
 
-    private void giveTools(Player playerSender) {
+    public static void giveTools(Player playerSender) {
         //Create AREA AXE item
         ItemStack areaItemStack = new ItemStack(Material.WOODEN_AXE, 1);
         ItemMeta areaItemMeta = areaItemStack.getItemMeta();
@@ -305,19 +305,65 @@ public class HostilityCommand implements CommandExecutor {
 //        Current captor of Havoc: (clan name)
 //        Next Hostility: 6PM EST
 //        Next Havoc:  8PM EST
-        String active = ChatColor.DARK_RED + "NONE";
-        if (activeHostilityGames.size() > 0)
-            active = "";
+
         HostilityMatch[] matches = activeHostilityGames.toArray(new HostilityMatch[activeHostilityGames.size()]);
+
+        TextComponent tc = new TextComponent(COMMAND_COLOR + "Currently active: ");
+        boolean hasActive = false;
         for (int i = 0; i < matches.length; i++) {
-            if (i != matches.length - 1)
-                active += matches[i].getPlatform().getName() + ", ";
-            else
-                active += matches[i].getPlatform().getName();
+            hasActive = true;
+            if (i != matches.length - 1) {
+                TextComponent component = new TextComponent(ChatColor.YELLOW + matches[i].getPlatform().getName() + ChatColor.YELLOW + ", ");
+                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + matches[i].getPlatform().getName() + STANDARD_COLOR + ".").create()));
+                component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + matches[i].getPlatform().getName()));
+                tc.addExtra(component.duplicate());
+            } else {
+                TextComponent component = new TextComponent(ChatColor.YELLOW + matches[i].getPlatform().getName() + ChatColor.YELLOW + "");
+                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + matches[i].getPlatform().getName() + STANDARD_COLOR + ".").create()));
+                component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + matches[i].getPlatform().getName()));
+                tc.addExtra(component.duplicate());
+            }
         }
 
-        playerSender.sendMessage(COMMAND_COLOR + "Currently active: " + ChatColor.YELLOW + active);
+        TextComponent tcInactive = new TextComponent(COMMAND_COLOR + "Currently inactive: ");
+        boolean hasInactive = false;
+        platformsLoop:
+        for (HostilityPlatform platform : platforms) {
+            matchesLoop:
+            for (HostilityMatch match : matches) {
+                if (match.getPlatform().getName().equalsIgnoreCase(platform.getName()))
+                    continue platformsLoop;
+            }
 
+            //If matches didn't catch it, this is inactive.
+            if(hasInactive)
+            {
+                TextComponent component = new TextComponent(", "  + platform.getName());
+                component.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + platform.getName() + STANDARD_COLOR + ".").create()));
+                component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + platform.getName()));
+                tcInactive.addExtra(component.duplicate());
+
+            } else {
+                TextComponent component = new TextComponent(platform.getName());
+                component.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + platform.getName() + STANDARD_COLOR + ".").create()));
+                component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + platform.getName()));
+                tcInactive.addExtra(component.duplicate());
+            }
+
+            hasInactive = true;
+
+        }
+
+
+        if (hasActive)
+            playerSender.spigot().sendMessage(tc.duplicate());
+        if (hasInactive)
+            playerSender.spigot().sendMessage(tcInactive.duplicate());
+
+
+        /*
         for (int i = 0; i < matches.length; i++) {
             if (matches[i].getCapturingClan() == null) {
                 playerSender.sendMessage(COMMAND_COLOR + "Current Captor of " + matches[i].getPlatform().getName() + ": " + ChatColor.DARK_RED + "NONE");
@@ -328,17 +374,22 @@ public class HostilityCommand implements CommandExecutor {
             }
 
         }
+         */
 
-        playerSender.sendMessage(COMMAND_COLOR + "Next Hostility: " + ChatColor.YELLOW + "6PM PST");
+        playerSender.sendMessage(ChatColor.GOLD + "Click on any of the matches to get more information!");
     }
 
     private String getHostilityInfo(String platformName) {
         boolean isActive = false;
         boolean exists = false;
 
+        HostilityMatch possibleMatch = null;
+        HostilityPlatform possiblePlatform = null;
+
         for (HostilityMatch match : activeHostilityGames) {
             HostilityPlatform platform = match.getPlatform();
             if (platform.getName().equalsIgnoreCase(platformName)) {
+                possibleMatch = match;
                 isActive = true;
                 exists = true;
             }
@@ -347,19 +398,30 @@ public class HostilityCommand implements CommandExecutor {
         if (!isActive) {
             for (HostilityPlatform platform : platforms) {
                 if (platform.getName().equalsIgnoreCase(platformName))
-                    exists = true;
+                    possiblePlatform = platform;
+                exists = true;
             }
         }
 
         String result = "";
         if (isActive && exists) {
-
+            result = ChatColor.GOLD + "----------" + ChatColor.GOLD + possibleMatch.getPlatform().getName() + " Information----------\n"
+                    + ChatColor.GOLD + "Status: " + ChatColor.GREEN + "Active\n";
+            if (possibleMatch.getCapturingClan() == null)
+                result += ChatColor.GOLD + "\nCurrent Captor: " + ChatColor.RED + "NONE";
+            else
+                result += ChatColor.GOLD + "\nCurrent Captor: " + ChatColor.YELLOW + possibleMatch.getCapturingClan().getName();
+        //    result += ChatColor.GOLD + "\nNext " + possibleMatch.getPlatform().getName() + ": " + ChatColor.YELLOW + possibleMatch.getPlatform().getTargetTime() + ChatColor.GRAY + " (" + possibleMatch.getPlatform().getExactTimeLeft() + " remaining)";
         } else if (!isActive && exists) {
+            result =  ChatColor.GOLD + "----------" + ChatColor.GOLD + possiblePlatform.getName() + " Information----------\n"
+                    + ChatColor.GOLD + "Status: " + ChatColor.RED + "Inactive\n";
+            result += ChatColor.GOLD + "Next " + possiblePlatform.getName() + ": " + ChatColor.YELLOW + possiblePlatform.getTargetTime() + ChatColor.GRAY + " (" + possiblePlatform.getExactTimeLeft() + " remaining)";
 
         } else if (!isActive && !exists) {
-
+            result = null;
         } else if (isActive && !exists) {
-            //Does NOT EXIST
+            //Does NOT EXIST, cannot be active and not exist
+            result = null;
         }
         return result;
     }

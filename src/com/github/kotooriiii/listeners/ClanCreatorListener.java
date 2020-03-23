@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.channels.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -15,7 +16,7 @@ import static com.github.kotooriiii.data.Maps.*;
 public class ClanCreatorListener implements Listener {
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent e) {
+    public void onChat(ShardChatEvent e) {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
 

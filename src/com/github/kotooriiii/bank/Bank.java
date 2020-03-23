@@ -1,5 +1,6 @@
 package com.github.kotooriiii.bank;
 
+import com.github.kotooriiii.files.FileManager;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class Bank {
     private UUID playerUUID;
     private Inventory inventory;
-    private double currency=-1;
+    private double currency;
     public final static String NAME = ChatColor.GRAY + "Bank";
     private final static HashMap<UUID, Bank> banks = new HashMap<>();
 
@@ -37,6 +38,7 @@ public class Bank {
 
     public void setCurrency(double currency) {
         this.currency = currency;
+        FileManager.write(this);
     }
 
     public void setInventory(Inventory inventory) {
@@ -45,5 +47,10 @@ public class Bank {
 
     public static HashMap<UUID, Bank> getBanks() {
         return banks;
+    }
+
+    public static Bank wrap(UUID playerUUID)
+    {
+        return getBanks().get(playerUUID);
     }
 }

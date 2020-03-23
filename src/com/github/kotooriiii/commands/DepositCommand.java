@@ -44,6 +44,12 @@ public class DepositCommand implements CommandExecutor {
                         return true;
                     }
 
+                    if(args[0].contains("."))
+                    {
+                        playerSender.sendMessage(ERROR_COLOR + "You can only deposit full, intact, unbroken gold ingots.");
+                        return true;
+                    }
+
                     double deposit = Double.parseDouble(args[0]);
                     DecimalFormat df = new DecimalFormat("#.##");
                     deposit = Double.valueOf(df.format(deposit));
@@ -94,7 +100,7 @@ public class DepositCommand implements CommandExecutor {
                         }
                         bank.setCurrency(leftover);
                         FileManager.write(bank);
-                        playerSender.sendMessage(STANDARD_COLOR + "You've deposited " + MONEY_COLOR + deposit + STANDARD_COLOR + ". You have added " + MONEY_COLOR + leftover + STANDARD_COLOR + " to your bank account.");
+                        playerSender.sendMessage(STANDARD_COLOR + "You've deposited " + MONEY_COLOR + df.format(deposit) + STANDARD_COLOR + ". You have " + MONEY_COLOR + df.format(leftover) + STANDARD_COLOR + " in your bank account.");
                     }
                 } else {
                     playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments. Did you mean " + COMMAND_COLOR + "/deposit (amount)" + ERROR_COLOR + "?");

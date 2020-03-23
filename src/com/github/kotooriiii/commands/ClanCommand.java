@@ -1,8 +1,12 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.channels.ChannelManager;
+import com.github.kotooriiii.channels.ChannelStatus;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
@@ -11,10 +15,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Player.*;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -34,14 +37,19 @@ public class ClanCommand implements CommandExecutor {
             UUID playerUUID = playerSender.getUniqueId();
             //If the command is the "clan" command
             if (cmd.getName().equalsIgnoreCase("clan")) {
+                ChannelManager channelManager = LostShardPlugin.getChannelManager();
                 //No arguments regarding this command
                 if (args.length == 0) {
+
                     //Send the help page and return.
                     Clan clan = Clan.getClan(playerUUID);
                     if (clan == null)
-                        sendHelp(playerSender);
-                    else
-                        playerSender.sendMessage(clan.info());
+                      playerSender.sendMessage(ERROR_COLOR + "You must be in a clan to enter clan chat.");
+                    else {
+                        channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
+                        playerSender.sendMessage(STANDARD_COLOR + "You have switched to clan chat.");
+
+                    }
                     return true;
                 }
                 //This statement refers to: /clans <argument 0>
@@ -78,7 +86,9 @@ public class ClanCommand implements CommandExecutor {
                         case "demote":
                             playerSender.sendMessage(ERROR_COLOR + "To demote a co-leader to member: " + COMMAND_COLOR + "/clan demote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
-                        case "chat": //TODO LATER
+                        case "chat":
+                            channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
+                            playerSender.sendMessage(STANDARD_COLOR + "You have switched to clan chat.");
                             break;
                         case "accept":
                             clanAccept(playerSender, playerUUID);
@@ -103,7 +113,11 @@ public class ClanCommand implements CommandExecutor {
                             sendStaffHelp(playerSender);
                             break;
                         default: //Not a premade command. This means something like: /clans chocolatebunnies
-                            sendUnknownCommand(playerSender);
+                            String message = HelperMethods.stringBuilder(args, 0, " ");
+                            ChannelStatus status = channelManager.getChannel(playerSender);
+                            channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
+                            playerSender.chat(message);
+                            channelManager.joinChannel(playerSender, status);
                             break;
                     }
 
@@ -164,6 +178,11 @@ public class ClanCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan demote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
                         case "chat": //TODO LATER
+                            String message = HelperMethods.stringBuilder(args, 1, " ");
+                            ChannelStatus status = channelManager.getChannel(playerSender);
+                            channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
+                            playerSender.chat(message);
+                            channelManager.joinChannel(playerSender, status);
                             break;
                         case "accept":
                             clanAccept(playerSender, playerUUID, supply);
@@ -239,7 +258,11 @@ public class ClanCommand implements CommandExecutor {
                             }
                             break;
                         default: //Not a premade command. This means something like: /clans chocolatebunnies white
-                            sendUnknownCommand(playerSender);
+                            String messageArgs1 = HelperMethods.stringBuilder(args, 0, " ");
+                            ChannelStatus statusArgs1 = channelManager.getChannel(playerSender);
+                            channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
+                            playerSender.chat(messageArgs1);
+                            channelManager.joinChannel(playerSender, statusArgs1);
                             break;
                     }
 
@@ -593,7 +616,7 @@ public class ClanCommand implements CommandExecutor {
                 if (targetPlayer.isOnline())
                     ((Player) targetPlayer).sendMessage(PLAYER_COLOR + playerSender.getName() + STANDARD_COLOR + " has invited you to join " + STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + ". You have 60 seconds to accept the invitation. Type " + STANDARD_COLOR + "/clan accept to join" + STANDARD_COLOR + " or " + STANDARD_COLOR + "/clan deny to deny" + STANDARD_COLOR + ".");
 
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                     public void run() {
                         if (!invitationConfirmation.containsKey(targetPlayerUUID)) //doesnt even exist in the map
                             return;
@@ -828,7 +851,7 @@ public class ClanCommand implements CommandExecutor {
                 leaderConfirmation.add(playerUUID);
                 playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to assign a new leader to the clan? Type /clan leader (username) in chat again to revoke your leadership. You have 60 seconds to confirm.");
 
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                     public void run() {
                         if (!leaderConfirmation.contains(playerUUID)) //If he was removed from the confirmation list, don't do anything.
                             return;
@@ -1093,7 +1116,7 @@ public class ClanCommand implements CommandExecutor {
         }
         switch (potentialClan.setName(playerUUID, clanName)) {
             case 0:
-                //todo take gold here
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-20);
                 potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to \"" + clanName + "\".");
                 break;
@@ -1105,7 +1128,8 @@ public class ClanCommand implements CommandExecutor {
                 playerSender.sendMessage(ERROR_COLOR + "You do not have permission to edit the clan name.");
                 break;
             case 79:
-                playerSender.sendMessage(ERROR_COLOR + "You need 20 gold to rename your clan. You currently have (value).");
+                DecimalFormat df = new DecimalFormat("#.##");
+                playerSender.sendMessage(ERROR_COLOR + "You need 20 gold to rename your clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ".");
                 break;
             case 10:
                 playerSender.sendMessage(ERROR_COLOR + "Your clan name can not be less than 3 characters.");
@@ -1136,7 +1160,7 @@ public class ClanCommand implements CommandExecutor {
 
         switch (potentialClan.setTag(playerUUID, tag)) {
             case 0:
-                //todo take gold here
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-5);
                 potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
                 break;
@@ -1157,7 +1181,8 @@ public class ClanCommand implements CommandExecutor {
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that tag.");
                 break;
             case 79:
-                playerSender.sendMessage(ERROR_COLOR + "You need 5 gold to rename your clan's tag. You currently have (value).");
+                DecimalFormat df = new DecimalFormat("#.##");
+                playerSender.sendMessage(ERROR_COLOR + "You need 5 gold to rename your clan's tag. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
                 break;
 
         }
@@ -1169,8 +1194,8 @@ public class ClanCommand implements CommandExecutor {
 
         switch (clan.create(playerUUID, clanName)) {
             case 0:
-                //todo take gold here
 
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-100);
                 clanTagCreators.put(playerUUID, clan);
                 playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created."); //todo gold takeaway this statement
                 playerSender.sendMessage(STANDARD_COLOR + "What would you like your clan tag to be? It must be 3 characters long.");
@@ -1190,7 +1215,8 @@ public class ClanCommand implements CommandExecutor {
                 playerSender.sendMessage(ERROR_COLOR + "Your clan name can not have special characters or whitespace characters.");
                 break;
             case 79:
-                playerSender.sendMessage(ERROR_COLOR + "You need 100 gold to create a clan. You currently have (value).");
+                DecimalFormat df = new DecimalFormat("#.##");
+                playerSender.sendMessage(ERROR_COLOR + "You need 100 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) +ERROR_COLOR + ".");
                 break;
             case 21:
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that name.");
@@ -1281,7 +1307,7 @@ public class ClanCommand implements CommandExecutor {
                 clanDisbandTimer.add(playerUUID);
                 playerSender.sendMessage(STANDARD_COLOR + "Are you sure you want to disband the clan? Type " + "/clan disband" + STANDARD_COLOR + " in chat again to disband your clan. You have 60 seconds to confirm.");
 
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                     public void run() {
                         if (!clanDisbandTimer.contains(playerUUID)) //If he was removed from the confirmation list, don't do anything.
                             return;

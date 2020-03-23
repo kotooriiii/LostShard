@@ -1,6 +1,6 @@
 package com.github.kotooriiii.listeners;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.guards.ShardBanker;
 import com.github.kotooriiii.guards.ShardGuard;
 import org.bukkit.entity.Player;
@@ -26,7 +26,7 @@ public class UpdatePacketOnJoinListener implements Listener {
                 {
                     banker.update(player);
                 }}
-        }.runTaskLater(LostShardK.plugin, 40);
+        }.runTaskLater(LostShardPlugin.plugin, 80);
     }
 
 
@@ -47,7 +47,7 @@ public class UpdatePacketOnJoinListener implements Listener {
                 {
                     banker.update(player);
                 }}
-            }.runTaskLater(LostShardK.plugin, 40);
+            }.runTaskLater(LostShardPlugin.plugin, 80);
         }
 
 

@@ -1,6 +1,6 @@
 package com.github.kotooriiii.guards;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.Packet;
@@ -93,22 +93,20 @@ public class ShardNMS {
     protected void updatePackets(Player player) {
         boolean isReady = false;
         for (Packet packet : packetsStored) {
-
-            if (packet instanceof PacketPlayOutPlayerInfo) {
+            if (packet.getClass().equals(PacketPlayOutPlayerInfo.class)) {
                 if (isReady) {
+//                    isReady=false;
                     new BukkitRunnable() {
                         @Override
                         public void run() {
                             sendPacket(packet, player);
                         }
-                    }.runTaskLater(LostShardK.plugin, 80);
+                    }.runTaskLater(LostShardPlugin.plugin, 80);
                     continue;
                 }
                 isReady = true;
             }
-
             sendPacket(packet, player);
-
         }
     }
 

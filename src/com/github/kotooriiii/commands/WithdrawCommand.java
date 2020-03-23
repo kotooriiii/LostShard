@@ -44,6 +44,12 @@ public class WithdrawCommand implements CommandExecutor {
                         return true;
                     }
 
+                    if(args[0].contains("."))
+                    {
+                        playerSender.sendMessage(ERROR_COLOR + "You can only withdraw full, intact, unbroken gold ingots. We assure you quality service!");
+                        return true;
+                    }
+
                     double withdraw = Double.parseDouble(args[0]);
                     DecimalFormat df = new DecimalFormat("#.##");
                     withdraw = Double.valueOf(df.format(withdraw));
@@ -66,7 +72,7 @@ public class WithdrawCommand implements CommandExecutor {
 
                     bank.setCurrency(leftover);
                     FileManager.write(bank);
-                    playerSender.sendMessage(STANDARD_COLOR + "You've withdrawn " + MONEY_COLOR + withdraw +STANDARD_COLOR + ". You have " + MONEY_COLOR + leftover + STANDARD_COLOR + " left in your bank.");
+                    playerSender.sendMessage(STANDARD_COLOR + "You've withdrawn " + MONEY_COLOR + df.format(withdraw) +STANDARD_COLOR + ". You have " + MONEY_COLOR + df.format(leftover) + STANDARD_COLOR + " left in your bank.");
 
                     int ingotsNum = (int) Math.floor(withdraw);
                     //int nuggetsNum = (int) withdraw%100;

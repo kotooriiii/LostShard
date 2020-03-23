@@ -33,15 +33,16 @@ public class BalanceCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("balance")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    final Location playerLocation = playerSender.getLocation();
-                    ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
-                    if (banker == null || !banker.isSocialDistance(playerLocation)) {
-                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby!!!");
-                        return true;
-                    }
+//                    final Location playerLocation = playerSender.getLocation();
+//                    ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
+//                    if (banker == null || !banker.isSocialDistance(playerLocation)) {
+//                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby!!!");
+//                        return true;
+//                    }
 
+                    DecimalFormat df = new DecimalFormat("#.##");
                     Bank bank = Bank.getBanks().get(playerUUID);
-                    playerSender.sendMessage(STANDARD_COLOR + "You currently have " + MONEY_COLOR + bank.getCurrency() + STANDARD_COLOR + " in your bank account.");
+                    playerSender.sendMessage(STANDARD_COLOR + "You currently have " + MONEY_COLOR +df.format(bank.getCurrency()) + STANDARD_COLOR + " in your bank account.");
 
                 } else {
                     playerSender.sendMessage(ERROR_COLOR + "Did you mean " + COMMAND_COLOR + "/balance" + ERROR_COLOR + "?");

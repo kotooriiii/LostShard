@@ -74,13 +74,40 @@ public class HostilityZone implements Serializable {
       clean();
     }
 
+    public boolean hasAdjacency(Location location)
+    {
+        int locX = location.getBlockX();
+        int locY = location.getBlockY();
+        int locZ = location.getBlockZ();
+
+        int tempX1 = this.x1-1;
+        int tempX2 = this.x2+1;
+
+        int tempY1 = this.y1-1;
+        int tempY2 = this.y2+1;
+
+        int tempZ1 = this.z1-1;
+        int tempZ2 = this.z2+1;
+
+
+        if(tempX1 <= locX && locX <= tempX2)
+        {
+            if(tempZ1 <= locZ && locZ <= tempZ2)
+            {
+                if(tempY1 <= locY && locY <= tempY2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public boolean contains(int x, int y, int z)
     {
         if(x1 <= x && x <= x2)
         {
             if(z1 <= z && z <= z2)
             {
-                if(y1 <= y && z <= y2)
+                if(y1 <= y && y <= y2)
                 return true;
             }
         }

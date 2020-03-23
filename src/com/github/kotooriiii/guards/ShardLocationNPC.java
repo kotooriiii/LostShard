@@ -25,7 +25,7 @@ public class ShardLocationNPC extends ShardBaseNPC {
         return true;
     }
 
-    protected boolean updateLocation(Location location)
+    protected boolean updateSpawnLocation(Location location)
     {
         this.spawnLocation = location;
         return true;

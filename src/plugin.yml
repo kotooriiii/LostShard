@@ -1,6 +1,7 @@
 name: LostShardK
-main: com.github.kotooriiii.LostShardK
+main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
+depend: [Vault, LuckPerms]
 version: 1.0
 api-version: 1.15
 commands:
@@ -14,6 +15,7 @@ commands:
     usage:
     aliases:
       - clans
+      - c
   hostility:
     description:
     usage:
@@ -24,6 +26,7 @@ commands:
     usage:
     aliases:
       - guards
+  #Bank
   chest:
     description:
     usage:
@@ -39,5 +42,72 @@ commands:
   balance:
     description:
     usage:
+    aliases:
+      - bal
+  #Sale
+  buy:
+    description:
+    usage:
+  sell:
+    description:
+    usage:
+  price:
+    description:
+    usage:
+  #Runebook stuff
+  rb:
+  runebook:
+  bind:
+  cast:
+
+  #stat stuff
+  stat:
+    description:
+    usage:
+    aliases:
+      - stats
+  meditate:
+  rest:
+
+  #skill stuff
+  setlvl:
+  archery:
+  swords:
+  mining:
+  fishing:
+  addLoot:
+  smithing:
+  smelt:
+  enhance:
+  harden:
+  power:
+  sharpen:
+  repair:
+  taming:
+  brawling:
+  setmurdercount:
+  setrank:
+  skills:
+
+  #plot stuff
+  Plot:
+
+  #chat, also clan is chat
+  global:
+    description:
+    usage:
+    aliases:
+      - g
+  local:
+    description:
+    usage:
+    aliases:
+      - l
+  msg:
+    description:
+    usage:
+    aliases:
+      - message
+
 
 

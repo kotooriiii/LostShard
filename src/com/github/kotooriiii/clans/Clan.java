@@ -1,5 +1,6 @@
 package com.github.kotooriiii.clans;
 
+import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -492,7 +493,7 @@ public class Clan {
 
         else if (!this.hasEditingPermission(playerSenderUUID)) {
             return 4;
-        } else if ("not have 20 gold".isEmpty()) {
+        } else if (Bank.getBanks().get(playerSenderUUID).getCurrency()<20) {
             return 79;
         } else if (clanName.length() < 3) {
             return 10;
@@ -535,7 +536,7 @@ public class Clan {
 
         else if (!this.hasEditingPermission(senderPlayerUUID)) {
             return 4;
-        } else if ("need 5 gold".isEmpty()) {
+        } else if (Bank.getBanks().get(senderPlayerUUID).getCurrency()<5) {
             return 79;
         } else if (tag.length() != 3) {
             return 10;
@@ -1279,7 +1280,7 @@ saveFile();
 
         if (potentialClan != null) {
             return 1;
-        } else if ("NOT ENOUGH GOLD FOR THIS ".length() > 100) {
+        } else if (Bank.getBanks().get(playerUUID).getCurrency()<100) {
             return 79;
         } else if (clanName.length() < 3) {
             return 10;

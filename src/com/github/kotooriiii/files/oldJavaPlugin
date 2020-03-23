@@ -1,0 +1,315 @@
+package com.github.kotooriiii;
+
+import com.SirBlobman.combatlogx.api.ICombatLogX;
+import com.github.kotooriiii.LostShard.RegionManager.CollectTaxes;
+import com.github.kotooriiii.LostShard.RegionManager.Plot;
+import com.github.kotooriiii.LostShard.RegionManager.PlotManager;
+import com.github.kotooriiii.LostShard.RegionManager.RegionCommands;
+import com.github.kotooriiii.LostShard.Skills.Commands.*;
+import com.github.kotooriiii.LostShard.Skills.Commands.Skills.CheckLvlCommand;
+import com.github.kotooriiii.LostShard.Skills.Commands.Skills.SkillsCommand;
+import com.github.kotooriiii.LostShard.Skills.Commands.Skills.SmithingCommands;
+import com.github.kotooriiii.LostShard.Skills.Crafting.CustomCrafting;
+import com.github.kotooriiii.LostShard.Skills.Helpers.DecreaseKillCount;
+import com.github.kotooriiii.LostShard.Skills.Helpers.LootEntry;
+import com.github.kotooriiii.LostShard.Skills.Helpers.LootTable;
+import com.github.kotooriiii.LostShard.Skills.Listeners.OnDmg;
+import com.github.kotooriiii.LostShard.Skills.Listeners.PlayerDeathListener;
+import com.github.kotooriiii.LostShard.Skills.Listeners.Skills.*;
+import com.github.kotooriiii.LostShard.Skills.Listeners.ZombieDeath;
+import com.github.kotooriiii.LostShard.Skills.PlayerUtil;
+import com.github.kotooriiii.LostShard.Skills.SkillPlayer;
+import com.github.kotooriiii.LostShard.Skills.Skills.Skill;
+import com.github.kotooriiii.LostShard.Skills.TeleportLocation;
+import com.github.kotooriiii.LostShard.Wands.CommandHandler;
+import com.github.kotooriiii.LostShard.Wands.Wand;
+import com.github.kotooriiii.LostShard.Wands.WandVariations.*;
+import com.github.kotooriiii.LostShard.chatex.ChatExCommandHandler;
+import com.github.kotooriiii.LostShard.chatex.ChatListener;
+import com.github.kotooriiii.LostShard.chatex.command.CommandManager;
+import com.github.kotooriiii.LostShard.chatex.command.EnterLocalChatCmd;
+import com.github.kotooriiii.LostShard.chatex.command.ExitLocalChatCmd;
+import com.github.kotooriiii.LostShard.chatex.utils.Config;
+import com.github.kotooriiii.LostShard.chatex.utils.Locales;
+import com.github.kotooriiii.LostShard.stats.Commands.RestNMeditate;
+import com.github.kotooriiii.LostShard.stats.Commands.StatsCommands;
+import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.commands.*;
+import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.guards.ShardBanker;
+import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.listeners.*;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Logger;
+
+import static com.github.kotooriiii.data.Maps.*;
+
+public class LostShardK extends JavaPlugin {
+
+    public static JavaPlugin plugin;
+    public static Logger logger;
+    public static PluginDescriptionFile pluginDescriptionFile;
+    public static WorldGuardPlugin worldGuardPlugin;
+    public static ICombatLogX combatLogXPlugin;
+
+    private CommandManager cmanager;
+
+    public static List<Wand> wandVariations = new ArrayList<>();
+    public static FileConfiguration config;
+
+    //Register classes for serialization
+    static {
+        ConfigurationSerialization.registerClass(Skill.class, "Skill");
+        ConfigurationSerialization.registerClass(SkillPlayer.class, "SkillPlayer");
+        ConfigurationSerialization.registerClass(LootEntry.class, "MiningLoot");
+        ConfigurationSerialization.registerClass(TeleportLocation.class, "TeleportLocation");
+
+        //REGION
+        ConfigurationSerialization.registerClass(Plot.class, "plot");
+    }
+    //
+
+    @Override
+    public void onEnable() {
+
+        //Console logger, plugin, and description file are all ready for public use
+        logger = Logger.getLogger("Minecraft");
+        plugin = this;
+        worldGuardPlugin = getWorldGuard();
+        combatLogXPlugin = getCombatLogX();
+        pluginDescriptionFile = this.getDescription();
+        FileManager.init();
+
+        //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
+        registerCommands();
+        registerEvents();
+
+        //All was successfully enabled
+        logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
+
+        PluginManager manager = Bukkit.getServer().getPluginManager();
+        loadConfig();
+
+        DecreaseKillCount.Schedule();
+
+
+
+        PlayerUtil.getInstance().Load();
+
+        LootTable.getMiningTableInstance().Load();
+        LootTable.getFishingTableInstance().Load();
+
+        PlotManager.getInstance().Load();
+        CollectTaxes.ScheduleTaxCollection();
+
+        CustomCrafting.Initialize();
+        initiateWands(manager);
+
+        registerStatCommands(manager);
+        registerSkillCommands(manager);
+        registerSkillListeners(manager);
+        MsgCommand.register(this, manager);
+        RegionCommands.Register(this, manager);
+
+        //chatex
+
+        try {
+            Config.load();
+            if (!Config.ENABLE.getBoolean()) {
+                getServer().getPluginManager().disablePlugin(this);
+                getLogger().info("disabled, check config!");
+                return;
+            }
+            Locales.load();
+
+            File localeFolder = new File(getDataFolder(), "locales");
+
+            if (!new File(localeFolder, Config.LOCALE.getString() + "_readme.txt").exists()) {
+                saveResource("resources" + File.separator+ "locales" + File.separator + Config.LOCALE.getString() + "_readme.txt", true);
+            }
+
+            EnterLocalChatCmd en = new EnterLocalChatCmd();
+            ExitLocalChatCmd ex = new ExitLocalChatCmd();
+            getCommand("local").setExecutor(en);
+            getCommand("l").setExecutor(en);
+            getCommand("global").setExecutor(ex);
+            getCommand("g").setExecutor(ex);
+
+
+            ChatListener listener = new ChatListener();
+            listener.register();
+            cmanager = new CommandManager(this);
+            cmanager.registerClass(ChatExCommandHandler.class);
+            getLogger().info("is now enabled!");
+        } catch (Exception e) {
+            getServer().getPluginManager().disablePlugin(this);
+            e.printStackTrace();
+        }
+        new com.github.kotooriiii.LostShard.chatex.plugins.PluginManager();
+
+    }
+
+    @Override
+    public void onDisable() {
+
+        saveData();
+
+        for (int i = 0; i < ShardGuard.getActiveShardGuards().size(); i++) {
+            ShardGuard.getActiveShardGuards().get(i).forceDestroy();
+        }
+        ShardGuard.getActiveShardGuards().clear();
+
+        for (int i = 0; i < ShardBanker.getActiveShardBankers().size(); i++) {
+            ShardBanker.getActiveShardBankers().get(i).forceDestroy();
+        }
+        ShardBanker.getActiveShardBankers().clear();
+        Bank.getBanks().clear();
+
+        //SKILLS
+        PlayerUtil.getInstance().Save();
+        LootTable.getMiningTableInstance().Save();
+        LootTable.getFishingTableInstance().Save();
+        DecreaseKillCount.Terminate();
+
+        getServer().getScheduler().cancelTasks(this);
+
+        //Region
+
+        PlotManager.getInstance().Save();
+        CollectTaxes.TerminateTaxCollection();
+
+        logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
+        plugin = null;
+        logger = null;
+        pluginDescriptionFile = null;
+
+    }
+    public static void debug(String message) {
+        if (!Config.DEBUG.getBoolean()) {
+            return;
+        }
+        String output = "[DEBUG] " + message;
+        logger.info(output);
+    }
+
+    private void saveData() {
+
+        for (Clan clan : clans) {
+            FileManager.write(clan);
+        }
+    }
+
+
+    public void registerCommands() {
+        getCommand("clan").setExecutor(new ClanCommand());
+        getCommand("ff").setExecutor(new FriendlyFireCommand());
+        getCommand("hostility").setExecutor(new HostilityCommand());
+        getCommand("guard").setExecutor(new GuardCommand());
+        getCommand("chest").setExecutor(new ChestCommand());
+getCommand("bank").setExecutor(new BankCommand());
+getCommand("deposit").setExecutor(new DepositCommand());
+getCommand("withdraw").setExecutor(new WithdrawCommand());
+        getCommand("balance").setExecutor(new BalanceCommand());
+
+
+    }
+
+    public void registerEvents() {
+        PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(new ClanCreatorListener(), this);
+        pm.registerEvents(new PlayerLeaveListener(), this);
+        pm.registerEvents(new PlayerFriendlyFireHitListener(), this);
+        pm.registerEvents(new HostilityCreateListener(), this);
+        pm.registerEvents(new GuardChatMessageListener(), this);
+        pm.registerEvents(new NPCInteractRedirectListener(), this);
+        pm.registerEvents(new UpdatePacketOnJoinListener(), this);
+        pm.registerEvents(new PlayerBankUpdateInventory(), this);
+    }
+
+    public WorldGuardPlugin getWorldGuard() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+        // WorldGuard may not be loaded
+        if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+            return null; // Maybe you want throw an exception instead
+        }
+        return (WorldGuardPlugin) plugin;
+    }
+
+    public ICombatLogX getCombatLogX() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("CombatLogX");
+        // WorldGuard may not be loaded
+        if (plugin == null || !(plugin instanceof ICombatLogX)) {
+            return null; // Maybe you want throw an exception instead
+        }
+        return (ICombatLogX) plugin;
+    }
+
+    void loadConfig() {
+        // Get the config
+        config = this.getConfig();
+
+        // Save all the settings to the config
+        config.options().copyDefaults(true);
+        this.saveConfig();
+    }
+
+    void initiateWands(PluginManager manager) {
+        wandVariations.add(new FireballWand(this, ChatColor.AQUA + "Fireball Wand",2, 15));
+        wandVariations.add(new TeleportWand(this,ChatColor.AQUA + "Teleport Wand",1, 15));
+        wandVariations.add(new HealingWand(this,ChatColor.AQUA + "Healing Wand",1, 20));
+        wandVariations.add(new LightningWand(this, 	ChatColor.AQUA + "Lightning Wand", 2, 20));
+        wandVariations.add(new IceWand(this,ChatColor.AQUA + "Ice Wand", 2, 15));
+        wandVariations.add(new WebWand(this,ChatColor.AQUA + "Web Wand",1, 15));
+
+        CommandHandler.Register(this, manager);
+    }
+
+
+    public void registerStatCommands(PluginManager manager)
+    {
+        RestNMeditate.register(this, manager);
+        StatsCommands.register(this, manager);
+    }
+
+    public void registerSkillListeners(PluginManager manager)
+    {
+        BrawlListener.register(this, manager);
+        SwordListener.register(this, manager);
+        MineListener.register(this, manager);
+        ArcheryListener.register(this, manager);
+        AnimalListener.register(this, manager);
+        FishingListener.register(this, manager);
+
+        PlayerDeathListener.register(this, manager);
+        PlayerDisconnectListener.register(this, manager);
+        ZombieDeath.register(this, manager);
+        OnDmg.register(this, manager);
+    }
+
+    public void registerSkillCommands(PluginManager manager){
+        SetRank.register(this, manager);
+        SetMurderCountCommand.register(this, manager);
+        SetlvlCommand.register(this, manager);
+        SetLootCommand.register(this, manager);
+        CheckLvlCommand.register(this, manager);
+        SmithingCommands.register(this, manager);
+        SkillsCommand.register(this, manager);
+    }
+}

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="CombatLogX">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/CombatLogX.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="jar://$PROJECT_DIR$/libs/CombatLogX.jar!/" recursive="false" />
+  </library>
+</component>

@@ -1,8 +1,11 @@
 package com.github.kotooriiii.hostility;
 
-import com.github.kotooriiii.LostShardK;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
+import javafx.application.Platform;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +13,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.text.DateFormat;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -84,6 +91,12 @@ public class HostilityMatch {
     }
 
     public void startGame() {
+        //If an active match is playing an instance of this match, stop. (Most likely, staff forcibly started it.)
+        for (HostilityMatch match : activeHostilityGames) {
+            if (match.getPlatform().getName().equalsIgnoreCase(this.getPlatform().getName())) {
+                return;
+            }
+        }
         broadcast(ChatColor.GOLD + platform.getName() + " is now available for capture.", null);
         activeHostilityGames.add(this);
         checkForCapturer();
@@ -127,7 +140,7 @@ public class HostilityMatch {
 
                 currentTicks--;
             }
-        }.runTaskTimer(LostShardK.plugin, 0, 1);
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
 
@@ -161,7 +174,7 @@ public class HostilityMatch {
                     if (player.isOnline() && !clanlessPlayersCooldown.contains(player)) {
                         player.sendMessage(ERROR_COLOR + "You need to be in a clan in order to capture " + platform.getName() + ".");
                         clanlessPlayersCooldown.add(player);
-                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                             @Override
                             public void run() {
                                 clanlessPlayersCooldown.remove(player);
@@ -170,7 +183,7 @@ public class HostilityMatch {
                     }
                 }
             }
-        }.runTaskTimer(LostShardK.plugin, 0, 1);
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     private final int toTicks(int minutes) {
@@ -206,13 +219,13 @@ public class HostilityMatch {
 
 
                 } else if (i > 0 && i < timerMinAlert.length - 1) {
-                    this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " is currently capturing "+platform.getName()+" for their " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks), this.capturingClan);
-                    capturingClan.broadcast(ChatColor.YELLOW + this.capturingPlayer.getName() + ChatColor.GOLD + " is capturing "+platform.getName()+" for your clan for the " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks));
+                    this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " is currently capturing " + platform.getName() + " for their " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks), this.capturingClan);
+                    capturingClan.broadcast(ChatColor.YELLOW + this.capturingPlayer.getName() + ChatColor.GOLD + " is capturing " + platform.getName() + " for your clan for the " + tryingToPlace(winStreak) + " time. " + toMinutesSeconds(this.currentTicks));
                 } else if (i == timerMinAlert.length - 1) {
                     winStreak++;
                     if (winStreak == 3) {
-                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured "+ platform.getName()+".", this.capturingClan);
-                        capturingClan.broadcast("Your clan has fully captured "+platform.getName()+".");
+                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
+                        capturingClan.broadcast("Your clan has fully captured " + platform.getName() + ".");
                         capturingClan.setHostilityBuff(true);
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
                         capturingClan.saveFile();
@@ -235,7 +248,7 @@ public class HostilityMatch {
                         dragonItemStack.setItemMeta(dragonItemMeta);
 
 
-                        for (UUID uuid : capturingClan.getOnlineUUIDS()) {
+                        for (UUID uuid : capturingClan.getAllUUIDS()) {
                             Player player = Bukkit.getOfflinePlayer(uuid).getPlayer();
 
                             if (player.isOnline()) {
@@ -248,7 +261,9 @@ public class HostilityMatch {
 
                                 }
 
-                                player.sendMessage(STANDARD_COLOR + "Your clan captured "+platform.getName()+". You have been awarded for your brave efforts!");
+                                player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
+                                player.sendMessage(STANDARD_COLOR + "Your clan has gained the hostility buff!");
+
                                 player.sendMessage(STANDARD_COLOR + "Bonuses: ");
                                 player.sendMessage(STANDARD_COLOR + "- 50 Gold");
                                 if (player.equals(capturingPlayer)) {
@@ -257,37 +272,63 @@ public class HostilityMatch {
                                 }
 
                                 if (unstoredItems.keySet().size() > 0)
-                                    player.sendMessage(STANDARD_COLOR + "Your clan captured "+platform.getName()+" but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
+                                    player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + " but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
 
                                 for (Integer integer : unstoredItems.keySet()) {
                                     ItemStack unstoredItemStack = unstoredItems.get(integer);
                                     Bukkit.getWorld("world").dropItem(player.getLocation(), unstoredItemStack);
                                 }
                             }
+
+                            final Stat stat = Stat.getStatMap().get(uuid);
+                            stat.setMaxStamina(125);
+                            stat.setMana(125);
+
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    stat.setMaxStamina(100);
+                                    stat.setMaxMana(100);
+
+                                    if (stat.getStamina() > stat.getMaxStamina())
+                                        stat.setStamina(stat.getMaxStamina());
+
+                                    if (stat.getMana() > stat.getMaxMana())
+                                        stat.setMana(stat.getMana());
+                                }
+                            }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 60 * 24);
+
                         }
+
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                capturingClan.setHostilityBuff(false);
+                            }
+                        }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 60 * 24);
 
                         endGame(false);
 
 
                         //win host
                     } else {
-                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has successfully captured "+platform.getName()+" for their " + tryingToPlace(winStreak - 1) + " time. "+platform.getName()+" will be active for capture in " + toMinutesSeconds(gracePeriod), this.capturingClan);
-                        capturingClan.broadcast(ChatColor.YELLOW + this.capturingPlayer.getName() + ChatColor.GOLD + " has successfully captured "+platform.getName()+" for your clan for the " + tryingToPlace(winStreak - 1) + " time. "+platform.getName()+" will be active for capture in " + toMinutesSeconds(gracePeriod));
+                        this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has successfully captured " + platform.getName() + " for their " + tryingToPlace(winStreak - 1) + " time. " + platform.getName() + " will be active for capture in " + toMinutesSeconds(gracePeriod), this.capturingClan);
+                        capturingClan.broadcast(ChatColor.YELLOW + this.capturingPlayer.getName() + ChatColor.GOLD + " has successfully captured " + platform.getName() + " for your clan for the " + tryingToPlace(winStreak - 1) + " time. " + platform.getName() + " will be active for capture in " + toMinutesSeconds(gracePeriod));
                         lastClan = capturingClan;
                         lastWinStreak = winStreak;
                         capturingCountdownTask.cancel();
                         checkForCapturerTask.cancel();
                         init();
-                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LostShardK.plugin, new Runnable() {
+                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
                             @Override
                             public void run() {
-                                broadcast(ChatColor.GOLD + platform.getName()  + " is now active for capture.", null);
+                                broadcast(ChatColor.GOLD + platform.getName() + " is now active for capture.", null);
 
                                 //Time is already updated on the #checkForCapture method
                                 checkForCapturer();
 
                             }
-                        },  (long) gracePeriod);
+                        }, (long) gracePeriod);
                     }
 
                     HelperMethods.playSound(Bukkit.getOnlinePlayers().toArray(new Player[0]), Sound.ENTITY_LIGHTNING_BOLT_THUNDER);
