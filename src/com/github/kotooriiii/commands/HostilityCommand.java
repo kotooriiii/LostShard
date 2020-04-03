@@ -158,10 +158,11 @@ public class HostilityCommand implements CommandExecutor {
                                     playerSender.sendMessage(STANDARD_COLOR + "-----------------");
                                     break;
                                 case "cancel":
-                                    if (!hostilityPlatformCreator.containsKey(playerUUID)) {
+                                    if (!hostilityPlatformCreator.containsKey(playerUUID) || !hostilityTimeCreator.containsKey(playerUUID)) {
                                         playerSender.sendMessage(ERROR_COLOR + "We cannot cancel a Hostility Platform if you are not in the process of creating one.");
                                     } else {
                                         hostilityPlatformCreator.remove(playerUUID);
+                                        hostilityTimeCreator.remove(playerUUID);
                                         playerSender.sendMessage(STANDARD_COLOR + "You canceled the creation of a new Hostility Platform!");
 
                                     }
@@ -415,7 +416,7 @@ public class HostilityCommand implements CommandExecutor {
         } else if (!isActive && exists) {
             result =  ChatColor.GOLD + "----------" + ChatColor.GOLD + possiblePlatform.getName() + " Information----------\n"
                     + ChatColor.GOLD + "Status: " + ChatColor.RED + "Inactive\n";
-            result += ChatColor.GOLD + "Next " + possiblePlatform.getName() + ": " + ChatColor.YELLOW + possiblePlatform.getTargetTime() + ChatColor.GRAY + " (" + possiblePlatform.getExactTimeLeft() + " remaining)";
+            result += ChatColor.GOLD + "Next " + possiblePlatform.getName() + ": " + ChatColor.YELLOW + possiblePlatform.getTargetTime() + ChatColor.GRAY + " (" + possiblePlatform.toBetterFormat() + " remaining)";
 
         } else if (!isActive && !exists) {
             result = null;

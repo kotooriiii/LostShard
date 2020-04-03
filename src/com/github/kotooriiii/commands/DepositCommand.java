@@ -2,21 +2,20 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardBanker;
-import net.minecraft.server.v1_15_R1.Packet;
+import com.github.kotooriiii.npc.ShardBanker;
+import net.milkbowl.vault.chat.Chat;
 import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -35,18 +34,18 @@ public class DepositCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("deposit")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    playerSender.sendMessage(ERROR_COLOR + "You must request an amount you'd like to deposit. Example: " + COMMAND_COLOR + "/deposit (amount)" + ERROR_COLOR + ".");
+                    playerSender.sendMessage(ChatColor.RED + "You must request an amount you'd like to deposit. Example: "+ "/deposit (amount)"  + ".");
 
 
                 } else if (args.length == 1) {
                     if (!NumberUtils.isNumber(args[0])) {
-                        playerSender.sendMessage(ERROR_COLOR + "The provided amount is not a number.");
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
                         return true;
                     }
 
                     if(args[0].contains("."))
                     {
-                        playerSender.sendMessage(ERROR_COLOR + "You can only deposit full, intact, unbroken gold ingots.");
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
                         return true;
                     }
 
@@ -56,7 +55,7 @@ public class DepositCommand implements CommandExecutor {
                     final Location playerLocation = playerSender.getLocation();
                     ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
                     if (banker == null || !banker.isSocialDistance(playerLocation)) {
-                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby!!!");
+                        playerSender.sendMessage(ChatColor.RED + "No banker nearby.");
                         return true;
                     }
 
@@ -87,7 +86,7 @@ public class DepositCommand implements CommandExecutor {
                     }
 
                     if (counterMoney < deposit) {
-                        playerSender.sendMessage(ERROR_COLOR + "You didn't have sufficient funds to deposit to your bank account. You currently have " + MONEY_COLOR +  Double.valueOf(df.format(counterMoney)) + ERROR_COLOR + " in your inventory.");
+                        playerSender.sendMessage(ChatColor.RED + "You tried to deposit " + Double.valueOf(df.format(deposit)) + " gold, but you only have " +  Double.valueOf(df.format(counterMoney)) + ".");
 
                     } else {
                         for (Map.Entry entry : hashmap.entrySet()) {
@@ -100,10 +99,10 @@ public class DepositCommand implements CommandExecutor {
                         }
                         bank.setCurrency(leftover);
                         FileManager.write(bank);
-                        playerSender.sendMessage(STANDARD_COLOR + "You've deposited " + MONEY_COLOR + df.format(deposit) + STANDARD_COLOR + ". You have " + MONEY_COLOR + df.format(leftover) + STANDARD_COLOR + " in your bank account.");
+                        playerSender.sendMessage(ChatColor.GRAY + "You have deposited " + df.format(deposit) + " gold into your bank account.");
                     }
                 } else {
-                    playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments. Did you mean " + COMMAND_COLOR + "/deposit (amount)" + ERROR_COLOR + "?");
+                    playerSender.sendMessage(ChatColor.RED + "You provided too many arguments. Did you mean " + "/deposit (amount)"  + "?");
                 }
             }
         }

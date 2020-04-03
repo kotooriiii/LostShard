@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -33,7 +34,7 @@ public class Bank {
 
     public double getCurrency()
     {
-        return currency;
+        return new BigDecimal(currency).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public void setCurrency(double currency) {

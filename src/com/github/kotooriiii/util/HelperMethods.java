@@ -1,10 +1,12 @@
 package com.github.kotooriiii.util;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import com.github.kotooriiii.status.Status;
+import com.github.kotooriiii.status.StatusPlayer;
+import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.potion.PotionEffectType;
 
 import java.text.DateFormat;
 import java.util.*;
@@ -103,6 +105,56 @@ public final class HelperMethods {
         return materials;
     }
 
+    public static PotionEffectType[] getNearestPotionEffectTypes(String name, int maxTypes) {
+
+        HashMap<PotionEffectType, Double> mappedProbabilities = new HashMap<>();
+        for (PotionEffectType potionEffectType : PotionEffectType.values()) {
+            String materialName = potionEffectType.getName().replace("_", " ");
+            if (materialName.contains("LEGACY"))
+                continue;
+            double probability = similarity(name.toUpperCase(), materialName);
+            if (probability < 0.25)
+                continue;
+            mappedProbabilities.put(potionEffectType, new Double(probability));
+        }
+
+        Comparator<Map.Entry<PotionEffectType, Double>> valueComparator = new Comparator<Map.Entry<PotionEffectType, Double>>() {
+
+            @Override
+            public int compare(Map.Entry<PotionEffectType, Double> e1, Map.Entry<PotionEffectType, Double> e2) {
+                Double v1 = e1.getValue();
+                Double v2 = e2.getValue();
+                return v2.compareTo(v1);
+            }
+        };
+
+        if (mappedProbabilities.isEmpty())
+            return null;
+
+        // Sort method needs a List, so let's first convert Set to List in Java
+        List<Map.Entry<PotionEffectType, Double>> listOfEntries = new ArrayList<Map.Entry<PotionEffectType, Double>>(mappedProbabilities.entrySet());
+
+        // sorting HashMap by values using comparator
+        Collections.sort(listOfEntries, valueComparator);
+
+        if (listOfEntries.isEmpty())
+            return null;
+        PotionEffectType[] potionEffectTypes;
+        if (listOfEntries.size() < maxTypes)
+            potionEffectTypes = new PotionEffectType[listOfEntries.size()];
+        else
+            potionEffectTypes = new PotionEffectType[maxTypes];
+
+        for (int i = 0; i < listOfEntries.size(); i++) {
+            if (i == potionEffectTypes.length - 1)
+                break;
+            potionEffectTypes[i] = listOfEntries.get(i).getKey();
+        }
+
+
+        return potionEffectTypes;
+    }
+
     /**
      * Calculates the similarity (a number within 0 and 1) between two strings.
      */
@@ -190,5 +242,105 @@ public final class HelperMethods {
         }
         return null;
     }
+
+    public static void localBroadcast(Player localPlayer, String name) {
+
+
+        ArrayList<Player> players = new ArrayList<>();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getLocation().distance(localPlayer.getLocation()) <= 100)
+                players.add(player);
+        }
+
+        Status status = StatusPlayer.wrap(localPlayer.getUniqueId()).getStatus();
+
+        for (Player lp : players) {
+            lp.sendMessage(ChatColor.AQUA + localPlayer.getName() + ChatColor.AQUA + " has cast \"" + name + "\".");
+        }
+    }
+
+    public static boolean isPlayerInduced(Entity defender, Entity damager) {
+        if (!(defender instanceof Player))
+            return false;
+
+        if (damager instanceof Player)
+            return true;
+
+        else if (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)
+            return true;
+
+        else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().equalsIgnoreCase(damager.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Player getPlayerInduced(Entity defender, Entity damager) {
+        if (!(defender instanceof Player))
+            return null;
+
+        if (damager instanceof Player)
+            return (Player) damager;
+
+        else if (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)
+            return (Player) ((Projectile) damager).getShooter();
+
+        else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().equalsIgnoreCase(damager.getName())) {
+                    return player;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isPlayerDamagerONLY(Entity defender, Entity damager) {
+        if (defender instanceof Player)
+            return false;
+
+        if (damager instanceof Player)
+            return true;
+
+        else if (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)
+            return true;
+
+        else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().equalsIgnoreCase(damager.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Player getPlayerDamagerONLY(Entity defender, Entity damager) {
+
+
+        if (defender instanceof Player)
+            return null;
+
+        if (damager instanceof Player)
+            return (Player) damager;
+
+        else if (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)
+            return (Player) ((Projectile) damager).getShooter();
+
+        else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().equalsIgnoreCase(damager.getName())) {
+                    return player;
+                }
+            }
+        }
+        return null;
+    }
+
 
 }

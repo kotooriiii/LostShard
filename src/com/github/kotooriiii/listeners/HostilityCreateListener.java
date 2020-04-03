@@ -3,7 +3,7 @@ package com.github.kotooriiii.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.hostility.HostilityZone;
+import com.github.kotooriiii.hostility.Zone;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -104,7 +104,7 @@ public class HostilityCreateListener implements Listener {
                     Location loc2 = new Location(LostShardPlugin.plugin.getServer().getWorld("world"), blockPos2X, blockPos2Y, blockPos2Z);
 
                     //set area
-                    HostilityZone zone = new HostilityZone(loc1, loc2);
+                    Zone zone = new Zone(loc1, loc2);
 
                     HostilityPlatform platform = (HostilityPlatform) hostilityPlatformCreator.get(playerUUID);
                     platform.addZone(zone);
@@ -129,7 +129,7 @@ public class HostilityCreateListener implements Listener {
                     Location loc1 = block.getLocation();
                     Location loc2 = new Location(loc1.getWorld(), loc1.getBlockX(), loc1.getY() + 2, loc1.getBlockZ());
                     //set area
-                    HostilityZone zone = new HostilityZone(loc1, loc2);
+                    Zone zone = new Zone(loc1, loc2);
                     HostilityPlatform platform = hostilityPlatformCreator.get(playerUUID);
                     platform.addZone(zone);
                     player.sendMessage(STANDARD_COLOR + "You have added a zone.");

@@ -1,8 +1,8 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.ShardGuard;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

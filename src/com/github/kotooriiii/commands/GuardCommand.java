@@ -2,7 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import net.md_5.bungee.api.ChatMessageType;

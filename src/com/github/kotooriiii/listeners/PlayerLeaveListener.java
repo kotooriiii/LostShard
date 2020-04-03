@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static com.github.kotooriiii.commands.CastCommand.markCommand;
+import static com.github.kotooriiii.commands.CastCommand.recallCommand;
 import static com.github.kotooriiii.data.Maps.*;
 
 public class PlayerLeaveListener implements Listener {
@@ -25,6 +27,9 @@ public class PlayerLeaveListener implements Listener {
         hostilityRemoverConfirmation.remove(uuid);
         hostilityPlatformCreator.remove(uuid);
         hostilityTimeCreator.remove(uuid);
+        spawnTimer.remove(uuid);
+        markCommand.remove(uuid);
+        recallCommand.remove(uuid);
 
     }
 }

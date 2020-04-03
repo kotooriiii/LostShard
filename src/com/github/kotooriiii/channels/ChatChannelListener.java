@@ -2,6 +2,8 @@ package com.github.kotooriiii.channels;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
@@ -17,12 +19,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class ChatChannelListener implements Listener {
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
-        if(LostShardPlugin.getChannelManager().getChannel(player) == null)
+        if (LostShardPlugin.getChannelManager().getChannel(player) == null)
             LostShardPlugin.getChannelManager().joinChannel(player, ChannelStatus.GLOBAL);
 
     }
@@ -50,16 +53,28 @@ public class ChatChannelListener implements Listener {
         ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage());
         Bukkit.getPluginManager().callEvent(shardChatEvent);
 
-        if(shardChatEvent.isCancelled())
+        if (shardChatEvent.isCancelled())
             return;
 
         Player player = asyncPlayerChatEvent.getPlayer();
 
         ChannelStatus status = LostShardPlugin.getChannelManager().getChannel(player);
-
+        Stat stat = Stat.wrap(player);
         String prefix = status.getPrefix();
-        String title = "";
+        String title = stat.getTitle();
+        if(!title.isEmpty())
+            title = ChatColor.WHITE + title;
         ChatColor color = StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor();
+
+        if(Staff.isStaff(player.getUniqueId()))
+        {
+            Staff staff = Staff.wrap(player.getUniqueId());
+            color = staff.getType().getChatColor();
+            prefix = ChatColor.GOLD + "[" +  prefix + ChatColor.GOLD + "]";
+        } else {
+            prefix = ChatColor.WHITE + "[" +  prefix + ChatColor.WHITE + "]";
+
+        }
         String name = color + player.getName();
         String message = asyncPlayerChatEvent.getMessage();
 
@@ -68,10 +83,9 @@ public class ChatChannelListener implements Listener {
 
 
         ArrayList<Player> recipients = getRecipients(player);
-        if(recipients==null)
+        if (recipients == null)
             return;
-        for(Player recipient : recipients)
-        {
+        for (Player recipient : recipients) {
             recipient.sendMessage(builder + ChatColor.WHITE + ": " + message);
         }
     }

@@ -18,6 +18,8 @@ public class CraftingRecipes {
         ItemStack leggings = new ItemStack(Material.CHAINMAIL_LEGGINGS, 1);
         ItemStack boots = new ItemStack(Material.CHAINMAIL_BOOTS, 1);
 
+
+
         // create a NamespacedKey for your recipe
         NamespacedKey helmetKey = new NamespacedKey(LostShardPlugin.plugin, "custom_chainmail_helmet");
         NamespacedKey chestplateKey = new NamespacedKey(LostShardPlugin.plugin, "custom_chainmail_chestplate");
@@ -29,6 +31,7 @@ public class CraftingRecipes {
         ShapedRecipe chestplateRecipe = new ShapedRecipe(chestplateKey, chestplate);
         ShapedRecipe leggingsRecipe = new ShapedRecipe(leggingsKey, leggings);
         ShapedRecipe bootsRecipe = new ShapedRecipe(bootsKey, boots);
+
 
         helmetRecipe.shape("###", "# #");
         //helmetRecipe.shape("   ","###", "# #");

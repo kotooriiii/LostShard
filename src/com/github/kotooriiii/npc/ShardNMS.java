@@ -1,4 +1,4 @@
-package com.github.kotooriiii.guards;
+package com.github.kotooriiii.npc;
 
 import com.github.kotooriiii.LostShardPlugin;
 import net.minecraft.server.v1_15_R1.Entity;

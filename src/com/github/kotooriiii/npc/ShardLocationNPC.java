@@ -1,4 +1,4 @@
-package com.github.kotooriiii.guards;
+package com.github.kotooriiii.npc;
 
 import org.bukkit.Location;
 

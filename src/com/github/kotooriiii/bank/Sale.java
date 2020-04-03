@@ -15,25 +15,25 @@ public class Sale implements Comparable, Comparator {
     private UUID id;
 
     private UUID sellerUUID;
-    private Material material;
+    private ItemStack itemStack;
     private int amount;
     private double price;
 
     private static ArrayList<Sale> sales = new ArrayList<>();
 
-    public Sale(UUID id, UUID sellerUUID, Material material, int amount, double individualPrice) {
+    public Sale(UUID id, UUID sellerUUID, ItemStack itemStack, int amount, double individualPrice) {
         this.id = id;
         this.sellerUUID = sellerUUID;
-        this.material = material;
+        this.itemStack = itemStack;
         this.amount = amount;
         this.price = individualPrice;
         sales.add(this);
     }
 
-    public Sale(UUID sellerUUID, Material material, int amount, double individualPrice) {
+    public Sale(UUID sellerUUID, ItemStack itemStack, int amount, double individualPrice) {
 
         boolean uniqueExists = false;
-        UUID id=null;
+        UUID id = null;
         existsLoop:
         while (!uniqueExists) {
             id = UUID.randomUUID();
@@ -47,7 +47,7 @@ public class Sale implements Comparable, Comparator {
         }
         this.id = id;
         this.sellerUUID = sellerUUID;
-        this.material = material;
+        this.itemStack = itemStack ;
         this.amount = amount;
         this.price = individualPrice;
         sales.add(this);
@@ -66,8 +66,8 @@ public class Sale implements Comparable, Comparator {
         return price;
     }
 
-    public Material getMaterial() {
-        return material;
+    public ItemStack getItemStack() {
+        return itemStack;
     }
 
     public int getAmount() {
@@ -75,6 +75,10 @@ public class Sale implements Comparable, Comparator {
     }
 
     public void setAmount(int amount) {
+        if (amount == 0) {
+            getSales().remove(this);
+            FileManager.removeFile(this);
+        }
         this.amount = amount;
     }
 
@@ -84,21 +88,18 @@ public class Sale implements Comparable, Comparator {
 
     @Override
     public int compareTo(Object o) {
-        if(o == null)
+        if (o == null)
             return 1;
-        if(!(o instanceof Sale))
+        if (!(o instanceof Sale))
             return 1;
         Sale otherSale = (Sale) o;
 
         int returnCode = 0;
-        if(this.getPrice() > otherSale.getPrice())
-        {
+        if (this.getPrice() > otherSale.getPrice()) {
             returnCode = 1;
-        } else if (this.getPrice() == otherSale.getPrice())
-        {
+        } else if (this.getPrice() == otherSale.getPrice()) {
             returnCode = 0;
-        } else if(this.getPrice() < otherSale.getPrice())
-        {
+        } else if (this.getPrice() < otherSale.getPrice()) {
             returnCode = -1;
         }
 
@@ -107,9 +108,9 @@ public class Sale implements Comparable, Comparator {
 
     @Override
     public int compare(Object o1, Object o2) {
-        if(o1 == null || o2 == null)
+        if (o1 == null || o2 == null)
             return 1;
-        if(!(o1 instanceof Sale) || !(o2 instanceof Sale))
+        if (!(o1 instanceof Sale) || !(o2 instanceof Sale))
             return 1;
         Sale thisSale = (Sale) o1;
         Sale otherSale = (Sale) o2;

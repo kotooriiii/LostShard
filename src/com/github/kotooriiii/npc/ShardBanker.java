@@ -1,7 +1,8 @@
-package com.github.kotooriiii.guards;
+package com.github.kotooriiii.npc;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.util.ArrayList;
 
@@ -31,8 +32,12 @@ public class ShardBanker extends ShardLocationNPC {
     {
         if(!super.spawn(x,y,z,yaw,pitch))
             return false;
-        updateSpawnLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
         activeShardBankers.add(this);
+
+        if (!setEquipment(Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS, Material.IRON_INGOT, Material.AIR))
+            return false;
+
+        updateSpawnLocation(new Location(getCurrentLocation().getWorld(), x + 0.5, y, z + 0.5, yaw, pitch));
         return true;
     }
 

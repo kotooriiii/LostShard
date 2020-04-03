@@ -1,4 +1,4 @@
-package com.github.kotooriiii.wands;
+package com.github.kotooriiii.sorcery.wands;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -6,8 +6,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import static com.github.kotooriiii.wands.Wand.getWielding;
-import static com.github.kotooriiii.wands.Wand.isWielding;
+import static com.github.kotooriiii.sorcery.wands.Wand.getWielding;
+import static com.github.kotooriiii.sorcery.wands.Wand.isWielding;
 
 public class WandListener implements Listener {
     @EventHandler

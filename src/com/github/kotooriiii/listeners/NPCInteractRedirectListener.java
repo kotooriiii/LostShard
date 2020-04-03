@@ -2,8 +2,8 @@ package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.events.PlayerLeftClickShardNPCEvent;
 import com.github.kotooriiii.events.PlayerRightClickShardNPCEvent;
-import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.Bukkit;
@@ -45,7 +45,7 @@ public class NPCInteractRedirectListener implements Listener {
                     }
                 }
 
-                if (ShardGuard.getNearestGuard(location).getCurrentLocation().distance(location) < 1)
+                if (ShardGuard.getNearestGuard(location) != null && ShardGuard.getNearestGuard(location).getCurrentLocation().distance(location) < 1)
                     entityDamaged.remove();
             }
         }
@@ -100,7 +100,7 @@ public class NPCInteractRedirectListener implements Listener {
                     return;
                 }
             }
-            if (ShardGuard.getNearestGuard(location).getCurrentLocation().distance(location) < 1)
+            if (ShardGuard.getNearestGuard(location) != null  && ShardGuard.getNearestGuard(location).getCurrentLocation().distance(location) < 1)
                 en.remove();
         }
     }
@@ -126,7 +126,7 @@ public class NPCInteractRedirectListener implements Listener {
                         return;
                     }
                 }
-                if (ShardBanker.getNearestBanker(location).getCurrentLocation().distance(location) < 1)
+                if (ShardBanker.getNearestBanker(location) != null && ShardBanker.getNearestBanker(location).getCurrentLocation().distance(location) < 1)
                     entityDamaged.remove();
             }
         }
@@ -153,7 +153,7 @@ public class NPCInteractRedirectListener implements Listener {
                 }
             }
 
-            if (ShardBanker.getNearestBanker(location).getCurrentLocation().distance(location) < 1)
+            if (ShardBanker.getNearestBanker(location) != null && ShardBanker.getNearestBanker(location).getCurrentLocation().distance(location) < 1)
                 en.remove();
 
         }

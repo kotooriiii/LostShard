@@ -1,7 +1,7 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardBanker;
+import com.github.kotooriiii.npc.ShardBanker;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;

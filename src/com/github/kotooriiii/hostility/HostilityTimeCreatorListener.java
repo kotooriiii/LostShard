@@ -17,8 +17,9 @@ public class HostilityTimeCreatorListener implements Listener {
     public void onChat(ShardChatEvent event) {
         Player player = event.getPlayer();
 
-        if (!hostilityTimeCreator.containsKey(player.getUniqueId()))
+        if (!hostilityTimeCreator.containsKey(player.getUniqueId())) {
             return;
+        }
         event.setCancelled(true);
 
         String message = event.getMessage();

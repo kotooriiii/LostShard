@@ -1,7 +1,7 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.guards.ShardBanker;
+import com.github.kotooriiii.npc.ShardBanker;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;

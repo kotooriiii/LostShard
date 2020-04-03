@@ -3,7 +3,7 @@ package com.github.kotooriiii.channels;
 import org.bukkit.ChatColor;
 
 public enum ChannelStatus {
-    LOCAL("Local", ChatColor.YELLOW), GLOBAL("Global", ChatColor.BLUE), CLAN("Clan", ChatColor.GREEN);
+    LOCAL("Local", ChatColor.YELLOW), GLOBAL("Global", ChatColor.YELLOW), CLAN("Clan", ChatColor.GREEN);
 
     private ChatColor chatColor;
     private String name;
@@ -14,10 +14,9 @@ public enum ChannelStatus {
         this.chatColor = chatColor;
     }
 
-
     public String getPrefix()
     {
-        return ChatColor.WHITE + "[" + this.getChatColor() + this.getName() + ChatColor.WHITE + "]";
+        return this.getChatColor() + this.getName();
     }
 
     public String getName() {

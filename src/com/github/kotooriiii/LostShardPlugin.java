@@ -1,6 +1,5 @@
 package com.github.kotooriiii;
 
-import com.SirBlobman.combatlogx.api.ICombatLogX;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.channels.ChatChannelListener;
@@ -8,35 +7,44 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.crafting.CraftingRecipes;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
+import com.github.kotooriiii.plots.*;
+import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
+import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.SkillUpdateListener;
+import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
 import com.github.kotooriiii.stats.StatRegenRunner;
-import com.github.kotooriiii.status.Status;
-import com.github.kotooriiii.status.StatusPlayer;
-import com.github.kotooriiii.status.StatusUpdateListener;
-import com.github.kotooriiii.wands.Glow;
-import com.github.kotooriiii.wands.MedAndRestCancelListener;
-import com.github.kotooriiii.wands.WandListener;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.github.kotooriiii.status.*;
+import com.github.kotooriiii.sorcery.wands.Glow;
+import com.github.kotooriiii.sorcery.wands.MedAndRestCancelListener;
+import com.github.kotooriiii.sorcery.wands.WandListener;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -48,8 +56,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
 
-    public static WorldGuardPlugin worldGuardPlugin;
-    public static ICombatLogX combatLogXPlugin;
+    public static LuckPerms luckPerms;
 
     public static FileConfiguration config;
 
@@ -60,20 +67,19 @@ public class LostShardPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
+
+
         //Console logger, plugin, and description file are all ready for public use
         logger = Logger.getLogger("Minecraft");
         plugin = this;
-        worldGuardPlugin = getWorldGuard();
-        combatLogXPlugin = getCombatLogX();
         pluginDescriptionFile = this.getDescription();
-        registerScoreboard();
+        luckPerms = loadLuckPerms();
         FileManager.init();
         channelManager = new ChannelManager();
 
-        StatusUpdateListener.listenAtNewDay();
+        newDayScheduler();
+
         StatRegenRunner.regen();
-
-
 
         //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
         registerCommands();
@@ -87,15 +93,15 @@ public class LostShardPlugin extends JavaPlugin {
         //Register for crash-related incidents
         registerBuff();
         registerCorrupts();
-
-
+        registerStaff();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
 
-        PluginManager manager = Bukkit.getServer().getPluginManager();
         loadConfig();
+        ShardScoreboardManager.updateScoreboard();
     }
+
 
     @Override
     public void onDisable() {
@@ -112,12 +118,12 @@ public class LostShardPlugin extends JavaPlugin {
         }
 
         Stat.getStatMap().clear();
-
         ShardBanker.getActiveShardBankers().clear();
-
         Bank.getBanks().clear();
-
         StatusPlayer.getPlayerStatus().clear();
+        Stat.getStatMap().clear();
+        Plot.getPlayerPlots().clear();
+        ;
 
 
         //SKILLS
@@ -139,9 +145,12 @@ public class LostShardPlugin extends JavaPlugin {
             FileManager.write(clan);
         }
 
-        for(Stat stat : Stat.getStatMap().values())
-        {
+        for (Stat stat : Stat.getStatMap().values()) {
             FileManager.write(stat);
+        }
+
+        for (Plot plot : Plot.getPlayerPlots().values()) {
+            FileManager.write(plot);
         }
     }
 
@@ -166,6 +175,12 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("sell").setExecutor(new SellCommand());
         getCommand("price").setExecutor(new PriceCommand());
         getCommand("msg").setExecutor(new MsgCommand());
+        getCommand("plot").setExecutor(new PlotCommand());
+        getCommand("spawn").setExecutor(new SpawnCommand());
+        getCommand("addtitle").setExecutor(new AddTitleCommand());
+        getCommand("hud").setExecutor(new HUDCommand());
+        getCommand("mark").setExecutor(new MarkCommand());
+        getCommand("cast").setExecutor(new CastCommand());
 
 
     }
@@ -188,22 +203,30 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new HostilityTimeCreatorListener(), this);
         pm.registerEvents(new InstaEatListener(), this);
         pm.registerEvents(new GoldArmorListener(), this);
+        pm.registerEvents(new PlayerEnterExitPlotRedirectListener(), this);
+        pm.registerEvents(new BlockChangePlotListener(), this);
+        pm.registerEvents(new EntityInteractPlotListener(), this);
+        pm.registerEvents(new PlayerStatusRespawnListener(), this);
+        pm.registerEvents(new PlotStaffCreateListener(), this);
+        pm.registerEvents(new PlayerSpawnMoveListener(), this);
+        pm.registerEvents(new StaffUpdateListener(getLuckPerms()), this);
+        pm.registerEvents(new SkillUpdateListener(), this);
+        pm.registerEvents(new CastListener(), this);
+
+        pm.registerEvents(new StunListener(), this);
+
+        pm.registerEvents(new ArcheryListener(), this);
+        pm.registerEvents(new BlacksmithyListener(), this);
+        pm.registerEvents(new BrawlingListener(), this);
+        pm.registerEvents(new FishingListener(), this);
+        pm.registerEvents(new LumberjackingListener(), this);
+        pm.registerEvents(new MiningListener(), this);
+        pm.registerEvents(new SorceryListener(), this);
+        pm.registerEvents(new SurvivalismListener(), this);
+        pm.registerEvents(new SwordsmanshipListener(), this);
+        pm.registerEvents(new TamingListener(), this);
 
 
-
-    }
-
-    public void registerScoreboard() {
-        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
-        Scoreboard scoreboard = scoreboardManager.getNewScoreboard();
-        Team worthy = scoreboard.registerNewTeam(Status.WORTHY.getName());
-        worthy.setColor(Status.WORTHY.getChatColor());
-        Team corrupt = scoreboard.registerNewTeam(Status.CORRUPT.getName());
-        corrupt.setColor(Status.CORRUPT.getChatColor());
-        Team exiled = scoreboard.registerNewTeam(Status.EXILED.getName());
-        exiled.setColor(Status.EXILED.getChatColor());
-
-        this.scoreboard = scoreboard;
     }
 
     public void registerGlow() {
@@ -249,8 +272,7 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    public void registerCorrupts()
-    {
+    public void registerCorrupts() {
 
         for (StatusPlayer statusPlayer : StatusPlayer.getCorrupts()) {
             UUID uuid = statusPlayer.getPlayerUUID();
@@ -275,22 +297,105 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    public WorldGuardPlugin getWorldGuard() {
-        Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-        // WorldGuard may not be loaded
-        if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-            return null; // Maybe you want throw an exception instead
+    public void registerStaff() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+            StaffType type = StaffType.matchStaffType(user.getPrimaryGroup());
+            if (type == null) return;
+
+            Staff staff = new Staff(user.getUniqueId(), type);
+
+            ShardScoreboardManager.add(player, staff.getType().getName());
         }
-        return (WorldGuardPlugin) plugin;
     }
 
-    public ICombatLogX getCombatLogX() {
-        Plugin plugin = getServer().getPluginManager().getPlugin("CombatLogX");
-        // WorldGuard may not be loaded
-        if (plugin == null || !(plugin instanceof ICombatLogX)) {
-            return null; // Maybe you want throw an exception instead
+    public void newDayScheduler() {
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
+        ZonedDateTime nextRun = now.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        if (now.compareTo(nextRun) >= 0)
+            nextRun = nextRun.plusDays(1);
+
+        Duration duration = Duration.between(now, nextRun);
+        long initalDelay = duration.getSeconds() * 20;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                //On every day, do all this code. 12:00am EST
+
+                //Set murder count less than one
+                for (StatusPlayer statusPlayer : StatusPlayer.getPlayerStatus().values()) {
+                    if (statusPlayer.getKills() > 0)
+                        statusPlayer.setKills(statusPlayer.getKills() - 1);
+                }
+
+                //Taxes every day
+                for (Plot plot : Plot.getPlayerPlots().values()) {
+
+                    if (!plot.rent()) {
+                        OfflinePlayer owner = Bukkit.getOfflinePlayer(plot.getOwnerUUID());
+                        if (owner.isOnline()) {
+                            if (plot.getRadius() == 1)
+                                owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. You have one day left before your plot is removed.");
+                            else
+                                owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. Your plot has shrunk by one block radius.");
+
+                        }
+                    }
+                }
+
+                //Save all skills
+                for(SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values())
+                {
+                    skillPlayer.save();
+                }
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        newDayScheduler();
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, 20);
+            }
+        }.runTaskLater(this.plugin, initalDelay);
+
+    }
+
+//    public WorldGuardPlugin getWorldGuard() {
+//        Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+//        // WorldGuard may not be loaded
+//        if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+//            return null; // Maybe you want throw an exception instead
+//        }
+//        return (WorldGuardPlugin) plugin;
+//    }
+//
+//    public ICombatLogX getCombatLogX() {
+//        Plugin plugin = getServer().getPluginManager().getPlugin("CombatLogX");
+//        // WorldGuard may not be loaded
+//        if (plugin == null || !(plugin instanceof ICombatLogX)) {
+//            return null; // Maybe you want throw an exception instead
+//        }
+//        return (ICombatLogX) plugin;
+//    }
+
+    private LuckPerms loadLuckPerms() {
+        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null) {
+            System.out.println("\n\n\n\n\n\nThe plugin LuckPerms was loaded.");
+            return provider.getProvider();
+        } else {
+            System.out.println("\n\n\n\n\n\nThe plugin LuckPerms was NOT loaded.");
+            return null;
         }
-        return (ICombatLogX) plugin;
+
+
+    }
+
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 
     void loadConfig() {
@@ -305,10 +410,5 @@ public class LostShardPlugin extends JavaPlugin {
     public static ChannelManager getChannelManager() {
         return channelManager;
     }
-
-    public static Scoreboard getScoreboard() {
-        return scoreboard;
-    }
-
 
 }

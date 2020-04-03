@@ -3,13 +3,21 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,11 +36,11 @@ public class SellCommand implements CommandExecutor {
             final Player playerSender = (Player) sender;
             final UUID playerUUID = playerSender.getUniqueId();
 
-            //If the command is balance
+            //If the command is sell
             if (cmd.getName().equalsIgnoreCase("sell")) {
                 //No arguments regarding this command
                 if (args.length != 3) {
-                    playerSender.sendMessage(ERROR_COLOR + "Did you mean " + COMMAND_COLOR + "/sell (amount) (item) (total price)" + ERROR_COLOR + "?");
+                    playerSender.sendMessage(ChatColor.RED + "Did you mean " + "/sell (amount) (item) (price)"  + "?");
                     return false;
                 }
 
@@ -42,59 +50,61 @@ public class SellCommand implements CommandExecutor {
 
                 //Check first argument
                 if (!NumberUtils.isNumber(args[0])) {
-                    playerSender.sendMessage(ERROR_COLOR + "The provided amount you'd like to sell is not a number.");
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to sell items.");
                     return true;
                 }
 
                 if (args[0].contains(".")) {
-                    playerSender.sendMessage(ERROR_COLOR + "You can only sell full, intact, unbroken items.");
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to sell items.");
                     return true;
                 }
 
                 //Check second argument
-                Material material = Material.matchMaterial(args[1].replace(" ", "_").toUpperCase());
-                if (material == null) {
-                    playerSender.sendMessage(ERROR_COLOR + "The item you are looking for doesn't exist.");
-
-                    Material[] materials = HelperMethods.getNearestMaterials(args[1], 3);
-                    if (materials == null || materials.length == 0) {
-                        playerSender.sendMessage(ERROR_COLOR + "Could not find a material close to your search.");
-                        return true;
-                    }
-                    String[] materialNames = new String[materials.length];
-                    for (int i = 0; i < materialNames.length; i++) {
-                        if(materials[i] == null)
-                            break;
-                        materialNames[i] = materials[i].getKey().getKey().toLowerCase();
-                    }
-                    String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ");
-                    playerSender.sendMessage(ERROR_COLOR + "Did you possibly mean to buy one of these items?:\n" + builder);
-                    return true;
-                }
+                ItemStack ingredient = getItem(playerSender, args[1].substring(0,1).toUpperCase() + args[1].substring(1).toLowerCase());
+                if (ingredient == null)
+                    return false;
 
                 //Check third argument
                 if (!NumberUtils.isNumber(args[2])) {
-                    playerSender.sendMessage(ERROR_COLOR + "The total price you provided is not a number.");
+                    playerSender.sendMessage(ChatColor.RED + "/sell (amount) (item) (price)");
                     return true;
                 }
 
                 //User input restrictions passed
                 int amount = Integer.parseInt(args[0]);
-                BigDecimal totalPrice = new BigDecimal(args[2]).setScale(2, RoundingMode.HALF_UP);
+                if (amount <= 0) {
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to sell items.");
+                    return false;
+                }
+                double totalPriceRaw = Double.parseDouble(args[2]);
+                BigDecimal totalPrice = new BigDecimal(args[2]).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-                ItemStack ingredient = new ItemStack(material, amount);
+                ingredient.setAmount(amount);
                 ItemStack[] ingredients = new ItemStack[]{ingredient};
                 if (!hasIngredients(playerSender, ingredients))
                     return false;
 
                 removeIngredients(playerSender, ingredients);
 
-                double individualRawPrice = (double)  totalPrice.doubleValue()/amount;
-                BigDecimal individualPrice = new BigDecimal(individualRawPrice).setScale(2, RoundingMode.HALF_UP);
+                double individualRawPrice = (double) (totalPriceRaw) / (double) amount;
+                BigDecimal individualPrice = new BigDecimal(individualRawPrice).setScale(2, BigDecimal.ROUND_HALF_UP);
 
 
-                playerSender.sendMessage(STANDARD_COLOR + "You have added " + amount + " " + material.getKey().getKey().toLowerCase().replace("_", " ") + " to the market for a total price of " + totalPrice + ". In simpler terms, you're selling 1 " + material.getKey().getKey().toLowerCase().replace("_", " ") + " for " + individualPrice + ".");
-                Sale sale = new Sale(playerUUID, material, amount, individualPrice.doubleValue());
+                String name = ingredient.getType().name().replace("_", " ").toLowerCase() + " ";
+                name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
+                if(ingredient.getItemMeta() instanceof PotionMeta) {
+                    name = ((PotionMeta) ingredient.getItemMeta()).getBasePotionData().getType().name();
+                    name = name.substring(0,1).toUpperCase() + name.substring(1).toUpperCase() + " ";
+                    if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
+                        name += "extended ";
+                    else if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
+                        name += "2 Potion ";
+                    else
+                        name+= "Potion ";
+                }
+
+                playerSender.sendMessage(ChatColor.GRAY + "You have put " + amount + " " + name + "on the market for " + totalPriceRaw + " gold.");// In simpler terms, you're selling 1 " + name + "for " + individualRawPrice + ".");
+                Sale sale = new Sale(playerUUID, ingredient, amount, individualRawPrice);
 
             }
         }
@@ -157,6 +167,9 @@ public class SellCommand implements CommandExecutor {
         int amountRequired = itemStack.getAmount();
         Material materialType = itemStack.getType();
 
+        ItemMeta meta = itemStack.getItemMeta();
+
+
         int counterMoney = 0;
 
         //Inventory slot index , int amount
@@ -166,6 +179,19 @@ public class SellCommand implements CommandExecutor {
             ItemStack iteratingItem = contents[i];
             if (iteratingItem == null || !materialType.equals(iteratingItem.getType()))
                 continue;
+
+            if (meta instanceof PotionMeta) {
+                if (!(iteratingItem.getItemMeta() instanceof PotionMeta))
+                    continue;
+                if (!((PotionMeta) meta).getBasePotionData().equals(((PotionMeta) iteratingItem.getItemMeta()).getBasePotionData()))
+                    continue;
+            }
+            if (!itemStack.getEnchantments().isEmpty())
+                continue;
+            if (itemStack.getType().equals(Material.SHULKER_BOX))
+                continue;
+
+
             int iteratingCount = iteratingItem.getAmount();
             int tempTotal = iteratingCount + counterMoney;
 
@@ -181,9 +207,131 @@ public class SellCommand implements CommandExecutor {
         }
 
         if (counterMoney < amountRequired) {
-            player.sendMessage(ERROR_COLOR + "You don't have " + amountRequired + " " + materialType.getKey().getKey().toLowerCase() + " to sell.");
+            player.sendMessage(ChatColor.RED + "You only have " + counterMoney + " " + materialType.getKey().getKey().substring(0,1).toUpperCase() +materialType.getKey().getKey().substring(1).toLowerCase() + ".");
             return null;
         }
         return hashmap;
+    }
+
+    public static ItemStack getItem(Player playerSender, String itemName) {
+        //Declare null
+        ItemStack itemStack = null;
+        Material material = null;
+
+        //Try to get potion out of it
+        itemStack = potionHelper(itemName);
+        //Try longer version of potion
+        if (itemStack == null)
+            itemStack = potionLongHelper(itemName);
+
+        //If we found a potion, set the item as potion
+        if (itemStack != null)
+            material = Material.POTION;
+
+        //No potion found, keep looking
+        if (material == null) {
+            if (itemName.equalsIgnoreCase("cobble")) //key premade
+                material = Material.COBBLESTONE;
+
+            //If still null keep going
+            if (material == null) //If not key words we previously made then search all material system
+                material = Material.matchMaterial(itemName.replace(" ", "_").toUpperCase()); //Find the material with that name!
+
+            //Still somehow null.. make suggestions
+            if (material == null) {
+
+                playerSender.sendMessage(ChatColor.RED + "Item '" + itemName + "' not found.");
+
+                Material[] materials = HelperMethods.getNearestMaterials(itemName, 3);
+                if (materials == null || materials.length == 0) {
+                    playerSender.sendMessage(ChatColor.RED + "No relatable items were found.");
+                    return null;
+                }
+                String[] materialNames = new String[materials.length];
+                for (int i = 0; i < materialNames.length; i++) {
+                    if (materials[i] == null)
+                        break;
+                    materialNames[i] = materials[i].getKey().getKey().toLowerCase();
+                }
+                String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ");
+                playerSender.sendMessage(ChatColor.RED  + "Did you possibly mean one of these items?:\n" + builder);
+                return null;
+            }
+        }
+        if (itemStack == null)
+            itemStack = new ItemStack(material, 1);
+        return itemStack;
+    }
+
+    public static ItemStack potionLongHelper(String name) {
+        ItemStack itemStack = new ItemStack(Material.POTION, 1);
+        PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
+
+        String potionName = name.substring(0, name.length() - 1).toUpperCase().replace(" ", "_");
+        String suffix = name.substring(name.length() - 1, name.length());
+
+        for (PotionType type : PotionType.values()) {
+            if (potionName.equalsIgnoreCase(type.name())) {
+                potionMeta.setBasePotionData(new PotionData(type));
+                break;
+            }
+        }
+
+        if (!suffix.isEmpty()) {
+            if (suffix.equalsIgnoreCase("e")) {
+                if(potionMeta.getBasePotionData().getType().isExtendable())
+                    potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), true, false));
+            }
+            if (suffix.equalsIgnoreCase("2")) {
+                if (potionMeta.getBasePotionData().getType().isUpgradeable())
+                    potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), false, true));
+            }
+            if (suffix.equalsIgnoreCase("1"))
+                ;
+        }
+
+        if (potionMeta.getBasePotionData().getType().equals(PotionType.UNCRAFTABLE))
+            return null;
+        itemStack.setItemMeta(potionMeta);
+        return itemStack;
+    }
+
+    public static ItemStack potionHelper(String name) {
+        ItemStack itemStack = new ItemStack(Material.POTION, 1);
+        PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
+
+        String potionName = name.substring(0, name.length() - 1).toUpperCase().replace(" ", "_");
+        String suffix = name.substring(name.length() - 1, name.length());
+
+        switch (potionName.toLowerCase()) {
+            case "swp":
+                potionMeta.setBasePotionData(new PotionData(PotionType.SPEED));
+                break;
+            case "strp":
+                potionMeta.setBasePotionData(new PotionData(PotionType.STRENGTH));
+                break;
+            case "frp":
+                potionMeta.setBasePotionData(new PotionData(PotionType.FIRE_RESISTANCE));
+                break;
+        }
+
+        if (!suffix.isEmpty()) {
+            if (suffix.equalsIgnoreCase("e")) {
+                if(potionMeta.getBasePotionData().getType().isExtendable())
+                potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), true, false));
+            }
+            if (suffix.equalsIgnoreCase("2")) {
+                if (potionMeta.getBasePotionData().getType().isUpgradeable())
+                    potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), false, true));
+            }
+            if (suffix.equalsIgnoreCase("1"))
+                ;
+        }
+
+        if (potionMeta.getBasePotionData().getType().equals(PotionType.UNCRAFTABLE))
+            return null;
+
+        itemStack.setItemMeta(potionMeta);
+        return itemStack;
     }
 }

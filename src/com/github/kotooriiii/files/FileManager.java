@@ -6,9 +6,12 @@ import com.github.kotooriiii.bank.DonorTitle;
 import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
-import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
+import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -36,6 +39,9 @@ public final class FileManager {
     private static File status_folder = new File(plugin_folder + File.separator + "statuses");
     private static File sales_folder = new File(plugin_folder + File.separator + "sales");
     private static File stats_folder = new File(plugin_folder + File.separator + "stats");
+    private static File plots_folder = new File(plugin_folder + File.separator + "plots");
+    private static File skills_folder = new File(plugin_folder + File.separator + "skills");
+    private static File marks_folder = new File(plugin_folder + File.separator + "marks");
 
 
     private FileManager() {
@@ -51,6 +57,9 @@ public final class FileManager {
         status_folder.mkdirs();
         sales_folder.mkdirs();
         stats_folder.mkdirs();
+        plots_folder.mkdirs();
+        skills_folder.mkdirs();
+        marks_folder.mkdirs();
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
@@ -136,8 +145,7 @@ public final class FileManager {
             }
         }
 
-        for(File file : sales_folder.listFiles())
-        {
+        for (File file : sales_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
 
@@ -149,8 +157,7 @@ public final class FileManager {
             }
         }
 
-        for(File file : stats_folder.listFiles())
-        {
+        for (File file : stats_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
 
@@ -160,6 +167,43 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a stat file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
+        }
+
+        for (File file : plots_folder.listFiles()) {
+            if (!file.getName().endsWith(".obj"))
+                continue;
+
+            Plot plot = readPlot(file);
+            if (plot == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a plot file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            Plot.add(plot);
+        }
+
+        for (File file : skills_folder.listFiles()) {
+            if (!file.getName().endsWith(".obj"))
+                continue;
+
+            SkillPlayer skillPlayer = readSkill(file);
+            if (skillPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a skill file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            SkillPlayer skillPlayer1 = new SkillPlayer(skillPlayer.getPlayerUUID());
+            //SkillPlayer.add(skillPlayer);
+        }
+
+        for (File file : marks_folder.listFiles()) {
+            if (!file.getName().endsWith(".obj"))
+                continue;
+
+            MarkPlayer markPlayer = readMarks(file);
+            if (markPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a marks file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            MarkPlayer.add(markPlayer);
         }
 
     }
@@ -380,19 +424,18 @@ public final class FileManager {
         String idString = saleFile.getName().substring(0, saleFile.getName().indexOf('.'));
 
         String uuidString = yaml.getString("SellerUUID");
-        String materialName = yaml.getString("Material");
+        ItemStack item = yaml.getItemStack("Item");
         int amount = yaml.getInt("Amount");
         double price = yaml.getDouble("Price");
-        if (materialName == null || uuidString == null || idString == null)
+        if (item == null || uuidString == null || idString == null)
             return null;
-        Material possibleMaterial = Material.matchMaterial(materialName);
         UUID id = UUID.fromString(idString);
         UUID sellerUUID = UUID.fromString(uuidString);
 
-        if (possibleMaterial == null || id == null || sellerUUID == null)
+        if (id == null || sellerUUID == null)
             return null;
 
-        Sale sale = new Sale(id, UUID.fromString(uuidString), possibleMaterial, amount, price);
+        Sale sale = new Sale(id, UUID.fromString(uuidString), item, amount, price);
         return sale;
     }
 
@@ -402,18 +445,70 @@ public final class FileManager {
 
         double stamina = yaml.getDouble("Stamina");
         double mana = yaml.getDouble("Mana");
+        String title = yaml.getString("Title");
 
         UUID playerUUID = UUID.fromString(uuidString);
 
-        if (playerUUID == null)
+        if (playerUUID == null || title == null)
             return null;
 
         Stat stat = new Stat(playerUUID);
         stat.setStamina(stamina);
         stat.setMana(mana);
+        stat.setTitle(title);
         return stat;
     }
 
+    public static Plot readPlot(File plotFile) {
+        try {
+            FileInputStream fis = new FileInputStream(plotFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Plot plot = (Plot) ois.readObject();
+            return plot;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static SkillPlayer readSkill(File skillFile) {
+        try {
+            FileInputStream fis = new FileInputStream(skillFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            SkillPlayer skillPlayer = (SkillPlayer) ois.readObject();
+            return skillPlayer;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static MarkPlayer readMarks(File markFile) {
+        try {
+            FileInputStream fis = new FileInputStream(markFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            MarkPlayer markPlayer = (MarkPlayer) ois.readObject();
+            return markPlayer;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     public static void write(Clan clan) {
@@ -580,7 +675,7 @@ public final class FileManager {
         }
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(saleFile);
         yaml.set("SellerUUID", sale.getSellerUUID().toString());
-        yaml.set("Material", sale.getMaterial().name().toUpperCase());
+        yaml.set("Item", sale.getItemStack());
         yaml.set("Amount", sale.getAmount());
         yaml.set("Price", sale.getPrice());
         try {
@@ -604,6 +699,7 @@ public final class FileManager {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statFile);
         yaml.set("Stamina", stat.getStamina());
         yaml.set("Mana", stat.getMana());
+        yaml.set("Title", stat.getTitle());
         try {
             yaml.save(statFile);
         } catch (IOException e) {
@@ -611,33 +707,59 @@ public final class FileManager {
         }
     }
 
-//    public static void write(ShardGuard guard, String oldName) {
-//        String oldFileName = oldName + ".yml";
-//        File oldGuardFile = new File(guards_folder + File.separator + oldFileName);
-//
-//        if (oldGuardFile.exists())
-//            oldGuardFile.delete();
-//
-//        String name = guard.getName();
-//        String fileName = name + ".yml";
-//        File guardFile = new File(guards_folder + File.separator + fileName);
-//
-//        try {
-//            if (!guardFile.exists())
-//                guardFile.createNewFile();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(guardFile);
-//        yaml.set("GuardPostLocation", guard.getGuardPost());
-//
-//        try {
-//            yaml.save(guardFile);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static void write(Plot plot) {
+        try {
+            File file = new File(plots_folder + File.separator + plot.getID() + ".obj");
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(plot);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(SkillPlayer skillPlayer) {
+        try {
+            File file = new File(skills_folder + File.separator + skillPlayer.getPlayerUUID() + ".obj");
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(skillPlayer);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(MarkPlayer markPlayer) {
+        try {
+            File file = new File(marks_folder + File.separator + markPlayer.getPlayerUUID() + ".obj");
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(markPlayer);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void removeFile(Clan clan) {
         UUID clanID = clan.getID();
@@ -703,6 +825,29 @@ public final class FileManager {
 
     }
 
+    public static void removeFile(Plot plot) {
+        File plotFile = new File(plots_folder + File.separator + plot.getID() + ".obj");
+
+        if (plotFile.exists())
+            plotFile.delete();
+
+    }
+
+    public static void removeFile(SkillPlayer skillPlayer) {
+        File skillsFile = new File(skills_folder + File.separator + skillPlayer.getPlayerUUID() + ".obj");
+
+        if (skillsFile.exists())
+            skillsFile.delete();
+
+    }
+
+    public static void removeFile(MarkPlayer markPlayer) {
+        File marksFile = new File(marks_folder + File.separator + markPlayer.getPlayerUUID() + ".obj");
+
+        if (marksFile.exists())
+            marksFile.delete();
+
+    }
 
     private static void saveResource(String resourcePath, File out_to_folder, boolean replace) {
         if (resourcePath != null && !resourcePath.equals("")) {

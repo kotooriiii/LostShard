@@ -6,6 +6,7 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -13,6 +14,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,7 +36,7 @@ public class BuyCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("buy")) {
                 //No arguments regarding this command
                 if (args.length != 3) {
-                    playerSender.sendMessage(ERROR_COLOR + "Did you mean " + COMMAND_COLOR + "/buy (amount) (item) (limit)" + ERROR_COLOR + "?");
+                    playerSender.sendMessage(ChatColor.RED + "Did you mean " + "/buy (amount) (item) (limit)" + "?");
                     return false;
                 }
 
@@ -43,63 +46,73 @@ public class BuyCommand implements CommandExecutor {
 
                 //Check first argument
                 if (!NumberUtils.isNumber(args[0])) {
-                    playerSender.sendMessage(ERROR_COLOR + "The provided amount you'd like to buy is not a number.");
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to buy items.");
                     return true;
                 }
 
                 if (args[0].contains(".")) {
-                    playerSender.sendMessage(ERROR_COLOR + "You can only buy full, intact, unbroken items.");
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to buy items.");
                     return true;
                 }
 
                 //Check second argument
-                Material material = Material.matchMaterial(args[1].replace(" ", "_").toUpperCase());
-                if (material == null) {
-                    playerSender.sendMessage(ERROR_COLOR + "The item you are looking for doesn't exist.");
-                    Material[] materials = HelperMethods.getNearestMaterials(args[1], 3);
-                    if (materials == null || materials.length == 0) {
-                        playerSender.sendMessage(ERROR_COLOR + "Could not find a material close to your search.");
-                        return true;
-                    }
-                    String[] materialNames = new String[materials.length];
-                    for (int i = 0; i < materialNames.length; i++) {
-                        if(materials[i] == null)
-                            break;
-                        materialNames[i] = materials[i].getKey().getKey().toLowerCase();
-                    }
-                    String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ");
-                    playerSender.sendMessage(ERROR_COLOR + "Did you possibly mean to buy one of these items?: " + builder);
-                    return true;
-                }
+                ItemStack ingredient = SellCommand.getItem(playerSender, args[1].substring(0,1).toUpperCase() + args[1].substring(1).toLowerCase());
+                if (ingredient == null)
+                    return false;
 
                 //Check third argument
                 if (!NumberUtils.isNumber(args[2])) {
-                    playerSender.sendMessage(ERROR_COLOR + "The limit you provided is not a number.");
+                    playerSender.sendMessage(ChatColor.RED + "/buy (amount) (item) (limit)");
                     return true;
                 }
 
                 //User input restrictions passed
                 int amount = Integer.parseInt(args[0]);
+                if (amount <= 0) {
+                    playerSender.sendMessage(ChatColor.RED + "You must use positive integers to buy items.");
+                    return false;
+                }
                 double limit = new BigDecimal(args[2]).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 Bank buyerBank = Bank.wrap(playerUUID);
 
                 //The limit is higher than what you have in your bank
                 if (limit > buyerBank.getCurrency()) {
-                    playerSender.sendMessage(ERROR_COLOR + "You don't have enough currency for that limit.");
+                    playerSender.sendMessage(ChatColor.RED + "You don't have enough currency for that limit.");
                     return false;
                 }
 
 
                 List<Sale> sortedSales = new ArrayList<>();
                 for (Sale sale : Sale.getSales()) {
-                    if (sale.getMaterial().equals(material)) {
+                    if (sale.getItemStack().getType().equals(ingredient.getType())) {
+                        if (ingredient.getItemMeta() instanceof PotionMeta) {
+                            if (!(sale.getItemStack().getItemMeta() instanceof PotionMeta))
+                                continue;
+
+                            PotionMeta saleMeta = (PotionMeta) sale.getItemStack().getItemMeta();
+                            if (!((PotionMeta) saleMeta).getBasePotionData().equals(((PotionMeta) ingredient.getItemMeta()).getBasePotionData()))
+                                continue;
+                        }
                         sortedSales.add(sale);
                     }
                 }
 
+                String name = ingredient.getType().name().replace("_", " ").toLowerCase() + " ";
+                name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
+                if(ingredient.getItemMeta() instanceof PotionMeta) {
+                    name = ((PotionMeta) ingredient.getItemMeta()).getBasePotionData().getType().name();
+                    name = name.substring(0,1).toUpperCase() + name.substring(1).toUpperCase() + " ";
+                    if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
+                        name += "extended ";
+                    else if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
+                        name += "2 Potion ";
+                    else
+                        name+= "Potion ";
+                }
+
                 //The material we are searching for is out of stock.
                 if (sortedSales.isEmpty()) {
-                    playerSender.sendMessage(ERROR_COLOR + "Nobody is currently selling the item, \"" + material.getKey().getKey().toLowerCase().replace("_", " ") + "\".");
+                    playerSender.sendMessage(ChatColor.RED + "The economy has no " + name + "left.");
                     return false;
                 }
 
@@ -122,7 +135,7 @@ public class BuyCommand implements CommandExecutor {
                     //The temporary amount we will hold is one more. The initial condition is starting with one purchase.
                     int tempTotalAmountCounter = amountCounter + 1;
                     //The temporary amount we will hold is the starting price. Initial condition is sale price for individual item.
-                    double tempTotalPriceCounter = priceCounter + sale.getPrice();
+                    double tempTotalPriceCounter = priceCounter + sale.getPrice();//new BigDecimal(priceCounter + sale.getPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 
                     //The item being tracked. If null entire time, just don't add it. We don't need to give the player an empty item.
                     ItemStack itemPurchased = null;
@@ -133,42 +146,53 @@ public class BuyCommand implements CommandExecutor {
                         //We are getting more than we need, stop!!
                         //OR
                         //We don't have money to keep going. STOP!!
-                        if (tempTotalAmountCounter > amount || tempTotalPriceCounter > limit)
+
+                        if (tempTotalAmountCounter > amount || tempTotalPriceCounter > limit) {
+                            tempTotalAmountCounter--;
+                            tempTotalPriceCounter -= sale.getPrice();
                             break itemLoop;
+                        }
 
                         //Less than or equal the limit, we are able to make the purchase.
 
                         //In theory, we 'purchased' it. Now promise the item.
-                        if (itemPurchased == null)
-                            itemPurchased = new ItemStack(sale.getMaterial(), 1); //Only buying one!
-                        else
+                        if (itemPurchased == null) {
+                            itemPurchased = new ItemStack(sale.getItemStack().getType(), 1); //Only buying one!
+                            if (ingredient.getItemMeta() instanceof PotionMeta) {
+                                itemPurchased.setItemMeta(ingredient.getItemMeta());
+                            }
+                        } else
                             itemPurchased.setAmount(itemPurchased.getAmount() + 1);
 
-                        //
-
-                        tempTotalAmountCounter = tempTotalAmountCounter + 1; //Incrementor
-                        tempTotalPriceCounter = priceCounter + (sale.getPrice() * (i + 2)); //Incrementor
+                        if (i != sale.getAmount() - 1) {
+                            tempTotalAmountCounter = tempTotalAmountCounter + 1; //Incrementor
+                            tempTotalPriceCounter =  tempTotalPriceCounter + sale.getPrice(); //new BigDecimal(tempTotalPriceCounter + sale.getPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue(); //Incrementor
+                        }
                     }
 
                     //If the item was purchased, then make sure we update the sale to show the correct item.
                     if (itemPurchased != null) {
                         itemsPurchased.add(itemPurchased); //Add to array of items purchased to give to player.
                         saleMap.put(sale, sale.getAmount() - itemPurchased.getAmount()); //For updating purposes after the loop ends.
-                        priceCounter = tempTotalPriceCounter;
+                        priceCounter = tempTotalPriceCounter; //new BigDecimal(tempTotalPriceCounter).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
                         amountCounter = tempTotalAmountCounter;
+
                     } //The item was never purchased, this means that the person could not afford it or we've reached the maximum quantity.
                     else break;
                 }
 
                 //Could not afford
                 if (itemsPurchased.isEmpty()) {
-                    playerSender.sendMessage(ERROR_COLOR + "You could not afford any of the items in the market.");
+                    playerSender.sendMessage(ChatColor.RED + "You could not afford any of the items in the market.");
                     return false;
                 }
 
                 //Not enough items but its okay.
                 if (amount > amountCounter) {
-                    playerSender.sendMessage(ERROR_COLOR + "You didn't receive the amount you requested for. However, enjoy a portion of what you were able to purchase.");
+                 //   playerSender.sendMessage(ChatColor.RED + "You didn't receive the amount you requested for. However, enjoy a portion of what you were able to purchase.");
+                    playerSender.sendMessage(ChatColor.RED + "Only " + amountCounter + " " + name +
+                            "remains in the economy.");
+                    return false;
                 }
 
                 //Give items and count items dropped
@@ -178,14 +202,14 @@ public class BuyCommand implements CommandExecutor {
                     HashMap<Integer, ItemStack> droppedItem = playerSender.getInventory().addItem(itemPurchased);
                     if (droppedItem != null && !droppedItem.isEmpty()) {
                         droppedItems.add(droppedItem);
-                       ItemStack itemStack = droppedItem.get(0);
-                       droppedItemsNum += itemStack.getAmount();
+                        ItemStack itemStack = droppedItem.get(0);
+                        droppedItemsNum += itemStack.getAmount();
                     }
                 }
 
                 //Drop items if need be.
                 if (droppedItems.size() > 0) {
-                    playerSender.sendMessage(STANDARD_COLOR + "You were not able to fit " + droppedItemsNum + " " + material.getKey().getKey().toLowerCase().replace("_", " ") + " into your inventory. \nIt has been dropped on the floor.");
+                    playerSender.sendMessage(ChatColor.RED + "You were not able to fit " + droppedItemsNum + " " + name + "into your inventory. They have been dropped on the ground.");
 
                     for (HashMap<Integer, ItemStack> map : droppedItems) {
                         for (ItemStack droppedItem : map.values()) {
@@ -196,32 +220,34 @@ public class BuyCommand implements CommandExecutor {
 
 
                 //Update sales.
-                for (Iterator<Map.Entry<Sale, Integer>> entryIterator = saleMap.entrySet().iterator(); entryIterator.hasNext();) {
+                for (Iterator<Map.Entry<Sale, Integer>> entryIterator = saleMap.entrySet().iterator(); entryIterator.hasNext(); ) {
                     Map.Entry<Sale, Integer> entry = entryIterator.next();
                     Sale sale = entry.getKey();
                     int leftoverAmount = entry.getValue();
 
                     Bank seller = Bank.wrap(sale.getSellerUUID());
-                    if (leftoverAmount == 0) {
-                        entryIterator.remove();
-                        FileManager.removeFile(sale);
-                    } else {
-                        sale.setAmount(leftoverAmount);
-                    }
-                    BigDecimal addedCurrency = new BigDecimal(seller.getCurrency()+(sale.getAmount()*sale.getPrice()));
-                    seller.setCurrency(addedCurrency.doubleValue());
+
+                    double addedCurrencyRaw = ((sale.getAmount() - leftoverAmount) * sale.getPrice());
+                    BigDecimal addedCurrency = new BigDecimal(addedCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    double newCurrencyRaw = seller.getCurrency() + addedCurrencyRaw;
+                    BigDecimal newCurrency = new BigDecimal(newCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+                    seller.setCurrency(newCurrencyRaw);
 
                     OfflinePlayer sellerPlayer = Bukkit.getOfflinePlayer(seller.getPlayerUUID());
-                    if(sellerPlayer.isOnline())
-                        sellerPlayer.getPlayer().sendMessage(STANDARD_COLOR + "You've made " + MONEY_COLOR + addedCurrency + STANDARD_COLOR + " from selling " + sale.getMaterial().getKey().getKey().toLowerCase().replace("_", " ") + ".");
-
+                    if (sellerPlayer.isOnline())
+                        sellerPlayer.getPlayer().sendMessage(ChatColor.GOLD + "A player has bought " + (sale.getAmount() - leftoverAmount) + " " + name + "from you for " +  addedCurrencyRaw + " gold. Your new balance is " + seller.getCurrency() + ".");
+                    sale.setAmount(leftoverAmount);
                 }
 
-                //Update banks
+//Update
 
-                BigDecimal removedCurrency = new BigDecimal(buyerBank.getCurrency()-priceCounter);
-                buyerBank.setCurrency(removedCurrency.doubleValue()); //Takes money away!!!!
-                playerSender.sendMessage(STANDARD_COLOR + "You've purchased " + amountCounter + " " + material.getKey().getKey().toLowerCase().replace("_", " ") + " for a total of " + MONEY_COLOR +  priceCounter + ".");
+                double removedCurrencyRaw = buyerBank.getCurrency() - priceCounter;
+                BigDecimal removedCurrency = new BigDecimal(removedCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal price = new BigDecimal(priceCounter).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+                buyerBank.setCurrency(removedCurrencyRaw); //Takes money away!!!!
+                playerSender.sendMessage(ChatColor.GRAY + "You have bought " + amountCounter + " " + name + "for " + priceCounter + ". Your new balance is " + buyerBank.getCurrency() + ".");
 
                 //I think we are done o_o
 

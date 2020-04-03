@@ -2,22 +2,18 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardBanker;
+import com.github.kotooriiii.npc.ShardBanker;
+import net.milkbowl.vault.chat.Chat;
 import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.UUID;
@@ -35,18 +31,17 @@ public class WithdrawCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("withdraw")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    playerSender.sendMessage(ERROR_COLOR + "You must request an amount you'd like to withdraw. Example: " + COMMAND_COLOR + "/withdraw (amount)" + ERROR_COLOR + ".");
+                    playerSender.sendMessage(ChatColor.RED + "You must request an amount you'd like to withdraw. Example: " + "/withdraw (amount)" + ".");
 
 
                 } else if (args.length == 1) {
                     if (!NumberUtils.isNumber(args[0])) {
-                        playerSender.sendMessage(ERROR_COLOR + "The provided amount is not a number.");
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
                         return true;
                     }
 
-                    if(args[0].contains("."))
-                    {
-                        playerSender.sendMessage(ERROR_COLOR + "You can only withdraw full, intact, unbroken gold ingots. We assure you quality service!");
+                    if (args[0].contains(".")) {
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
                         return true;
                     }
 
@@ -56,7 +51,7 @@ public class WithdrawCommand implements CommandExecutor {
                     final Location playerLocation = playerSender.getLocation();
                     ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
                     if (banker == null || !banker.isSocialDistance(playerLocation)) {
-                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby!!!");
+                        playerSender.sendMessage(ChatColor.RED + "No banker nearby.");
                         return true;
                     }
 
@@ -66,34 +61,29 @@ public class WithdrawCommand implements CommandExecutor {
                     leftover = Double.valueOf(df.format(leftover));
 
                     if (leftover < 0) {
-                        playerSender.sendMessage(ERROR_COLOR + "You don't have that much money in your bank! We don't offer credit cards either.");
+                        playerSender.sendMessage(ChatColor.RED + "You tried to withdraw " + Double.valueOf(df.format(withdraw)) + " gold, but your bank only has " + Double.valueOf(df.format(currency)) + ".");
                         return true;
                     }
 
-                    bank.setCurrency(leftover);
-                    FileManager.write(bank);
-                    playerSender.sendMessage(STANDARD_COLOR + "You've withdrawn " + MONEY_COLOR + df.format(withdraw) +STANDARD_COLOR + ". You have " + MONEY_COLOR + df.format(leftover) + STANDARD_COLOR + " left in your bank.");
-
                     int ingotsNum = (int) Math.floor(withdraw);
-                    //int nuggetsNum = (int) withdraw%100;
                     HashMap<Integer, ItemStack> itemStacks = playerSender.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, ingotsNum));
-                    int amountDropped=0;
-                    for(Integer integer : itemStacks.keySet())
-                    {
+                    int amountDropped = 0;
+                    for (Integer integer : itemStacks.keySet()) {
                         ItemStack itemStack = itemStacks.get(integer);
                         amountDropped += itemStack.getAmount();
-                        playerLocation.getWorld().dropItem(playerLocation, itemStack);
                     }
 
-                    if(amountDropped>0)
-                    {
-                        playerSender.sendMessage(STANDARD_COLOR + "You did not have enough inventory space for your withdrawal." + MONEY_COLOR + amountDropped + STANDARD_COLOR + " gold ingots been dropped on the ground.");
-
+                    if (amountDropped > 0) {
+                        playerSender.sendMessage(ChatColor.RED + "Your inventory is full. " + amountDropped + " gold was kept in your bank account.");
+                        bank.setCurrency(leftover+amountDropped);
+                    } else {
+                        playerSender.sendMessage(ChatColor.GRAY + "You have withdrawn " + df.format(withdraw) + " gold from your bank account.");
+                        bank.setCurrency(leftover);
                     }
-
+                    FileManager.write(bank);
 
                 } else {
-                    playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments. Did you mean " + COMMAND_COLOR + " /withdraw (amount)" + ERROR_COLOR + "?");
+                    playerSender.sendMessage(ChatColor.RED + "You provided too many arguments. Did you mean " + " /withdraw (amount)" + "?");
                 }
             }
         }

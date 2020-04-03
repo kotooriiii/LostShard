@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -71,7 +72,7 @@ public class GoldArmorListener implements Listener {
             return;
 
         Player player = (Player) entity;
-        ItemStack leggings = player.getInventory().getChestplate();
+        ItemStack leggings = player.getInventory().getLeggings();
         //helmet must be gold
         if (leggings == null || leggings.getType() != Material.GOLDEN_LEGGINGS)
             return;
@@ -93,7 +94,7 @@ public class GoldArmorListener implements Listener {
             return;
 
         Player player = (Player) entity;
-        ItemStack boots = player.getInventory().getChestplate();
+        ItemStack boots = player.getInventory().getBoots();
         //helmet must be gold
         if (boots == null || boots.getType() != Material.GOLDEN_BOOTS)
             return;

@@ -3,6 +3,8 @@ package com.github.kotooriiii.data;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.plots.Plot;
 import org.bukkit.ChatColor;
 import org.bukkit.permissions.Permission;
 
@@ -51,6 +53,13 @@ public final class Maps {
     public static ArrayList<HostilityPlatform> platforms = new ArrayList<>();
     //ACTIVE GAMES OF HOSTILITY. These are the matches players are playing currently.
     public static ArrayList<HostilityMatch> activeHostilityGames = new ArrayList<>();
+    //A player is trying to create a plot and have unlimited time this lets them create a staff plot like order, chaos, or hostility.
+    public static HashMap<UUID, Object[]> staffPlotCreator = new HashMap<>();
+    //A player UUID is trying to teleport to spawn and can't move.
+    public static ArrayList<UUID> spawnTimer = new ArrayList<>();
+
+    //A player UUID toggled hud off.
+    public static ArrayList<UUID> hudContainer = new ArrayList<>();
 
 
     public final static ChatColor ERROR_COLOR = ChatColor.DARK_RED;
@@ -64,6 +73,6 @@ public final class Maps {
     public final static ChatColor COMMAND_COLOR = ChatColor.GOLD;
     public final static ChatColor RANK_COLOR = ChatColor.DARK_GREEN;
 
-    public final static Permission STAFF_PERMISSION = new Permission("lostshardsk.staff");
+    public final static Permission STAFF_PERMISSION = new Permission("lostshard.staff");
 
 }

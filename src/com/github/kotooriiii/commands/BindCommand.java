@@ -1,18 +1,13 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
-import com.github.kotooriiii.wands.Wand;
-import com.github.kotooriiii.wands.WandType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import com.github.kotooriiii.sorcery.wands.Wand;
+import com.github.kotooriiii.sorcery.wands.WandType;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -47,17 +42,21 @@ public class BindCommand implements CommandExecutor {
                     for (WandType wandType : WandType.values()) {
 
                         // Check if wand is the one requested
-                        if (wandType.getName().equalsIgnoreCase(namebuilder)) {
-                            // Create wand item
-                            wand =  new Wand(wandType);
-                            isFound=true;
-                            break;
+                        for(String iname : wandType.getNames())
+                        {
+                            if(iname.equalsIgnoreCase(namebuilder))
+                            {
+                                // Create wand item
+                                wand =  new Wand(wandType);
+                                isFound=true;
+                                break;
+                            }
                         }
                     }
 
                     if(!isFound)
                     {
-                        playerSender.sendMessage(ERROR_COLOR + "Are you trying to make a new spell? We can't find \"" + namebuilder + "\" in our books.");
+                        playerSender.sendMessage(ERROR_COLOR + "That spell does not exist.");
                         return false;
                     }
 

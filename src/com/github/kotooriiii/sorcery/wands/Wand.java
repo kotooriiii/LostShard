@@ -1,34 +1,34 @@
-package com.github.kotooriiii.wands;
+package com.github.kotooriiii.sorcery.wands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.hostility.HostilityZone;
+import com.github.kotooriiii.skills.listeners.BrawlingListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.google.common.base.Function;
-import com.sk89q.worldedit.extension.platform.Platform;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.activeHostilityGames;
+import static com.github.kotooriiii.util.HelperMethods.localBroadcast;
 
 public class Wand {
 
@@ -50,7 +50,7 @@ public class Wand {
         ItemMeta wandMeta = wandItem.getItemMeta();
 
         // Set stick name based on input
-        wandMeta.setDisplayName(type.getChatColor() + type.getName() + " Wand");
+        wandMeta.setDisplayName(type.getChatColor() + type.getNames()[0] + " Wand");
 
         // Add stick enchantment
         Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, "GlowCustomEnchant"));
@@ -61,7 +61,7 @@ public class Wand {
         lore.add(type.getChatColor() + "Left click to use this wand.");
         lore.add(type.getChatColor() + "The wand has a cooldown of " + type.getCooldown() + " seconds.");
         lore.add(type.getChatColor() + "The wand has a mana cost of " + type.getManaCost() + " mana.");
-        lore.add("ID:" + type.getName());
+        lore.add("ID:" + type.getNames()[0]);
         wandMeta.setLore(lore);
         wandItem.setItemMeta(wandMeta);
         // Return the finished want item
@@ -74,7 +74,7 @@ public class Wand {
             return false;
         for (WandType type : WandType.values()) {
             String lastLine = itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size() - 1);
-            if (lastLine.equals("ID:" + type.getName()))
+            if (lastLine.equals("ID:" + type.getNames()[0]))
                 return true;
         }
         return false;
@@ -86,8 +86,8 @@ public class Wand {
             return null;
         for (WandType type : WandType.values()) {
             String lastLine = itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size() - 1);
-            if (lastLine.equals("ID:" + type.getName()))
-                return WandType.matchWandType(type.getName());
+            if (lastLine.equals("ID:" + type.getNames()[0]))
+                return WandType.matchWandType(type.getNames()[0]);
         }
         return null;
     }
@@ -185,7 +185,17 @@ public class Wand {
             Object[] properties = wandOnCooldown.get(player.getUniqueId());
             DecimalFormat df = new DecimalFormat("##.##");
             double timeOnCooldown = ((Double) properties[1]).doubleValue() / 20;
-            player.sendMessage(ERROR_COLOR + "Your wand is on cooldown! You have " + df.format(timeOnCooldown) + " seconds before you can cast another spell!");
+            BigDecimal bd = new BigDecimal(timeOnCooldown).setScale(0, RoundingMode.UP);
+            int value = bd.intValue();
+            if (value == 0)
+                value = 1;
+
+            String time = "seconds";
+            if (value == 1) {
+                time = "second";
+            }
+
+            player.sendMessage(ERROR_COLOR + "You must wait " + value + " " + time + " before you can cast another spell.");
             return true;
         }
         return false;
@@ -194,24 +204,22 @@ public class Wand {
 
     public void cast(Player player) {
 
-        // Don't execute any action if the player is on cooldown
+        if(BrawlingListener.isStunned(player.getUniqueId()))
+        {
+            player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
+            return;
+        }
 
+        // Don't execute any action if the player is on cooldown
         if (isCooldown(player))
             return;
-
 
         Stat stat = Stat.getStatMap().get(player.getUniqueId());
 
         if (stat.getMana() < type.getManaCost()) {
-            player.sendMessage(ERROR_COLOR + "You need " + (type.getManaCost() - stat.getMana()) + " more mana to cast that spell!");
+            player.sendMessage(ERROR_COLOR + "You don't have enough mana to cast " + this.type.getNames()[0] + ".");
             return;
         }
-
-
-//        if (BrawlListener.isStunnedMap.containsKey(player.getUniqueId()) && BrawlListener.isStunnedMap.get(player.getUniqueId())) {
-//            player.sendMessage(ChatColor.DARK_RED + "You can not cast spells when you are stunned");
-//            return;
-//        }
 
         // Run the wand action
         if (!executeSpell(player))
@@ -219,7 +227,7 @@ public class Wand {
         stat.setMana(stat.getMana() - type.getManaCost());
         removeIngredients(player);
 
-        localBroadcast(player);
+        localBroadcast(player, type.getNames()[0]);
 
         // Add player to cooldown list
         wandOnCooldown.put(player.getUniqueId(), new Object[]{type, new Double(type.getCooldown() * 20)});
@@ -254,12 +262,12 @@ public class Wand {
                 List<Block> lineOfSightFireball = player.getLineOfSight(null, 4);
 
                 // Only spawn fireball if there is some room infront of player
-                if (lineOfSightFireball.size() < 4) {
-                    player.sendMessage(ERROR_COLOR + "You need more space to cast that spell!");
-                    return false;
-                }
+//                if (lineOfSightFireball.size() < 4) {
+//                    player.sendMessage(ERROR_COLOR + "You need more space to cast that spell!");
+//                    return false;
+//                }
                 // Get location of block infront of player
-                Location targetLocationFireball = lineOfSightFireball.get(3).getLocation();
+                Location targetLocationFireball = lineOfSightFireball.get(lineOfSightFireball.size() - 1).getLocation();
 
                 // Calculate fireball position from block position
                 // Take the player rotation so it flies in the correct direction
@@ -272,8 +280,9 @@ public class Wand {
                         player.getLocation().getPitch());
 
                 // Spawn fireball
-                player.getWorld().spawnEntity(fireballLocation, EntityType.FIREBALL);
-
+                Entity en = player.getWorld().spawnEntity(fireballLocation, EntityType.FIREBALL);
+                en.setCustomNameVisible(false);
+                en.setCustomName(player.getName());
                 break;
             case TELEPORT:
                 final int rangeTeleport = 20;
@@ -282,12 +291,14 @@ public class Wand {
                     player.sendMessage(ERROR_COLOR + "You need more room to cast this spell!");
                     return false;
                 }
-                if (!new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() + 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR) || !new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() + 2, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
-                    player.sendMessage(ERROR_COLOR + "You can't teleport in this location! You will lose your head!");
+                if (!new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() + 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR) && !new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
+                    player.sendMessage(ERROR_COLOR + "Invalid target.");
                     return false;
+                } else if (new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
+                    teleportLocation.add(0, -1, 0);
                 }
 
-                player.teleport(teleportLocation);
+                player.teleport(new Location(teleportLocation.getWorld(), teleportLocation.getBlockX() + 0.5, teleportLocation.getBlockY(), teleportLocation.getBlockZ() + 0.5, player.getLocation().getYaw(), player.getLocation().getPitch()));
                 break;
             case HEALING:
                 double health = player.getHealth();
@@ -298,7 +309,7 @@ public class Wand {
                 break;
             case ICE:
                 // Get blocks in line of sight of player
-                final int rangeIce = 20;
+                final int rangeIce = 32;
                 final int despawnDelayIce = 7;
                 List<Block> lineOfSightBlocks = player.getLineOfSight(null, rangeIce);
 
@@ -306,7 +317,7 @@ public class Wand {
                 final Location centerBlock = lineOfSightBlocks.get(lineOfSightBlocks.size() - 1).getLocation();
                 //Should make it unable to spawn in the air
                 if (centerBlock.getBlock().isEmpty()) {
-                    player.sendMessage(ERROR_COLOR + "This spell must be cast on the ground!");
+                    player.sendMessage(ERROR_COLOR + "Invalid target.");
                     return false;
                 }
 
@@ -315,7 +326,7 @@ public class Wand {
                     centerBlock.add(0, 1, 0);
 
                 if (!hasIceShape(centerBlock, Material.SNOW_BLOCK, block -> block.isEmpty() || block.getType() == Material.LEGACY_LONG_GRASS)) {
-                    player.sendMessage(ERROR_COLOR + "You can't cast that spell on the platform.");
+                    player.sendMessage(ERROR_COLOR + "You can not cast Ice Ball on hostility platforms.");
                     return false;
                 }
                 setIceShape(centerBlock, Material.SNOW_BLOCK, block -> block.isEmpty() || block.getType() == Material.LEGACY_LONG_GRASS);
@@ -330,7 +341,7 @@ public class Wand {
 
                 break;
             case WEB:
-                final int rangeWeb = 30;
+                final int rangeWeb = 32;
                 final int despawnDelayWeb = 7;
                 // Get blocks in line of sight of player
                 List<Block> lineOfSightWeb = player.getLineOfSight(null, rangeWeb);
@@ -339,7 +350,7 @@ public class Wand {
                 final Location centerBlockWeb = lineOfSightWeb.get(lineOfSightWeb.size() - 1).getLocation();
                 //Should make it unable to spawn in the air
                 if (centerBlockWeb.getBlock().isEmpty()) {
-                    player.sendMessage(ERROR_COLOR + "You are out of range to cast this spell.");
+                    player.sendMessage(ERROR_COLOR + "Invalid target.");
                     return false;
                 }
 
@@ -348,7 +359,7 @@ public class Wand {
                     centerBlockWeb.add(0, 1, 0);
 
                 if (!hasWebShape(centerBlockWeb, Material.COBWEB, bottomLeft -> bottomLeft.isEmpty() || bottomLeft.getType() == Material.LEGACY_LONG_GRASS)) {
-                    player.sendMessage(ERROR_COLOR + "You can't cast that spell on the platform.");
+                    player.sendMessage(ERROR_COLOR + "You can not cast Web Field on hostility platforms.");
                     return false;
                 }
 
@@ -369,10 +380,19 @@ public class Wand {
                 // Get target block (last block in line of sight)
                 Location lightningLocation = lineOfSightLightning.get(lineOfSightLightning.size() - 1).getLocation();
                 player.getWorld().strikeLightning(lightningLocation);
+                callPlayerEvent(player, lightningLocation);
                 break;
         }
 
         return true;
+    }
+
+    private void callPlayerEvent(Player attacker, Location location) {
+        for (Player defender : Bukkit.getOnlinePlayers()) {
+            if (defender.getLocation().getBlock().equals(location.getBlock()))
+                Bukkit.getPluginManager().callEvent(new EntityDamageByEntityEvent(attacker
+                        , defender, EntityDamageEvent.DamageCause.CUSTOM, 7));
+        }
     }
 
 
@@ -499,12 +519,29 @@ public class Wand {
     }
 
     public Location teleportLocation(Player player, final int range) {
-        BlockFace face = getBlockFace(player, range);
-        if (face == null)
-            return null;
+
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
+        Block targetBlock = lastTwoTargetBlocks.get(1);
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
+        if (new Location(adjacentBlock.getWorld(), adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()).getBlock().getType() == Material.AIR) {
+            adjacentBlock = new Location(adjacentBlock.getWorld(), targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()).getBlock();
+        }
         return adjacentBlock.getLocation();
+    }
+
+    private Block[] getCornerBlocks(Block block) {
+        Location targetLoc = block.getLocation();
+        Block[] blocks = new Block[8];
+        blocks[0] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
+        blocks[1] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ()).getBlock();
+        blocks[2] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
+        blocks[3] = new Location(targetLoc.getWorld(), targetLoc.getBlockX(), targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
+        blocks[4] = new Location(targetLoc.getWorld(), targetLoc.getBlockX(), targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
+        blocks[5] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
+        blocks[6] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ()).getBlock();
+        blocks[7] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
+
+        return blocks;
     }
 
     public BlockFace getBlockFace(Player player, final int range) {
@@ -515,20 +552,4 @@ public class Wand {
         return targetBlock.getFace(adjacentBlock);
     }
 
-    private void localBroadcast(Player localPlayer) {
-
-
-        ArrayList<Player> players = new ArrayList<>();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getLocation().distance(localPlayer.getLocation()) <= 100)
-                players.add(player);
-        }
-
-        Status status = StatusPlayer.wrap(localPlayer.getUniqueId()).getStatus();
-
-        for (Player lp : players) {
-            lp.sendMessage(status.getChatColor() + localPlayer.getName() + type.getChatColor() + " has cast " + type.getName() + ".");
-        }
-    }
 }

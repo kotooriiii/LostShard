@@ -1,22 +1,13 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.guards.ShardBanker;
-import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -42,7 +33,7 @@ public class BalanceCommand implements CommandExecutor {
 
                     DecimalFormat df = new DecimalFormat("#.##");
                     Bank bank = Bank.getBanks().get(playerUUID);
-                    playerSender.sendMessage(STANDARD_COLOR + "You currently have " + MONEY_COLOR +df.format(bank.getCurrency()) + STANDARD_COLOR + " in your bank account.");
+                    playerSender.sendMessage(ChatColor.GRAY + "You have " + df.format(bank.getCurrency()) + ChatColor.GRAY + " in your bank account.");
 
                 } else {
                     playerSender.sendMessage(ERROR_COLOR + "Did you mean " + COMMAND_COLOR + "/balance" + ERROR_COLOR + "?");

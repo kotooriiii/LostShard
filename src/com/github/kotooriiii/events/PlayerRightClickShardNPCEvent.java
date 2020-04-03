@@ -1,6 +1,6 @@
 package com.github.kotooriiii.events;
 
-        import com.github.kotooriiii.guards.ShardBaseNPC;
+        import com.github.kotooriiii.npc.ShardBaseNPC;
         import org.bukkit.entity.Player;
         import org.bukkit.event.Cancellable;
         import org.bukkit.event.Event;

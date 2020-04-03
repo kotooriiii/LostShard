@@ -3,7 +3,6 @@ package com.github.kotooriiii.hostility;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.util.HelperMethods;
-import javafx.application.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -12,13 +11,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.Serializable;
 import java.text.DateFormat;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.UUID;
-
-import static com.github.kotooriiii.data.Maps.platforms;
 
 public class HostilityPlatform implements Serializable {
 
@@ -26,7 +21,7 @@ public class HostilityPlatform implements Serializable {
 
     private String name;
 
-    private ArrayList<HostilityZone> zones;
+    private ArrayList<Zone> zones;
 
     private int[] time;
 
@@ -37,7 +32,7 @@ public class HostilityPlatform implements Serializable {
     }
 
     public boolean contains(int x, int y, int z) {
-        for (HostilityZone zone : getZones()) {
+        for (Zone zone : getZones()) {
             if (zone.contains(x, y, z)) {
                 return true;
             }
@@ -120,7 +115,7 @@ public class HostilityPlatform implements Serializable {
     }
 
     public boolean contains(Block block) {
-        for (HostilityZone zone : getZones()) {
+        for (Zone zone : getZones()) {
             if (zone.contains(block)) {
                 return true;
             }
@@ -129,7 +124,7 @@ public class HostilityPlatform implements Serializable {
     }
 
     public boolean hasAdjacency(Location location) {
-        for (HostilityZone zone : getZones()) {
+        for (Zone zone : getZones()) {
             if (zone.hasAdjacency(location)) {
                 return true;
             }
@@ -143,11 +138,11 @@ public class HostilityPlatform implements Serializable {
 
     //START BASIC GETTER AND SETTER
 
-    public HostilityZone[] getZones() {
-        return this.zones.toArray(new HostilityZone[this.zones.size()]);
+    public Zone[] getZones() {
+        return this.zones.toArray(new Zone[this.zones.size()]);
     }
 
-    public void addZone(HostilityZone zone) {
+    public void addZone(Zone zone) {
         this.zones.add(zone);
     }
 
@@ -187,7 +182,12 @@ public class HostilityPlatform implements Serializable {
             public void run() {
                 HostilityMatch match = new HostilityMatch(gamePlatform);
                 match.startGame();
-                runCountdown();
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        runCountdown();
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, 20);
             }
         }.runTaskLater(LostShardPlugin.plugin, (long) Math.ceil(initialDelay));
     }
@@ -237,9 +237,19 @@ public class HostilityPlatform implements Serializable {
     }
 
     public String getExactTimeLeft() {
+
+        return toBetterFormat();
+    }
+
+    public String toBetterFormat()
+    {
         Calendar from = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         Calendar to = getMatchCalendar();
-        return getTimeLeft(from, to);
+        String[] splitTime =  getTimeLeft(from, to).split(", ");
+        if(splitTime.length == 1)
+            return splitTime[0];
+
+        return splitTime[0] + " and " + splitTime[1];
     }
 
     private String getTimeLeft(Calendar from, Calendar to) {
@@ -308,7 +318,7 @@ public class HostilityPlatform implements Serializable {
         if (words.length == 1)
             return result;
         else {
-            words[words.length - 1] = "and " + words[words.length - 1];
+            words[words.length - 1] = "" + words[words.length - 1];
 
             return HelperMethods.stringBuilder(words, 0, ", ");
         }

@@ -1,18 +1,11 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.events.PlayerLeftClickShardNPCEvent;
-import com.github.kotooriiii.events.PlayerRightClickShardNPCEvent;
-import com.github.kotooriiii.guards.ShardBanker;
-import com.github.kotooriiii.guards.ShardGuard;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.*;
 
 import java.util.ArrayList;
 import java.util.UUID;

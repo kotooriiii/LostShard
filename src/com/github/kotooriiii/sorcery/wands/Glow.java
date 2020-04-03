@@ -1,4 +1,4 @@
-package com.github.kotooriiii.wands;
+package com.github.kotooriiii.sorcery.wands;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
