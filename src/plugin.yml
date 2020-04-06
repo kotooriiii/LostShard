@@ -77,12 +77,11 @@ commands:
   addtitle:
 
   #skill stuff
-  setlvl:
   archery:
-  swords:
+  swordsmanship:
   mining:
   fishing:
-  addLoot:
+
   smithing:
   smelt:
   enhance:
@@ -90,10 +89,16 @@ commands:
   power:
   sharpen:
   repair:
+
   taming:
+  pets:
+
   brawling:
-  setmurdercount:
-  setrank:
+
+  survivalism:
+  camp:
+  track:
+
   skills:
 
   #plot stuff

@@ -2,6 +2,7 @@ package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.channels.ShardChatEvent;
 import com.github.kotooriiii.skills.listeners.BrawlingListener;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,6 +39,16 @@ public class StunListener implements Listener {
         Player player = event.getPlayer();
         if(BrawlingListener.isStunned(player.getUniqueId()))
         {
+            Location fromLoc = event.getFrom();
+            Location toLoc = event.getTo();
+
+            if(fromLoc.getY() > toLoc.getY())
+            {
+                if(fromLoc.getX() != toLoc.getX() || fromLoc.getZ() != toLoc.getZ())
+                    player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
+                event.setTo(new Location(fromLoc.getWorld(), fromLoc.getX(), toLoc.getY(), fromLoc.getZ(), toLoc.getYaw(), toLoc.getPitch()));
+                return;
+            }
             player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
             event.setCancelled(true);
         }

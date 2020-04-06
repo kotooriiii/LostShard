@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.DateFormat;
@@ -203,6 +204,7 @@ public final class HelperMethods {
         }
         return costs[s2.length()];
     }
+
     public static int getDay(String nameOfDay) {
         switch (nameOfDay.toLowerCase()) {
             case "mon":
@@ -342,5 +344,18 @@ public final class HelperMethods {
         return null;
     }
 
+    public static boolean isCarryingSword(Player player) {
+        ItemStack item = player.getInventory().getItemInMainHand();
+        switch (item.getType()) {
+            case DIAMOND_SWORD:
+            case GOLDEN_SWORD:
+            case IRON_SWORD:
+            case STONE_SWORD:
+            case WOODEN_SWORD:
+                return true;
+            default:
+                return false;
+        }
+    }
 
 }

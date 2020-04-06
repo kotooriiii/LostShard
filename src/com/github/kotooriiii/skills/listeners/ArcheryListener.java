@@ -145,11 +145,11 @@ public class ArcheryListener implements Listener {
         double randomValue = Math.random();
 
         if (randomValue <= chance) {
-            if (defender.getHealth() - 5 <= 0) {
+            if (defender.getHealth() - 10 <= 0) {
                 defender.setHealth(0.5);
             }
             else {
-                defender.setHealth(defender.getHealth()-5);
+                defender.setHealth(defender.getHealth()-10);
             }
 
             arrow.remove();

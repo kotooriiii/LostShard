@@ -16,6 +16,9 @@ import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.SkillUpdateListener;
+import com.github.kotooriiii.skills.commands.CampCommand;
+import com.github.kotooriiii.skills.commands.PetsCommand;
+import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
@@ -123,7 +126,7 @@ public class LostShardPlugin extends JavaPlugin {
         StatusPlayer.getPlayerStatus().clear();
         Stat.getStatMap().clear();
         Plot.getPlayerPlots().clear();
-        ;
+
 
 
         //SKILLS
@@ -181,6 +184,9 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("hud").setExecutor(new HUDCommand());
         getCommand("mark").setExecutor(new MarkCommand());
         getCommand("cast").setExecutor(new CastCommand());
+        getCommand("pets").setExecutor(new PetsCommand());
+        getCommand("camp").setExecutor(new CampCommand());
+        getCommand("track").setExecutor(new TrackCommand());
 
 
     }

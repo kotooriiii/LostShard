@@ -702,9 +702,25 @@ public class Plot implements Serializable {
         return false;
     }
 
+    public static boolean isStandingOnPlot(Location location) {
+        for (Plot plot : allPlots) {
+            if (plot.contains(location))
+                return true;
+        }
+        return false;
+    }
+
     public static Plot getStandingOnPlot(Player player) {
         for (Plot plot : allPlots) {
             if (plot.contains(player))
+                return plot;
+        }
+        return null;
+    }
+
+    public static Plot getStandingOnPlot(Location location) {
+        for (Plot plot : allPlots) {
+            if (plot.contains(location))
                 return plot;
         }
         return null;
