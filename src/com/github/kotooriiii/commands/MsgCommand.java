@@ -1,7 +1,6 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.util.HelperMethods;
-import javafx.application.Platform;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -17,12 +16,10 @@ public class MsgCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
-        if(commandSender instanceof Player)
-        {
+        if (commandSender instanceof Player) {
             final Player playerSender = (Player) commandSender;
 
-            if(args.length < 2)
-            {
+            if (args.length < 2) {
                 playerSender.sendMessage(ERROR_COLOR + "The proper usage of the command is: " + COMMAND_COLOR + "/msg (username) (message)" + ERROR_COLOR + ".");
                 return false;
             }
@@ -30,14 +27,12 @@ public class MsgCommand implements CommandExecutor {
             String name = args[0];
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-            if(!offlinePlayer.hasPlayedBefore())
-            {
+            if (!offlinePlayer.hasPlayedBefore()) {
                 playerSender.sendMessage(ERROR_COLOR + "The player you are looking for has never set foot in this server.");
                 return false;
             }
 
-            if(!offlinePlayer.isOnline())
-            {
+            if (!offlinePlayer.isOnline()) {
                 playerSender.sendMessage(ERROR_COLOR + "The player you are looking for is not online.");
                 return false;
             }
@@ -49,8 +44,6 @@ public class MsgCommand implements CommandExecutor {
             playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
             receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
         }
-
-
 
 
         return true;

@@ -177,12 +177,15 @@ public class TamingListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) entity;
         Egg egg = (Egg) projectile;
 
-        if (shooter.getLevel() < 30)
-            return;
+        //todo remove comments
+//        if (shooter.getLevel() < 30)
+//            return;
+
         if (SkillPlayer.wrap(shooter.getUniqueId()).getTaming().getLevel() < 50)
             return;
-        //Passive and monsters
 
+
+        //Passive and monsters
         if (livingEntity instanceof Tameable) {
             if (((Tameable) livingEntity).isTamed() && !((Tameable) livingEntity).getOwner().getUniqueId().equals(shooter.getUniqueId()))
                 return;
@@ -207,7 +210,8 @@ public class TamingListener implements Listener {
 
 
         applyPokeball(shooter, livingEntity, egg, chance);
-        shooter.setLevel(shooter.getLevel() - 30);
+        //todo remove xp
+    //    shooter.setLevel(shooter.getLevel() - 30);
         addXP(shooter, entity, 100);
     }
 
@@ -234,7 +238,7 @@ public class TamingListener implements Listener {
                 return;
 
             egg.remove();
-            entity.remove(); //todo does the entity die naturally?
+            entity.remove();
             shooter.sendMessage(ChatColor.RED + "The " + entity.getName().toLowerCase().replace("_", " ") + " has drained your experience.");
             HashMap<Integer, ItemStack> map = shooter.getInventory().addItem(spawnEgg);
             if (!map.isEmpty()) {
@@ -356,6 +360,17 @@ public class TamingListener implements Listener {
             default:
                 return false;
 
+
+            //todo might do something custom with values down here v
+            case ILLUSIONER:
+            case GIANT:
+            case ENDER_DRAGON:
+            case IRON_GOLEM:
+            case SNOWMAN:
+            case WITHER:
+                return false;
+
+
             case ELDER_GUARDIAN:
             case WITHER_SKELETON:
             case STRAY:
@@ -366,11 +381,9 @@ public class TamingListener implements Listener {
             case EVOKER:
             case VEX:
             case VINDICATOR:
-            case ILLUSIONER:
             case CREEPER:
             case SKELETON:
             case SPIDER:
-            case GIANT:
             case ZOMBIE:
             case SLIME:
             case GHAST:
@@ -380,8 +393,6 @@ public class TamingListener implements Listener {
             case SILVERFISH:
             case BLAZE:
             case MAGMA_CUBE:
-            case ENDER_DRAGON:
-            case WITHER:
             case PHANTOM:
             case WITCH:
             case ENDERMITE:
@@ -394,16 +405,14 @@ public class TamingListener implements Listener {
 
             case DONKEY:
             case MULE:
+            case MUSHROOM_COW:
             case PIG:
             case SHEEP:
             case COW:
             case CHICKEN:
             case SQUID:
             case WOLF:
-            case MUSHROOM_COW:
-            case SNOWMAN:
             case OCELOT:
-            case IRON_GOLEM:
             case BAT:
             case HORSE:
             case RABBIT:
@@ -473,6 +482,17 @@ public class TamingListener implements Listener {
             default:
                 return false;
 
+
+                //todo might do something custom with values down here v
+            case ILLUSIONER:
+            case GIANT:
+            case ENDER_DRAGON:
+            case IRON_GOLEM:
+            case SNOWMAN:
+            case WITHER:
+                return false;
+
+
             case ELDER_GUARDIAN:
             case WITHER_SKELETON:
             case STRAY:
@@ -483,11 +503,9 @@ public class TamingListener implements Listener {
             case EVOKER:
             case VEX:
             case VINDICATOR:
-            case ILLUSIONER:
             case CREEPER:
             case SKELETON:
             case SPIDER:
-            case GIANT:
             case ZOMBIE:
             case SLIME:
             case GHAST:
@@ -497,8 +515,6 @@ public class TamingListener implements Listener {
             case SILVERFISH:
             case BLAZE:
             case MAGMA_CUBE:
-            case ENDER_DRAGON:
-            case WITHER:
             case PHANTOM:
             case WITCH:
             case ENDERMITE:
@@ -509,6 +525,7 @@ public class TamingListener implements Listener {
             case RAVAGER:
                 return false;
 
+            case MUSHROOM_COW:
             case DONKEY:
             case MULE:
             case PIG:
@@ -517,10 +534,7 @@ public class TamingListener implements Listener {
             case CHICKEN:
             case SQUID:
             case WOLF:
-            case MUSHROOM_COW:
-            case SNOWMAN:
             case OCELOT:
-            case IRON_GOLEM:
             case BAT:
             case HORSE:
             case RABBIT:
@@ -590,133 +604,197 @@ public class TamingListener implements Listener {
             case PLAYER:
             default:
                 material = null;
+                break;
 
                 //todo might do something custom with values down here v
             case ILLUSIONER:
             case GIANT:
             case ENDER_DRAGON:
-            case MUSHROOM_COW:
             case IRON_GOLEM:
             case SNOWMAN:
             case WITHER:
                 material = null;
+                break;
 
+
+            case MUSHROOM_COW:
+                material=Material.MOOSHROOM_SPAWN_EGG;
+                break;
             case ELDER_GUARDIAN:
                 material = Material.ELDER_GUARDIAN_SPAWN_EGG;
+                break;
             case WITHER_SKELETON:
                 material = Material.WITHER_SKELETON_SPAWN_EGG;
+                break;
             case STRAY:
                 material = Material.STRAY_SPAWN_EGG;
+                break;
             case HUSK:
                 material = Material.HUSK_SPAWN_EGG;
+                break;
             case ZOMBIE_VILLAGER:
                 material = Material.ZOMBIE_VILLAGER_SPAWN_EGG;
+                break;
             case SKELETON_HORSE:
                 material = Material.SKELETON_HORSE_SPAWN_EGG;
+                break;
             case ZOMBIE_HORSE:
                 material = Material.ZOMBIE_HORSE_SPAWN_EGG;
+                break;
             case EVOKER:
                 material = Material.EVOKER_SPAWN_EGG;
+                break;
             case VEX:
                 material = Material.VEX_SPAWN_EGG;
+                break;
             case VINDICATOR:
                 material = Material.VINDICATOR_SPAWN_EGG;
+                break;
             case CREEPER:
                 material = Material.CREEPER_SPAWN_EGG;
+                break;
             case SKELETON:
                 material = Material.SKELETON_SPAWN_EGG;
+                break;
             case SPIDER:
                 material = Material.SPIDER_SPAWN_EGG;
+                break;
             case ZOMBIE:
                 material = Material.ZOMBIE_SPAWN_EGG;
+                break;
             case SLIME:
                 material = Material.SLIME_SPAWN_EGG;
+                break;
             case GHAST:
                 material = Material.GHAST_SPAWN_EGG;
+                break;
             case PIG_ZOMBIE:
                 material = Material.ZOMBIE_PIGMAN_SPAWN_EGG;
+                break;
             case ENDERMAN:
                 material = Material.ENDERMAN_SPAWN_EGG;
+                break;
             case CAVE_SPIDER:
                 material = Material.CAVE_SPIDER_SPAWN_EGG;
+                break;
             case SILVERFISH:
                 material = Material.SILVERFISH_SPAWN_EGG;
+                break;
             case BLAZE:
                 material = Material.BLAZE_SPAWN_EGG;
+                break;
             case MAGMA_CUBE:
                 material = Material.MAGMA_CUBE_SPAWN_EGG;
+                break;
             case PHANTOM:
                 material = Material.PHANTOM_SPAWN_EGG;
+                break;
             case WITCH:
                 material = Material.WITCH_SPAWN_EGG;
+                break;
             case ENDERMITE:
                 material = Material.ENDERMITE_SPAWN_EGG;
+                break;
             case GUARDIAN:
                 material = Material.GUARDIAN_SPAWN_EGG;
+                break;
             case SHULKER:
                 material = Material.SHULKER_SPAWN_EGG;
+                break;
             case DROWNED:
                 material = Material.DROWNED_SPAWN_EGG;
+                break;
             case PILLAGER:
                 material = Material.PILLAGER_SPAWN_EGG;
+                break;
             case RAVAGER:
                 material = Material.RAVAGER_SPAWN_EGG;
+                break;
             case DONKEY:
                 material = Material.DONKEY_SPAWN_EGG;
+                break;
             case MULE:
                 material = Material.MULE_SPAWN_EGG;
+                break;
             case PIG:
                 material = Material.PIG_SPAWN_EGG;
+                break;
             case SHEEP:
                 material = Material.SHEEP_SPAWN_EGG;
+                break;
             case COW:
                 material = Material.COW_SPAWN_EGG;
+                break;
             case CHICKEN:
                 material = Material.CHICKEN_SPAWN_EGG;
+                break;
             case SQUID:
                 material = Material.SQUID_SPAWN_EGG;
+                break;
             case WOLF:
                 material = Material.WOLF_SPAWN_EGG;
+                break;
             case OCELOT:
                 material = Material.OCELOT_SPAWN_EGG;
+                break;
             case BAT:
                 material = Material.BAT_SPAWN_EGG;
+                break;
             case HORSE:
                 material = Material.HORSE_SPAWN_EGG;
+                break;
             case RABBIT:
                 material = Material.RABBIT_SPAWN_EGG;
+                break;
             case POLAR_BEAR:
                 material = Material.POLAR_BEAR_SPAWN_EGG;
+                break;
             case LLAMA:
                 material = Material.LLAMA_SPAWN_EGG;
+                break;
             case PARROT:
                 material = Material.PARROT_SPAWN_EGG;
+                break;
             case VILLAGER:
                 material = Material.VILLAGER_SPAWN_EGG;
+                break;
             case TURTLE:
                 material = Material.TURTLE_SPAWN_EGG;
+                break;
             case COD:
                 material = Material.COD_SPAWN_EGG;
+                break;
             case SALMON:
                 material = Material.SALMON_SPAWN_EGG;
+                break;
             case PUFFERFISH:
                 material = Material.PUFFERFISH_SPAWN_EGG;
+                break;
             case TROPICAL_FISH:
                 material = Material.TROPICAL_FISH_SPAWN_EGG;
+                break;
             case DOLPHIN:
                 material = Material.DOLPHIN_SPAWN_EGG;
+                break;
             case CAT:
                 material = Material.CAT_SPAWN_EGG;
+                break;
             case PANDA:
                 material = Material.PANDA_SPAWN_EGG;
+                break;
             case TRADER_LLAMA:
                 material = Material.TRADER_LLAMA_SPAWN_EGG;
+                break;
             case WANDERING_TRADER:
                 material = Material.WANDERING_TRADER_SPAWN_EGG;
+                break;
             case FOX:
                 material = Material.FOX_SPAWN_EGG;
+                break;
             case BEE:
                 material = Material.BEE_SPAWN_EGG;
+                break;
+
         }
 
         return new ItemStack(material, 1);
@@ -738,7 +816,7 @@ public class TamingListener implements Listener {
         else if (level == 100)
             maxSize = 5;
         //If we try to add one more wolf, is it allowed?
-        if (wolves.length + 1 >= maxSize) {
+        if (wolves.length + 1 > maxSize) {
             //TOO MUCH
             player.sendMessage(ERROR_COLOR + "You have reached the maximum number of wolves you can capture for your Taming level.");
             return false;

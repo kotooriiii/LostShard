@@ -1,6 +1,7 @@
 package com.github.kotooriiii.skills.commands;
 
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.listeners.TamingListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -22,7 +23,22 @@ public class PetsCommand implements CommandExecutor {
         if (sender instanceof Player) {
             final Player playerSender = (Player) sender;
             if (cmd.getName().equalsIgnoreCase("pets")) {
+
+                if((int) SkillPlayer.wrap(playerSender.getUniqueId()).getTaming().getLevel() < 50)
+                {
+                    playerSender.sendMessage(ERROR_COLOR + "You must be at least level 50 to teleport your pets.");
+                    return false;
+                }
+
+
                 Wolf[] wolves = TamingListener.getWolves(playerSender);
+
+                if(wolves.length == 0)
+                {
+                    playerSender.sendMessage(ERROR_COLOR + "You have no pets.");
+                    return false;
+                }
+
                 for(Wolf wolf : wolves)
                 {
                     wolf.teleport(playerSender);

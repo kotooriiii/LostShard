@@ -89,10 +89,12 @@ public class ArcheryListener implements Listener {
         Player defenderPlayer = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damager = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damager = betterDamageCause.getEntity();
 
         if (damager == null)
             return;
@@ -114,13 +116,16 @@ public class ArcheryListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPEntityDeath(EntityDeathEvent event) {
+
         Entity defenderEntity = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
-        if (damagerCause == null)
-            return;
 
-        Entity damagerEntity = damagerCause.getEntity();
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent) )
+            return;
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damagerEntity = betterDamageCause.getEntity();
 
         if (damagerEntity == null)
             return;
@@ -194,30 +199,33 @@ public class ArcheryListener implements Listener {
         else if (force <= 1)
             damage = 9;
 
-        level = 100; //todo remove this
-        switch (level) {
-            case 100:
-                damage += 4;
-                applyKnockback(damager, defender, arrow, 0.5); //todo change back to 0.2
-                applyPierce(damager, defender, arrow, event, 0.5); //todo change back to 0.15
-                break;
-            case 75:
-                damage += 3;
-                applyKnockback(damager, defender, arrow, 0.15);
-                applyPierce(damager, defender, arrow, event, 0.10);
-                break;
-            case 50:
-                damage += 2;
-                applyKnockback(damager, defender, arrow, 0.10);
-                applyPierce(damager, defender, arrow, event, 0.075);
-                break;
-            case 25:
-                damage += 1;
-                applyKnockback(damager, defender, arrow, 0.07);
-                applyPierce(damager, defender, arrow, event, 0.05);
-                break;
-            default:
-                break;
+        if(level>=100)
+        {
+            damage += 4;
+            applyKnockback(damager, defender, arrow, 0.2);
+            applyPierce(damager, defender, arrow, event, 0.15);
+        }
+        else if(75 <= level && level < 100)
+        {
+            damage += 3;
+            applyKnockback(damager, defender, arrow, 0.15);
+            applyPierce(damager, defender, arrow, event, 0.10);
+        }
+        else if(50 <= level && level < 75)
+        {
+            damage += 2;
+            applyKnockback(damager, defender, arrow, 0.10);
+            applyPierce(damager, defender, arrow, event, 0.075);
+        }
+        else if(25 <= level && level < 50)
+        {
+            damage += 1;
+            applyKnockback(damager, defender, arrow, 0.07);
+            applyPierce(damager, defender, arrow, event, 0.05);
+        }
+        else if(0 <= level && level < 25)
+        {
+
         }
 
         //power

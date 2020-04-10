@@ -88,10 +88,11 @@ public class SwordsmanshipListener implements Listener {
         Player defenderPlayer = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damager = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+        Entity damager = betterDamageCause.getEntity();
 
         if (damager == null)
             return;
@@ -118,13 +119,16 @@ public class SwordsmanshipListener implements Listener {
         Entity defenderEntity = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null ||  !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damagerEntity = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damagerEntity = betterDamageCause.getEntity();
 
         if (damagerEntity == null)
             return;
+
 
         if (!isPlayerDamagerONLY(defenderEntity, damagerEntity))
             return;
@@ -214,25 +218,29 @@ public class SwordsmanshipListener implements Listener {
 
         int damage = (int) event.getDamage(); //todo might need to rework this
 
-        level=100; //todo remove
-        switch (level) {
-            case 100:
-                damage += 4;
-                applyBleed(damager, defender, 1); //todo replace w this val 0.225
-                break;
-            case 75:
-                damage += 3;
-                applyBleed(damager, defender, 0.15);
-                break;
-            case 50:
-                damage += 2;
-                applyBleed(damager, defender, 0.1);
-                break;
-            case 25:
-                damage += 1;
-                applyBleed(damager, defender, 0.05);
-                break;
-            default:
+        if(level>=100)
+        {
+            damage += 4;
+            applyBleed(damager, defender, 0.225);
+        }
+        else if(75 <= level && level < 100)
+        {
+            damage += 3;
+            applyBleed(damager, defender, 0.15);
+        }
+        else if(50 <= level && level < 75)
+        {
+            damage += 2;
+            applyBleed(damager, defender, 0.1);
+        }
+        else if(25 <= level && level < 50)
+        {
+            damage += 1;
+            applyBleed(damager, defender, 0.05);
+        }
+        else if(0 <= level && level < 25)
+        {
+
         }
 
         event.setDamage(damage);

@@ -19,6 +19,9 @@ import com.github.kotooriiii.skills.SkillUpdateListener;
 import com.github.kotooriiii.skills.commands.CampCommand;
 import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
+import com.github.kotooriiii.skills.commands.blacksmithy.HardenCommand;
+import com.github.kotooriiii.skills.commands.blacksmithy.RepairCommand;
+import com.github.kotooriiii.skills.commands.blacksmithy.SmeltCommand;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
@@ -188,11 +191,18 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("camp").setExecutor(new CampCommand());
         getCommand("track").setExecutor(new TrackCommand());
 
+getCommand("repair").setExecutor(new RepairCommand());
+        getCommand("smelt").setExecutor(new SmeltCommand());
+
+        getCommand("harden").setExecutor(new HardenCommand());
+
 
     }
 
     public void registerEvents() {
         PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(new EntityDeathTrackerListener(), this);
+
         pm.registerEvents(new ClanCreatorListener(), this);
         pm.registerEvents(new PlayerLeaveListener(), this);
         pm.registerEvents(new PlayerFriendlyFireHitListener(), this);
@@ -218,6 +228,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new StaffUpdateListener(getLuckPerms()), this);
         pm.registerEvents(new SkillUpdateListener(), this);
         pm.registerEvents(new CastListener(), this);
+
+        pm.registerEvents(new PreventRemovalChunkListener(), this);
 
         pm.registerEvents(new StunListener(), this);
 

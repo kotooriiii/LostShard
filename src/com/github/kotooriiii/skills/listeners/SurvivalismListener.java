@@ -5,25 +5,31 @@ import com.github.kotooriiii.skills.SkillPlayer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.github.kotooriiii.util.HelperMethods.*;
 import static com.github.kotooriiii.util.HelperMethods.getPlayerDamagerONLY;
 
 public class SurvivalismListener implements Listener {
+
+    public final static int TRACKING_XP = 75;
+    public final static int CAMP_XP = 50;
 
     public static class Campfire {
         private Location location;
@@ -34,7 +40,7 @@ public class SurvivalismListener implements Listener {
         private final int HEALING = 1; //half hearts
         private final int DURATION_TICKS = 15 * 20; //seconds
 
-        public static final float MANA_COST = 40;
+        public static final float STAMINA_COST = 40;
         public static final int LEVEL = 25;
         public static final int RANGE = 5;
 
@@ -83,6 +89,7 @@ public class SurvivalismListener implements Listener {
 
             campfireHashMap.put(this.ownerUUID, this);
 
+            addXP(Bukkit.getOfflinePlayer(ownerUUID).getPlayer(), CAMP_XP);
             getLog().setType(Material.OAK_LOG); //set log
             getFireBlock().setType(Material.FIRE); //set fire
 
@@ -94,21 +101,24 @@ public class SurvivalismListener implements Listener {
                 public void run() {
 
                     if (isCancelled() || isDestroyed) {
+                        campfireHashMap.remove(ownerUUID);
                         this.cancel();
                         return;
                     }
 
-                    if (getFireBlock().getType() != Material.FIRE) {
-                        this.cancel();
-                        return;
-                    }
+//                    if (getFireBlock().getType() != Material.FIRE) {
+//                        campfireHashMap.remove(ownerUUID);
+//                        this.cancel();
+//                        return;
+//                    }
 
                     if (counter >= max) {
                         //Timer ran out duration
                         destroy();
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(ownerUUID);
-                        if(offlinePlayer.isOnline())
+                        if (offlinePlayer.isOnline())
                             offlinePlayer.getPlayer().sendMessage(ChatColor.GRAY + "Your camp fire has gone out.");
+                        campfireHashMap.remove(ownerUUID);
                         this.cancel();
                         return;
                     }
@@ -154,15 +164,56 @@ public class SurvivalismListener implements Listener {
         }
     }
 
+    public enum SurvivalistFood {
+
+        MELON(Material.MELON_SLICE, 8),
+        ROTTEN_FLESH(Material.ROTTEN_FLESH, 6),
+        SOUP(Material.MUSHROOM_STEW, 11);
+
+        private Material type;
+        private int foodLevel;
+
+        private SurvivalistFood(Material type, int foodLevel) {
+            this.type = type;
+            this.foodLevel = foodLevel;
+        }
+
+        public int getFoodLevel() {
+            return foodLevel;
+        }
+
+        public Material getType() {
+            return type;
+        }
+
+        public static boolean isSurvivalistFood(Material materialType) {
+            for (SurvivalistFood betterFood : SurvivalistFood.values()) {
+                if (materialType.equals(betterFood.getType()))
+                    return true;
+            }
+            return false;
+        }
+
+        public static SurvivalistFood getSurvivalistFood(Material materialType) {
+            for (SurvivalistFood betterFood : SurvivalistFood.values()) {
+                if (materialType.equals(betterFood.getType()))
+                    return betterFood;
+            }
+            return null;
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPPlayerDeath(PlayerDeathEvent event) {
         Player defenderPlayer = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damager = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damager = betterDamageCause.getEntity();
 
         if (damager == null)
             return;
@@ -183,13 +234,17 @@ public class SurvivalismListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPEntityDeath(EntityDeathEvent event) {
-        Entity defenderEntity = event.getEntity();
+
+        LivingEntity defenderEntity = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
-        if (damagerCause == null)
+
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damagerEntity = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamagerCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damagerEntity = betterDamagerCause.getDamager();
 
         if (damagerEntity == null)
             return;
@@ -197,22 +252,76 @@ public class SurvivalismListener implements Listener {
         if (!isPlayerDamagerONLY(defenderEntity, damagerEntity))
             return;
 
+
         Player damagerPlayer = getPlayerDamagerONLY(defenderEntity, damagerEntity);
         //DamagerEntity already defined
 
         //
         //The code for each skill will follow on the bottom
         //
+        if (SkillPlayer.wrap(damagerPlayer.getUniqueId()).getSurvivalism().getLevel() >= 75) {
 
+            if (false)//todo for config options in the future
+                if (damagerPlayer.getInventory().getItemInMainHand() != null && damagerPlayer.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS) > 0)
+                    return;
+
+            for (ItemStack itemStack : event.getDrops()) {
+                double random = Math.random();
+                if (random <= 0.75) {
+
+                    int multiplier = new Random().nextInt(2) + 2; //0 1 , 2 3
+
+                    ItemStack item = new ItemStack(itemStack.getType(), itemStack.getAmount() * multiplier);
+                    defenderEntity.getLocation().getWorld().dropItemNaturally(event.getEntity().getLocation(), item);
+                }
+
+            }
+
+        }
         addXP(damagerPlayer, defenderEntity);
-
     }
 
-    private boolean addXP(Player player, Entity entity) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEat(FoodLevelChangeEvent event) {
+        if (!(event.getEntity() instanceof Player))
+            return;
+        Player player = (Player) event.getEntity();
+        ItemStack eatenItem = event.getItem();
+
+        if (!SurvivalistFood.isSurvivalistFood(eatenItem.getType()))
+            return;
+
+        int level = (int) SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().getLevel();
+
+        if (level < 50)
+            return;
+
+        int eventFoodLevel = event.getFoodLevel();
+        int currentFoodLevel = player.getFoodLevel();
+        int survivalFoodLevel = SurvivalistFood.getSurvivalistFood(eatenItem.getType()).getFoodLevel();
+        int fullyAdded = eventFoodLevel + currentFoodLevel + survivalFoodLevel;
+
+        final int maxFoodLevel = 20;
+
+
+        if (fullyAdded >= maxFoodLevel) {
+            player.setFoodLevel(maxFoodLevel);
+
+        } else {
+            player.setFoodLevel(fullyAdded);
+        }
+    }
+
+
+    private static boolean addXP(Player player, float XP) {
+        return SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().addXP(XP);
+    }
+
+    private static boolean addXP(Player player, Entity entity) {
         return SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().addXP(getXP(entity));
     }
 
-    private float getXP(Entity entity) {
+    private static float getXP(Entity entity) {
 
         switch (entity.getType()) {
 

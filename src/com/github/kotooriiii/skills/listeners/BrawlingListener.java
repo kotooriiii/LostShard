@@ -52,7 +52,7 @@ public class BrawlingListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if(!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -82,7 +82,7 @@ public class BrawlingListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if(!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
         addXP(damagerPlayer, defenderEntity);
         applyLevelBonus(damagerPlayer, defenderEntity, event);
@@ -95,10 +95,12 @@ public class BrawlingListener implements Listener {
         Player defenderPlayer = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        Entity damager = damagerCause.getEntity();
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
+        Entity damager = betterDamageCause.getEntity();
 
         if (damager == null)
             return;
@@ -114,7 +116,7 @@ public class BrawlingListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if(!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -125,10 +127,11 @@ public class BrawlingListener implements Listener {
         Entity defenderEntity = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
-        if (damagerCause == null)
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
+        EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
-        Entity damagerEntity = damagerCause.getEntity();
+        Entity damagerEntity = betterDamageCause.getEntity();
 
         if (damagerEntity == null)
             return;
@@ -144,7 +147,7 @@ public class BrawlingListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damagerEntity instanceof Player))
             return;
-        if(!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
         addXP(damagerPlayer, defenderEntity);
 
@@ -162,16 +165,15 @@ public class BrawlingListener implements Listener {
             ((Player) defender).sendMessage(ChatColor.GREEN + "You have been stunned!");
 
             //Remove in case old entry
-            if(getStunMap().containsKey(defender.getUniqueId()))
-            {
-               Object[] props =  getStunMap().get(defender.getUniqueId());
+            if (getStunMap().containsKey(defender.getUniqueId())) {
+                Object[] props = getStunMap().get(defender.getUniqueId());
                 ((BukkitTask) props[0]).cancel();
                 getStunMap().remove(defender.getUniqueId());
 
             }
 
             //Stun timer
-            final int stunTimer = 20*1;
+            final int stunTimer = 20 * 1;
 
             //Properties of object
             Object[] properties = new Object[]{null, new Double(stunTimer)};
@@ -185,7 +187,7 @@ public class BrawlingListener implements Listener {
                 @Override
                 public void run() {
 
-                    if(isCancelled())
+                    if (isCancelled())
                         return;
 
                     if (counter >= timer) {
@@ -202,7 +204,7 @@ public class BrawlingListener implements Listener {
                     counter += 20;
                     Object[] properties = getStunMap().get(playerUUID);
                     int left = timer - counter;
-                    if(left < 0 ) left = 0;
+                    if (left < 0) left = 0;
 
                     properties[1] = new Double(left);
                 }
@@ -217,26 +219,21 @@ public class BrawlingListener implements Listener {
 
         int damage = 1;
 
-        level=100; //todo remove
-        switch (level) {
-            case 100:
-                damage += 4;
-                killFriendly(defender, event);
-                applyStun(damager, defender, 1); //todo replace w this val 0.15
-                break;
-            case 75:
-                damage += 3;
-                applyStun(damager, defender, 0.125);
-                break;
-            case 50:
-                damage += 2;
-                applyStun(damager, defender, 0.1);
-                break;
-            case 25:
-                damage += 1;
-                applyStun(damager, defender, 0.05);
-                break;
-            default:
+        if (level >= 100) {
+            damage += 4;
+            if (killFriendly(damager, defender, event))
+                return;
+            applyStun(damager, defender, 0.15);
+        } else if (75 <= level && level < 100) {
+            damage += 3;
+            applyStun(damager, defender, 0.125);
+        } else if (50 <= level && level < 75) {
+            damage += 2;
+            applyStun(damager, defender, 0.1);
+        } else if (25 <= level && level < 50) {
+            damage += 1;
+            applyStun(damager, defender, 0.05);
+        } else if (0 <= level && level < 25) {
 
         }
 
@@ -430,7 +427,7 @@ public class BrawlingListener implements Listener {
         return 10;
     }
 
-    private void killFriendly(Entity entity, EntityDamageByEntityEvent event) {
+    private boolean killFriendly(Player killer, Entity entity, EntityDamageByEntityEvent event) {
         switch (entity.getType()) {
 
             case DROPPED_ITEM:
@@ -541,10 +538,11 @@ public class BrawlingListener implements Listener {
             case TRADER_LLAMA:
             case FOX:
             case BEE:
-                event.setCancelled(true);
-                ((LivingEntity) entity).damage(((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-                break;
+                double hp = ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+                event.setDamage(hp);
+                return true;
         }
+        return false;
     }
 
     public static HashMap<UUID, Object[]> getStunMap() {
@@ -558,9 +556,9 @@ public class BrawlingListener implements Listener {
     public static String getStunMessage(UUID uuid) {
         Object[] props = stunMap.get(uuid);
         Double timeLeft = (Double) props[1];
-        int timeNum = (int) Math.ceil(timeLeft.doubleValue()/20);
-        if(timeNum == 0)
-            timeNum=1;
+        int timeNum = (int) Math.ceil(timeLeft.doubleValue() / 20);
+        if (timeNum == 0)
+            timeNum = 1;
         String timeSecond = "seconds";
         if (timeNum == 1)
             timeSecond = "second";

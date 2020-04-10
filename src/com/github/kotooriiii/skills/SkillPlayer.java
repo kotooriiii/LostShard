@@ -48,7 +48,7 @@ public class SkillPlayer implements Serializable {
         this.taming = new Skill(SkillType.TAMING);
         this.survivalism = new Skill(SkillType.SURVIVALISM);
         this.brawling = new Skill(SkillType.BRAWLING);
-        this.blacksmithy = new Skill(SkillType.BRAWLING);
+        this.blacksmithy = new Skill(SkillType.BLACKSMITHY);
         this.sorcery = new Skill(SkillType.SORCERY);
 
         add(this);
@@ -275,6 +275,8 @@ public class SkillPlayer implements Serializable {
          * @return level of skill
          */
         public float getLevel() {
+            if(true)
+                return 100;
             return level;
         }
 

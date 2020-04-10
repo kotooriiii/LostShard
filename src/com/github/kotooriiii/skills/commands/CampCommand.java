@@ -3,9 +3,7 @@ package com.github.kotooriiii.skills.commands;
 import com.github.kotooriiii.plots.Plot;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.listeners.SurvivalismListener;
-import com.github.kotooriiii.skills.listeners.TamingListener;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,7 +13,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,15 +37,16 @@ public class CampCommand implements CommandExecutor {
 
                 Stat stat = Stat.wrap(playerUUID);
 
-                if(stat.getMana() < SurvivalismListener.Campfire.MANA_COST)
+                if(stat.getStamina() < SurvivalismListener.Campfire.STAMINA_COST)
                 {
-                    playerSender.sendMessage(ERROR_COLOR + "You must at least have " + SurvivalismListener.Campfire.MANA_COST + " mana.");
+                    playerSender.sendMessage(ERROR_COLOR + "You must at least have " + SurvivalismListener.Campfire.STAMINA_COST + " stamina.");
                     return false;
                 }
 
                 if(SurvivalismListener.Campfire.hasCampfire(playerUUID))
                 {
                     playerSender.sendMessage(ERROR_COLOR + "You already have a campfire somewhere.");
+                    return false;
                 }
 
 
@@ -57,7 +55,7 @@ public class CampCommand implements CommandExecutor {
                 Location location = getLocation(playerSender, SurvivalismListener.Campfire.RANGE+1);
                 if(location == null)
                 {
-                    playerSender.sendMessage(ERROR_COLOR + "Not a valid location");
+                    playerSender.sendMessage(ERROR_COLOR + "Not a valid location.");
                     return false;
                 }
 
@@ -88,11 +86,12 @@ public class CampCommand implements CommandExecutor {
                 SurvivalismListener.Campfire campfire = new SurvivalismListener.Campfire(playerUUID, location);
                 if(!campfire.isSpawnable())
                 {
-                    playerSender.sendMessage(ERROR_COLOR + "There was an error placing a campfire in this location. Is there a block occupying that space?");
+                   // playerSender.sendMessage(ERROR_COLOR + "There was an error placing a campfire in this location. Is there a block occupying that space?");
+                    playerSender.sendMessage(ERROR_COLOR + "Not a valid location.");
                     return false;
                 }
 
-                stat.setMana(stat.getMana() - SurvivalismListener.Campfire.MANA_COST);
+                stat.setStamina(stat.getStamina() - SurvivalismListener.Campfire.STAMINA_COST);
                 campfire.spawn();
                 playerSender.sendMessage(ChatColor.GOLD + "You set up a temporary camp.");
             }
@@ -117,14 +116,12 @@ public class CampCommand implements CommandExecutor {
 
         if(adjacentBlock.getType() != Material.AIR)
         {
-            //todo make sure this works when im testing
-            Bukkit.broadcastMessage("The campfire spot block is already taken by something not air. Cannot be placed here.");
+            //Bukkit.broadcastMessage("The campfire spot block is already taken by something not air. Cannot be placed here.");
             return null;
         }
 
         if(adjacentBlock.getY() < targetBlock.getY()) {
-            //todo make sure this works when im testing
-            Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
+           // Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
             return null;
         }
 

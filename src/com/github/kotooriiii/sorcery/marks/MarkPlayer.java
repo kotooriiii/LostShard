@@ -3,7 +3,6 @@ package com.github.kotooriiii.sorcery.marks;
 import com.github.kotooriiii.files.FileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import sun.text.resources.cldr.ka.FormatData_ka;
 
 import java.io.Serializable;
 import java.util.ArrayList;
