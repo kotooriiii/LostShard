@@ -19,9 +19,7 @@ import com.github.kotooriiii.skills.SkillUpdateListener;
 import com.github.kotooriiii.skills.commands.CampCommand;
 import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
-import com.github.kotooriiii.skills.commands.blacksmithy.HardenCommand;
-import com.github.kotooriiii.skills.commands.blacksmithy.RepairCommand;
-import com.github.kotooriiii.skills.commands.blacksmithy.SmeltCommand;
+import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
@@ -72,7 +70,6 @@ public class LostShardPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
 
 
         //Console logger, plugin, and description file are all ready for public use
@@ -129,7 +126,6 @@ public class LostShardPlugin extends JavaPlugin {
         StatusPlayer.getPlayerStatus().clear();
         Stat.getStatMap().clear();
         Plot.getPlayerPlots().clear();
-
 
 
         //SKILLS
@@ -191,10 +187,12 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("camp").setExecutor(new CampCommand());
         getCommand("track").setExecutor(new TrackCommand());
 
-getCommand("repair").setExecutor(new RepairCommand());
+        getCommand("repair").setExecutor(new RepairCommand());
         getCommand("smelt").setExecutor(new SmeltCommand());
-
         getCommand("harden").setExecutor(new HardenCommand());
+        getCommand("enhance").setExecutor(new EnhanceCommand());
+        getCommand("sharpen").setExecutor(new SharpenCommand());
+        getCommand("power").setExecutor(new PowerCommand());
 
 
     }
@@ -365,8 +363,7 @@ getCommand("repair").setExecutor(new RepairCommand());
                 }
 
                 //Save all skills
-                for(SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values())
-                {
+                for (SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values()) {
                     skillPlayer.save();
                 }
 

@@ -17,12 +17,12 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class EnhanceCommand implements CommandExecutor {
+public class SharpenCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
     final int ADDED_XP = 25;
 
-    final int MAXIMUM_ENHANCE = 4;
+    final int MAXIMUM_SHARPEN = 4;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -32,7 +32,7 @@ public class EnhanceCommand implements CommandExecutor {
             return false;
 
         //comand
-        if (!cmd.getName().equalsIgnoreCase("enhance"))
+        if (!cmd.getName().equalsIgnoreCase("sharpen"))
             return false;
 
 
@@ -46,8 +46,8 @@ public class EnhanceCommand implements CommandExecutor {
 
 
         //If ingredients don't exist or the item isn't able to take any damage
-        if (!isTool(mainHand) || !(meta instanceof Damageable)) {
-            playerSender.sendMessage(ERROR_COLOR + "This item is not able to be enhanced.");
+        if (!isSword(mainHand) || !(meta instanceof Damageable)) {
+            playerSender.sendMessage(ERROR_COLOR + "This item is not able to be sharpened.");
             return false;
         }
 
@@ -55,7 +55,7 @@ public class EnhanceCommand implements CommandExecutor {
         ItemStack[] ingredients = getCost(mainHand);
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to enhance this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to sharpen this item");
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())
@@ -64,13 +64,13 @@ public class EnhanceCommand implements CommandExecutor {
         //Make sure player has the stats necessary
         Stat stat = Stat.wrap(playerUUID);
         if (stat.getStamina() < STAMINA_COST) {
-            playerSender.sendMessage(ERROR_COLOR + "You must have at least " + STAMINA_COST + " stamina to enhance an item.");
+            playerSender.sendMessage(ERROR_COLOR + "You must have at least " + STAMINA_COST + " stamina to sharpen an item.");
             return false;
         }
 
         //Check if already maxed out
         if (!hasMoreEnchants(mainHand) || getBlacksmithyLevelNeeded(mainHand) == -1) {
-            playerSender.sendMessage(ERROR_COLOR + "The item has reached the highest level to be enhanced.");
+            playerSender.sendMessage(ERROR_COLOR + "The item has reached the highest level to be sharpened.");
             return false;
         }
 
@@ -82,14 +82,14 @@ public class EnhanceCommand implements CommandExecutor {
         int level = (int) blacksmithy.getLevel();
 
         if (!hasBlacksmithyLevel(mainHand, level)) {
-            playerSender.sendMessage(ERROR_COLOR + "You aren't high enough level to enhance this item.");
+            playerSender.sendMessage(ERROR_COLOR + "You aren't high enough level to sharpen this item.");
             return false;
         }
 
 
         //Harden
         enchant(mainHand);
-        playerSender.sendMessage(ChatColor.GOLD + "You enhance the item.");
+        playerSender.sendMessage(ChatColor.GOLD + "You sharpen the item.");
 
 
         //Give rewards/xp/consequence.
@@ -107,18 +107,14 @@ public class EnhanceCommand implements CommandExecutor {
     }
 
     private int getBlacksmithyLevelNeeded(ItemStack mainHand) {
-        int nextLevel = getEnhanceLevel(mainHand) + 1;
+        int nextLevel = getSharpenLevel(mainHand) + 1;
         Material material = mainHand.getType();
 
         switch (material) {
             //DIAMOND
-            case DIAMOND_AXE:
-            case DIAMOND_SHOVEL:
-            case DIAMOND_HOE:
+            case DIAMOND_SWORD:
                 //GOLD
-            case GOLDEN_AXE:
-            case GOLDEN_SHOVEL:
-            case GOLDEN_HOE:
+            case GOLDEN_SWORD:
                 if(nextLevel == 1)
                     return 50;
                 else if(nextLevel == 2)
@@ -130,21 +126,15 @@ public class EnhanceCommand implements CommandExecutor {
                 else
                     return -1;
                 //IRON
-            case IRON_AXE:
-            case IRON_SHOVEL:
-            case IRON_HOE:
+            case IRON_SWORD:
                 if(nextLevel == 1)
                     return 25;
                 else if(nextLevel == 2)
                     return 30;
-                else if(nextLevel == 3)
-                    return 40;
                 else
                     return -1;
                 //STONE
-            case STONE_AXE:
-            case STONE_SHOVEL:
-            case STONE_HOE:
+            case STONE_SWORD:
                 if(nextLevel == 1)
                     return 10;
                 else if(nextLevel == 2)
@@ -152,9 +142,7 @@ public class EnhanceCommand implements CommandExecutor {
                 else
                     return -1;
                 //WOODEN
-            case WOODEN_AXE:
-            case WOODEN_SHOVEL:
-            case WOODEN_HOE:
+            case WOODEN_SWORD:
                 if (nextLevel == 1)
                     return 5;
                 else
@@ -164,86 +152,54 @@ public class EnhanceCommand implements CommandExecutor {
         return 0;
     }
 
-    private boolean isTool(ItemStack itemStack) {
+    private boolean isSword(ItemStack itemStack) {
         Material material = itemStack.getType();
 
         switch (material) {
 
             //DIAMOND
-            case DIAMOND_AXE:
-            case DIAMOND_SHOVEL:
-            case DIAMOND_HOE:
+            case DIAMOND_SWORD:
                 //GOLD
-            case GOLDEN_AXE:
-            case GOLDEN_SHOVEL:
-            case GOLDEN_HOE:
+            case GOLDEN_SWORD:
                 //IRON
-            case IRON_AXE:
-            case IRON_SHOVEL:
-            case IRON_HOE:
+            case IRON_SWORD:
                 //STONE
-            case STONE_AXE:
-            case STONE_SHOVEL:
-            case STONE_HOE:
+            case STONE_SWORD:
                 //WOODEN
-            case WOODEN_AXE:
-            case WOODEN_SHOVEL:
-            case WOODEN_HOE:
+            case WOODEN_SWORD:
                 return true;
         }
         return false;
     }
 
     private boolean hasMoreEnchants(ItemStack itemStack) {
-        int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
-        int unbreakingLevel = itemStack.getEnchantmentLevel(Enchantment.DURABILITY);
+        int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
 
-        int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
-        int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
+        int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
 
-        if ((efficiencyLevel < MAXIMUM_ENHANCE && efficiencyLevel < efficiencyMaxLevel) || (unbreakingLevel < MAXIMUM_ENHANCE && unbreakingLevel < unbreakingMaxLevel))
+        if ((sharpnessLevel < MAXIMUM_SHARPEN && sharpnessLevel < sharpnessMaxLevel))
             return true;
         return false;
     }
 
-    private int getEnhanceLevel(ItemStack itemStack) {
+    private int getSharpenLevel(ItemStack itemStack) {
 
-        int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
-        int unbreakingLevel = itemStack.getEnchantmentLevel(Enchantment.DURABILITY);
+        int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
 
-        int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
-        int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
-
-        if (efficiencyLevel == unbreakingLevel)
-            return efficiencyLevel;
-
-        if (unbreakingLevel == unbreakingMaxLevel)
-            return efficiencyLevel;
-        if (efficiencyLevel == efficiencyMaxLevel)
-            return unbreakingLevel;
-
-        return efficiencyLevel < unbreakingLevel ? efficiencyLevel : unbreakingLevel;
+        return sharpnessLevel;
     }
 
     private void enchant(ItemStack itemStack) {
-        int nextLevel = getEnhanceLevel(itemStack) + 1;
+        int nextLevel = getSharpenLevel(itemStack) + 1;
 
-        int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
-        int unbreakingLevel = itemStack.getEnchantmentLevel(Enchantment.DURABILITY);
+        int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
 
-        int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
-        int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
-
-        if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= efficiencyLevel) {
-            itemStack.removeEnchantment(Enchantment.DIG_SPEED);
-            itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
+        if (sharpnessLevel < nextLevel && nextLevel <= MAXIMUM_SHARPEN && nextLevel <= sharpnessMaxLevel) {
+            itemStack.removeEnchantment(Enchantment.DAMAGE_ALL);
+            itemStack.addEnchantment(Enchantment.DAMAGE_ALL, nextLevel);
         }
-
-        if (unbreakingLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= unbreakingMaxLevel) {
-            itemStack.removeEnchantment(Enchantment.DURABILITY);
-            itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
-        }
-
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {
@@ -251,7 +207,7 @@ public class EnhanceCommand implements CommandExecutor {
         Material material = itemStack.getType();
         int cost = -1;
 
-        switch (getEnhanceLevel(itemStack) + 1) {
+        switch (getSharpenLevel(itemStack) + 1) {
             case 1:
                 cost = 1;
                 break;
@@ -269,32 +225,22 @@ public class EnhanceCommand implements CommandExecutor {
         switch (material) {
 
             //DIAMOND
-            case DIAMOND_AXE:
-            case DIAMOND_SHOVEL:
-            case DIAMOND_HOE:
+            case DIAMOND_SWORD:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, cost)};
 
             //GOLD
-            case GOLDEN_AXE:
-            case GOLDEN_SHOVEL:
-            case GOLDEN_HOE:
+            case GOLDEN_SWORD:
                 return new ItemStack[]{new ItemStack(Material.GOLD_INGOT, cost)};
 
             //IRON
-            case IRON_AXE:
-            case IRON_SHOVEL:
-            case IRON_HOE:
+            case IRON_SWORD:
                 return new ItemStack[]{new ItemStack(Material.IRON_INGOT, cost)};
 
             //STONE
-            case STONE_AXE:
-            case STONE_SHOVEL:
-            case STONE_HOE:
+            case STONE_SWORD:
                 return new ItemStack[]{new ItemStack(Material.COBBLESTONE, cost)};
 
-            case WOODEN_AXE:
-            case WOODEN_SHOVEL:
-            case WOODEN_HOE:
+            case WOODEN_SWORD:
                 return new ItemStack[]{new ItemStack(Material.OAK_PLANKS, cost), new ItemStack(Material.ACACIA_PLANKS, cost), new ItemStack(Material.BIRCH_PLANKS, cost), new ItemStack(Material.DARK_OAK_PLANKS, cost),
                         new ItemStack(Material.JUNGLE_PLANKS, cost), new ItemStack(Material.SPRUCE_PLANKS, cost)};
 

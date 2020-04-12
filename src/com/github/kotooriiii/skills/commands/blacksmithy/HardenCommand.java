@@ -123,6 +123,7 @@ public class HardenCommand implements CommandExecutor {
                     return 80;
                 else if (nextLevel == 2)
                     return 100;
+                else return -1;
                 //GOLD
             case GOLDEN_BOOTS:
             case GOLDEN_HELMET:
@@ -132,6 +133,7 @@ public class HardenCommand implements CommandExecutor {
                     return -1;
                 else if (nextLevel == 2)
                     return -1;
+                else return -1;
                 //IRON
             case IRON_BOOTS:
             case IRON_HELMET:
@@ -141,6 +143,7 @@ public class HardenCommand implements CommandExecutor {
                     return 50;
                 else if (nextLevel == 2)
                     return 65;
+                else return -1;
                 //STONE
             case CHAINMAIL_BOOTS:
             case CHAINMAIL_HELMET:
@@ -150,9 +153,11 @@ public class HardenCommand implements CommandExecutor {
                     return 25;
                 else if (nextLevel == 2)
                     return 40;
+                else
+                    return -1;
         }
 
-        return -1;
+        return  0;
     }
 
     private boolean isArmor(ItemStack itemStack) {
