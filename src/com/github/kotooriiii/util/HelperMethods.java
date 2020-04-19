@@ -10,6 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.DateFormat;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public final class HelperMethods {
@@ -355,6 +358,92 @@ public final class HelperMethods {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    public static ZonedDateTime toZDT(long seconds)
+    {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
+        ZonedDateTime unbanDate = now.plusSeconds(seconds);
+
+        return unbanDate;
+    }
+
+
+    public static String getTimeLeft(ZonedDateTime zonedDateTime) {
+
+        ZonedDateTime now = ZonedDateTime.now();
+        long left = Duration.between(now, zonedDateTime).toMillis();
+
+        String[] splitTime = getTimeLeft(left).split(", ");
+        if(splitTime.length == 1)
+            return splitTime[0];
+        return splitTime[0] + " and " + splitTime[1];
+
+    }
+
+    private static String getTimeLeft(long left) {
+
+        final long ms = 1;
+        final long sec = ms * 1000;
+        final long min = sec * 60;
+        final long hour = min * 60;
+        final long day = hour * 24;
+        final long week = day * 7;
+
+        long weeks = left / week;
+        long weeksRemaining = left % week;
+        long days = weeksRemaining / day;
+        long daysRemaining = weeksRemaining % day;
+        long hours = daysRemaining / hour;
+        long hoursRemaining = daysRemaining % hour;
+        long minutes = hoursRemaining / min;
+        long minutesRemaining = hoursRemaining % min;
+        long seconds = minutesRemaining / sec;
+        long secondsRemaining = minutesRemaining % sec;
+        long milliseconds = secondsRemaining / ms;
+        String result = "";
+        if (weeks != 0)
+            if (result.isEmpty())
+                result += weeks + " week(s)";
+            else
+                result += ", " + weeks + " week(s)";
+        if (days != 0)
+            if (result.isEmpty())
+                result += days + " day(s)";
+            else
+                result += ", " + days + " day(s)";
+        if (hours != 0)
+            if (result.isEmpty())
+                result += hours + " hour(s)";
+            else
+                result += ", " + hours + " hour(s)";
+        if (minutes != 0)
+            if (result.isEmpty())
+                result += minutes + " minute(s)";
+            else
+                result += ", " + minutes + " minute(s)";
+
+        if (seconds != 0)
+            if (result.isEmpty())
+                result += seconds + " second(s)";
+            else
+                result += ", " + seconds + " second(s)";
+
+        if (milliseconds != 0)
+            if (result.isEmpty())
+                result += milliseconds + " millisecond(s)";
+            else
+                result += ", " + milliseconds + " millisecond(s)";
+
+
+        String[] words = result.split(", ");
+        if (words.length == 1)
+            return result;
+        else {
+            words[words.length - 1] = "" + words[words.length - 1];
+
+            return HelperMethods.stringBuilder(words, 0, ", ");
         }
     }
 

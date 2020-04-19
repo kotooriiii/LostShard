@@ -3,6 +3,7 @@ package com.github.kotooriiii.skills.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -215,14 +216,16 @@ public class BrawlingListener implements Listener {
     }
 
     private void applyLevelBonus(Player damager, Entity defender, EntityDamageByEntityEvent event) {
-        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getArchery().getLevel();
+        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getBrawling().getLevel();
 
         int damage = 1;
 
+        boolean isFriendlyKill = false;
         if (level >= 100) {
             damage += 4;
-            if (killFriendly(damager, defender, event))
-                return;
+            if(killFriendly(damager, defender, event))
+                isFriendlyKill =true;
+
             applyStun(damager, defender, 0.15);
         } else if (75 <= level && level < 100) {
             damage += 3;
@@ -237,6 +240,7 @@ public class BrawlingListener implements Listener {
 
         }
 
+        if(!isFriendlyKill)
         event.setDamage(damage);
     }
 

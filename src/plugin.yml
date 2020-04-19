@@ -56,8 +56,6 @@ commands:
     description:
     usage:
   #Runebook stuff
-  rb:
-  runebook:
   bind:
   cast:
   mark:
@@ -100,6 +98,10 @@ commands:
   track:
 
   skills:
+    description:
+    usage:
+    aliases:
+      - skill
 
   #plot stuff
   plot:
@@ -121,6 +123,13 @@ commands:
     usage:
     aliases:
       - message
+  mute:
+  heal:
+  banmatch:
+    description:
+    usage:
+    aliases:
+      - bm
 
 
 

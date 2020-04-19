@@ -53,8 +53,9 @@ public class ChatChannelListener implements Listener {
         ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage());
         Bukkit.getPluginManager().callEvent(shardChatEvent);
 
-        if (shardChatEvent.isCancelled())
+        if (shardChatEvent.isCancelled()) {
             return;
+        }
 
         Player player = asyncPlayerChatEvent.getPlayer();
 
@@ -62,17 +63,16 @@ public class ChatChannelListener implements Listener {
         Stat stat = Stat.wrap(player);
         String prefix = status.getPrefix();
         String title = stat.getTitle();
-        if(!title.isEmpty())
+        if (!title.isEmpty())
             title = ChatColor.WHITE + title;
         ChatColor color = StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor();
 
-        if(Staff.isStaff(player.getUniqueId()))
-        {
+        if (Staff.isStaff(player.getUniqueId())) {
             Staff staff = Staff.wrap(player.getUniqueId());
             color = staff.getType().getChatColor();
-            prefix = ChatColor.GOLD + "[" +  prefix + ChatColor.GOLD + "]";
+            prefix = ChatColor.GOLD + "[" + prefix + ChatColor.GOLD + "]";
         } else {
-            prefix = ChatColor.WHITE + "[" +  prefix + ChatColor.WHITE + "]";
+            prefix = ChatColor.WHITE + "[" + prefix + ChatColor.WHITE + "]";
 
         }
         String name = color + player.getName();

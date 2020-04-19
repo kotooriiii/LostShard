@@ -343,7 +343,7 @@ public class HostilityPlatform implements Serializable {
 
         String day = HelperMethods.getDay(this.getTime()[0]);
 
-        return day + " " + hr12 + ":" + String.format("%02d", this.getTime()[2]) + suffix;
+        return day + " " + hr12 + ":" + String.format("%02d", this.getTime()[2]) + suffix + " EST";
     }
 
 

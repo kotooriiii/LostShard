@@ -21,6 +21,8 @@ public class SkillPlayer implements Serializable {
 
     private UUID playerUUID;
 
+    private final int MAX_POINTS = 10000;
+
     private Skill archery;
     private Skill swordsmanship;
     private Skill mining;
@@ -52,6 +54,22 @@ public class SkillPlayer implements Serializable {
         this.sorcery = new Skill(SkillType.SORCERY);
 
         add(this);
+    }
+
+    public Skill[] getSkills() {
+        return new Skill[]
+                {
+                        archery, swordsmanship, mining, fishing, lumberjacking, taming,
+                        survivalism, brawling, blacksmithy, sorcery
+                };
+    }
+
+    public Skill get(int skillID) {
+        for (Skill skill : getSkills()) {
+            if (skill.getType().getID() == skillID)
+                return skill;
+        }
+        return null;
     }
 
     public UUID getPlayerUUID() {
@@ -98,6 +116,14 @@ public class SkillPlayer implements Serializable {
         return sorcery;
     }
 
+    public boolean isMaxed() {
+        int counter = 0;
+        for (Skill skill : getSkills()) {
+            counter += (int) skill.getLevel();
+        }
+        return counter >= this.MAX_POINTS;
+    }
+
     public void save() {
         FileManager.write(this);
     }
@@ -124,7 +150,7 @@ public class SkillPlayer implements Serializable {
         private float level;
         private final float maxLevel;
 
-        private final int CONSTANT = 100;
+        private final int CONSTANT = 75;
 
         public Skill(SkillType type) {
             this.type = type;
@@ -152,8 +178,12 @@ public class SkillPlayer implements Serializable {
          */
         public boolean addXP(float addedXP) {
 
-            //The cap was reached
+            //The cap for this skill is reached
             if (level == maxLevel)
+                return false;
+
+            //Total xp is reached
+            if (isMaxed())
                 return false;
 
             //Add XP
@@ -166,7 +196,6 @@ public class SkillPlayer implements Serializable {
             if (this.xp >= getMaxXP()) {
 
                 boolean isLeveledUp = addLevels(randomSkillPoint);
-
 
 
                 if (isLeveledUp) {
@@ -275,20 +304,21 @@ public class SkillPlayer implements Serializable {
          * @return level of skill
          */
         public float getLevel() {
-            if(true)
-                return 100;
             return level;
         }
 
+        public void setLevel(float level) {
+            this.xp = 0;
+            this.level = level;
+        }
 
     /*
     Helper level up
      */
 
-        private void sendLevelUpMessage(float val)
-        {
+        private void sendLevelUpMessage(float val) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-            if(!offlinePlayer.isOnline())
+            if (!offlinePlayer.isOnline())
                 return;
 
             BigDecimal valMessage = new BigDecimal(val).setScale(1, RoundingMode.HALF_UP);
@@ -297,5 +327,7 @@ public class SkillPlayer implements Serializable {
             Player player = offlinePlayer.getPlayer();
             player.sendMessage(ChatColor.GOLD + "You have gained " + valMessage + " " + this.getType().getName() + ", it is now " + levelMessage + ".");
         }
+
+
     }
 }

@@ -4,6 +4,7 @@ import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +17,12 @@ public class PlayerStatusRespawnListener implements Listener {
     public void onRespawnStatus(PlayerRespawnEvent event)
     {
         Player player = event.getPlayer();
+
+        event.setRespawnLocation(getSpawnLocation(player));
+    }
+
+    public static Location getSpawnLocation(Player player)
+    {
         StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
         Stat stat = Stat.wrap(statusPlayer.getPlayerUUID());
         stat.setMana(stat.getMaxMana());
@@ -24,8 +31,9 @@ public class PlayerStatusRespawnListener implements Listener {
         Plot plot = Plot.getPlot(organization);
         if(plot == null || plot.getCenter() == null) {
             Bukkit.broadcastMessage(ERROR_COLOR + "The spawn is not created for " + organization + ".") ;
-            return;
+            return null;
         }
-        event.setRespawnLocation(plot.getCenter());
+
+        return plot.getCenter();
     }
 }

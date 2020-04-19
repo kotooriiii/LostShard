@@ -1,5 +1,6 @@
 package com.github.kotooriiii.skills.commands.blacksmithy;
 
+import net.md_5.bungee.chat.SelectorComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,23 +18,37 @@ public class InventoryUtil {
     private Player player;
     private ItemStack[] ingredients;
 
-    public InventoryUtil(Player player, ItemStack[] ingredients, String message) {
+    private int counter = 0;
+    private int maxCounter;
+    private boolean checkAll;
+
+    public InventoryUtil(Player player, ItemStack[] ingredients, String message, int maxCounter, boolean checkAll) {
         this.player = player;
         this.ingredients = ingredients;
         this.message = message;
+
+        this.maxCounter = maxCounter;
+        this.checkAll = checkAll;
     }
 
     public boolean hasIngredients() {
         ArrayList<HashMap<Integer, Integer>> pendingRemovalItems = new ArrayList<>();
 
         boolean hasIngredients = true;
+        boolean isUnique = false;
+
         for (ItemStack ingredient : ingredients) {
-            HashMap<Integer, Integer> indeces = hasIngredient(ingredient);
+            HashMap<Integer, Integer> indeces = hasIngredient(ingredient, true, false);
             if (indeces == null) {
                 hasIngredients = false;
                 continue;
+            } else {
+                isUnique=true;
             }
             pendingRemovalItems.add(indeces);
+
+            if (!checkAll && isUnique)
+                return hasIngredients;
         }
 
         return hasIngredients;
@@ -44,13 +59,21 @@ public class InventoryUtil {
         PlayerInventory currentInventory = player.getInventory();
 
         boolean hasIngredients = true;
+        boolean isUnique = false;
+
         for (ItemStack ingredient : ingredients) {
-            HashMap<Integer, Integer> indeces = hasIngredient(ingredient);
+            HashMap<Integer, Integer> indeces = hasIngredient(ingredient, false, true);
             if (indeces == null) {
                 hasIngredients = false;
                 continue;
+            } else {
+                isUnique = true;
             }
             pendingRemovalItems.add(indeces);
+
+            if (!checkAll && isUnique)
+                break;
+
         }
 
         if (hasIngredients) {
@@ -72,7 +95,7 @@ public class InventoryUtil {
         return hasIngredients;
     }
 
-    private HashMap<Integer, Integer> hasIngredient(ItemStack ingredient) {
+    private HashMap<Integer, Integer> hasIngredient(ItemStack ingredient, boolean message, boolean isRemoving) {
         PlayerInventory inventory = player.getInventory();
         ItemStack[] contents = inventory.getContents();
 
@@ -102,11 +125,27 @@ public class InventoryUtil {
             }
         }
 
-        if (counterMoney < amountRequired) {
-            player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase() + " " + this.message + ".");
-            return null;
+        if (isRemoving) {
+            if (counterMoney < amountRequired) {
+                if (message)
+                    player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
+                return null;
+
+            }
+
+        } else {
+            if (counterMoney < amountRequired && counter < maxCounter) {
+
+                if (message)
+                    player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
+                counter++;
+                return null;
+
+            }
         }
+
+
         return hashmap;
-    }
+}
 
 }

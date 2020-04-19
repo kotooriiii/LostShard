@@ -5,9 +5,7 @@ import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -47,7 +45,7 @@ public class ArcheryListener implements Listener {
         //The code for each skill will follow on the bottom
         //
 
-        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof Arrow))
+        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -75,7 +73,7 @@ public class ArcheryListener implements Listener {
         //The code for each skill will follow on the bottom
         //
 
-        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof Arrow))
+        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderEntity);
@@ -108,7 +106,7 @@ public class ArcheryListener implements Listener {
         //
         //The code for each skill will follow on the bottom
         //
-        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof Arrow))
+        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -139,14 +137,14 @@ public class ArcheryListener implements Listener {
         //
         //The code for each skill will follow on the bottom
         //
-        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damagerEntity instanceof Arrow))
+        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damagerEntity instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderEntity);
 
     }
 
-    private void applyPierce(Player damager, Player defender,Arrow arrow, EntityDamageByEntityEvent event, double chance) {
+    private void applyPierce(Player damager, Player defender,AbstractArrow arrow, EntityDamageByEntityEvent event, double chance) {
         double randomValue = Math.random();
 
         if (randomValue <= chance) {
@@ -164,7 +162,7 @@ public class ArcheryListener implements Listener {
         }
     }
 
-    private void applyKnockback(Player damager, Player defender,Arrow arrow, double chance) {
+    private void applyKnockback(Player damager, Player defender, AbstractArrow arrow, double chance) {
         double randomValue = Math.random();
 
         if (randomValue <= chance) {
@@ -182,7 +180,7 @@ public class ArcheryListener implements Listener {
     private void applyLevelBonus(Player damager, Player defender, EntityDamageByEntityEvent event) {
         int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getArchery().getLevel();
 
-        Arrow arrow = (Arrow) event.getDamager();
+        AbstractArrow arrow = (Arrow) event.getDamager();
         String[] properties = arrow.getCustomName().split(":");
 
         String id = properties[0];

@@ -29,22 +29,19 @@ public class CampCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("camp")) {
 
                 int level = (int) SkillPlayer.wrap(playerUUID).getSurvivalism().getLevel();
-                if(level < SurvivalismListener.Campfire.LEVEL)
-                {
+                if (level < SurvivalismListener.Campfire.LEVEL) {
                     playerSender.sendMessage(ERROR_COLOR + "You must be at least level 25 to place a camp.");
                     return false;
                 }
 
                 Stat stat = Stat.wrap(playerUUID);
 
-                if(stat.getStamina() < SurvivalismListener.Campfire.STAMINA_COST)
-                {
+                if (stat.getStamina() < SurvivalismListener.Campfire.STAMINA_COST) {
                     playerSender.sendMessage(ERROR_COLOR + "You must at least have " + SurvivalismListener.Campfire.STAMINA_COST + " stamina.");
                     return false;
                 }
 
-                if(SurvivalismListener.Campfire.hasCampfire(playerUUID))
-                {
+                if (SurvivalismListener.Campfire.hasCampfire(playerUUID)) {
                     playerSender.sendMessage(ERROR_COLOR + "You already have a campfire somewhere.");
                     return false;
                 }
@@ -52,41 +49,45 @@ public class CampCommand implements CommandExecutor {
 
                 //check plots
 
-                Location location = getLocation(playerSender, SurvivalismListener.Campfire.RANGE+1);
-                if(location == null)
-                {
+                Location location = getLocation(playerSender, SurvivalismListener.Campfire.RANGE + 1);
+                if (location == null) {
                     playerSender.sendMessage(ERROR_COLOR + "Not a valid location.");
                     return false;
                 }
 
-                if(Plot.isStandingOnPlot(location))
-                {
+                if (Plot.isStandingOnPlot(location)) {
                     Plot plot = Plot.getStandingOnPlot(location);
+                    boolean exists = false;
 
-                    if(!plot.getOwnerUUID().equals(playerUUID))
-                    {
-                        boolean exists = false;
-                        for(UUID uuid : plot.getJointOwners())
-                        {
-                            if(uuid.equals(playerUUID))
-                            {
-                                exists=true;
-                                break;
+                    if (plot.isStaff()) {
+                        exists = false;
+                    }
+
+
+                    if (!exists) {
+
+                        if (!plot.isStaff() && !plot.getOwnerUUID().equals(playerUUID)) {
+
+                            for (UUID uuid : plot.getJointOwners()) {
+                                if (uuid.equals(playerUUID)) {
+                                    exists = true;
+                                    break;
+                                }
                             }
                         }
-                        if(!exists)
-                        {
-                            playerSender.sendMessage(ERROR_COLOR + "You cannot place a campfire in this location.");
-                            return false;
-                        }
                     }
+
+                    if (!exists) {
+                        playerSender.sendMessage(ERROR_COLOR + "You cannot place a campfire in this location.");
+                        return false;
+                    }
+
                     //all ok
                 }
 
                 SurvivalismListener.Campfire campfire = new SurvivalismListener.Campfire(playerUUID, location);
-                if(!campfire.isSpawnable())
-                {
-                   // playerSender.sendMessage(ERROR_COLOR + "There was an error placing a campfire in this location. Is there a block occupying that space?");
+                if (!campfire.isSpawnable()) {
+                    // playerSender.sendMessage(ERROR_COLOR + "There was an error placing a campfire in this location. Is there a block occupying that space?");
                     playerSender.sendMessage(ERROR_COLOR + "Not a valid location.");
                     return false;
                 }
@@ -100,28 +101,25 @@ public class CampCommand implements CommandExecutor {
 
     }
 
-    private Location getLocation(Player player, int range)
-    {
+    private Location getLocation(Player player, int range) {
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
         Block targetBlock = lastTwoTargetBlocks.get(1);
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
 
-        if(targetBlock.getType() == Material.AIR)
-        {
+        if (targetBlock.getType() == Material.AIR) {
             //todo make sure this works when im testing
-            Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
+   //         Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
             return null;
         }
 
 
-        if(adjacentBlock.getType() != Material.AIR)
-        {
+        if (adjacentBlock.getType() != Material.AIR) {
             //Bukkit.broadcastMessage("The campfire spot block is already taken by something not air. Cannot be placed here.");
             return null;
         }
 
-        if(adjacentBlock.getY() < targetBlock.getY()) {
-           // Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
+        if (adjacentBlock.getY() < targetBlock.getY()) {
+            // Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
             return null;
         }
 

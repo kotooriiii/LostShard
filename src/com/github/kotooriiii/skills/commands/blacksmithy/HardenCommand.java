@@ -21,7 +21,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class HardenCommand implements CommandExecutor {
 
-    final int STAMINA_COST = 10;
+    final int STAMINA_COST = 25;
     final int ADDED_XP = 25;
 
     final int MAXIUMUM_HARDEN = 2;
@@ -57,7 +57,7 @@ public class HardenCommand implements CommandExecutor {
         ItemStack[] ingredients = getCost(mainHand);
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to harden this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to harden this item", 1, false);
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())

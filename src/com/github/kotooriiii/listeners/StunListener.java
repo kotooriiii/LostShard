@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 public class StunListener implements Listener {
-    @EventHandler
+    @EventHandler (priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void checkStunCommand(PlayerCommandPreprocessEvent event)
     {
         Player player = event.getPlayer();

@@ -659,7 +659,7 @@ public class Plot implements Serializable {
     public static boolean isStaffPlot(String name) {
 
         //Is reserved for order and chaos
-        if (name.equalsIgnoreCase("order") || name.equalsIgnoreCase("chaos"))
+        if (name.equalsIgnoreCase("order") || name.equalsIgnoreCase("chaos") || name.equalsIgnoreCase("arena"))
             return true;
 
         //Is reserved

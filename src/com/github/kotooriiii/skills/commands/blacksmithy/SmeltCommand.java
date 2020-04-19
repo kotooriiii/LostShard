@@ -80,19 +80,25 @@ public class SmeltCommand implements CommandExecutor {
                     playerSender.getWorld().dropItemNaturally(playerSender.getLocation(), itemStack);
                 }
             }
+            playerSender.sendMessage(ChatColor.GOLD + "You smelt the item.");
+
 
         } else {
-
             //Break item
-            ((Damageable) meta).setDamage(mainHand.getType().getMaxDurability());
-            playerSender.sendMessage(ChatColor.RED + "You weren't able to smelt the item.");
-
+            playerSender.sendMessage(ChatColor.GRAY + "You smelted the item but failed to recover any usable material.");
         }
+
+
+
+//        playerSender.playSound(playerSender.getLocation());
 
         //Give xp for trying.
         blacksmithy.addXP(ADDED_XP);
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         mainHand.setItemMeta(meta);
+        playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+        playerSender.updateInventory();
+
         return true;
     }
 

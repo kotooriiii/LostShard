@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.wands;
+package com.github.kotooriiii.sorcery.listeners;
 
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.Location;

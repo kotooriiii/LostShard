@@ -12,6 +12,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
@@ -59,7 +61,7 @@ public class SurvivalismListener implements Listener {
         public Player[] getCampers() {
             Location boundingBox = new Location(location.getWorld(), location.getBlockX(), location.getBlockY() + HEIGHT_Y, location.getBlockZ());
             ArrayList<Player> players = new ArrayList<>();
-            for (Entity entity : Bukkit.getWorld("world").getNearbyEntities(boundingBox, RADIUS, HEIGHT_Y, RADIUS)) {
+            for (Entity entity : getLog().getWorld().getNearbyEntities(boundingBox, RADIUS, HEIGHT_Y, RADIUS)) {
                 if (!(entity instanceof Player))
                     continue;
 
@@ -75,6 +77,19 @@ public class SurvivalismListener implements Listener {
 
         public Block getLog() {
             return location.getBlock();
+        }
+
+        public Player[] getCampersRange(int radius) {
+            Location boundingBox = new Location(location.getWorld(), location.getBlockX(), location.getBlockY() + HEIGHT_Y, location.getBlockZ());
+            ArrayList<Player> players = new ArrayList<>();
+            for (Entity entity : getLog().getWorld().getNearbyEntities(boundingBox, radius, HEIGHT_Y, radius)) {
+                if (!(entity instanceof Player))
+                    continue;
+
+                Player player = (Player) entity;
+                players.add(player);
+            }
+            return players.toArray(new Player[players.size()]);
         }
 
         public boolean isSpawnable() {
@@ -204,6 +219,59 @@ public class SurvivalismListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
+    public void onFireCampfire(EntityDamageEvent event) {
+        Entity damagedEntity = event.getEntity();
+        EntityDamageEvent.DamageCause cause = event.getCause();
+
+        if (!(damagedEntity instanceof Player))
+            return;
+
+        if (!cause.equals(EntityDamageEvent.DamageCause.FIRE_TICK) && !cause.equals(EntityDamageEvent.DamageCause.FIRE))
+            return;
+
+        Block fireblock = damagedEntity.getLocation().getBlock();
+
+        for (Campfire campfire : Campfire.getCampfires().values()) {
+            for (Player player : campfire.getCampersRange(1)) {
+                if (player.equals(damagedEntity)) {
+                    damagedEntity.setFireTicks(0);
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onFireCampfireSpread(BlockSpreadEvent event) {
+
+        Block block = event.getSource();
+
+        if (!block.getType().equals(Material.FIRE))
+            return;
+
+        for (Campfire campfire : Campfire.getCampfires().values()) {
+            if (campfire.getFireBlock().equals(block)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onFireBurn(BlockBurnEvent event) {
+
+        Block burnedBlock = event.getBlock();
+
+        for (Campfire campfire : Campfire.getCampfires().values()) {
+            if (campfire.getLog().equals(burnedBlock)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onXPPlayerDeath(PlayerDeathEvent event) {
         Player defenderPlayer = event.getEntity();
 
@@ -287,6 +355,9 @@ public class SurvivalismListener implements Listener {
             return;
         Player player = (Player) event.getEntity();
         ItemStack eatenItem = event.getItem();
+
+        if(eatenItem == null)
+            return;
 
         if (!SurvivalistFood.isSurvivalistFood(eatenItem.getType()))
             return;

@@ -1,8 +1,13 @@
 package com.github.kotooriiii;
 
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.banmatch.BanmatchCommand;
+import com.github.kotooriiii.banmatch.BanmatchCreatorListener;
+import com.github.kotooriiii.banmatch.BanmatchDefeatListener;
+import com.github.kotooriiii.banmatch.BannedJoinListener;
 import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.channels.ChatChannelListener;
+import com.github.kotooriiii.muted.listeners.MuteListener;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.crafting.CraftingRecipes;
@@ -21,12 +26,13 @@ import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.listeners.*;
+import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
-import com.github.kotooriiii.sorcery.wands.MedAndRestCancelListener;
+import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -154,6 +160,11 @@ public class LostShardPlugin extends JavaPlugin {
         for (Plot plot : Plot.getPlayerPlots().values()) {
             FileManager.write(plot);
         }
+
+        //Save all skills
+        for (SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values()) {
+            skillPlayer.save();
+        }
     }
 
 
@@ -186,13 +197,18 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("pets").setExecutor(new PetsCommand());
         getCommand("camp").setExecutor(new CampCommand());
         getCommand("track").setExecutor(new TrackCommand());
+        getCommand("mute").setExecutor(new MuteCommand());
 
+        getCommand("skills").setExecutor(new SkillCommand());
         getCommand("repair").setExecutor(new RepairCommand());
         getCommand("smelt").setExecutor(new SmeltCommand());
         getCommand("harden").setExecutor(new HardenCommand());
         getCommand("enhance").setExecutor(new EnhanceCommand());
         getCommand("sharpen").setExecutor(new SharpenCommand());
         getCommand("power").setExecutor(new PowerCommand());
+
+        getCommand("banmatch").setExecutor(new BanmatchCommand());
+        getCommand("heal").setExecutor(new HealCommand());
 
 
     }
@@ -226,6 +242,9 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new StaffUpdateListener(getLuckPerms()), this);
         pm.registerEvents(new SkillUpdateListener(), this);
         pm.registerEvents(new CastListener(), this);
+        pm.registerEvents(new FireballExplodeListener(), this);
+
+        pm.registerEvents(new MuteListener(), this);
 
         pm.registerEvents(new PreventRemovalChunkListener(), this);
 
@@ -241,6 +260,15 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new SurvivalismListener(), this);
         pm.registerEvents(new SwordsmanshipListener(), this);
         pm.registerEvents(new TamingListener(), this);
+
+        pm.registerEvents(new ZombieDeathListener(), this);
+        pm.registerEvents(new HostilityNamePreprocessListener(), this);
+
+        pm.registerEvents(new BanmatchCreatorListener(), this);
+        pm.registerEvents(new BannedJoinListener(), this);
+        pm.registerEvents(new BanmatchDefeatListener(), this);
+
+
 
 
     }
@@ -354,9 +382,9 @@ public class LostShardPlugin extends JavaPlugin {
                         OfflinePlayer owner = Bukkit.getOfflinePlayer(plot.getOwnerUUID());
                         if (owner.isOnline()) {
                             if (plot.getRadius() == 1)
-                                owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. You have one day left before your plot is removed.");
+                                ;//owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. You have one day left before your plot is removed.");
                             else
-                                owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. Your plot has shrunk by one block radius.");
+                                ;//owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. Your plot has shrunk by one block radius.");
 
                         }
                     }
@@ -372,7 +400,7 @@ public class LostShardPlugin extends JavaPlugin {
                     public void run() {
                         newDayScheduler();
                     }
-                }.runTaskLater(LostShardPlugin.plugin, 20);
+                }.runTaskLater(LostShardPlugin.plugin, 20*10);
             }
         }.runTaskLater(this.plugin, initalDelay);
 

@@ -1,5 +1,6 @@
 package com.github.kotooriiii.skills.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
@@ -14,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.UUID;
@@ -72,7 +74,7 @@ public class TrackCommand implements CommandExecutor {
                 final int STAMINA_COST = 25;
 
                 if (!hasStamina(playerSender, STAMINA_COST)) {
-                    playerSender.sendMessage(ERROR_COLOR + "You need at least " + STAMINA_COST + " to track.");
+                    playerSender.sendMessage(ERROR_COLOR + "You need at least " + STAMINA_COST + " stamina to track.");
                     return false;
                 }
 
@@ -121,9 +123,24 @@ public class TrackCommand implements CommandExecutor {
                     trackedPlayer.sendMessage(ChatColor.GRAY + "The hairs on the back of your neck stand up.");
                 }
 
+trackedPlayer.setGlowing(true);
 
-                playerSender.sendMessage(getCompassDirection(playerSender, trackedPlayer.getLocation()));
-                playerSender.sendMessage(howClose(playerSender.getLocation().distance(trackedPlayer.getLocation())));
+                final Player finalTrackedPlayer = trackedPlayer;
+                new BukkitRunnable()
+                {
+                    @Override
+                    public void run() {
+
+                        if(!finalTrackedPlayer.isDead())
+                        finalTrackedPlayer.setGlowing(false);
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, 20*1);
+
+
+                String direction = getCompassDirection(playerSender, trackedPlayer.getLocation());
+                direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
+                playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
+                playerSender.sendMessage(ChatColor.GOLD + howClose(trackedPlayer.getLocation().distance(playerSender.getLocation())));
 
             } else {
                 if (level < 50) {

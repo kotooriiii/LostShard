@@ -3,6 +3,7 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.channels.ChannelManager;
+import com.github.kotooriiii.plots.ArenaPlot;
 import com.github.kotooriiii.plots.Plot;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -251,8 +252,7 @@ public class PlotCommand implements CommandExecutor {
                             switch (args[1]) {
                                 case "create":
 
-                                    if(args.length == 2)
-                                    {
+                                    if (args.length == 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff create (name)");
                                         return false;
                                     }
@@ -266,29 +266,74 @@ public class PlotCommand implements CommandExecutor {
                                     giveTools(playerSender);
                                     break;
                                 case "setspawn":
-                                    if(args.length == 2)
-                                    {
-                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff create (name)");
+                                    if (args.length == 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawn (name)");
                                         return false;
                                     }
 
-                                    if(!Plot.isStandingOnPlot(playerSender))
-                                    {
+                                    if (!Plot.isStandingOnPlot(playerSender)) {
                                         playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
                                         return false;
                                     }
 
                                     Plot plot = Plot.getStandingOnPlot(playerSender);
 
-                                    if(!plot.isStaff() && !plot.getName().equalsIgnoreCase("order") && !plot.getName().equalsIgnoreCase("chaos"))
-                                    {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos.");
+                                    if (!plot.isStaff() && !plot.getName().equalsIgnoreCase("order") && !plot.getName().equalsIgnoreCase("chaos")) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos. (For the banmatch/moneymatch refer to: setspawnA and setspawnB)");
                                         return false;
                                     }
 
                                     plot.setSpawn(playerSender.getLocation());
                                     playerSender.sendMessage(ChatColor.GOLD + "The spawn for " + plot.getName() + " has been set to where you are standing.");
 
+                                    break;
+                                case "setspawna":
+                                    if (args.length == 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawnA (name)");
+                                        return false;
+                                    }
+
+                                    if (!Plot.isStandingOnPlot(playerSender)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
+                                        return false;
+                                    }
+
+                                    Plot plotA = Plot.getStandingOnPlot(playerSender);
+
+                                    if (!(plotA instanceof ArenaPlot))
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
+                                        return false;
+                                    }
+
+                                    ArenaPlot arenaPlotA = (ArenaPlot) plotA;
+
+                                    arenaPlotA.setSpawnA(playerSender.getLocation());
+                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + arenaPlotA.getName() + " has been set to where you are standing.");
+                                    break;
+                                case "setspawnb":
+                                    if (args.length == 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawnB (name)");
+                                        return false;
+                                    }
+
+                                    if (!Plot.isStandingOnPlot(playerSender)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
+                                        return false;
+                                    }
+
+                                    Plot plotB = Plot.getStandingOnPlot(playerSender);
+
+                                    if (!(plotB instanceof ArenaPlot))
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
+                                        return false;
+                                    }
+
+                                    ArenaPlot arenaPlotB = (ArenaPlot) plotB;
+
+                                    arenaPlotB.setSpawnB(playerSender.getLocation());
+                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + arenaPlotB.getName() + " has been set to where you are standing.");
                                     break;
                                 case "tools":
                                     if (staffPlotCreator.containsKey(playerUUID))

@@ -3,6 +3,7 @@ package com.github.kotooriiii.skills.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -46,7 +47,7 @@ public class SwordsmanshipListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if(!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!HelperMethods.isCarryingSword(damagerPlayer))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -76,7 +77,7 @@ public class SwordsmanshipListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-         if(!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!HelperMethods.isCarryingSword(damagerPlayer))
             return;
         addXP(damagerPlayer, defenderEntity);
 
@@ -108,7 +109,7 @@ public class SwordsmanshipListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if(!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!HelperMethods.isCarryingSword(damagerPlayer))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -119,7 +120,7 @@ public class SwordsmanshipListener implements Listener {
         Entity defenderEntity = event.getEntity();
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
-        if (damagerCause == null ||  !(damagerCause instanceof EntityDamageByEntityEvent))
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
@@ -141,7 +142,7 @@ public class SwordsmanshipListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damagerEntity instanceof Player))
             return;
-        if(!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!HelperMethods.isCarryingSword(damagerPlayer))
             return;
         addXP(damagerPlayer, defenderEntity);
 
@@ -159,16 +160,15 @@ public class SwordsmanshipListener implements Listener {
             ((Player) defender).sendMessage(ChatColor.GREEN + "You are bleeding!");
 
             //Remove in case old entry
-            if(getBleedingMap().containsKey(defender.getUniqueId()))
-            {
-                Object[] props =  getBleedingMap().get(defender.getUniqueId());
+            if (getBleedingMap().containsKey(defender.getUniqueId())) {
+                Object[] props = getBleedingMap().get(defender.getUniqueId());
                 ((BukkitTask) props[0]).cancel();
                 getBleedingMap().remove(defender.getUniqueId());
 
             }
 
             //Stun timer
-            final int stunTimer = 20*4;
+            final int stunTimer = 20 * 5;
 
             //Properties of object
             Object[] properties = new Object[]{null, new Double(stunTimer)};
@@ -182,7 +182,7 @@ public class SwordsmanshipListener implements Listener {
                 @Override
                 public void run() {
 
-                    if(isCancelled())
+                    if (isCancelled())
                         return;
 
                     if (counter >= timer) {
@@ -198,48 +198,53 @@ public class SwordsmanshipListener implements Listener {
                     }
 
                     //Damage by half-heart
-                    ((Player) defender).damage(1);
+
+                    double newHP = ((Player) defender).getHealth() - 1;
+
+                    if (newHP <= 0) {
+                        if(!defender.isDead())
+                        ((Player) defender).setHealth(0);
+                        getBleedingMap().remove(playerUUID);
+                        this.cancel();
+                        return;
+
+                    }
+                    else {
+                        ((Player) defender).setHealth(newHP);
+                    }
 
                     counter += 20;
                     Object[] properties = getBleedingMap().get(playerUUID);
                     int left = timer - counter;
-                    if(left < 0 ) left = 0;
+                    if (left < 0) left = 0;
 
                     properties[1] = new Double(left);
                 }
             }.runTaskTimer(LostShardPlugin.plugin, 20, 20);
+
             bleedingMap.put(defender.getUniqueId(), properties);
 
         }
     }
 
     private void applyLevelBonus(Player damager, Entity defender, EntityDamageByEntityEvent event) {
-        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getArchery().getLevel();
+        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getSwordsmanship().getLevel();
 
         int damage = (int) event.getDamage(); //todo might need to rework this
 
-        if(level>=100)
-        {
+        if (level >= 100) {
             damage += 4;
             applyBleed(damager, defender, 0.225);
-        }
-        else if(75 <= level && level < 100)
-        {
+        } else if (75 <= level && level < 100) {
             damage += 3;
             applyBleed(damager, defender, 0.15);
-        }
-        else if(50 <= level && level < 75)
-        {
+        } else if (50 <= level && level < 75) {
             damage += 2;
             applyBleed(damager, defender, 0.1);
-        }
-        else if(25 <= level && level < 50)
-        {
+        } else if (25 <= level && level < 50) {
             damage += 1;
             applyBleed(damager, defender, 0.05);
-        }
-        else if(0 <= level && level < 25)
-        {
+        } else if (0 <= level && level < 25) {
 
         }
 

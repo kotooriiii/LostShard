@@ -55,7 +55,7 @@ public class EnhanceCommand implements CommandExecutor {
         ItemStack[] ingredients = getCost(mainHand);
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to enhance this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to enhance this item", 1, false);
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())
@@ -112,10 +112,12 @@ public class EnhanceCommand implements CommandExecutor {
 
         switch (material) {
             //DIAMOND
+            case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
             case DIAMOND_HOE:
                 //GOLD
+            case GOLDEN_PICKAXE:
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
             case GOLDEN_HOE:
@@ -130,6 +132,7 @@ public class EnhanceCommand implements CommandExecutor {
                 else
                     return -1;
                 //IRON
+            case IRON_PICKAXE:
             case IRON_AXE:
             case IRON_SHOVEL:
             case IRON_HOE:
@@ -142,6 +145,7 @@ public class EnhanceCommand implements CommandExecutor {
                 else
                     return -1;
                 //STONE
+            case STONE_PICKAXE:
             case STONE_AXE:
             case STONE_SHOVEL:
             case STONE_HOE:
@@ -152,6 +156,7 @@ public class EnhanceCommand implements CommandExecutor {
                 else
                     return -1;
                 //WOODEN
+            case WOODEN_PICKAXE:
             case WOODEN_AXE:
             case WOODEN_SHOVEL:
             case WOODEN_HOE:
@@ -170,22 +175,27 @@ public class EnhanceCommand implements CommandExecutor {
         switch (material) {
 
             //DIAMOND
+            case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
             case DIAMOND_HOE:
                 //GOLD
+            case GOLDEN_PICKAXE:
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
             case GOLDEN_HOE:
                 //IRON
+            case IRON_PICKAXE:
             case IRON_AXE:
             case IRON_SHOVEL:
             case IRON_HOE:
                 //STONE
+            case STONE_PICKAXE:
             case STONE_AXE:
             case STONE_SHOVEL:
             case STONE_HOE:
                 //WOODEN
+            case WOODEN_PICKAXE:
             case WOODEN_AXE:
             case WOODEN_SHOVEL:
             case WOODEN_HOE:
@@ -234,7 +244,7 @@ public class EnhanceCommand implements CommandExecutor {
         int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
-        if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= efficiencyLevel) {
+        if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= efficiencyMaxLevel) {
             itemStack.removeEnchantment(Enchantment.DIG_SPEED);
             itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
         }
@@ -269,29 +279,34 @@ public class EnhanceCommand implements CommandExecutor {
         switch (material) {
 
             //DIAMOND
+            case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
             case DIAMOND_HOE:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, cost)};
 
             //GOLD
+            case GOLDEN_PICKAXE:
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
             case GOLDEN_HOE:
                 return new ItemStack[]{new ItemStack(Material.GOLD_INGOT, cost)};
 
             //IRON
+            case IRON_PICKAXE:
             case IRON_AXE:
             case IRON_SHOVEL:
             case IRON_HOE:
                 return new ItemStack[]{new ItemStack(Material.IRON_INGOT, cost)};
 
             //STONE
+            case STONE_PICKAXE:
             case STONE_AXE:
             case STONE_SHOVEL:
             case STONE_HOE:
                 return new ItemStack[]{new ItemStack(Material.COBBLESTONE, cost)};
 
+            case WOODEN_PICKAXE:
             case WOODEN_AXE:
             case WOODEN_SHOVEL:
             case WOODEN_HOE:

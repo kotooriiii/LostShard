@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -204,8 +206,7 @@ public class Wand {
 
     public void cast(Player player) {
 
-        if(BrawlingListener.isStunned(player.getUniqueId()))
-        {
+        if (BrawlingListener.isStunned(player.getUniqueId())) {
             player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
             return;
         }
@@ -280,9 +281,12 @@ public class Wand {
                         player.getLocation().getPitch());
 
                 // Spawn fireball
-                Entity en = player.getWorld().spawnEntity(fireballLocation, EntityType.FIREBALL);
-                en.setCustomNameVisible(false);
-                en.setCustomName(player.getName());
+                Fireball fireball = (Fireball) player.launchProjectile(Fireball.class, player.getEyeLocation().getDirection());
+                Vector origVector = fireball.getDirection();
+                Vector vector = new Vector(origVector.getX(), origVector.getY(), origVector.getZ()).multiply(2);
+                fireball.setVelocity(vector);
+                fireball.setDirection(vector);
+                fireball.setShooter(player);
                 break;
             case TELEPORT:
                 final int rangeTeleport = 20;
@@ -521,9 +525,16 @@ public class Wand {
     public Location teleportLocation(Player player, final int range) {
 
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
-        Block targetBlock = lastTwoTargetBlocks.get(1);
+
+        Block targetBlock;
+        if (lastTwoTargetBlocks.size() > 1)
+            targetBlock = lastTwoTargetBlocks.get(1);
+        else
+            targetBlock = lastTwoTargetBlocks.get(0);
+
+
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
-        if (new Location(adjacentBlock.getWorld(), adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()).getBlock().getType() == Material.AIR) {
+        if (new Location(adjacentBlock.getWorld(), adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()).getBlock().getType() == Material.AIR && new Location(targetBlock.getWorld(), targetBlock.getX(), targetBlock.getY()+1, targetBlock.getZ()).getBlock().getType() == Material.AIR) {
             adjacentBlock = new Location(adjacentBlock.getWorld(), targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()).getBlock();
         }
         return adjacentBlock.getLocation();

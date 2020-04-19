@@ -55,7 +55,7 @@ public class SharpenCommand implements CommandExecutor {
         ItemStack[] ingredients = getCost(mainHand);
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to sharpen this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to sharpen this item", 1, false);
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())

@@ -74,11 +74,9 @@ public class TamingListener implements Listener {
         if (entity instanceof Wolf)
             if (!addWolf(player))
                 event.setCancelled(true);
-
         addXP(player, entity);
 
     }
-
 
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -105,9 +103,13 @@ public class TamingListener implements Listener {
         ItemStack itemStack = player.getInventory().getItemInMainHand();
 
         //Check if the item is a tameable item
-        if (!itemStack.getType().equals(getBreedingFoods(entity)))
-            return;
 
+        boolean exists = false;
+        for (Material breedingFood : getBreedingFoods(entity))
+            if (itemStack.getType().equals(breedingFood))
+                exists = true;
+        if (!exists)
+            return;
         addXP(player, entity);
     }
 
@@ -132,7 +134,11 @@ public class TamingListener implements Listener {
         ItemStack itemStack = player.getInventory().getItemInMainHand();
 
         //Check if the item is a tameable item
-        if (!itemStack.getType().equals(getTameableItem(tameable)))
+        boolean exists = false;
+        for (Material breedingFood : getTameableItem(tameable))
+            if (itemStack.getType().equals(breedingFood))
+                exists = true;
+        if (!exists)
             return;
 
         addXP(player, entity);
@@ -140,22 +146,25 @@ public class TamingListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onTameAttemptVehicle(VehicleExitEvent event) {
+
+
         LivingEntity livingEntity = event.getExited();
         //Must be player
         if (!(livingEntity instanceof Player))
             return;
 
         Vehicle vehicle = event.getVehicle();
-        Entity entity = vehicle.getVehicle();
+
         //Must be a tameable entity
-        if (!(entity instanceof Tameable))
+        if (!(vehicle instanceof Tameable))
             return;
-        Tameable tameable = (Tameable) entity;
+
+        Tameable tameable = (Tameable) vehicle;
         //Already tamed
         if (tameable.isTamed())
             return;
 
-        addXP((Player) livingEntity, entity);
+        addXP((Player) livingEntity, vehicle);
     }
 
     //Pokeball
@@ -211,7 +220,7 @@ public class TamingListener implements Listener {
 
         applyPokeball(shooter, livingEntity, egg, chance);
         //todo remove xp
-    //    shooter.setLevel(shooter.getLevel() - 30);
+        //    shooter.setLevel(shooter.getLevel() - 30);
         addXP(shooter, entity, 100);
     }
 
@@ -483,7 +492,7 @@ public class TamingListener implements Listener {
                 return false;
 
 
-                //todo might do something custom with values down here v
+            //todo might do something custom with values down here v
             case ILLUSIONER:
             case GIANT:
             case ENDER_DRAGON:
@@ -606,7 +615,7 @@ public class TamingListener implements Listener {
                 material = null;
                 break;
 
-                //todo might do something custom with values down here v
+            //todo might do something custom with values down here v
             case ILLUSIONER:
             case GIANT:
             case ENDER_DRAGON:
@@ -618,7 +627,7 @@ public class TamingListener implements Listener {
 
 
             case MUSHROOM_COW:
-                material=Material.MOOSHROOM_SPAWN_EGG;
+                material = Material.MOOSHROOM_SPAWN_EGG;
                 break;
             case ELDER_GUARDIAN:
                 material = Material.ELDER_GUARDIAN_SPAWN_EGG;

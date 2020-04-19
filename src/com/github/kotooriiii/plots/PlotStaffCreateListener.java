@@ -149,15 +149,22 @@ public class PlotStaffCreateListener implements Listener {
                         if (next.getName().equalsIgnoreCase(name)) {
                             player.sendMessage(ERROR_COLOR + "The last plot with this name has been cleared. What this means is that the last spawn was also removed.");
                             plotFound = next;
-                            isFound =true;
+                            isFound = true;
                         }
                     }
 
-                    if(isFound)
+                    if (isFound)
                         plotFound.disband();
 
 
-                    Plot plot = new Plot(zoneFinish, name); //auto does it
+                    if (name.equalsIgnoreCase("arena"))
+                    {
+                        Plot plot = new ArenaPlot(zoneFinish, name); //auto does it
+
+                    }
+                    else {
+                        Plot plot = new Plot(zoneFinish, name); //auto does it
+                    }
 
                     player.getInventory().clear();
                     player.sendMessage(STANDARD_COLOR + "You have saved the staff plot, \"" + name + "\".");

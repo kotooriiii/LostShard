@@ -1,6 +1,7 @@
-package com.github.kotooriiii.sorcery.marks;
+package com.github.kotooriiii.sorcery.listeners;
 
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

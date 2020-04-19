@@ -1,6 +1,9 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,32 +13,38 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.github.kotooriiii.util.HelperMethods.getPlayerDamagerONLY;
+import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
+
 public class PlayerFriendlyFireHitListener implements Listener {
 
     ArrayList<Player> players = new ArrayList<>();
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
 
-        if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+        if (!HelperMethods.isPlayerInduced(event.getEntity(), event.getDamager()))
+            return;
 
-            Player attacker = (Player) event.getDamager();
-            UUID attackerUUID = attacker.getUniqueId();
+        Player defender = (Player) event.getEntity();
+        UUID defenderUUID = defender.getUniqueId();
 
-            Player defender = (Player) event.getEntity();
-            UUID defenderUUID = defender.getUniqueId();
+        Player attacker = getPlayerInduced(defender, event.getDamager());
+        UUID attackerUUID = attacker.getUniqueId();
 
-            Clan attackerClan = Clan.getClan(attackerUUID);
-            Clan defenderClan = Clan.getClan(defenderUUID);
+        Clan attackerClan = Clan.getClan(attackerUUID);
+        Clan defenderClan = Clan.getClan(defenderUUID);
 
-            if (attackerClan != null && defenderClan != null) {
-                if (attackerClan.equals(defenderClan)) {
-                    if (attackerClan.isFriendlyFire())
-                        event.setCancelled(true);
+
+        if (attackerClan != null && defenderClan != null) {
+            if (attackerClan.equals(defenderClan)) {
+                if (!attackerClan.isFriendlyFire()) {
+                    event.setCancelled(true);
                 }
             }
+        }
 
-        }//end
+        //end
     }
 
 //    @EventHandler

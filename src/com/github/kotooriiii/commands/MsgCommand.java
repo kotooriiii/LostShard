@@ -16,34 +16,37 @@ public class MsgCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
-        if (commandSender instanceof Player) {
-            final Player playerSender = (Player) commandSender;
+        if (!(commandSender instanceof Player))
+            return false;
 
-            if (args.length < 2) {
-                playerSender.sendMessage(ERROR_COLOR + "The proper usage of the command is: " + COMMAND_COLOR + "/msg (username) (message)" + ERROR_COLOR + ".");
-                return false;
-            }
+        if (!command.getName().equalsIgnoreCase("msg"))
+            return false;
+        final Player playerSender = (Player) commandSender;
 
-            String name = args[0];
-
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-            if (!offlinePlayer.hasPlayedBefore()) {
-                playerSender.sendMessage(ERROR_COLOR + "The player you are looking for has never set foot in this server.");
-                return false;
-            }
-
-            if (!offlinePlayer.isOnline()) {
-                playerSender.sendMessage(ERROR_COLOR + "The player you are looking for is not online.");
-                return false;
-            }
-
-            Player receivingPlayer = offlinePlayer.getPlayer();
-
-            String message = HelperMethods.stringBuilder(args, 1, " ");
-
-            playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
-            receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+        if (args.length < 2) {
+            playerSender.sendMessage(ERROR_COLOR + "The proper usage of the command is: " + COMMAND_COLOR + "/msg (username) (message)" + ERROR_COLOR + ".");
+            return false;
         }
+
+        String name = args[0];
+
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
+        if (!offlinePlayer.hasPlayedBefore()) {
+            playerSender.sendMessage(ERROR_COLOR + "The player you are looking for does not exist.");
+            return false;
+        }
+
+        if (!offlinePlayer.isOnline()) {
+            playerSender.sendMessage(ERROR_COLOR + "The player you are looking for is not online.");
+            return false;
+        }
+
+        Player receivingPlayer = offlinePlayer.getPlayer();
+
+        String message = HelperMethods.stringBuilder(args, 1, " ");
+
+        playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
+        receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
 
 
         return true;

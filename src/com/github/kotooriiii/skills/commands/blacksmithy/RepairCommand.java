@@ -51,7 +51,7 @@ public class RepairCommand implements CommandExecutor {
         }
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to repair this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to repair this item", 1, false);
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())
@@ -73,9 +73,8 @@ public class RepairCommand implements CommandExecutor {
         double random = Math.random();
 
 
-
         //If won!
-        if (random <  chance) {
+        if (random < chance) {
             //Repair item
             ((Damageable) meta).setDamage(0);
             playerSender.sendMessage(ChatColor.GOLD + "You repair the item.");
@@ -87,11 +86,11 @@ public class RepairCommand implements CommandExecutor {
             int damageTaken = (int) Math.floor(mainHand.getType().getMaxDurability() / 3);
 
             if (((Damageable) meta).getDamage() - damageTaken < 0)
-                ((Damageable) meta).setDamage(mainHand.getType().getMaxDurability());
+                playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             else
                 ((Damageable) meta).setDamage(((Damageable) meta).getDamage() - damageTaken);
 
-            playerSender.sendMessage(ChatColor.RED + "You weren't able to repair the item.");
+            playerSender.sendMessage(ChatColor.GRAY + "You failed to repair the item, it was damaged in the process.");
         }
 
         //Give xp for trying.
@@ -99,6 +98,7 @@ public class RepairCommand implements CommandExecutor {
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         mainHand.setItemMeta(meta);
         invHelper.removeIngredients();
+        playerSender.updateInventory();
         return true;
     }
 

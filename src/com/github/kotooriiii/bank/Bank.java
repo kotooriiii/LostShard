@@ -32,6 +32,8 @@ public class Bank {
         return inventory;
     }
 
+
+
     public double getCurrency()
     {
         return new BigDecimal(currency).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -39,6 +41,18 @@ public class Bank {
 
     public void setCurrency(double currency) {
         this.currency = currency;
+        FileManager.write(this);
+    }
+
+    public void add(double currency)
+    {
+        this.currency += currency;
+        FileManager.write(this);
+    }
+
+    public void remove(double currency)
+    {
+        this.currency -= currency;
         FileManager.write(this);
     }
 

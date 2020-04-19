@@ -55,7 +55,7 @@ public class PowerCommand implements CommandExecutor {
         ItemStack[] ingredients = getCost(mainHand);
 
         //Inventory helper and construct error message
-        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to power this item");
+        InventoryUtil invHelper = new InventoryUtil(playerSender, ingredients, "to power this item", 1, false);
 
         //If inventory doesn't have the necessary ingredients.
         if (!invHelper.hasIngredients())
@@ -112,13 +112,13 @@ public class PowerCommand implements CommandExecutor {
 
         switch (material) {
             case BOW:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 50;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 60;
-                else if(nextLevel == 3)
+                else if (nextLevel == 3)
                     return 70;
-                else if(nextLevel == 4)
+                else if (nextLevel == 4)
                     return 80;
                 else
                     return -1;

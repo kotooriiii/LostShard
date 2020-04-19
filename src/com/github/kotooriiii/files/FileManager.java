@@ -4,8 +4,10 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.DonorTitle;
 import com.github.kotooriiii.bank.Sale;
+import com.github.kotooriiii.banmatch.BannedPlayer;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.muted.MutedPlayer;
 import com.github.kotooriiii.npc.ShardBanker;
 import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
@@ -15,6 +17,8 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import com.mojang.datafixers.kinds.IdF;
+import net.minecraft.server.v1_15_R1.Packet;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -22,8 +26,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.UUID;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.logging.Level;
 
 import static com.github.kotooriiii.data.Maps.platforms;
@@ -42,10 +46,47 @@ public final class FileManager {
     private static File plots_folder = new File(plugin_folder + File.separator + "plots");
     private static File skills_folder = new File(plugin_folder + File.separator + "skills");
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
+    private static File muted_folder = new File(plugin_folder + File.separator + "muted");
+
+    private static File banned_file = new File(plugin_folder + File.separator + "banned-list.yml");
 
 
     private FileManager() {
     }
+
+    public static UUID[] getBanned() {
+
+        ArrayList<UUID> playerUUIDS = new ArrayList<>();
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
+
+        Set<String> setUUIDS = yaml.getKeys(false);
+
+        for(String uuidString : setUUIDS)
+        {
+            playerUUIDS.add(UUID.fromString(uuidString));
+        }
+
+        return playerUUIDS.toArray(new UUID[playerUUIDS.size()]);
+    }
+
+    public static BannedPlayer getBannedPlayer(UUID uuid)
+    {
+        return (BannedPlayer) YamlConfiguration.loadConfiguration(banned_file).get(uuid.toString());
+    }
+
+    public static void ban(BannedPlayer bannedPlayer)
+    {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
+        yaml.set(bannedPlayer.getPlayerUUID().toString(), bannedPlayer);
+    }
+
+    public static void unban(BannedPlayer bannedPlayer)
+    {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
+        yaml.set(bannedPlayer.getPlayerUUID().toString(), null);
+    }
+
 
     public static void init() {
         plugin_folder.mkdir();
@@ -60,6 +101,16 @@ public final class FileManager {
         plots_folder.mkdirs();
         skills_folder.mkdirs();
         marks_folder.mkdirs();
+        muted_folder.mkdirs();
+
+        if(!banned_file.exists()) {
+            try {
+                banned_file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
@@ -190,8 +241,7 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a skill file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            SkillPlayer skillPlayer1 = new SkillPlayer(skillPlayer.getPlayerUUID());
-            //SkillPlayer.add(skillPlayer);
+            SkillPlayer.add(skillPlayer);
         }
 
         for (File file : marks_folder.listFiles()) {
@@ -204,6 +254,19 @@ public final class FileManager {
                 continue;
             }
             MarkPlayer.add(markPlayer);
+        }
+
+        for(File file : muted_folder.listFiles())
+        {
+            if(file.getName().endsWith(".yml"))
+                continue;
+
+            MutedPlayer mutedPlayer = readMutedPlayer(file);
+            if (mutedPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a muted file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            mutedPlayer.add();
         }
 
     }
@@ -510,6 +573,22 @@ public final class FileManager {
         return null;
     }
 
+    public static MutedPlayer readMutedPlayer(File mutedFile)
+    {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(mutedFile);
+        String uuidString = mutedFile.getName().substring(0, mutedFile.getName().indexOf('.'));
+
+        ZonedDateTime bannedTime = (ZonedDateTime) yaml.get("ZoneDateTime");
+
+        UUID playerUUID = UUID.fromString(uuidString);
+
+        if (playerUUID == null || bannedTime == null)
+            return null;
+
+        MutedPlayer mutedPlayer = new MutedPlayer(playerUUID, bannedTime);
+        return mutedPlayer;
+    }
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -761,6 +840,26 @@ public final class FileManager {
         }
     }
 
+    public static void write(MutedPlayer mutedPlayer) {
+        String fileName = mutedPlayer.getMutedUUID() + ".yml";
+        File mutedPlayerFile = new File(muted_folder + File.separator + fileName);
+
+        try {
+            if (!mutedPlayerFile.exists())
+                mutedPlayerFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(mutedPlayerFile);
+        yaml.set("ZoneDateTime", mutedPlayer.getBannedTime());
+        try {
+            yaml.save(mutedPlayerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void removeFile(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -848,6 +947,15 @@ public final class FileManager {
             marksFile.delete();
 
     }
+
+    public static void removeFile(MutedPlayer mutedPlayer) {
+        File mutedPlayerFile = new File(muted_folder + File.separator + mutedPlayer.getMutedUUID() + ".yml");
+
+        if (mutedPlayerFile.exists())
+            mutedPlayerFile.delete();
+
+    }
+
 
     private static void saveResource(String resourcePath, File out_to_folder, boolean replace) {
         if (resourcePath != null && !resourcePath.equals("")) {
