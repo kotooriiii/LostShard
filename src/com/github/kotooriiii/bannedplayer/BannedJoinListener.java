@@ -1,14 +1,12 @@
-package com.github.kotooriiii.banmatch;
+package com.github.kotooriiii.bannedplayer;
 
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 
-import java.io.File;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -28,14 +26,14 @@ public class BannedJoinListener  implements Listener {
 
                 if(unbanZDT == null)
                 {
-                    unbanDate = "Indefinite ban";
+                    unbanDate += "Indefinite ban";
                 } else {
                     if(ZonedDateTime.now().compareTo(unbanZDT) >= 0)
                     {
                         FileManager.unban(bannedPlayer);
                         return;
                     }
-                    unbanDate += HelperMethods.getTimeLeft(unbanZDT);
+                    unbanDate += HelperMethods.until(unbanZDT);
                 }
 
 

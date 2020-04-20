@@ -361,14 +361,22 @@ public final class HelperMethods {
         }
     }
 
-    public static ZonedDateTime toZDT(long seconds)
-    {
+    public static ZonedDateTime toZDT(long seconds) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
         ZonedDateTime unbanDate = now.plusSeconds(seconds);
-
         return unbanDate;
     }
 
+    public static ZonedDateTime toZDT(int years, int months, int weeks, int days, int hours, int minutes, int seconds) {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
+        ZonedDateTime nextRun = now.plusYears(years).plusMonths(months).plusWeeks(weeks).plusDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+        return nextRun;
+    }
+
+    public static ZonedDateTime toZDT(int[] props)
+    {
+        return toZDT(props[0], props[1], props[2], props[3], props[4], props[5], props[6]);
+    }
 
     public static String getTimeLeft(ZonedDateTime zonedDateTime) {
 
@@ -376,7 +384,7 @@ public final class HelperMethods {
         long left = Duration.between(now, zonedDateTime).toMillis();
 
         String[] splitTime = getTimeLeft(left).split(", ");
-        if(splitTime.length == 1)
+        if (splitTime.length == 1)
             return splitTime[0];
         return splitTime[0] + " and " + splitTime[1];
 
@@ -445,6 +453,35 @@ public final class HelperMethods {
 
             return HelperMethods.stringBuilder(words, 0, ", ");
         }
+    }
+
+    public static  String until(ZonedDateTime of)
+    {
+        int hour = of.getHour();
+        String ampm = "";
+
+        if(hour == 0)
+        {
+            hour  = 12;
+            ampm = "a.m.";
+        } else if (1 <= hour && hour <= 11)
+        {
+            hour = hour;
+            ampm = "a.m.";
+        } else if (hour == 12)
+        {
+            hour = 12;
+            ampm = "p.m.";
+        }
+        else if(13 <= hour && hour < 23) {
+            hour = hour-12;
+            ampm = "p.m.";
+        }
+
+        String monthName = of.getMonth().name();
+        monthName = monthName.substring(0,1).toUpperCase() + monthName.substring(1).toLowerCase();
+
+        return of.getDayOfMonth() + " " + monthName + " " + of.getYear() + " " + hour + ":" + of.getMinute() + ampm;
     }
 
 }

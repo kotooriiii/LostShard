@@ -1,6 +1,6 @@
-package com.github.kotooriiii.banmatch;
+package com.github.kotooriiii.match.banmatch;
 
-import com.github.kotooriiii.plots.PlayerStatusRespawnListener;
+import com.github.kotooriiii.match.Match;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -30,9 +30,9 @@ public class BanmatchCommand implements CommandExecutor {
 
         if (args.length >= 1) {
             if (args[0].equalsIgnoreCase("cancel")) {
-                if (Banmatch.hasActiveMatch()) {
-                    Banmatch bm = Banmatch.getActiveMatch();
-                    bm.cancel();
+                if (Match.hasActiveMatch()) {
+                    Match bm = Match.getActiveMatch();
+                    bm.cancel(playerSender);
 
                     playerSender.sendMessage(STANDARD_COLOR + "You have canceled the match.");
                 } else {
@@ -66,7 +66,7 @@ public class BanmatchCommand implements CommandExecutor {
         }
 
         Banmatch banmatch = new Banmatch(offlineFighterA.getUniqueId(), offlinePlayerFighterB.getUniqueId());
-        Banmatch.getBanmatchCreator().put(playerSender.getUniqueId(), banmatch);
+        Match.getMatchCreatorMap().put(playerSender.getUniqueId(), banmatch);
         playerSender.sendMessage(STANDARD_COLOR + "Creating banmatch session...");
         playerSender.sendMessage(STANDARD_COLOR + "What is the armor type? (diamond,gold,iron,chainmail)");
 

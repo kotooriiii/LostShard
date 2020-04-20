@@ -1,7 +1,6 @@
-package com.github.kotooriiii.banmatch;
+package com.github.kotooriiii.bannedplayer;
 
 import java.io.Serializable;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 

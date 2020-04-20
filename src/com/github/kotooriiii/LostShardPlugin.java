@@ -1,12 +1,14 @@
 package com.github.kotooriiii;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.banmatch.BanmatchCommand;
-import com.github.kotooriiii.banmatch.BanmatchCreatorListener;
-import com.github.kotooriiii.banmatch.BanmatchDefeatListener;
-import com.github.kotooriiii.banmatch.BannedJoinListener;
+import com.github.kotooriiii.bannedplayer.BannedJoinListener;
+import com.github.kotooriiii.match.BanmatchDefeatListener;
+import com.github.kotooriiii.match.MatchCreatorListener;
+import com.github.kotooriiii.match.MatchDefeatListener;
+import com.github.kotooriiii.match.banmatch.*;
 import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.channels.ChatChannelListener;
+import com.github.kotooriiii.match.moneymatch.MoneymatchCommand;
 import com.github.kotooriiii.muted.listeners.MuteListener;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
@@ -208,6 +210,8 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("power").setExecutor(new PowerCommand());
 
         getCommand("banmatch").setExecutor(new BanmatchCommand());
+        getCommand("moneymatch").setExecutor(new MoneymatchCommand());
+
         getCommand("heal").setExecutor(new HealCommand());
 
 
@@ -264,9 +268,9 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new ZombieDeathListener(), this);
         pm.registerEvents(new HostilityNamePreprocessListener(), this);
 
-        pm.registerEvents(new BanmatchCreatorListener(), this);
+        pm.registerEvents(new MatchCreatorListener(), this);
         pm.registerEvents(new BannedJoinListener(), this);
-        pm.registerEvents(new BanmatchDefeatListener(), this);
+        pm.registerEvents(new MatchDefeatListener(), this);
 
 
 

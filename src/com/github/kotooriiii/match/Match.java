@@ -1,49 +1,48 @@
-package com.github.kotooriiii.banmatch;
+package com.github.kotooriiii.match;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.plots.ArenaPlot;
 import com.github.kotooriiii.plots.PlayerStatusRespawnListener;
 import com.github.kotooriiii.plots.Plot;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class Banmatch {
+public class Match {
+
+    public static String NAME = "Match";
 
     private UUID fighterA;
     private UUID fighterB;
 
     private Material armorType;
     private int protection;
-
     private Material swordType;
     private int sharpness;
     private int fireAspect;
-
     private int power;
 
-    private String unbannedTime;
-
-    private int banmatchBegin;
+    private int beginCountdown;
     private BukkitTask task;
 
     private boolean isActive = false;
 
 
-    private static HashMap<UUID, Banmatch> banmatchCreator = new HashMap<>();
+    private static HashMap<UUID, Match> matchCreatorMap = new HashMap<>();
 
-    private static Banmatch activeMatch;
+    private static Match activeMatch;
 
-    public Banmatch(UUID fighterA, UUID fighterB) {
+    public Match(UUID fighterA, UUID fighterB)
+    {
         this.fighterA = fighterA;
         this.fighterB = fighterB;
 
@@ -56,10 +55,13 @@ public class Banmatch {
 
         power = -1;
 
-        unbannedTime = null;
-
-        banmatchBegin = -1;
+        beginCountdown = -1;
         task = null;
+    }
+
+    public void initializer()
+    {
+
     }
 
     public BukkitTask getTask() {
@@ -76,7 +78,7 @@ public class Banmatch {
         }
 
         win(Bukkit.getOfflinePlayer(winner));
-        ban(Bukkit.getOfflinePlayer(loser));
+        lose(Bukkit.getOfflinePlayer(loser));
 
         activeMatch = null;
     }
@@ -85,7 +87,7 @@ public class Banmatch {
         return fighterA.equals(candidateUUID) || fighterB.equals(candidateUUID);
     }
 
-    public static Banmatch getActiveMatch() {
+    public static Match getActiveMatch() {
         return activeMatch;
     }
 
@@ -96,7 +98,7 @@ public class Banmatch {
     public void startCountdown() {
 
         activeMatch = this;
-
+initializer();
         task = new BukkitRunnable() {
 
 
@@ -106,21 +108,21 @@ public class Banmatch {
                 if (isCancelled())
                     return;
 
-                significantTime(banmatchBegin);
+                significantTime(beginCountdown);
 
-                if (banmatchBegin == 0) {
-                    sendToAll(ChatColor.GREEN + "Banmatch is in progress.");
+                if (beginCountdown == 0) {
+                    sendToAll(ChatColor.GREEN + getName()  + " is in progress.");
                     start();
                     this.cancel();
                     return;
                 }
 
-                banmatchBegin--;
+                beginCountdown--;
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 60 * 20 * 1);
     }
 
-    public void start() {
+    private void start() {
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
 
@@ -131,10 +133,12 @@ public class Banmatch {
         } else if (!fighterA.isOnline()) {
             sendToAll(ChatColor.YELLOW + fighterA.getName() + ChatColor.RED + " did not participate in battle.");
             win(fighterB);
+            lose(fighterA);
             return;
         } else if (!fighterB.isOnline()) {
             sendToAll(ChatColor.YELLOW + fighterB.getName() + ChatColor.RED + " did not participate in battle.");
             win(fighterA);
+            lose(fighterB);
             return;
         }
 
@@ -145,9 +149,9 @@ public class Banmatch {
         ArenaPlot arenaPlot = (ArenaPlot) Plot.getPlot("Arena");
 
         if (arenaPlot.getSpawnA() == null)
-            sendToAll(ERROR_COLOR + "The arena's spawn A has not been set. Banmatch did not start.");
+            sendToAll(ERROR_COLOR + "The arena's spawn A has not been set. " + getName() + " did not start.");
         if (arenaPlot.getSpawnB() == null)
-            sendToAll(ERROR_COLOR + "The arena's spawn B has not been set. Banmatch did not start.");
+            sendToAll(ERROR_COLOR + "The arena's spawn B has not been set. " + getName() + " did not start.");
 
         if (arenaPlot.getSpawnA() == null || arenaPlot.getSpawnB() == null)
             return;
@@ -157,20 +161,16 @@ public class Banmatch {
         playerB.teleport(arenaPlot.getSpawnB());
     }
 
-    private void win(OfflinePlayer offlinePlayer) {
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " is the winner of the banmatch!");
+    public void win(OfflinePlayer offlinePlayer) {
+        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " is the winner of the " + getName() + "!");
     }
 
-    private void ban(OfflinePlayer offlinePlayer) {
-        if (offlinePlayer.isOnline()) {
-            offlinePlayer.getPlayer().kickPlayer("You were defeated in a banmatch.");
-        }
-        BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), null, "You were defeated in a banmatch.");
-        FileManager.ban(bannedPlayer);
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " has been banned.");
+    public void lose(OfflinePlayer offlinePlayer) {
+        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " was defeated in a " + getName() + ".");
+
     }
 
-    private void sendToAll(String message) {
+    public void sendToAll(String message) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(message);
         }
@@ -183,7 +183,7 @@ public class Banmatch {
         for (int sig : significant) {
             if (counter == sig) {
                 for (Player player : Bukkit.getOnlinePlayers())
-                    player.sendMessage(ChatColor.GREEN + "Banmatch in session. ETA " + counter + " mins");
+                    player.sendMessage(ChatColor.GREEN + getName() + " in session. ETA " + counter + " mins");
                 break;
             }
         }
@@ -248,52 +248,34 @@ public class Banmatch {
         this.power = power;
     }
 
-    public String getUnbannedTime() {
-        return unbannedTime;
+    public int getBeginCountdown() {
+        return beginCountdown;
     }
 
-    public void setUnbannedTime(String time) {
-        this.unbannedTime = time;
+    public void setBeginCountdown(int beginCountdown) {
+        this.beginCountdown = beginCountdown;
     }
 
-    public void setUnbannedTime(ZonedDateTime unbannedTime) {
-        this.unbannedTime = unbannedTime + ""; //tdo look over
+    public static boolean isCreatingMatch(UUID uuid) {
+        return matchCreatorMap.get(uuid) != null;
     }
 
-    public void setUnbannedTime(int days, int hours, int minutes, int seconds) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
-        ZonedDateTime nextRun = now.plusDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds);
-        this.unbannedTime = nextRun + ""; //tdoo lookover
+    public static Match wrap(UUID uuid) {
+        return matchCreatorMap.get(uuid);
     }
 
-    public int getBanmatchBegin() {
-        return banmatchBegin;
+    public static HashMap<UUID, Match> getMatchCreatorMap() {
+        return matchCreatorMap;
     }
 
-    public void setBanmatchBegin(int banmatchBegin) {
-        this.banmatchBegin = banmatchBegin;
-    }
-
-    public static boolean isCreatingBanmatch(UUID uuid) {
-        return banmatchCreator.get(uuid) != null;
-    }
-
-    public static Banmatch wrap(UUID uuid) {
-        return banmatchCreator.get(uuid);
-    }
-
-    public static HashMap<UUID, Banmatch> getBanmatchCreator() {
-        return banmatchCreator;
-    }
-
-    private String proper(String msg) {
+    public String proper(String msg) {
 
         if (msg.contains("_"))
             msg = msg.substring(0, msg.indexOf("_"));
         return msg.substring(0, 1).toUpperCase() + msg.substring(1).toLowerCase();
     }
 
-    private String toRoman(int num) {
+    public String toRoman(int num) {
         switch (num) {
             case 0:
                 return "NONE";
@@ -329,20 +311,24 @@ public class Banmatch {
         ChatColor DEFAULT = ChatColor.YELLOW;
         ChatColor IDENTITY = ChatColor.BLUE;
 
-        information += IDENTITY + "Banmatch in session.";
+        information += IDENTITY + getName() + " in session.";
         information += "\n" + DEFAULT + Bukkit.getOfflinePlayer(getFighterA()).getName() + IDENTITY + " vs " + DEFAULT + Bukkit.getOfflinePlayer(getFighterB()).getName();
         information += "\n" + IDENTITY + "Terms:";
         information += "\n" + DEFAULT + "Protection " + toRoman(getProtection()) + " " + proper(getArmorType().getKey().getKey()) + " Armor";
         information += "\n" + DEFAULT + "Sharpness " + toRoman(getSharpness()) + " Fire " + toRoman(getFireAspect()) + " " + proper(getSwordType().getKey().getKey()) + " Sword";
         information += "\n" + DEFAULT + "Power " + toRoman(getPower()) + " Bow";
-        information += "\n" + IDENTITY + "Ban term: " + DEFAULT + getUnbannedTime();
-        information += "\n" + IDENTITY + "Event will begin in: " + DEFAULT + getBanmatchBegin() + " min";
+        information += "\n" + IDENTITY + "Event will begin in: " + DEFAULT + getBeginCountdown() + " min";
 
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(information);
         }
 
+    }
+
+    public void cancel(Player player){
+        getMatchCreatorMap().remove(player.getUniqueId());
+        cancel();
     }
 
     public void cancel() {
@@ -360,4 +346,12 @@ public class Banmatch {
             }
         }
     }
+
+    public static String getName()
+    {
+        return NAME;
+    }
+
+
 }
+
