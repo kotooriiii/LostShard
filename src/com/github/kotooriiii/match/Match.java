@@ -36,7 +36,6 @@ public class Match {
 
     private boolean isActive = false;
 
-
     private static HashMap<UUID, Match> matchCreatorMap = new HashMap<>();
 
     private static Match activeMatch;
@@ -87,14 +86,6 @@ public class Match {
         return fighterA.equals(candidateUUID) || fighterB.equals(candidateUUID);
     }
 
-    public static Match getActiveMatch() {
-        return activeMatch;
-    }
-
-    public static boolean hasActiveMatch() {
-        return getActiveMatch() != null;
-    }
-
     public void startCountdown() {
 
         activeMatch = this;
@@ -142,11 +133,16 @@ initializer();
             return;
         }
 
-        isActive = true;
         Player playerA = fighterA.getPlayer();
         Player playerB = fighterB.getPlayer();
 
         ArenaPlot arenaPlot = (ArenaPlot) Plot.getPlot("Arena");
+
+        if(arenaPlot == null)
+        {
+            sendToAll(ERROR_COLOR + "The arena plot has not been set.");
+            return;
+        }
 
         if (arenaPlot.getSpawnA() == null)
             sendToAll(ERROR_COLOR + "The arena's spawn A has not been set. " + getName() + " did not start.");
@@ -159,6 +155,7 @@ initializer();
 
         playerA.teleport(arenaPlot.getSpawnA());
         playerB.teleport(arenaPlot.getSpawnB());
+        isActive = true;
     }
 
     public void win(OfflinePlayer offlinePlayer) {
@@ -191,6 +188,17 @@ initializer();
 
 
     //Getters /setters
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public static Match getActiveMatch() {
+        return activeMatch;
+    }
+
+    public static boolean hasActiveMatch() {
+        return getActiveMatch() != null;
+    }
 
     public UUID getFighterA() {
         return fighterA;

@@ -14,6 +14,7 @@ public class Banmatch extends Match {
 
     private ZonedDateTime unbannedTime;
 
+    private final static String INDEFINITE_BAN_IDENTIFIER = "Indefinite";
 
     public Banmatch(UUID fighterA, UUID fighterB) {
       super(fighterA, fighterB);
@@ -36,9 +37,9 @@ public class Banmatch extends Match {
             offlinePlayer.getPlayer().kickPlayer("You were defeated in a " + getName() + ".");
         }
         BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), "You were defeated in a " + getName() + ".");
-        FileManager.ban(bannedPlayer);
+        FileManager.write(bannedPlayer);
 
-        if(getUnbannedTime() == null)
+        if(getUnbannedTime().getYear() == 0)
         sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " has been banned indefinitely.");
         else
             sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " has been banned until " + HelperMethods.until(getUnbannedTime()));
@@ -59,18 +60,31 @@ public class Banmatch extends Match {
         ChatColor DEFAULT = ChatColor.YELLOW;
         ChatColor IDENTITY = ChatColor.BLUE;
 
+        String banTermLift = "";
+        if(getUnbannedTime().getYear() == 0)
+        {
+         banTermLift = Banmatch.getIndefiniteBanIdentifier();
+        } else {
+            banTermLift = HelperMethods.until(getUnbannedTime());
+        }
+
+
         information += IDENTITY + getName() + " in session.";
         information += "\n" + DEFAULT + Bukkit.getOfflinePlayer(getFighterA()).getName() + IDENTITY + " vs " + DEFAULT + Bukkit.getOfflinePlayer(getFighterB()).getName();
         information += "\n" + IDENTITY + "Terms:";
         information += "\n" + DEFAULT + "Protection " + toRoman(getProtection()) + " " + proper(getArmorType().getKey().getKey()) + " Armor";
         information += "\n" + DEFAULT + "Sharpness " + toRoman(getSharpness()) + " Fire " + toRoman(getFireAspect()) + " " + proper(getSwordType().getKey().getKey()) + " Sword";
         information += "\n" + DEFAULT + "Power " + toRoman(getPower()) + " Bow";
-        information += "\n" + IDENTITY + "Ban term lifted on: " + DEFAULT + HelperMethods.until(getUnbannedTime());
+        information += "\n" + IDENTITY + "Ban term lifted on: " + DEFAULT + banTermLift;
         information += "\n" + IDENTITY + "Event will begin in: " + DEFAULT + getBeginCountdown() + " min";
 
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(information);
         }
+    }
+
+    public static String getIndefiniteBanIdentifier() {
+        return INDEFINITE_BAN_IDENTIFIER;
     }
 }

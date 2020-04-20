@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -16,6 +17,9 @@ public class MatchDefeatListener implements Listener {
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
+            if(!match.isActive())
+                return;
+
             if(match.isFighter(player.getUniqueId()))
             {
                 match.end(player.getUniqueId());
@@ -30,6 +34,9 @@ public class MatchDefeatListener implements Listener {
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
+            if(!match.isActive())
+                return;
+
             if(match.isFighter(player.getUniqueId()))
             {
                 match.end(player.getUniqueId());
@@ -38,12 +45,16 @@ public class MatchDefeatListener implements Listener {
     }
 
     @EventHandler
-    public void onTeleport(PlayerTeleportEvent event)
+    public void onTeleport(PlayerMoveEvent event)
     {
         Player player = event.getPlayer();
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
+
+            if(!match.isActive())
+                return;
+
             if(match.isFighter(player.getUniqueId()))
             {
                 if(!Plot.isStandingOnPlot(player))

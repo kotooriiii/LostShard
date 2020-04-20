@@ -300,7 +300,7 @@ public class PlotCommand implements CommandExecutor {
 
                                     Plot plotA = Plot.getStandingOnPlot(playerSender);
 
-                                    if (!(plotA instanceof ArenaPlot))
+                                    if (!plotA.getName().equalsIgnoreCase("arena"))
                                     {
                                         playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
                                         return false;
@@ -324,7 +324,7 @@ public class PlotCommand implements CommandExecutor {
 
                                     Plot plotB = Plot.getStandingOnPlot(playerSender);
 
-                                    if (!(plotB instanceof ArenaPlot))
+                                    if (!plotB.getName().equalsIgnoreCase("arena"))
                                     {
                                         playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
                                         return false;

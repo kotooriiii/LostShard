@@ -43,6 +43,12 @@ public class MoneymatchCommand implements CommandExecutor {
             }
         }
 
+        if(Match.hasActiveMatch())
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You must wait for the other match to end to use this command. Or, you can use /mm cancel");
+            return false;
+        }
+
         if (args.length != 2) {
             playerSender.sendMessage(ERROR_COLOR + "The proper usage of the command is: " + COMMAND_COLOR + "/mm (username) (username)" + ERROR_COLOR + ".");
             return false;

@@ -32,6 +32,12 @@ public class Moneymatch extends Match {
     {
         Bank withdrawalA = Bank.wrap(getFighterA());
         Bank withdrawalB = Bank.wrap(getFighterB());
+        OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
+        OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
+        if(fighterA.isOnline())
+            fighterA.getPlayer().sendMessage(ChatColor.RED + "" + wagerAmount + " has been taken from your bank account.");
+        if(fighterB.isOnline())
+            fighterB.getPlayer().sendMessage(ChatColor.RED + "" + wagerAmount + " has been taken from your bank account.");
         withdrawalA.remove(wagerAmount);
         withdrawalB.remove(wagerAmount);
     }

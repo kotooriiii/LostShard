@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -375,6 +376,8 @@ public final class HelperMethods {
 
     public static ZonedDateTime toZDT(int[] props)
     {
+        if(props == null)
+            return null;
         return toZDT(props[0], props[1], props[2], props[3], props[4], props[5], props[6]);
     }
 
@@ -481,7 +484,9 @@ public final class HelperMethods {
         String monthName = of.getMonth().name();
         monthName = monthName.substring(0,1).toUpperCase() + monthName.substring(1).toLowerCase();
 
-        return of.getDayOfMonth() + " " + monthName + " " + of.getYear() + " " + hour + ":" + of.getMinute() + ampm;
+        String minuteName = new DecimalFormat("#.##").format(of.getMinute());
+
+        return of.getDayOfMonth() + " " + monthName + " " + of.getYear() + " " + hour + ":" + minuteName + ampm + " EST";
     }
 
 }

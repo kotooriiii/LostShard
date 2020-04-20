@@ -48,9 +48,10 @@ public class Plot implements Serializable {
     public static HashMap<UUID, Plot> playerPlots = new HashMap<>();
     public static ArrayList<Plot> allPlots = new ArrayList<>();
 
-    private class PointBlock implements Serializable {
+    protected class PointBlock implements Serializable {
         private static final long serialVersionUID = 1L;
 
+        private String world;
         private int x;
         private int y;
         private int z;
@@ -59,6 +60,7 @@ public class Plot implements Serializable {
 
         public PointBlock(Location location) {
             this(location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getPitch(), location.getYaw());
+            world = location.getWorld().getName();
         }
 
         public PointBlock(int x, int y, int z) {
@@ -67,6 +69,7 @@ public class Plot implements Serializable {
             this.z = z;
             this.pitch = 0;
             this.yaw = 0;
+            world = "world";
         }
 
         public PointBlock(int x, int y, int z, float pitch, float yaw) {
@@ -75,6 +78,7 @@ public class Plot implements Serializable {
             this.z = z;
             this.pitch = pitch;
             this.yaw = yaw;
+            world = "world";
         }
 
         public int getX() {
@@ -98,7 +102,9 @@ public class Plot implements Serializable {
         }
 
         public Location getLocation() {
-            return new Location(Bukkit.getWorld("world"), x + 0.5, y, z + 0.5, yaw, pitch);
+            if(world == null)
+                world="world";
+            return new Location(Bukkit.getWorld(world), x + 0.5, y, z + 0.5, yaw, pitch);
         }
     }
 

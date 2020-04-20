@@ -30,6 +30,8 @@ public class BanmatchCommand implements CommandExecutor {
 
         if (args.length >= 1) {
             if (args[0].equalsIgnoreCase("cancel")) {
+                Match.getMatchCreatorMap().remove(playerSender.getUniqueId());
+
                 if (Match.hasActiveMatch()) {
                     Match bm = Match.getActiveMatch();
                     bm.cancel(playerSender);
@@ -45,6 +47,12 @@ public class BanmatchCommand implements CommandExecutor {
 
         if (args.length != 2) {
             playerSender.sendMessage(ERROR_COLOR + "The proper usage of the command is: " + COMMAND_COLOR + "/bm (username) (username)" + ERROR_COLOR + ".");
+            return false;
+        }
+
+        if(Match.hasActiveMatch())
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You must wait for the other match to end to use this command. Or, you can use /bm cancel");
             return false;
         }
 

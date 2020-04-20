@@ -22,7 +22,6 @@ import static com.github.kotooriiii.data.Maps.*;
 
 public class HostilityMatch {
 
-
     /**
      * The platform that players have to capture.
      */

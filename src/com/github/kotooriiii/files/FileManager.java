@@ -46,45 +46,11 @@ public final class FileManager {
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
 
-    private static File banned_file = new File(plugin_folder + File.separator + "banned-list.yml");
+    private static File banned_folder = new File(plugin_folder + File.separator + "banned-players");
 
 
     private FileManager() {
     }
-
-    public static UUID[] getBanned() {
-
-        ArrayList<UUID> playerUUIDS = new ArrayList<>();
-
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
-
-        Set<String> setUUIDS = yaml.getKeys(false);
-
-        for(String uuidString : setUUIDS)
-        {
-            playerUUIDS.add(UUID.fromString(uuidString));
-        }
-
-        return playerUUIDS.toArray(new UUID[playerUUIDS.size()]);
-    }
-
-    public static BannedPlayer getBannedPlayer(UUID uuid)
-    {
-        return (BannedPlayer) YamlConfiguration.loadConfiguration(banned_file).get(uuid.toString());
-    }
-
-    public static void ban(BannedPlayer bannedPlayer)
-    {
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
-        yaml.set(bannedPlayer.getPlayerUUID().toString(), bannedPlayer);
-    }
-
-    public static void unban(BannedPlayer bannedPlayer)
-    {
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(banned_file);
-        yaml.set(bannedPlayer.getPlayerUUID().toString(), null);
-    }
-
 
     public static void init() {
         plugin_folder.mkdir();
@@ -100,14 +66,7 @@ public final class FileManager {
         skills_folder.mkdirs();
         marks_folder.mkdirs();
         muted_folder.mkdirs();
-
-        if(!banned_file.exists()) {
-            try {
-                banned_file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+  banned_folder.mkdirs();
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -267,6 +226,24 @@ public final class FileManager {
             mutedPlayer.add();
         }
 
+    }
+
+    public static BannedPlayer[] getBanned()
+    {
+        ArrayList<BannedPlayer> bannedPlayers = new ArrayList<>();
+        for(File file : muted_folder.listFiles())
+        {
+            if(file.getName().endsWith(".obj"))
+                continue;
+
+            BannedPlayer bannedPlayer = readBannedPlayer(file);
+            if (bannedPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a banned player file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            bannedPlayers.add(bannedPlayer);
+        }
+        return bannedPlayers.toArray(new BannedPlayer[bannedPlayers.size()]);
     }
 
     public static HostilityPlatform readPlatformFile(File platformFile) {
@@ -587,6 +564,24 @@ public final class FileManager {
         return mutedPlayer;
     }
 
+    public static BannedPlayer readBannedPlayer(File bannedPlayerFile)
+    {
+        try {
+            FileInputStream fis = new FileInputStream(bannedPlayerFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            BannedPlayer bannedPlayer = (BannedPlayer) ois.readObject();
+            return bannedPlayer;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -858,6 +853,25 @@ public final class FileManager {
         }
     }
 
+    public static void write(BannedPlayer bannedPlayer) {
+        String fileName = bannedPlayer.getPlayerUUID() + ".obj";
+        File file = new File(banned_folder + File.separator + fileName);
+try{
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(bannedPlayer);
+        oos.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    }
+
     public static void removeFile(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -948,6 +962,14 @@ public final class FileManager {
 
     public static void removeFile(MutedPlayer mutedPlayer) {
         File mutedPlayerFile = new File(muted_folder + File.separator + mutedPlayer.getMutedUUID() + ".yml");
+
+        if (mutedPlayerFile.exists())
+            mutedPlayerFile.delete();
+
+    }
+
+    public static void removeFile(BannedPlayer bannedPlayer) {
+        File mutedPlayerFile = new File(banned_folder + File.separator + bannedPlayer.getPlayerUUID() + ".yml");
 
         if (mutedPlayerFile.exists())
             mutedPlayerFile.delete();

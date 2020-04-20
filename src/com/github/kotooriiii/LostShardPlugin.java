@@ -2,7 +2,7 @@ package com.github.kotooriiii;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bannedplayer.BannedJoinListener;
-import com.github.kotooriiii.match.BanmatchDefeatListener;
+import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.match.MatchCreatorListener;
 import com.github.kotooriiii.match.MatchDefeatListener;
 import com.github.kotooriiii.match.banmatch.*;
@@ -43,6 +43,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -111,6 +112,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         loadConfig();
         ShardScoreboardManager.updateScoreboard();
+
     }
 
 
@@ -257,7 +259,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new ArcheryListener(), this);
         pm.registerEvents(new BlacksmithyListener(), this);
         pm.registerEvents(new BrawlingListener(), this);
-        pm.registerEvents(new FishingListener(), this);
+        pm.registerEvents(new FishingListener(), this); 
         pm.registerEvents(new LumberjackingListener(), this);
         pm.registerEvents(new MiningListener(), this);
         pm.registerEvents(new SorceryListener(), this);

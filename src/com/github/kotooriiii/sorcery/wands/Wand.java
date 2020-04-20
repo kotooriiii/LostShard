@@ -282,11 +282,11 @@ public class Wand {
 
                 // Spawn fireball
                 Fireball fireball = (Fireball) player.launchProjectile(Fireball.class, player.getEyeLocation().getDirection());
+                fireball.setShooter(player);
                 Vector origVector = fireball.getDirection();
                 Vector vector = new Vector(origVector.getX(), origVector.getY(), origVector.getZ()).multiply(2);
                 fireball.setVelocity(vector);
                 fireball.setDirection(vector);
-                fireball.setShooter(player);
                 break;
             case TELEPORT:
                 final int rangeTeleport = 20;

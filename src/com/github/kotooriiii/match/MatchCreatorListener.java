@@ -5,12 +5,19 @@ import com.github.kotooriiii.channels.ShardChatEvent;
 import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.match.moneymatch.Moneymatch;
 import com.github.kotooriiii.util.HelperMethods;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+
+import java.time.ZonedDateTime;
 
 import static com.github.kotooriiii.data.Maps.*;
 
@@ -145,9 +152,19 @@ public class MatchCreatorListener implements Listener {
                     return;
             }
 
-            if(match instanceof Banmatch)
-            player.sendMessage(STANDARD_COLOR + "How long is the ban? \nExample: '1y 2m 3w 4d 5h 6m 0s' is 1year2months3weeks4days5hours6minutes0seconds.\nOR 'indefinite' for a forever ban.");
-            else if (match instanceof Moneymatch)
+            if (match instanceof Banmatch) {
+                TextComponent tc = new TextComponent(STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25m 30s)");
+                TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
+                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
+                TextComponent component2 = new TextComponent("\n" + ChatColor.YELLOW + "Example 2: Hover to view another example.");
+                component2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Preferred arguments: " + COMMAND_COLOR + "'1y 9mo 4s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 9 months, 4 seconds" + STANDARD_COLOR + ".\n\nNOTE: The other time identifiers not listed here will be by default, '0'.").create()));
+                TextComponent component3 = new TextComponent("\n" + ChatColor.YELLOW + "Example 3: Hover to view another example.");
+                component3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "One-way argument: " + COMMAND_COLOR + "'"  + Banmatch.getIndefiniteBanIdentifier()  + "'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "Banned indefinitely" + STANDARD_COLOR + ".").create()));
+                tc.addExtra(component);
+                tc.addExtra(component2);
+                tc.addExtra(component3);
+                player.spigot().sendMessage(tc.duplicate());
+            } else if (match instanceof Moneymatch)
                 player.sendMessage(STANDARD_COLOR + "What is the wager amount per player?\nExample: PlayerA has 100. PlayerB has 100. Winner gets 200. In this case, wager amount is 100.");
 
             return;
@@ -157,45 +174,49 @@ public class MatchCreatorListener implements Listener {
             Banmatch banmatch = (Banmatch) match;
 
             if (banmatch.getUnbannedTime() == null) {
-                if (!message.matches("[0-9]+y\\s[0-9]+m\\s[0-9]+w\\s[0-9]+d\\s[0-9]+h\\s[0-9]+m\\s[0-9]+s") && !message.equalsIgnoreCase("indefinite")) {
-                    player.sendMessage(STANDARD_COLOR + "Not a valid ban date.\nExample: '1y 2m 3w 4d 5h 6m 0s' is 1year2months3weeks4days5hours6minutes0seconds.\nOR 'indefinite' for a forever ban.");
+                if (!matchesRegex(message) && !message.equalsIgnoreCase(Banmatch.getIndefiniteBanIdentifier())) {
+                    TextComponent tc = new TextComponent(STANDARD_COLOR + "Not a valid ban date from now.\n" + STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25m 30s)");
+                    TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
+                    component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
+                    TextComponent component2 = new TextComponent("\n" + ChatColor.YELLOW + "Example 2: Hover to view another example.");
+                    component2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Preferred arguments: " + COMMAND_COLOR + "'1y 9mo 4s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 9 months, 4 seconds" + STANDARD_COLOR + ".\n\nNOTE: The other time identifiers not listed here will be by default, '0'.").create()));
+                    TextComponent component3 = new TextComponent("\n" + ChatColor.YELLOW + "Example 3: Hover to view another example.");
+                    component3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "One-way argument: " + COMMAND_COLOR + "'"  + Banmatch.getIndefiniteBanIdentifier()  + "'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "Banned indefinitely" + STANDARD_COLOR + ".").create()));
+                    tc.addExtra(component);
+                    tc.addExtra(component2);
+                    tc.addExtra(component3);
+                    player.spigot().sendMessage(tc.duplicate());
+                    return;
                 }
-                if (message.equalsIgnoreCase("indefinite")) {
-                    banmatch.setUnbannedTime(null);
+
+                if (message.equalsIgnoreCase(Banmatch.getIndefiniteBanIdentifier())) {
+                    banmatch.setUnbannedTime(ZonedDateTime.now().withYear(0));
                 } else {
-                    String[] args = message.split(" ");
-                    int[] howLongInt = new int[7];
-                    for (int i = 0; i < howLongInt.length; i++)
-                        howLongInt[i] = Integer.parseInt(args[i].substring(0, args[i].length() - 1));
-                    banmatch.setUnbannedTime(HelperMethods.toZDT(howLongInt));
+                    banmatch.setUnbannedTime(HelperMethods.toZDT(toProperties(message)));
                 }
                 player.sendMessage(STANDARD_COLOR + "When does this " + match.getName() + " begin? (0-60 minutes)");
                 return;
             }
-        } else if (match instanceof Moneymatch)
-        {
+        } else if (match instanceof Moneymatch) {
             Moneymatch moneymatch = (Moneymatch) match;
 
             if (moneymatch.getWagerAmount() == -1) {
                 if (!NumberUtils.isNumber(message)) {
                     player.sendMessage(STANDARD_COLOR + "Not a valid wager amount per player.\nExample: PlayerA has 100. PlayerB has 100. Winner gets 200. In this case, wager amount is 100.");
+                    return;
                 }
                 double wagerAmount = Double.parseDouble(message);
 
                 Bank bankA = Bank.wrap(match.getFighterA());
                 Bank bankB = Bank.wrap(match.getFighterB());
 
-                if(bankA.getCurrency() < wagerAmount && bankB.getCurrency() < wagerAmount)
-                {
+                if (bankA.getCurrency() < wagerAmount && bankB.getCurrency() < wagerAmount) {
                     player.sendMessage(PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterA()).getName() + ERROR_COLOR + " and " + PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterB()).getName() + ERROR_COLOR + " do not have enough to wager. To cancel creating this match do /mm cancel.");
                     return;
-                }
-               else if(bankA.getCurrency() < wagerAmount)
-                {
+                } else if (bankA.getCurrency() < wagerAmount) {
                     player.sendMessage(PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterA()).getName() + ERROR_COLOR + " does not have enough to wager. To cancel creating this match do /mm cancel.");
                     return;
-                } else if (bankB.getCurrency() < wagerAmount)
-                {
+                } else if (bankB.getCurrency() < wagerAmount) {
                     player.sendMessage(PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterB()).getName() + ERROR_COLOR + " does not have enough to wager. To cancel creating this match do /mm cancel.");
                     return;
                 }
@@ -227,7 +248,55 @@ public class MatchCreatorListener implements Listener {
             match.startCountdown();
             return;
         }
-
-
     }
+
+    private boolean matchesRegex(String message) {
+        String[] properties = message.split(" ");
+
+        for (String property : properties) {
+            if (!property.matches("[0-9]+y|[0-9]+mo|[0-9]+w|[0-9]+d|[0-9]+h|[0-9]+min|[0-9]+s")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int[] toProperties(String message) {
+        String[] properties = message.toLowerCase().split(" ");
+        int[] numproperties = new int[]
+                {0,0,0,0,0,0,0}; //year,month,week,day,hour,minute,second
+        for (String property : properties) {
+            String identifier = property.replaceAll("[0-9]+", "");
+            String timeString = property.replaceAll("[A-Za-z]", "");
+            int time = Integer.parseInt(timeString);
+            switch (identifier) {
+                case "y":
+                    numproperties[0] = time;
+                    break;
+                case "mo":
+                    numproperties[1] = time;
+                    break;
+                case "w":
+                    numproperties[2] = time;
+                    break;
+                case "d":
+                    numproperties[3] = time;
+                    break;
+                case "h":
+                    numproperties[4] = time;
+                    break;
+                case "min":
+                    numproperties[5] = time;
+                    break;
+                case "s":
+                    numproperties[6] = time;
+                    break;
+                default:
+                    return null;
+            }
+        }
+
+        return numproperties;
+    }
+
 }
