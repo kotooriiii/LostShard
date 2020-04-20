@@ -73,6 +73,7 @@ commands:
   meditate:
   rest:
   addtitle:
+  addrank:
 
   #skill stuff
   archery:

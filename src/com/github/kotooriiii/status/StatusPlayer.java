@@ -2,6 +2,7 @@ package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -54,7 +55,7 @@ public class StatusPlayer {
         this.status = status;
         save();
 
-        if(Staff.isStaff(offlinePlayer.getUniqueId()))
+        if(Staff.isStaff(offlinePlayer.getUniqueId()) || RankPlayer.wrap(getPlayerUUID()).isDonator())
             return;
 
         ShardScoreboardManager.add(offlinePlayer, status.getName());

@@ -23,6 +23,7 @@ public class MarkPlayer implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private String name;
+        private String worldName;
         private int x;
         private int y;
         private int z;
@@ -31,6 +32,7 @@ public class MarkPlayer implements Serializable {
 
         public Mark(String name, Location location) {
             this(name, location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getPitch(), location.getYaw());
+            worldName = location.getWorld().getName();
         }
 
         public Mark(String name, int x, int y, int z) {
@@ -76,7 +78,9 @@ public class MarkPlayer implements Serializable {
         }
 
         public Location getLocation() {
-            return new Location(Bukkit.getWorld("world"), x + 0.5, y, z + 0.5, yaw, pitch);
+            if (worldName == null)
+                worldName = "world";
+            return new Location(Bukkit.getWorld(this.worldName), x + 0.5, y, z + 0.5, yaw, pitch);
         }
     }
 
@@ -127,13 +131,11 @@ public class MarkPlayer implements Serializable {
         return null;
     }
 
-    public void save()
-    {
+    public void save() {
         FileManager.write(this);
     }
 
-    public void remove()
-    {
+    public void remove() {
         FileManager.removeFile(this);
         this.markPlayerHashMap.remove(this.playerUUID);
 
@@ -144,24 +146,20 @@ public class MarkPlayer implements Serializable {
     }
 
     //static
-    public static HashMap<UUID,MarkPlayer> getMarkPlayers()
-    {
+    public static HashMap<UUID, MarkPlayer> getMarkPlayers() {
         return markPlayerHashMap;
     }
 
-    public static void add(MarkPlayer markPlayer)
-    {
-        if(!markPlayerHashMap.containsKey(markPlayer.playerUUID))
-        markPlayerHashMap.put(markPlayer.playerUUID, markPlayer);
+    public static void add(MarkPlayer markPlayer) {
+        if (!markPlayerHashMap.containsKey(markPlayer.playerUUID))
+            markPlayerHashMap.put(markPlayer.playerUUID, markPlayer);
     }
 
-    public static boolean hasMarks(UUID playerUUID)
-    {
+    public static boolean hasMarks(UUID playerUUID) {
         return wrap(playerUUID) != null;
     }
 
-    public static MarkPlayer wrap(UUID playerUUID)
-    {
+    public static MarkPlayer wrap(UUID playerUUID) {
         return markPlayerHashMap.get(playerUUID);
     }
 }

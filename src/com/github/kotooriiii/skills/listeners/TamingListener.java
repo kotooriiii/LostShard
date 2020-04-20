@@ -6,6 +6,7 @@ import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -252,7 +253,7 @@ public class TamingListener implements Listener {
             HashMap<Integer, ItemStack> map = shooter.getInventory().addItem(spawnEgg);
             if (!map.isEmpty()) {
                 shooter.sendMessage(STANDARD_COLOR + "Your inventory is full. The spawn egg has been dropped on the ground.");
-                Bukkit.getWorld("world").dropItem(shooter.getLocation(), spawnEgg);
+                shooter.getLocation().getWorld().dropItem(shooter.getLocation(), spawnEgg);
             }
 
         } else {
@@ -838,20 +839,23 @@ public class TamingListener implements Listener {
 
     public static Wolf[] getWolves(Player player) {
         ArrayList<Wolf> wolves = new ArrayList<>();
-        for (Entity entity : Bukkit.getWorld("world").getLivingEntities()) {
-            if (entity instanceof Wolf) {
-                Wolf wolf = (Wolf) entity;
-                if (!wolf.isTamed())
-                    continue;
 
-                AnimalTamer tamer = wolf.getOwner();
-                if (!(tamer instanceof Player))
-                    continue;
+        for(World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getLivingEntities()){
+                if (entity instanceof Wolf) {
+                    Wolf wolf = (Wolf) entity;
+                    if (!wolf.isTamed())
+                        continue;
 
-                Player owner = (Player) tamer;
+                    AnimalTamer tamer = wolf.getOwner();
+                    if (!(tamer instanceof Player))
+                        continue;
 
-                if (player.equals(owner))
-                    wolves.add(wolf);
+                    Player owner = (Player) tamer;
+
+                    if (player.equals(owner))
+                        wolves.add(wolf);
+                }
             }
         }
         return wolves.toArray(new Wolf[wolves.size()]);

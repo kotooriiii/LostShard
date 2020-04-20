@@ -3,6 +3,7 @@ package com.github.kotooriiii.npc;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 
 import java.util.ArrayList;
 
@@ -15,8 +16,8 @@ public class ShardBanker extends ShardLocationNPC {
      *
      * @param name   The name of the NPC
      */
-    public ShardBanker(String name) {
-        super(ChatColor.GRAY + "[Banker]", name, Skin.BANKER);
+    public ShardBanker(World world, String name) {
+        super(world, ChatColor.GRAY + "[Banker]", name, Skin.BANKER);
     }
 
     public boolean isSocialDistance(Location loc)

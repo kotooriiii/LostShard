@@ -274,7 +274,7 @@ public class HostilityMatch {
 
                                 for (Integer integer : unstoredItems.keySet()) {
                                     ItemStack unstoredItemStack = unstoredItems.get(integer);
-                                    Bukkit.getWorld("world").dropItem(player.getLocation(), unstoredItemStack);
+                                    player.getLocation().getWorld().dropItem(player.getLocation(), unstoredItemStack);
                                 }
                             }
 

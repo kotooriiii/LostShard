@@ -1,6 +1,8 @@
 package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -115,21 +117,19 @@ public class StatusUpdateListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
+
+        if(RankPlayer.getRankPlayerMap().get(uuid) == null)
+        {
+            RankPlayer rankPlayer = new RankPlayer(uuid, RankType.DEFAULT);
+            rankPlayer.save();
+        }
+
         if (StatusPlayer.getPlayerStatus().get(uuid) == null) {
             StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.WORTHY, 0);
             statusPlayer.save();
         }
         ShardScoreboardManager.registerScoreboard(event.getPlayer());
 
-    }
-
-    @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-
-        StatusPlayer statusPlayer = StatusPlayer.getPlayerStatus().get(uuid);
-        Status status = statusPlayer.getStatus();
-        //  LostShardPlugin.getScoreboard().getTeam(status.getName()).removePlayer(Bukkit.getOfflinePlayer(uuid));
     }
 
     public static HashMap<UUID, BukkitTask> getPlayersCorrupt() {

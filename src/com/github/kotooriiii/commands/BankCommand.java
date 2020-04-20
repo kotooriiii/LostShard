@@ -68,7 +68,7 @@ public class BankCommand implements CommandExecutor {
                                         }
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "You have hired " + BANKER_COLOR + nameCreate + STANDARD_COLOR + " to handle finances in this location.");
-                                    ShardBanker banker = new ShardBanker(nameCreate);
+                                    ShardBanker banker = new ShardBanker(playerSender.getLocation().getWorld(), nameCreate);
                                     banker.spawn(playerSender.getLocation());
                                     FileManager.write(banker);
                                     break;

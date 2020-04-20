@@ -20,6 +20,7 @@ import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
 import com.github.kotooriiii.plots.*;
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.SkillUpdateListener;
@@ -105,6 +106,7 @@ public class LostShardPlugin extends JavaPlugin {
         //Register for crash-related incidents
         registerBuff();
         registerCorrupts();
+        registerDonators();
         registerStaff();
 
         //All was successfully enabled
@@ -195,6 +197,8 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("plot").setExecutor(new PlotCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
         getCommand("addtitle").setExecutor(new AddTitleCommand());
+        getCommand("addrank").setExecutor(new AddRankCommand());
+
         getCommand("hud").setExecutor(new HUDCommand());
         getCommand("mark").setExecutor(new MarkCommand());
         getCommand("cast").setExecutor(new CastCommand());
@@ -347,6 +351,13 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
+    public void registerDonators() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            RankPlayer rankPlayer = RankPlayer.wrap(player.getUniqueId());
+            ShardScoreboardManager.add(player, rankPlayer.getRankType().getName());
+        }
+    }
+
     public void registerStaff() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
@@ -367,7 +378,7 @@ public class LostShardPlugin extends JavaPlugin {
             nextRun = nextRun.plusDays(1);
 
         Duration duration = Duration.between(now, nextRun);
-        long initalDelay = duration.getSeconds() * 20;
+        long initialDelay = duration.getSeconds() * 20;
 
         new BukkitRunnable() {
             @Override
@@ -408,7 +419,7 @@ public class LostShardPlugin extends JavaPlugin {
                     }
                 }.runTaskLater(LostShardPlugin.plugin, 20*10);
             }
-        }.runTaskLater(this.plugin, initalDelay);
+        }.runTaskLater(this.plugin, initialDelay);
 
     }
 

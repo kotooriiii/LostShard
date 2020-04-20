@@ -32,9 +32,9 @@ public class ShardGuard extends ShardLocationNPC {
 
     private BukkitTask task;
 
-    public ShardGuard(String name) {
+    public ShardGuard(World world, String name) {
 
-        super(ChatColor.GRAY + "[" + "Guard" + "]", name, Skin.GUARD);
+        super(world, ChatColor.GRAY + "[" + "Guard" + "]", name, Skin.GUARD);
         //Set as active Guard
     }
 

@@ -2,6 +2,8 @@ package com.github.kotooriiii.channels;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -59,9 +61,9 @@ public class ChatChannelListener implements Listener {
 
         Player player = asyncPlayerChatEvent.getPlayer();
 
-        ChannelStatus status = LostShardPlugin.getChannelManager().getChannel(player);
+        ChannelStatus channelStatus = LostShardPlugin.getChannelManager().getChannel(player);
         Stat stat = Stat.wrap(player);
-        String prefix = status.getPrefix();
+        String prefix = channelStatus.getPrefix();
         String title = stat.getTitle();
         if (!title.isEmpty())
             title = ChatColor.WHITE + title;
@@ -72,8 +74,17 @@ public class ChatChannelListener implements Listener {
             color = staff.getType().getChatColor();
             prefix = ChatColor.GOLD + "[" + prefix + ChatColor.GOLD + "]";
         } else {
-            prefix = ChatColor.WHITE + "[" + prefix + ChatColor.WHITE + "]";
 
+            //NOT STAFF
+            //Maybe donators?
+            RankPlayer rankPlayer = RankPlayer.wrap(player.getUniqueId());
+            if (rankPlayer.isDonator()) {
+                prefix = rankPlayer.getChannelContent(prefix);
+                color = rankPlayer.getRankType().getPrefixNameColor();
+            } else {
+
+                prefix = ChatColor.WHITE + "[" + prefix + ChatColor.WHITE + "]";
+            }
         }
         String name = color + player.getName();
         String message = asyncPlayerChatEvent.getMessage();

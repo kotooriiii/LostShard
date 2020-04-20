@@ -1,6 +1,7 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
@@ -44,7 +45,7 @@ public class CastCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("cast")) {
 
                 if (args.length == 0) {
-                    playerSender.sendMessage(ERROR_COLOR + "You don't have any marks."); //todo "mistype the spell"
+                    playerSender.sendMessage(ERROR_COLOR + "You don't have any marks.");
                     return false;
                 } else if (args.length >= 1) {
                     switch (args[0].toLowerCase()) {
@@ -79,7 +80,10 @@ public class CastCommand implements CommandExecutor {
 
                                 MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
                                 MarkPlayer.Mark[] marks = markPlayer.getMarks();
-                                if (marks.length == 3) {
+
+                                RankPlayer rankPlayer = RankPlayer.wrap(playerUUID);
+
+                                if (marks.length == rankPlayer.getRankType().getMaxMarksNum()) {
                                     playerSender.sendMessage(ERROR_COLOR + "You have reached the maximum limit of marks.");
                                     return true;
                                 }
@@ -203,7 +207,7 @@ public class CastCommand implements CommandExecutor {
                                 stat.setMana(stat.getMana() - 15);
                                 playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
                                 playerSender.teleport(mark.getLocation());
-                                Bukkit.getWorld("world").strikeLightningEffect(mark.getLocation());
+                                mark.getLocation().getWorld().strikeLightningEffect(mark.getLocation());
                                 removeIngredients(playerSender, ingredients);
                                 markRecallUUIDCooldown.put(playerUUID, new Integer(2));
                                 new BukkitRunnable() {

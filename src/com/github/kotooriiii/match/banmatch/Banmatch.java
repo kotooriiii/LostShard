@@ -15,6 +15,7 @@ public class Banmatch extends Match {
     private ZonedDateTime unbannedTime;
 
     private final static String INDEFINITE_BAN_IDENTIFIER = "Indefinite";
+    private final static String BAN_MESSAGE = "You were defeated in a " + getName() + ".";
 
     public Banmatch(UUID fighterA, UUID fighterB) {
       super(fighterA, fighterB);
@@ -34,7 +35,7 @@ public class Banmatch extends Match {
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
         if (offlinePlayer.isOnline()) {
-            offlinePlayer.getPlayer().kickPlayer("You were defeated in a " + getName() + ".");
+            offlinePlayer.getPlayer().kickPlayer(BAN_MESSAGE);
         }
         BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), "You were defeated in a " + getName() + ".");
         FileManager.write(bannedPlayer);
@@ -86,5 +87,10 @@ public class Banmatch extends Match {
 
     public static String getIndefiniteBanIdentifier() {
         return INDEFINITE_BAN_IDENTIFIER;
+    }
+
+    public static String getBanMessage()
+    {
+        return BAN_MESSAGE;
     }
 }

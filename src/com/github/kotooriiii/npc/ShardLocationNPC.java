@@ -1,6 +1,7 @@
 package com.github.kotooriiii.npc;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
 public class ShardLocationNPC extends ShardBaseNPC {
     private Location spawnLocation;
@@ -12,8 +13,8 @@ public class ShardLocationNPC extends ShardBaseNPC {
      * @param name   The name of the NPC
      * @param skin   The skin of the NPC
      */
-    public ShardLocationNPC(String prefix, String name, Skin skin) {
-        super(prefix, name, skin);
+    public ShardLocationNPC(World world, String prefix, String name, Skin skin) {
+        super(world, prefix, name, skin);
     }
 
     public boolean setSpawnLocation(Location location) {

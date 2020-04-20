@@ -1,9 +1,9 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.logging.log4j.core.pattern.MarkerPatternConverter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -103,12 +103,10 @@ public class MarkCommand implements CommandExecutor {
 
         playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Marks-");
 
-        playerSender.sendMessage(ChatColor.GOLD + "Pg " + pageCounter + " of " + pages + " (" + size + " of " + 3 + " marks used)");
+        playerSender.sendMessage(ChatColor.GOLD + "Pg " + pageCounter + " of " + pages + " (" + size + " of " + RankPlayer.wrap(playerUUID).getRankType().getMaxMarksNum() + " marks used)");
 
         for (int i = (page - 1) * amtOfMarksPerPage; i < size; i++) {
             if (markCounter == amtOfMarksPerPage) {
-                pageCounter++;
-                markCounter = 0;
                 return;
             }
 

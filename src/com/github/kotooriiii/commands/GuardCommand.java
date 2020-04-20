@@ -139,7 +139,7 @@ public class GuardCommand implements CommandExecutor {
                                         }
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "You have hired " + GUARD_COLOR + nameCreate + STANDARD_COLOR + " to stand in this position.");
-                                    ShardGuard guard = new ShardGuard(nameCreate);
+                                    ShardGuard guard = new ShardGuard(playerSender.getLocation().getWorld(), nameCreate);
                                     guard.spawn(playerSender.getLocation());
                                     FileManager.write(guard);
                                     break;

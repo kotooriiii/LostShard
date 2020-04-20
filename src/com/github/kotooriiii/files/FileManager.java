@@ -12,6 +12,8 @@ import com.github.kotooriiii.npc.ShardBanker;
 import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
@@ -45,6 +47,8 @@ public final class FileManager {
     private static File skills_folder = new File(plugin_folder + File.separator + "skills");
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
+    private static File ranks_folder = new File(plugin_folder + File.separator + "ranks");
+
 
     private static File banned_folder = new File(plugin_folder + File.separator + "banned-players");
 
@@ -66,7 +70,8 @@ public final class FileManager {
         skills_folder.mkdirs();
         marks_folder.mkdirs();
         muted_folder.mkdirs();
-  banned_folder.mkdirs();
+        banned_folder.mkdirs();
+        ranks_folder.mkdirs();
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -141,6 +146,18 @@ public final class FileManager {
             Bank.getBanks().put(player.getUniqueId(), bank);
         }
 
+        for (File file : ranks_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            RankPlayer rankPlayer = readRankPlayer(file);
+
+            if (rankPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a rank file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+        }
+
         for (File file : status_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
@@ -213,9 +230,8 @@ public final class FileManager {
             MarkPlayer.add(markPlayer);
         }
 
-        for(File file : muted_folder.listFiles())
-        {
-            if(file.getName().endsWith(".yml"))
+        for (File file : muted_folder.listFiles()) {
+            if (file.getName().endsWith(".yml"))
                 continue;
 
             MutedPlayer mutedPlayer = readMutedPlayer(file);
@@ -228,12 +244,10 @@ public final class FileManager {
 
     }
 
-    public static BannedPlayer[] getBanned()
-    {
+    public static BannedPlayer[] getBanned() {
         ArrayList<BannedPlayer> bannedPlayers = new ArrayList<>();
-        for(File file : muted_folder.listFiles())
-        {
-            if(file.getName().endsWith(".obj"))
+        for (File file : muted_folder.listFiles()) {
+            if (file.getName().endsWith(".obj"))
                 continue;
 
             BannedPlayer bannedPlayer = readBannedPlayer(file);
@@ -414,8 +428,10 @@ public final class FileManager {
 
         ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
 
-        //todo get rank to see slots
-        inventory = Bukkit.createInventory(Bukkit.getPlayer(UUID.fromString(bankerName)), DonorTitle.getMaxSize(), Bank.NAME);
+        UUID uuid = UUID.fromString(bankerName);
+        RankPlayer rankPlayer = RankPlayer.wrap(uuid);
+
+        inventory = Bukkit.createInventory(Bukkit.getPlayer(uuid), rankPlayer.getRankType().getBankInventorySize(), Bank.NAME);
         for (int i = 0; i < itemStacks.length; i++) {
             if (itemStacks[i] != null)
                 inventory.addItem(itemStacks[i]);
@@ -430,7 +446,7 @@ public final class FileManager {
             currencyNum = Double.parseDouble(currencyString);
         }
 
-        Bank bank = new Bank(UUID.fromString(bankerName), inventory, currencyNum);
+        Bank bank = new Bank(uuid, inventory, currencyNum);
         return bank;
     }
 
@@ -451,10 +467,14 @@ public final class FileManager {
         return statusPlayer;
     }
 
-    public static StatusPlayer readStatusPlayer(UUID uuid) {
-        File statusFile = new File(status_folder + File.separator + uuid + ".yml");
-        return readStatusPlayer(statusFile);
+    public static RankPlayer readRankPlayer(File rankFile) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(rankFile);
+        String uuid = rankFile.getName().substring(0, rankFile.getName().indexOf('.'));
 
+        String name = yaml.getString("RankType");
+        RankType rankType = RankType.matchRankType(name);
+        RankPlayer rankPlayer = new RankPlayer(UUID.fromString(uuid), rankType);
+        return rankPlayer;
     }
 
     public static Sale readSale(File saleFile) {
@@ -548,8 +568,7 @@ public final class FileManager {
         return null;
     }
 
-    public static MutedPlayer readMutedPlayer(File mutedFile)
-    {
+    public static MutedPlayer readMutedPlayer(File mutedFile) {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(mutedFile);
         String uuidString = mutedFile.getName().substring(0, mutedFile.getName().indexOf('.'));
 
@@ -564,8 +583,7 @@ public final class FileManager {
         return mutedPlayer;
     }
 
-    public static BannedPlayer readBannedPlayer(File bannedPlayerFile)
-    {
+    public static BannedPlayer readBannedPlayer(File bannedPlayerFile) {
         try {
             FileInputStream fis = new FileInputStream(bannedPlayerFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -697,6 +715,10 @@ public final class FileManager {
         try {
             if (!bankFile.exists())
                 bankFile.createNewFile();
+            else
+                ;
+            //Can always remove the file and work from anew to REMOVE ENTIRE contents from file. The bank in memory holds the
+            // new information anyways so it will be fine. If they donate again then they get their items back.
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -729,6 +751,26 @@ public final class FileManager {
         yaml.set("MurderCount", statusPlayer.getKills());
         try {
             yaml.save(statusFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(RankPlayer rankPlayer) {
+        String fileName = rankPlayer.getPlayerUUID() + ".yml";
+        File ranksFile = new File(ranks_folder + File.separator + fileName);
+
+        try {
+            if (!ranksFile.exists())
+                ranksFile.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(ranksFile);
+        yaml.set("RankType", rankPlayer.getRankType().getName());
+        try {
+            yaml.save(ranksFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -856,20 +898,20 @@ public final class FileManager {
     public static void write(BannedPlayer bannedPlayer) {
         String fileName = bannedPlayer.getPlayerUUID() + ".obj";
         File file = new File(banned_folder + File.separator + fileName);
-try{
-        if (file.exists()) {
-            file.delete();
+        try {
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(bannedPlayer);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        file.createNewFile();
-        FileOutputStream outputStream = new FileOutputStream(file);
-        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-        oos.writeObject(bannedPlayer);
-        oos.close();
-    } catch (FileNotFoundException e) {
-        e.printStackTrace();
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
     }
 
     public static void removeFile(Clan clan) {

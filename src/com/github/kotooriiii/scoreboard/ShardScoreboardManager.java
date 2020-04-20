@@ -2,6 +2,7 @@ package com.github.kotooriiii.scoreboard;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
@@ -34,6 +35,12 @@ public class ShardScoreboardManager {
         corrupt.setColor(Status.CORRUPT.getChatColor());
         Team exiled = registerScoreboard.registerNewTeam(Status.EXILED.getName());
         exiled.setColor(Status.EXILED.getChatColor());
+
+        Team sub = registerScoreboard.registerNewTeam(RankType.SUBSCRIBER.getName());
+        sub.setColor(RankType.SUBSCRIBER.getPrefixNameColor());
+        Team subplus = registerScoreboard.registerNewTeam(RankType.SUBSCRIBER_PLUS.getName());
+        subplus.setColor(RankType.SUBSCRIBER_PLUS.getPrefixNameColor());
+
 
         Team owner = registerScoreboard.registerNewTeam(StaffType.OWNER.getName());
         owner.setColor(StaffType.OWNER.getChatColor());

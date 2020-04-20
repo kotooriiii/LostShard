@@ -3,6 +3,7 @@ package com.github.kotooriiii.listeners;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.DonorTitle;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.ranks.RankPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
@@ -19,7 +20,7 @@ public class PlayerBankUpdateInventory implements Listener {
     public void onBankInventoryClose(InventoryCloseEvent inventoryCloseEvent) {
 
 
-        if(inventoryCloseEvent.getView().getTitle().equalsIgnoreCase(ChatColor.GRAY + "Bank"))
+        if(inventoryCloseEvent.getView().getTitle().equalsIgnoreCase(Bank.NAME))
         {
             HumanEntity player = inventoryCloseEvent.getPlayer();
             if(player instanceof Player) {
@@ -33,13 +34,15 @@ public class PlayerBankUpdateInventory implements Listener {
     }
 
     @EventHandler
+    //initializer
     public void onJoinLoadBank(PlayerJoinEvent event)
     {
         Player player = event.getPlayer();
         Bank bank = FileManager.readBankFile(player.getUniqueId());
+
         if(bank==null)
         {
-            Bank.getBanks().put(player.getUniqueId(), new Bank(player.getUniqueId(), Bukkit.createInventory(player, DonorTitle.BASE.getSize(), Bank.NAME), 0));
+            Bank.getBanks().put(player.getUniqueId(), new Bank(player.getUniqueId(), Bukkit.createInventory(player, RankPlayer.wrap(player.getUniqueId()).getRankType().getBankInventorySize(), Bank.NAME), 0));
             return;
         }
         Bank.getBanks().put(player.getUniqueId(), bank);

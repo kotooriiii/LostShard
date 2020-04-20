@@ -1,5 +1,6 @@
 package com.github.kotooriiii.match;
 
+import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.plots.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +32,7 @@ public class MatchDefeatListener implements Listener {
     public void onQuit(PlayerQuitEvent event)
     {
         Player player = event.getPlayer();
+
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
@@ -45,7 +47,7 @@ public class MatchDefeatListener implements Listener {
     }
 
     @EventHandler
-    public void onTeleport(PlayerMoveEvent event)
+    public void onMoveOutOfArena(PlayerMoveEvent event)
     {
         Player player = event.getPlayer();
         if(Match.hasActiveMatch())

@@ -68,6 +68,10 @@ public class Match {
     }
 
     public void end(UUID loser) {
+
+        activeMatch = null;
+        isActive = false;
+
         UUID winner = null;
 
         if (fighterA.equals(loser)) {
@@ -78,8 +82,6 @@ public class Match {
 
         win(Bukkit.getOfflinePlayer(winner));
         lose(Bukkit.getOfflinePlayer(loser));
-
-        activeMatch = null;
     }
 
     public boolean isFighter(UUID candidateUUID) {

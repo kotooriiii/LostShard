@@ -68,12 +68,11 @@ public class ShardBaseNPC extends ShardNMS {
      * @param name The name of the NPC
      * @param skin The skin of the NPC
      */
-    public ShardBaseNPC(String prefix, String name, Skin skin) {
+    public ShardBaseNPC(World world, String prefix, String name, Skin skin) {
 
         //Get the NMS server
         MinecraftServer minecraftServer = ((CraftServer) Bukkit.getServer()).getServer();
         //Get the BUKKIT world
-        World world = Bukkit.getWorld("world");
 
         //Get the NMS world
         WorldServer minecraftWorld = ((CraftWorld) world).getHandle();

@@ -2,6 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.ranks.RankPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -33,13 +34,14 @@ public class ChestCommand implements CommandExecutor {
                         return true;
                     }
 
+                    RankPlayer rankPlayer = RankPlayer.wrap(playerUUID);
                     //get rank player
-                    int rankSize = 27;
-                    //todo make a way to get rank
+                    int rankSize = rankPlayer.getRankType().getBankInventorySize();
+
                     Inventory inventory = Bank.getBanks().get(playerUUID).getInventory();
 
                     ItemStack[] itemStacks = inventory.getContents();
-                    inventory = Bukkit.createInventory(playerSender, rankSize, Bank.NAME); //hashmap get
+                    inventory = Bukkit.createInventory(playerSender, rankSize, Bank.NAME);
                     for(int i = 0; i < itemStacks.length ; i++)
                     {
                         if(itemStacks[i] != null)
