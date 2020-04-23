@@ -7,6 +7,7 @@ import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
+import com.github.kotooriiii.discord.links.LinkPlayer;
 import com.github.kotooriiii.muted.MutedPlayer;
 import com.github.kotooriiii.npc.ShardBanker;
 import com.github.kotooriiii.npc.ShardGuard;
@@ -48,6 +49,8 @@ public final class FileManager {
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
     private static File ranks_folder = new File(plugin_folder + File.separator + "ranks");
+    private static File discord_folder = new File(plugin_folder + File.separator + "discord");
+    private static File links_folder = new File(discord_folder + File.separator + "links");
 
 
     private static File banned_folder = new File(plugin_folder + File.separator + "banned-players");
@@ -72,6 +75,8 @@ public final class FileManager {
         muted_folder.mkdirs();
         banned_folder.mkdirs();
         ranks_folder.mkdirs();
+        discord_folder.mkdirs();
+        links_folder.mkdirs();
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -242,6 +247,19 @@ public final class FileManager {
                 continue;
             }
             mutedPlayer.add();
+        }
+
+        for(File file : links_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".obj"))
+                continue;
+
+            LinkPlayer linkPlayer = readLinkPlayer(file);
+            if (linkPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a link file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            linkPlayer.addToMap();
         }
 
     }
@@ -628,6 +646,23 @@ public final class FileManager {
         return null;
     }
 
+    public static LinkPlayer readLinkPlayer(File linkPlayerFile) {
+        try {
+            FileInputStream fis = new FileInputStream(linkPlayerFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            LinkPlayer linkPlayer = (LinkPlayer) ois.readObject();
+            return linkPlayer;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -942,6 +977,25 @@ public final class FileManager {
         }
     }
 
+    public static void write(LinkPlayer linkPlayer) {
+        String fileName = linkPlayer.getUserSnowflake()+ ".obj";
+        File file = new File(links_folder + File.separator + fileName);
+        try {
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(linkPlayer);
+            oos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void removeFile(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -1039,10 +1093,18 @@ public final class FileManager {
     }
 
     public static void removeFile(BannedPlayer bannedPlayer) {
-        File mutedPlayerFile = new File(banned_folder + File.separator + bannedPlayer.getPlayerUUID() + ".yml");
+        File bannedPlayerFile = new File(banned_folder + File.separator + bannedPlayer.getPlayerUUID() + ".obj");
 
-        if (mutedPlayerFile.exists())
-            mutedPlayerFile.delete();
+        if (bannedPlayerFile.exists())
+            bannedPlayerFile.delete();
+
+    }
+
+    public static void removeFile(LinkPlayer linkPlayer) {
+        File linkPlayerFile = new File(links_folder + File.separator + linkPlayer.getUserSnowflake() + ".obj");
+
+        if (linkPlayerFile.exists())
+            linkPlayerFile.delete();
 
     }
 

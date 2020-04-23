@@ -23,6 +23,12 @@ public class LinkPlayer implements Serializable {
         this.playerUUID = playerUUID;
     }
 
+    public void addToMap() {
+        if (isOpted())
+            snowflakeLinkMap.put(userSnowflake, this);
+        uuidLinkMap.put(playerUUID, this);
+    }
+
     public String getUserSnowflake() {
         return userSnowflake;
     }
@@ -40,14 +46,14 @@ public class LinkPlayer implements Serializable {
         if (isOpted())
             snowflakeLinkMap.put(userSnowflake, this);
         uuidLinkMap.put(playerUUID, this);
-       // FileManager.write(this);
+        FileManager.write(this);
     }
 
     public void remove() {
         if (isOpted())
             snowflakeLinkMap.remove(userSnowflake, this);
         uuidLinkMap.remove(playerUUID, this);
-       // FileManager.removeFile(this);
+        FileManager.removeFile(this);
     }
 
     public static boolean isLinked(String snowflake) {
