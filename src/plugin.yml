@@ -138,6 +138,12 @@ commands:
     usage:
     aliases:
       - mm
+  ban:
+  unban:
+  invsee:
+
+  #Discord
+  opt:
 
 
 

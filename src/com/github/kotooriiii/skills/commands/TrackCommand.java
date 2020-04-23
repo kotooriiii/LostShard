@@ -176,7 +176,7 @@ trackedPlayer.setGlowing(true);
                 }
 
                 survivalism.addXP(SurvivalismListener.TRACKING_XP);
-                //todo  removeStamina(playerSender, manaCost);
+                removeStamina(playerSender, manaCost);
                 String direction = getCompassDirection(playerSender, closestEntity.getLocation());
                 direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
                 playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");

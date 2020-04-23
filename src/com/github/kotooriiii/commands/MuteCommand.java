@@ -49,7 +49,7 @@ public class MuteCommand implements CommandExecutor {
         }
 
         if(offlinePlayer.isOnline()) {
-          if(offlinePlayer.getPlayer().hasPermission(STAFF_PERMISSION))
+            if(offlinePlayer.getPlayer().hasPermission(STAFF_PERMISSION))
             {
                 playerSender.sendMessage(ERROR_COLOR + "The player cannot be muted.");
                 return false;
@@ -63,7 +63,7 @@ public class MuteCommand implements CommandExecutor {
         {
             playerSender.sendMessage(ChatColor.RED + "You have muted " + PLAYER_COLOR + offlinePlayer.getName() + ChatColor.RED + ".");
             if(offlinePlayer.isOnline())
-            offlinePlayer.getPlayer().sendMessage(ERROR_COLOR + "You have been muted.");
+                offlinePlayer.getPlayer().sendMessage(ERROR_COLOR + "You have been muted.");
             MutedPlayer mutedPlayer = new MutedPlayer(offlinePlayer.getUniqueId());
             mutedPlayer.add();
 

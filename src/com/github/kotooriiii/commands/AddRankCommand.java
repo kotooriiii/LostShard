@@ -50,14 +50,14 @@ public class AddRankCommand implements CommandExecutor {
                 String rankName = HelperMethods.stringBuilder(args, 1, " ");
                 RankType rankType = RankType.matchRankType(rankName);
 
-                if(rankName == null)
+                if(rankType == null)
                 {
                     playerSender.sendMessage(ERROR_COLOR + "That is not a valid rank type.");
                     return false;
                 }
 
 
-                RankPlayer rankPlayer = RankPlayer.wrap(playerUUID);
+                RankPlayer rankPlayer = RankPlayer.wrap(offlinePlayer.getUniqueId());
 
                 if(rankPlayer.getRankType().equals(rankType))
                 {
@@ -67,7 +67,7 @@ public class AddRankCommand implements CommandExecutor {
 
                 rankPlayer.setRankType(rankType);
                 for(Player player : Bukkit.getOnlinePlayers())
-                player.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " has now been promoted to " + rankType.getPrefixNameColor() + rankType.getName() + ".");
+                player.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " has now been promoted to " + rankType.getName() + ".");
 
             }
         }

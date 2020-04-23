@@ -22,6 +22,7 @@ public class ArenaPlot extends Plot implements Serializable {
     }
 
     public Location getSpawnA() {
+        if(spawnA == null)return null;
         return spawnA.getLocation();
     }
 
@@ -31,7 +32,8 @@ public class ArenaPlot extends Plot implements Serializable {
     }
 
     public Location getSpawnB() {
-        return spawnB.getLocation();
+        if(spawnB == null)
+            return null;return spawnB.getLocation();
     }
 
     public void setSpawnB(Location spawnB) {

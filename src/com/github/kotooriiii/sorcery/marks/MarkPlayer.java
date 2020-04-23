@@ -1,6 +1,8 @@
 package com.github.kotooriiii.sorcery.marks;
 
 import com.github.kotooriiii.files.FileManager;
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.types.templates.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -141,6 +143,16 @@ public class MarkPlayer implements Serializable {
 
     }
 
+    public void setMarks(Mark[] marks)
+    {
+        ArrayList<Mark> newMarks = new ArrayList<>();
+        for(int i = 0; i < marks.length; i++)
+        {
+            newMarks.add(marks[i]);
+        }
+        this.marks = newMarks;
+        save();
+    }
     public Mark[] getMarks() {
         return this.marks.toArray(new Mark[this.marks.size()]);
     }

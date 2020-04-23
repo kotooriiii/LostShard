@@ -1,6 +1,7 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StaffType;
@@ -21,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
@@ -87,13 +89,25 @@ public class StaffUpdateListener implements Listener {
         User user = event.getUser();
         UUID playerUUID = user.getUniqueId();
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-        if(offlinePlayer.isOnline())
+        if (offlinePlayer.isOnline())
             return;
         String name = user.getPrimaryGroup();
         StaffType type = StaffType.matchStaffType(name);
         if (type == null) return;
 
         Staff staff = new Staff(playerUUID, type);
+    }
+
+
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void staffOverwrite(PlayerLoginEvent event)
+    {
+        if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL) {
+            if(Staff.isStaff(event.getPlayer().getUniqueId()))
+            event.allow();
+            if(RankPlayer.wrap(event.getPlayer().getUniqueId()) != null && RankPlayer.wrap(event.getPlayer().getUniqueId()).isDonator())
+                event.allow();
+        }
     }
 
 

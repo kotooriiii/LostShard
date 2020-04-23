@@ -16,6 +16,9 @@ import java.text.DecimalFormat;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import static com.github.kotooriiii.data.Maps.PLAYER_COLOR;
+import static com.github.kotooriiii.util.HelperMethods.sendToAll;
+
 public class Moneymatch extends Match {
 
     private double wagerAmount;
@@ -35,27 +38,41 @@ public class Moneymatch extends Match {
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
         if(fighterA.isOnline())
-            fighterA.getPlayer().sendMessage(ChatColor.RED + "" + wagerAmount + " has been taken from your bank account.");
+            fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
         if(fighterB.isOnline())
-            fighterB.getPlayer().sendMessage(ChatColor.RED + "" + wagerAmount + " has been taken from your bank account.");
+            fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
         withdrawalA.remove(wagerAmount);
         withdrawalB.remove(wagerAmount);
     }
 
     @Override
+    public void deinitializer()
+    {
+        Bank depositA = Bank.wrap(getFighterA());
+        Bank depositB = Bank.wrap(getFighterB());
+        OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
+        OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
+        if(fighterA.isOnline())
+            fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
+        if(fighterB.isOnline())
+            fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
+        depositA.remove(wagerAmount);
+        depositB.remove(wagerAmount);
+    }
+
+    @Override
     public void win(OfflinePlayer offlinePlayer) {
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " is the winner of the " + getName() + "!");
+        sendToAll(PLAYER_COLOR + offlinePlayer.getName() + ChatColor.GREEN + " has won the money match.");
         Bank winnerBank = Bank.wrap(offlinePlayer.getUniqueId());
         winnerBank.add(wagerAmount*2);
         if(offlinePlayer.isOnline())
         {
-            offlinePlayer.getPlayer().sendMessage(ChatColor.YELLOW + "" + wagerAmount*2 + " gold was deposited into your bank.");
+            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount*2 + " gold has been deposited into your account.");
         }
     }
 
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " was defeated in a " + getName() + ".");
 }
 
     public double getWagerAmount() {
@@ -70,7 +87,7 @@ public class Moneymatch extends Match {
     public void inform() {
         String information = "";
 
-        ChatColor DEFAULT = ChatColor.YELLOW;
+        ChatColor DEFAULT = ChatColor.GOLD;
         ChatColor IDENTITY = ChatColor.BLUE;
 
         information += IDENTITY + getName() + " in session.";

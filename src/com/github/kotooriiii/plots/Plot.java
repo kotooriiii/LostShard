@@ -462,6 +462,10 @@ public class Plot implements Serializable {
         return isStaff;
     }
 
+    public void setStaff(boolean isStaff)
+    {
+        this.isStaff = isStaff;
+    }
     public double getBalance() {
         return balance;
     }

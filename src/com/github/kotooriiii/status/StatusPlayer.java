@@ -55,7 +55,7 @@ public class StatusPlayer {
         this.status = status;
         save();
 
-        if(Staff.isStaff(offlinePlayer.getUniqueId()) || RankPlayer.wrap(getPlayerUUID()).isDonator())
+        if(Staff.isStaff(offlinePlayer.getUniqueId()))
             return;
 
         ShardScoreboardManager.add(offlinePlayer, status.getName());

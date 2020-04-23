@@ -1,5 +1,6 @@
 package com.github.kotooriiii.bannedplayer;
 
+import com.github.kotooriiii.files.FileManager;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.io.Serializable;
@@ -21,6 +22,16 @@ public class BannedPlayer implements Serializable {
         this.playerUUID = playerUUID;
         this.unbanDate = zdt;
         this.bannedMessage = bannedMessage;
+    }
+
+    public void save()
+    {
+        FileManager.write(this);
+    }
+
+    public void remove()
+    {
+        FileManager.removeFile(this);
     }
 
     public UUID getPlayerUUID() {

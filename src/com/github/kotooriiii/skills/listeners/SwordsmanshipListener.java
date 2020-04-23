@@ -230,7 +230,7 @@ public class SwordsmanshipListener implements Listener {
     private void applyLevelBonus(Player damager, Entity defender, EntityDamageByEntityEvent event) {
         int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getSwordsmanship().getLevel();
 
-        int damage = (int) event.getDamage(); //todo might need to rework this
+        int damage = (int) event.getDamage();
 
         if (level >= 100) {
             damage += 4;

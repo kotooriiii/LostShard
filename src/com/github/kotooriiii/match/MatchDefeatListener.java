@@ -1,6 +1,5 @@
 package com.github.kotooriiii.match;
 
-import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.plots.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,7 +17,7 @@ public class MatchDefeatListener implements Listener {
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
-            if(!match.isActive())
+            if(!match.hasGameStarted())
                 return;
 
             if(match.isFighter(player.getUniqueId()))
@@ -36,7 +35,7 @@ public class MatchDefeatListener implements Listener {
         if(Match.hasActiveMatch())
         {
             Match match = Match.getActiveMatch();
-            if(!match.isActive())
+            if(!match.hasGameStarted())
                 return;
 
             if(match.isFighter(player.getUniqueId()))
@@ -54,7 +53,7 @@ public class MatchDefeatListener implements Listener {
         {
             Match match = Match.getActiveMatch();
 
-            if(!match.isActive())
+            if(!match.hasGameStarted())
                 return;
 
             if(match.isFighter(player.getUniqueId()))
@@ -66,6 +65,34 @@ public class MatchDefeatListener implements Listener {
                 }
 
                 Plot plot = Plot.getStandingOnPlot(player);
+                if(!plot.getName().equalsIgnoreCase("arena")) {
+                    match.end(player.getUniqueId());
+                    return;
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent event)
+    {
+        Player player = event.getPlayer();
+        if(Match.hasActiveMatch())
+        {
+            Match match = Match.getActiveMatch();
+
+            if(!match.hasGameStarted())
+                return;
+
+            if(match.isFighter(player.getUniqueId()))
+            {
+                if(!Plot.isStandingOnPlot(event.getTo()))
+                {
+                    match.end(player.getUniqueId());
+                    return;
+                }
+
+                Plot plot = Plot.getStandingOnPlot(event.getTo());
                 if(!plot.getName().equalsIgnoreCase("arena")) {
                     match.end(player.getUniqueId());
                     return;

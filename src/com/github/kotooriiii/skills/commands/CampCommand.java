@@ -107,7 +107,6 @@ public class CampCommand implements CommandExecutor {
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
 
         if (targetBlock.getType() == Material.AIR) {
-            //todo make sure this works when im testing
    //         Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
             return null;
         }

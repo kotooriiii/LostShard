@@ -187,9 +187,8 @@ public class TamingListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) entity;
         Egg egg = (Egg) projectile;
 
-        //todo remove comments
-//        if (shooter.getLevel() < 30)
-//            return;
+        if (shooter.getLevel() < 30)
+            return;
 
         if (SkillPlayer.wrap(shooter.getUniqueId()).getTaming().getLevel() < 50)
             return;
@@ -220,8 +219,7 @@ public class TamingListener implements Listener {
 
 
         applyPokeball(shooter, livingEntity, egg, chance);
-        //todo remove xp
-        //    shooter.setLevel(shooter.getLevel() - 30);
+        shooter.setLevel(shooter.getLevel() - 30);
         addXP(shooter, entity, 100);
     }
 

@@ -36,12 +36,6 @@ public class ShardScoreboardManager {
         Team exiled = registerScoreboard.registerNewTeam(Status.EXILED.getName());
         exiled.setColor(Status.EXILED.getChatColor());
 
-        Team sub = registerScoreboard.registerNewTeam(RankType.SUBSCRIBER.getName());
-        sub.setColor(RankType.SUBSCRIBER.getPrefixNameColor());
-        Team subplus = registerScoreboard.registerNewTeam(RankType.SUBSCRIBER_PLUS.getName());
-        subplus.setColor(RankType.SUBSCRIBER_PLUS.getPrefixNameColor());
-
-
         Team owner = registerScoreboard.registerNewTeam(StaffType.OWNER.getName());
         owner.setColor(StaffType.OWNER.getChatColor());
         Team coowner = registerScoreboard.registerNewTeam(StaffType.COOWNER.getName());
@@ -63,30 +57,32 @@ public class ShardScoreboardManager {
         //Objective register
         Objective objective = scoreboard.registerNewObjective("profile", "dummy", "", RenderType.INTEGER);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        objective.setDisplayName(ChatColor.GOLD + "-" + player.getName() + "'s Profile-");
+        objective.setDisplayName(ChatColor.GOLD + "-" + player.getName() + "'s Stats-");
 
-        Score balanceScore = objective.getScore(ChatColor.GRAY + "» Balance");
-        balanceScore.setScore(16);
 
-        Team balanceValue = scoreboard.registerNewTeam("balance");
-        balanceValue.addEntry(ChatColor.GREEN + "" + ChatColor.DARK_GREEN);
-        objective.getScore(ChatColor.GREEN + "" + ChatColor.DARK_GREEN).setScore(15);
 
-        Score manaScore = objective.getScore(ChatColor.GRAY + "» Mana");
-        manaScore.setScore(14);
+        Score manaScore = objective.getScore(ChatColor.BLUE + "Mana");
+        manaScore.setScore(16);
 
         Team manaValue = scoreboard.registerNewTeam("mana");
-        manaValue.addEntry(ChatColor.AQUA + "" + ChatColor.DARK_AQUA);
-        objective.getScore(ChatColor.AQUA + "" + ChatColor.DARK_AQUA).setScore(13);
+        manaValue.addEntry(ChatColor.AQUA + "" + ChatColor.BLUE);
+        objective.getScore(ChatColor.AQUA + "" + ChatColor.BLUE).setScore(15);
 
-        Score staminaScore = objective.getScore(ChatColor.GRAY + "» Stamina");
-        staminaScore.setScore(12);
+        Score staminaScore = objective.getScore(ChatColor.RED + "Stamina");
+        staminaScore.setScore(14);
 
         Team staminaValue = scoreboard.registerNewTeam("stamina");
         staminaValue.addEntry(ChatColor.BLUE + "" + ChatColor.DARK_BLUE);
-        objective.getScore(ChatColor.BLUE + "" + ChatColor.DARK_BLUE).setScore(11);
+        objective.getScore(ChatColor.BLUE + "" + ChatColor.DARK_BLUE).setScore(13);
 
-        Score murderCountScore = objective.getScore(ChatColor.GRAY + "» Murder Count");
+      Score balanceScore = objective.getScore(ChatColor.GOLD + "Balance");
+       balanceScore.setScore(12);
+
+        Team balanceValue = scoreboard.registerNewTeam("balance");
+        balanceValue.addEntry(ChatColor.GREEN + "" + ChatColor.DARK_GREEN);
+        objective.getScore(ChatColor.GREEN + "" + ChatColor.DARK_GREEN).setScore(11);
+
+     Score murderCountScore = objective.getScore(ChatColor.DARK_RED + "Murder count");
         murderCountScore.setScore(10);
 
         Team murderCountValue = scoreboard.registerNewTeam("murderCount");
@@ -122,10 +118,14 @@ public class ShardScoreboardManager {
                     Stat stat = Stat.wrap(player);
                     StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
 
-                    scoreboard.getTeam("balance").setPrefix(ChatColor.WHITE + "" + Bank.wrap(player.getUniqueId()).getCurrency() + "");
                     scoreboard.getTeam("mana").setPrefix(ChatColor.WHITE + "" + (int) stat.getMana() + "/" + (int) stat.getMaxMana());
                     scoreboard.getTeam("stamina").setPrefix(ChatColor.WHITE + "" + (int) stat.getStamina() + "/" + (int) stat.getMaxStamina());
-                    scoreboard.getTeam("murderCount").setPrefix(ChatColor.WHITE + "" + statusPlayer.getKills() + "");
+
+                    //scoreboard.getTeam("balance").setPrefix(ChatColor.GOLD + "Balance: ");
+                    scoreboard.getTeam("balance").setSuffix(ChatColor.WHITE + "" + Bank.wrap(player.getUniqueId()).getCurrency() + "");
+
+                 //   scoreboard.getTeam("murderCount").setPrefix(ChatColor.RED + "Murder count: ");
+                    scoreboard.getTeam("murderCount").setSuffix(ChatColor.WHITE + "" + statusPlayer.getKills() + "");
 
                 }
             }

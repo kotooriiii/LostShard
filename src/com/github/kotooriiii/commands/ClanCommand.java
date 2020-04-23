@@ -177,7 +177,7 @@ public class ClanCommand implements CommandExecutor {
                             else
                                 playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/clan demote (username) [opt: rank]" + ERROR_COLOR + ".");
                             break;
-                        case "chat": //TODO LATER
+                        case "chat":
                             String message = HelperMethods.stringBuilder(args, 1, " ");
                             ChannelStatus status = channelManager.getChannel(playerSender);
                             channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
@@ -1197,7 +1197,7 @@ public class ClanCommand implements CommandExecutor {
 
                 Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-100);
                 clanTagCreators.put(playerUUID, clan);
-                playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created."); //todo gold takeaway this statement
+                playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created.");
                 playerSender.sendMessage(STANDARD_COLOR + "What would you like your clan tag to be? It must be 3 characters long.");
                 //From here the player will chat the responses and the HashMap will take care of the clan customization.
                 break;

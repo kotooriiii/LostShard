@@ -19,6 +19,8 @@ import org.bukkit.event.Listener;
 
 import java.time.ZonedDateTime;
 
+import static com.github.kotooriiii.commands.BanCommand.matchesRegex;
+import static com.github.kotooriiii.commands.BanCommand.toProperties;
 import static com.github.kotooriiii.data.Maps.*;
 
 public class MatchCreatorListener implements Listener {
@@ -38,13 +40,13 @@ public class MatchCreatorListener implements Listener {
 
             switch (message.toLowerCase()) {
                 case "diamond":
-                    match.setArmorType(Material.DIAMOND);
+                    match.setArmorType(Material.DIAMOND_BOOTS);
                     break;
                 case "gold":
-                    match.setArmorType(Material.GOLD_INGOT);
+                    match.setArmorType(Material.GOLDEN_BOOTS);
                     break;
                 case "iron":
-                    match.setArmorType(Material.IRON_INGOT);
+                    match.setArmorType(Material.IRON_BOOTS);
                     break;
                 case "chainmail":
                     match.setArmorType(Material.CHAINMAIL_BOOTS);
@@ -74,23 +76,23 @@ public class MatchCreatorListener implements Listener {
                     return;
             }
 
-            player.sendMessage(STANDARD_COLOR + "What is the sword type? (diamond,gold,iron,chainmail)");
+            player.sendMessage(STANDARD_COLOR + "What is the sword type? (diamond,gold,iron,wooden)");
             return;
         }
 
         if (match.getSwordType() == null) {
             switch (message.toLowerCase()) {
                 case "diamond":
-                    match.setSwordType(Material.DIAMOND);
+                    match.setSwordType(Material.DIAMOND_SWORD);
                     break;
                 case "gold":
-                    match.setSwordType(Material.GOLD_INGOT);
+                    match.setSwordType(Material.GOLDEN_SWORD);
                     break;
                 case "iron":
-                    match.setSwordType(Material.IRON_INGOT);
+                    match.setSwordType(Material.IRON_SWORD);
                     break;
-                case "chainmail":
-                    match.setSwordType(Material.CHAINMAIL_BOOTS);
+                case "wooden":
+                    match.setSwordType(Material.WOODEN_SWORD);
                     break;
                 default:
                     player.sendMessage(ERROR_COLOR + "Not a valid sword type.");
@@ -152,7 +154,23 @@ public class MatchCreatorListener implements Listener {
                     return;
             }
 
+
+
             if (match instanceof Banmatch) {
+                player.sendMessage(STANDARD_COLOR + "What is the ban term? (Quick Example: type anything here..\nExample: 'forever and ur ip banned as well')");
+            } else if (match instanceof Moneymatch)
+                player.sendMessage(STANDARD_COLOR + "What is the wager amount per player?\nExample: PlayerA has 100. PlayerB has 100. Winner gets 200. In this case, wager amount is 100.");
+
+            return;
+        }
+
+        if(match instanceof Banmatch)
+        {
+            Banmatch banmatch = (Banmatch) match;
+
+            if(banmatch.getConsequentMessage() == null)
+            {
+                banmatch.setConsequentMessage(message);
                 TextComponent tc = new TextComponent(STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25m 30s)");
                 TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
@@ -164,11 +182,10 @@ public class MatchCreatorListener implements Listener {
                 tc.addExtra(component2);
                 tc.addExtra(component3);
                 player.spigot().sendMessage(tc.duplicate());
-            } else if (match instanceof Moneymatch)
-                player.sendMessage(STANDARD_COLOR + "What is the wager amount per player?\nExample: PlayerA has 100. PlayerB has 100. Winner gets 200. In this case, wager amount is 100.");
-
-            return;
+                return;
+            }
         }
+
         if (match instanceof Banmatch) {
 
             Banmatch banmatch = (Banmatch) match;
@@ -226,6 +243,8 @@ public class MatchCreatorListener implements Listener {
                 return;
             }
         }
+
+
         if (match.getBeginCountdown() == -1) {
 
             if (!NumberUtils.isNumber(message) || message.contains(".")) {
@@ -250,53 +269,6 @@ public class MatchCreatorListener implements Listener {
         }
     }
 
-    private boolean matchesRegex(String message) {
-        String[] properties = message.split(" ");
 
-        for (String property : properties) {
-            if (!property.matches("[0-9]+y|[0-9]+mo|[0-9]+w|[0-9]+d|[0-9]+h|[0-9]+min|[0-9]+s")) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private int[] toProperties(String message) {
-        String[] properties = message.toLowerCase().split(" ");
-        int[] numproperties = new int[]
-                {0,0,0,0,0,0,0}; //year,month,week,day,hour,minute,second
-        for (String property : properties) {
-            String identifier = property.replaceAll("[0-9]+", "");
-            String timeString = property.replaceAll("[A-Za-z]", "");
-            int time = Integer.parseInt(timeString);
-            switch (identifier) {
-                case "y":
-                    numproperties[0] = time;
-                    break;
-                case "mo":
-                    numproperties[1] = time;
-                    break;
-                case "w":
-                    numproperties[2] = time;
-                    break;
-                case "d":
-                    numproperties[3] = time;
-                    break;
-                case "h":
-                    numproperties[4] = time;
-                    break;
-                case "min":
-                    numproperties[5] = time;
-                    break;
-                case "s":
-                    numproperties[6] = time;
-                    break;
-                default:
-                    return null;
-            }
-        }
-
-        return numproperties;
-    }
 
 }

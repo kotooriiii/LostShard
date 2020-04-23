@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 
 import java.util.UUID;
 
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class BlockChangePlotListener implements Listener {
@@ -36,6 +37,15 @@ public class BlockChangePlotListener implements Listener {
 
                 if(playerInteracting.hasPermission(STAFF_PERMISSION))
                     return;
+
+                //Staff no permission
+                if(plot.isStaff()){
+
+                    playerInteracting.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+
+                    entityChangeBlockEvent.setCancelled(true);
+                    return;
+                }
 
                 //If don't have permissions
                 if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
@@ -67,7 +77,14 @@ public class BlockChangePlotListener implements Listener {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
+                //Staff no permission
+                if(plot.isStaff()){
 
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+
+                    blockBreakEvent.setCancelled(true);
+                    return;
+                }
                 //If don't have permissions
                 if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
                     blockBreakEvent.setCancelled(true);
@@ -98,7 +115,14 @@ public class BlockChangePlotListener implements Listener {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
+                //Staff no permission
+                if(plot.isStaff()){
 
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+
+                    blockPlaceEvent.setCancelled(true);
+                    return;
+                }
                 //If don't have permissions
                 if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
                     blockPlaceEvent.setCancelled(true);

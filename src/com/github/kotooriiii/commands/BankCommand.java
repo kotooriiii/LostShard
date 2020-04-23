@@ -140,7 +140,7 @@ public class BankCommand implements CommandExecutor {
 
     public void sendHelp(Player playerSender) {
         playerSender.sendMessage(ChatColor.GOLD + "------Bank Help------");
-        playerSender.sendMessage(COMMAND_COLOR + "/chest " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/chest " + ChatColor.YELLOW + "");
         playerSender.sendMessage(COMMAND_COLOR + "/balance" + ChatColor.YELLOW + "");
         playerSender.sendMessage(COMMAND_COLOR + "/withdraw " + ChatColor.YELLOW + "(amount)");
         playerSender.sendMessage(COMMAND_COLOR + "/deposit " + ChatColor.YELLOW + "(amount)");

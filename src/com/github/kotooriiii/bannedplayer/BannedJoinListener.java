@@ -58,6 +58,6 @@ public class BannedJoinListener  implements Listener {
 
     public void debug(String message)
     {
-        Bukkit.broadcastMessage(message);
+        //Bukkit.broadcastMessage(message);
     }
 }

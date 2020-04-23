@@ -29,7 +29,25 @@ public class SkillCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("skills")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    playerSender.sendMessage(STANDARD_COLOR + "No page for this command yet. /skills");
+                    playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Skills-");
+
+                    SkillPlayer skillPlayer = SkillPlayer.wrap(playerUUID);
+                    float skillNum = 0;
+                    float maxSkillNum = 0;
+
+                    for(SkillPlayer.Skill skill : skillPlayer.getSkills())
+                    {
+                        skillNum += skill.getLevel();
+                        maxSkillNum += 100;
+                    }
+
+                    playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + skillNum+ "/" + maxSkillNum + " skill points.");
+
+
+                    for(SkillPlayer.Skill skill : skillPlayer.getSkills())
+                    {
+                        playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + ": " + ChatColor.WHITE + skill.getLevel());
+                    }
                     return false;
                 }
 

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.util.HelperMethods.sendToAll;
 
 public class Match {
 
@@ -34,14 +35,13 @@ public class Match {
     private int beginCountdown;
     private BukkitTask task;
 
-    private boolean isActive = false;
+    private boolean hasGameStarted = false;
 
     private static HashMap<UUID, Match> matchCreatorMap = new HashMap<>();
 
     private static Match activeMatch;
 
-    public Match(UUID fighterA, UUID fighterB)
-    {
+    public Match(UUID fighterA, UUID fighterB) {
         this.fighterA = fighterA;
         this.fighterB = fighterB;
 
@@ -58,8 +58,11 @@ public class Match {
         task = null;
     }
 
-    public void initializer()
-    {
+    public void initializer() {
+
+    }
+
+    public void deinitializer() {
 
     }
 
@@ -70,7 +73,7 @@ public class Match {
     public void end(UUID loser) {
 
         activeMatch = null;
-        isActive = false;
+        hasGameStarted = false;
 
         UUID winner = null;
 
@@ -91,7 +94,7 @@ public class Match {
     public void startCountdown() {
 
         activeMatch = this;
-initializer();
+        initializer();
         task = new BukkitRunnable() {
 
 
@@ -104,7 +107,7 @@ initializer();
                 significantTime(beginCountdown);
 
                 if (beginCountdown == 0) {
-                    sendToAll(ChatColor.GREEN + getName()  + " is in progress.");
+                    sendToAll(ChatColor.GREEN + getName() + " is in progress.");
                     start();
                     this.cancel();
                     return;
@@ -140,8 +143,7 @@ initializer();
 
         ArenaPlot arenaPlot = (ArenaPlot) Plot.getPlot("Arena");
 
-        if(arenaPlot == null)
-        {
+        if (arenaPlot == null) {
             sendToAll(ERROR_COLOR + "The arena plot has not been set.");
             return;
         }
@@ -157,7 +159,7 @@ initializer();
 
         playerA.teleport(arenaPlot.getSpawnA());
         playerB.teleport(arenaPlot.getSpawnB());
-        isActive = true;
+        hasGameStarted = true;
     }
 
     public void win(OfflinePlayer offlinePlayer) {
@@ -169,20 +171,19 @@ initializer();
 
     }
 
-    public void sendToAll(String message) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(message);
-        }
-    }
-
     private void significantTime(int counter) {
         int[] significant = new int[]
                 {5, 4, 3, 2, 1};
 
         for (int sig : significant) {
             if (counter == sig) {
-                for (Player player : Bukkit.getOnlinePlayers())
-                    player.sendMessage(ChatColor.GREEN + getName() + " in session. ETA " + counter + " mins");
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (counter == 1)
+                        player.sendMessage(ChatColor.GREEN + getName() + " in session. ETA " + counter + " min");
+                    else
+                        player.sendMessage(ChatColor.GREEN + getName() + " in session. ETA " + counter + " mins");
+
+                }
                 break;
             }
         }
@@ -190,8 +191,8 @@ initializer();
 
 
     //Getters /setters
-    public boolean isActive() {
-        return isActive;
+    public boolean hasGameStarted() {
+        return hasGameStarted;
     }
 
     public static Match getActiveMatch() {
@@ -336,29 +337,42 @@ initializer();
 
     }
 
-    public void cancel(Player player){
+    public void cancel(Player player) {
         getMatchCreatorMap().remove(player.getUniqueId());
-        cancel();
+        cancel(false);
     }
 
-    public void cancel() {
+    public void cancel(boolean returnToSpawn) {
+
+        sendToAll(ChatColor.GREEN + this.getName() + " has been canceled.");
+
+
+        if (activeMatch != null) {
+            deinitializer();
+        }
+
         this.getTask().cancel();
-        if (isActive) {
+
+        if (hasGameStarted) {
             OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
             OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
 
-            if (fighterA.isOnline()) {
-                fighterA.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterA.getPlayer()));
-            }
+            if (returnToSpawn) {
+                if (fighterA.isOnline()) {
+                    fighterA.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterA.getPlayer()));
+                }
 
-            if (fighterB.isOnline()) {
-                fighterB.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterB.getPlayer()));
+                if (fighterB.isOnline()) {
+                    fighterB.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterB.getPlayer()));
+                }
             }
         }
+
+        hasGameStarted = false;
+        activeMatch = null;
     }
 
-    public static String getName()
-    {
+    public static String getName() {
         return NAME;
     }
 

@@ -1,6 +1,11 @@
 package com.github.kotooriiii.status;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -41,6 +46,23 @@ public class Staff {
     public static void remove(Staff staff)
     {
       staffMap.remove(staff.playerUUID);
+    }
+
+    public static Staff[] getStaff()
+    {
+        return staffMap.values().toArray(new Staff[staffMap.values().size()]);
+    }
+
+    public static Player[] getOnlineStaffPlayers()
+    {
+        ArrayList<Player> players = new ArrayList<Player>();
+        for(Staff staff : getStaff())
+        {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(staff.getPlayerUUID());
+            if(offlinePlayer.isOnline())
+                players.add(offlinePlayer.getPlayer());
+        }
+        return players.toArray(new Player[players.size()]);
     }
 
     public static HashMap<UUID, Staff> getStaffMap() {

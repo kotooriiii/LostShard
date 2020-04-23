@@ -39,6 +39,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--Discord API -->
+            <dependency>
+                <groupId>com.discord4j</groupId>
+                <artifactId>discord4j-core</artifactId>
+                <version>3.1.0.M1</version>
+            </dependency>
+
     </dependencies>
 
 </project>

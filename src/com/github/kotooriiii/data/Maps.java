@@ -73,6 +73,9 @@ public final class Maps {
     public final static ChatColor COMMAND_COLOR = ChatColor.GOLD;
     public final static ChatColor RANK_COLOR = ChatColor.DARK_GREEN;
 
+    public final static ChatColor DISCORD_COLOR = ChatColor.BLUE;
+
+
     public final static Permission STAFF_PERMISSION = new Permission("lostshard.staff");
 
 }

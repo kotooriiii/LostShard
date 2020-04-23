@@ -139,11 +139,17 @@ public final class FileManager {
                 continue;
             }
         }
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            Bank bank = FileManager.readBankFile(player.getUniqueId());
-            if (bank == null)
-                return;
-            Bank.getBanks().put(player.getUniqueId(), bank);
+
+        for (File file : status_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            StatusPlayer statusPlayer = readStatusPlayer(file);
+
+            if (statusPlayer == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a status file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
         }
 
         for (File file : ranks_folder.listFiles()) {
@@ -158,16 +164,12 @@ public final class FileManager {
             }
         }
 
-        for (File file : status_folder.listFiles()) {
-            if (!file.getName().endsWith(".yml"))
-                continue;
 
-            StatusPlayer statusPlayer = readStatusPlayer(file);
-
-            if (statusPlayer == null) {
-                LostShardPlugin.logger.info("\n\n" + "There was a status file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
-                continue;
-            }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Bank bank = FileManager.readBankFile(player.getUniqueId());
+            if (bank == null)
+                return;
+            Bank.getBanks().put(player.getUniqueId(), bank);
         }
 
         for (File file : sales_folder.listFiles()) {
@@ -231,7 +233,7 @@ public final class FileManager {
         }
 
         for (File file : muted_folder.listFiles()) {
-            if (file.getName().endsWith(".yml"))
+            if (!file.getName().endsWith(".yml"))
                 continue;
 
             MutedPlayer mutedPlayer = readMutedPlayer(file);
@@ -244,10 +246,36 @@ public final class FileManager {
 
     }
 
+    public static void ban(UUID uuid, ZonedDateTime zdt, String banMessage) {
+        if(isBanned(uuid))
+            return;
+        FileManager.write(new BannedPlayer(uuid, zdt, banMessage));
+    }
+
+
+    public static void ban(UUID uuid) {
+        ban(uuid, ZonedDateTime.now().withYear(0), "You are banned.");
+    }
+
+    public static void unban(UUID uuid) {
+        for (BannedPlayer bannedPlayer : getBanned()) {
+            if (bannedPlayer.getPlayerUUID().equals(uuid))
+                removeFile(bannedPlayer);
+        }
+    }
+
+    public static boolean isBanned(UUID uuid) {
+        for (BannedPlayer bannedPlayer : getBanned()) {
+            if (bannedPlayer.getPlayerUUID().equals(uuid))
+                return true;
+        }
+        return false;
+    }
+
     public static BannedPlayer[] getBanned() {
         ArrayList<BannedPlayer> bannedPlayers = new ArrayList<>();
-        for (File file : muted_folder.listFiles()) {
-            if (file.getName().endsWith(".obj"))
+        for (File file : banned_folder.listFiles()) {
+            if (!file.getName().endsWith(".obj"))
                 continue;
 
             BannedPlayer bannedPlayer = readBannedPlayer(file);
@@ -383,7 +411,7 @@ public final class FileManager {
             LostShardPlugin.logger.info("There was an error reading the clan in file \"" + shardGuardFile.getName() + "\". The guard post location in the file might be corrupted or missing.");
             return null;
         }
-        ShardGuard guard = new ShardGuard(guardName);
+        ShardGuard guard = new ShardGuard(guardPostLocation.getWorld(), guardName);
 
 
         guard.spawn(guardPostLocation);
@@ -404,7 +432,7 @@ public final class FileManager {
             return null;
         }
 
-        ShardBanker banker = new ShardBanker(bankerName);
+        ShardBanker banker = new ShardBanker(guardPostLocation.getWorld(), bankerName);
 
         banker.spawn(guardPostLocation);
 

@@ -476,7 +476,7 @@ public final class HelperMethods {
             hour = 12;
             ampm = "p.m.";
         }
-        else if(13 <= hour && hour < 23) {
+        else if(13 <= hour && hour <= 23) {
             hour = hour-12;
             ampm = "p.m.";
         }
@@ -484,9 +484,15 @@ public final class HelperMethods {
         String monthName = of.getMonth().name();
         monthName = monthName.substring(0,1).toUpperCase() + monthName.substring(1).toLowerCase();
 
-        String minuteName = new DecimalFormat("#.##").format(of.getMinute());
+        String minuteName = new DecimalFormat("#00").format(of.getMinute());
 
         return of.getDayOfMonth() + " " + monthName + " " + of.getYear() + " " + hour + ":" + minuteName + ampm + " EST";
+    }
+
+    public static void sendToAll(String message) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(message);
+        }
     }
 
 }

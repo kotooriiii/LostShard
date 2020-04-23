@@ -30,7 +30,7 @@ public class BanmatchCommand implements CommandExecutor {
 
         if (args.length >= 1) {
             if (args[0].equalsIgnoreCase("cancel")) {
-                Match.getMatchCreatorMap().remove(playerSender.getUniqueId());
+
 
                 if (Match.hasActiveMatch()) {
                     Match bm = Match.getActiveMatch();
@@ -38,8 +38,12 @@ public class BanmatchCommand implements CommandExecutor {
 
                     playerSender.sendMessage(STANDARD_COLOR + "You have canceled the match.");
                 } else {
+                    if(Match.getMatchCreatorMap().containsKey(playerSender.getUniqueId()))
+                        playerSender.sendMessage(STANDARD_COLOR + "Canceled creation of match.");
+                    else
                     playerSender.sendMessage(STANDARD_COLOR + "No active match able to be canceled.");
                 }
+                Match.getMatchCreatorMap().remove(playerSender.getUniqueId());
 
                 return false;
             }

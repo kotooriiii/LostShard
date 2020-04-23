@@ -59,8 +59,8 @@ public class SkillPlayer implements Serializable {
     public Skill[] getSkills() {
         return new Skill[]
                 {
-                        archery, swordsmanship, mining, fishing, lumberjacking, taming,
-                        survivalism, brawling, blacksmithy, sorcery
+                        archery, blacksmithy, brawling, fishing, mining,
+                        survivalism, swordsmanship, taming
                 };
     }
 

@@ -75,17 +75,15 @@ public class ChatChannelListener implements Listener {
             prefix = ChatColor.GOLD + "[" + prefix + ChatColor.GOLD + "]";
         } else {
 
-            //NOT STAFF
-            //Maybe donators?
             RankPlayer rankPlayer = RankPlayer.wrap(player.getUniqueId());
             if (rankPlayer.isDonator()) {
-                prefix = rankPlayer.getChannelContent(prefix);
-                color = rankPlayer.getRankType().getPrefixNameColor();
+                prefix = rankPlayer.getChannelContent(channelStatus.getPrefix());
             } else {
+                prefix = ChatColor.WHITE + "[" + channelStatus.getPrefix() + ChatColor.WHITE + "]";
 
-                prefix = ChatColor.WHITE + "[" + prefix + ChatColor.WHITE + "]";
             }
         }
+
         String name = color + player.getName();
         String message = asyncPlayerChatEvent.getMessage();
 

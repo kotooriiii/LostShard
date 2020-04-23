@@ -10,17 +10,22 @@ import org.bukkit.entity.Player;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import static com.github.kotooriiii.data.Maps.PLAYER_COLOR;
+import static com.github.kotooriiii.util.HelperMethods.sendToAll;
+
 public class Banmatch extends Match {
 
     private ZonedDateTime unbannedTime;
+    private String consequentMessage;
 
     private final static String INDEFINITE_BAN_IDENTIFIER = "Indefinite";
-    private final static String BAN_MESSAGE = "You were defeated in a " + getName() + ".";
+    private final static String BAN_MESSAGE = "You have been banned.";
 
     public Banmatch(UUID fighterA, UUID fighterB) {
       super(fighterA, fighterB);
       super.NAME = "Banmatch";
       unbannedTime = null;
+      consequentMessage = null;
     }
 
     @Override
@@ -29,7 +34,6 @@ public class Banmatch extends Match {
 
     @Override
     public void win(OfflinePlayer offlinePlayer) {
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " is the winner of the " + getName() + "!");
     }
 
     @Override
@@ -37,13 +41,11 @@ public class Banmatch extends Match {
         if (offlinePlayer.isOnline()) {
             offlinePlayer.getPlayer().kickPlayer(BAN_MESSAGE);
         }
-        BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), "You were defeated in a " + getName() + ".");
+        BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), BAN_MESSAGE);
         FileManager.write(bannedPlayer);
 
-        if(getUnbannedTime().getYear() == 0)
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " has been banned indefinitely.");
-        else
-            sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.RED + " has been banned until " + HelperMethods.until(getUnbannedTime()));
+
+            sendToAll(PLAYER_COLOR +  offlinePlayer.getName() + ChatColor.GREEN + " has been banned.");
     }
 
     public ZonedDateTime getUnbannedTime() {
@@ -54,11 +56,21 @@ public class Banmatch extends Match {
         this.unbannedTime = unbannedTime;
     }
 
+    public String  getConsequentMessage()
+    {
+        return consequentMessage;
+    }
+
+    public void setConsequentMessage(String consequentMessage)
+    {
+        this.consequentMessage = consequentMessage;
+    }
+
     @Override
     public void inform() {
         String information = "";
 
-        ChatColor DEFAULT = ChatColor.YELLOW;
+        ChatColor DEFAULT = ChatColor.GOLD;
         ChatColor IDENTITY = ChatColor.BLUE;
 
         String banTermLift = "";
@@ -76,7 +88,8 @@ public class Banmatch extends Match {
         information += "\n" + DEFAULT + "Protection " + toRoman(getProtection()) + " " + proper(getArmorType().getKey().getKey()) + " Armor";
         information += "\n" + DEFAULT + "Sharpness " + toRoman(getSharpness()) + " Fire " + toRoman(getFireAspect()) + " " + proper(getSwordType().getKey().getKey()) + " Sword";
         information += "\n" + DEFAULT + "Power " + toRoman(getPower()) + " Bow";
-        information += "\n" + IDENTITY + "Ban term lifted on: " + DEFAULT + banTermLift;
+        information += "\n" + IDENTITY + "Ban term: " + DEFAULT + consequentMessage;
+        information += "\n" + IDENTITY + "Lifted on: " + DEFAULT + banTermLift;
         information += "\n" + IDENTITY + "Event will begin in: " + DEFAULT + getBeginCountdown() + " min";
 
 

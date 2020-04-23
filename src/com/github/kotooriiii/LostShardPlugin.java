@@ -3,6 +3,9 @@ package com.github.kotooriiii;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bannedplayer.BannedJoinListener;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
+import com.github.kotooriiii.discord.client.DC4JBot;
+import com.github.kotooriiii.discord.listeners.LinkListener;
+import com.github.kotooriiii.match.MatchCheatingListener;
 import com.github.kotooriiii.match.MatchCreatorListener;
 import com.github.kotooriiii.match.MatchDefeatListener;
 import com.github.kotooriiii.match.banmatch.*;
@@ -37,6 +40,11 @@ import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
+import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -75,14 +83,15 @@ public class LostShardPlugin extends JavaPlugin {
     public static FileConfiguration config;
 
     private static ChannelManager channelManager;
+    private static DC4JBot dc4JBot;
     private static Scoreboard scoreboard;
 
 
     @Override
     public void onEnable() {
 
-
         //Console logger, plugin, and description file are all ready for public use
+        registerDiscord();
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
@@ -106,7 +115,6 @@ public class LostShardPlugin extends JavaPlugin {
         //Register for crash-related incidents
         registerBuff();
         registerCorrupts();
-        registerDonators();
         registerStaff();
 
         //All was successfully enabled
@@ -220,7 +228,18 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("heal").setExecutor(new HealCommand());
 
+        getCommand("ban").setExecutor(new BanCommand());
+        getCommand("unban").setExecutor(new UnbanCommand());
 
+        getCommand("invsee").setExecutor(new InvseeCommand());
+
+        getCommand("opt").setExecutor(new LinkListener());
+
+
+    }
+
+    public void registerDiscord() {
+        dc4JBot = new DC4JBot();
     }
 
     public void registerEvents() {
@@ -263,7 +282,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new ArcheryListener(), this);
         pm.registerEvents(new BlacksmithyListener(), this);
         pm.registerEvents(new BrawlingListener(), this);
-        pm.registerEvents(new FishingListener(), this); 
+        pm.registerEvents(new FishingListener(), this);
         pm.registerEvents(new LumberjackingListener(), this);
         pm.registerEvents(new MiningListener(), this);
         pm.registerEvents(new SorceryListener(), this);
@@ -278,8 +297,9 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new BannedJoinListener(), this);
         pm.registerEvents(new MatchDefeatListener(), this);
 
-
-
+        pm.registerEvents(new InventorySeeListener(), this);
+        pm.registerEvents(new MatchCheatingListener(), this);
+        pm.registerEvents(new LinkListener(), this);
 
     }
 
@@ -351,13 +371,6 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    public void registerDonators() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            RankPlayer rankPlayer = RankPlayer.wrap(player.getUniqueId());
-            ShardScoreboardManager.add(player, rankPlayer.getRankType().getName());
-        }
-    }
-
     public void registerStaff() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
@@ -417,7 +430,7 @@ public class LostShardPlugin extends JavaPlugin {
                     public void run() {
                         newDayScheduler();
                     }
-                }.runTaskLater(LostShardPlugin.plugin, 20*10);
+                }.runTaskLater(LostShardPlugin.plugin, 20 * 10);
             }
         }.runTaskLater(this.plugin, initialDelay);
 
@@ -440,6 +453,10 @@ public class LostShardPlugin extends JavaPlugin {
 //        }
 //        return (ICombatLogX) plugin;
 //    }
+
+    public static DC4JBot getDiscord() {
+        return dc4JBot;
+    }
 
     private LuckPerms loadLuckPerms() {
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);

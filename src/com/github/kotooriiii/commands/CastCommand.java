@@ -57,10 +57,9 @@ public class CastCommand implements CommandExecutor {
                             }
 
 
-
                             //rest
                             if (args.length == 1) {
-                                    markCommand.put(playerUUID, playerSender.getLocation());
+                                markCommand.put(playerUUID, playerSender.getLocation());
                                 HelperMethods.localBroadcast(playerSender, "Mark");
                                 playerSender.sendMessage(ChatColor.AQUA + "What would you like to name your Mark?");
                                 //Make a chat name
@@ -70,11 +69,11 @@ public class CastCommand implements CommandExecutor {
 
 
                                 Location location = playerSender.getLocation();
-                                if(markCommand.containsKey(playerUUID)) {
+                                boolean isDirect = true;
+                                if (markCommand.containsKey(playerUUID)) {
                                     location = markCommand.get(playerUUID);
-
                                 } else {
-                                    HelperMethods.localBroadcast(playerSender, "Mark");
+                                    isDirect = false;
                                 }
                                 markCommand.remove(playerUUID);
 
@@ -116,6 +115,9 @@ public class CastCommand implements CommandExecutor {
                                 }
 
 
+                                if (!isDirect) {
+                                    HelperMethods.localBroadcast(playerSender, "Mark");
+                                }
 
 
                                 //mana
@@ -152,7 +154,7 @@ public class CastCommand implements CommandExecutor {
 
                             if (args.length == 1) {
                                 //Make a chat name
-                                    recallCommand.put(playerUUID, playerSender.getLocation());
+                                recallCommand.put(playerUUID, playerSender.getLocation());
                                 HelperMethods.localBroadcast(playerSender, "Recall");
                                 playerSender.sendMessage(ChatColor.AQUA + "Where would you like to recall to?");
 
@@ -195,7 +197,7 @@ public class CastCommand implements CommandExecutor {
                                 }
 
 
-                                if(recallCommand.containsKey(playerUUID)) {
+                                if (recallCommand.containsKey(playerUUID)) {
 
 
                                 } else {
@@ -229,6 +231,9 @@ public class CastCommand implements CommandExecutor {
                                 }.runTaskTimer(LostShardPlugin.plugin, 20, 20);
 
                             }
+                            break;
+                        default:
+                            playerSender.sendMessage(ERROR_COLOR + "Invalid command.");
                             break;
                     }
                 }
