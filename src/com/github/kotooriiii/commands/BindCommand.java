@@ -38,7 +38,7 @@ public class BindCommand implements CommandExecutor {
                     String namebuilder = HelperMethods.stringBuilder(args, 0, " ");
                     // Loop through all possible
                     boolean isFound = false;
-                    Wand wand=null;
+                    Wand wand = null;
                     for (WandType wandType : WandType.values()) {
 
                         // Check if wand is the one requested
@@ -48,7 +48,7 @@ public class BindCommand implements CommandExecutor {
                             {
                                 // Create wand item
                                 wand =  new Wand(wandType);
-                                isFound=true;
+                                isFound = true;
                                 break;
                             }
                         }

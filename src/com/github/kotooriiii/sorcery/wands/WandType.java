@@ -10,7 +10,7 @@ public enum WandType {
     ICE(new String[]{"Ice Ball", "Ice"},ChatColor.AQUA,new ItemStack[]{new ItemStack(Material.STRING, 1)},2,15),
     LIGHTNING(new String[]{"Lightning"},ChatColor.GOLD,new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},2,20),
     TELEPORT(new String[]{"Teleport"},ChatColor.DARK_PURPLE,new ItemStack[]{new ItemStack(Material.FEATHER, 1)},1,15),
-    WEB(new String[]{"Web Field", "Web"},ChatColor.DARK_GRAY,new ItemStack[]{new ItemStack(Material.STRING, 1)},1,15);
+    WEB(new String[]{"Web Field", "Web"},ChatColor.AQUA,new ItemStack[]{new ItemStack(Material.STRING, 1)},1,15);
 
 
     private String[] names;

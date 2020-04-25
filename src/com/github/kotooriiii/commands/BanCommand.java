@@ -49,7 +49,7 @@ public class BanCommand implements CommandExecutor {
             String name = args[0];
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-            if (!offlinePlayer.hasPlayedBefore()) {
+            if (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()) {
                 playerSender.sendMessage(ERROR_COLOR + "The player you are looking for does not exist.");
                 return false;
             }

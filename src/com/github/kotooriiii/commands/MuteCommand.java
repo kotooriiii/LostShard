@@ -2,6 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.muted.MutedPlayer;
+import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.util.HelperMethods;
 import com.mojang.datafixers.kinds.IdF;
 import org.bukkit.Bukkit;
@@ -29,8 +30,7 @@ public class MuteCommand implements CommandExecutor {
             return false;
         final Player playerSender = (Player) commandSender;
 
-        if(!playerSender.hasPermission(STAFF_PERMISSION))
-        {
+        if (!playerSender.hasPermission(STAFF_PERMISSION)) {
             playerSender.sendMessage(ERROR_COLOR + "You must be staff to access this command.");
             return false;
         }
@@ -43,35 +43,31 @@ public class MuteCommand implements CommandExecutor {
         String name = args[0];
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-        if (!offlinePlayer.hasPlayedBefore()) {
+        if(!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline())
+        {
             playerSender.sendMessage(ERROR_COLOR + "The player you are looking for does not exist.");
             return false;
         }
 
-        if(offlinePlayer.isOnline()) {
-            if(offlinePlayer.getPlayer().hasPermission(STAFF_PERMISSION))
-            {
-                playerSender.sendMessage(ERROR_COLOR + "The player cannot be muted.");
-                return false;
+        if (Staff.isStaff(offlinePlayer.getUniqueId())) {
 
-            }
+            playerSender.sendMessage(ERROR_COLOR + "The player cannot be muted.");
+            return false;
+
         }
 
         boolean isMuting = !MutedPlayer.getMutedPlayers().containsKey(offlinePlayer.getUniqueId());
 
-        if(isMuting)
-        {
+        if (isMuting) {
             playerSender.sendMessage(ChatColor.RED + "You have muted " + PLAYER_COLOR + offlinePlayer.getName() + ChatColor.RED + ".");
-            if(offlinePlayer.isOnline())
+            if (offlinePlayer.isOnline())
                 offlinePlayer.getPlayer().sendMessage(ERROR_COLOR + "You have been muted.");
             MutedPlayer mutedPlayer = new MutedPlayer(offlinePlayer.getUniqueId());
             mutedPlayer.add();
 
-        }
-        else
-        {
+        } else {
             playerSender.sendMessage(ChatColor.RED + "You have unmuted " + PLAYER_COLOR + offlinePlayer.getName() + ChatColor.RED + ".");
-            if(offlinePlayer.isOnline())
+            if (offlinePlayer.isOnline())
                 offlinePlayer.getPlayer().sendMessage(ERROR_COLOR + "You have been unmuted.");
             MutedPlayer.getMutedPlayers().get(offlinePlayer.getUniqueId()).remove();
         }

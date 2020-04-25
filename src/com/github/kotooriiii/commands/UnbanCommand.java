@@ -2,6 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -46,16 +47,14 @@ public class UnbanCommand implements CommandExecutor {
         String name = args[0];
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-        if (!offlinePlayer.hasPlayedBefore()) {
+        if (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player you are looking for does not exist.");
             return false;
         }
 
-        if (offlinePlayer.isOnline()) {
-            if (offlinePlayer.getPlayer().hasPermission(STAFF_PERMISSION)) {
-                playerSender.sendMessage(ERROR_COLOR + "The player is a staff member and cannot be banned.");
-                return false;
-            }
+        if (Staff.isStaff(offlinePlayer.getUniqueId())) {
+            playerSender.sendMessage(ERROR_COLOR + "The player is a staff member and cannot be banned.");
+            return false;
         }
 
         boolean isBanned = FileManager.isBanned(offlinePlayer.getUniqueId());

@@ -3,6 +3,7 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.npc.ShardGuard;
+import com.github.kotooriiii.plots.Plot;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import net.md_5.bungee.api.ChatMessageType;
@@ -40,65 +41,74 @@ public class GuardCommand implements CommandExecutor {
                 if (args.length == 0) {
                     final Location playerLocation = playerSender.getLocation();
 
+                    Plot plot = Plot.getStandingOnPlot(playerLocation);
+                    //plot doesnt exist
+                    if (plot == null) {
+                        return false;
+                    }
+
+                    //must be in order;
+                    if (!plot.getName().equalsIgnoreCase("order")) {
+                        return false;
+                    }
+
+
                     StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
-                    if(!statusPlayer.getStatus().equals(Status.WORTHY))
-                    {
-                        playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
+                    if (!statusPlayer.getStatus().equals(Status.WORTHY)) {
+                        //playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
                         return true;
                     }
 
-                        ShardGuard guard = ShardGuard.getNearestGuard(playerLocation);
-                        if(guard==null)
-                        {
-                            playerSender.sendMessage(ERROR_COLOR + "No guard nearby!!!");
-                            return true;
-                        } else if(!statusPlayer.hasNearbyEnemy(5))
-                        {
-                            playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
-                            return true;
+                    ShardGuard guard = ShardGuard.getNearestGuard(playerLocation);
+                    if (guard == null) {
+                       // playerSender.sendMessage(ERROR_COLOR + "No guard nearby!");
+                        return true;
+                    } else if (!statusPlayer.hasNearbyEnemyRange(5)) {
+                        //playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
+                        return true;
+                    }
+
+                    guard.setCalled(true);
+                    guard.teleport(playerLocation);
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+
+                            if (guard.isBusy())
+                                return;
+                            int curX = guard.getCurrentLocation().getBlockX();
+                            int postX = guard.getSpawnLocation().getBlockX();
+                            int curY = guard.getCurrentLocation().getBlockY();
+                            int postY = guard.getSpawnLocation().getBlockY();
+                            int curZ = guard.getCurrentLocation().getBlockZ();
+                            int postZ = guard.getSpawnLocation().getBlockZ();
+
+                            guard.getCurrentLocation().getWorld().spawnParticle(Particle.BARRIER, new Location(guard.getCurrentLocation().getWorld(), guard.getCurrentLocation().getBlockX() + 0.5, guard.getCurrentLocation().getBlockY() + 3, guard.getCurrentLocation().getBlockZ() + 0.5), 1);
+                            if (curX != postX && curY != postY && curZ != postZ) {
+                                guard.getCurrentLocation().getWorld().playSound(guard.getCurrentLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
+                            }
+                        }
+                    }.runTaskLater(LostShardPlugin.plugin, 40);
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+
+                            int curX = guard.getCurrentLocation().getBlockX();
+                            int postX = guard.getSpawnLocation().getBlockX();
+                            int curY = guard.getCurrentLocation().getBlockY();
+                            int postY = guard.getSpawnLocation().getBlockY();
+                            int curZ = guard.getCurrentLocation().getBlockZ();
+                            int postZ = guard.getSpawnLocation().getBlockZ();
+
+                            if (curX != postX && curY != postY && curZ != postZ) {
+                                guard.teleport(guard.getSpawnLocation());
+                                guard.setCalled(false);
+                            }
                         }
 
-                        guard.setCalled(true);
-                        guard.teleport(playerLocation);
-
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-
-                                if(guard.isBusy())
-                                    return;
-                                int curX = guard.getCurrentLocation().getBlockX();
-                                int postX = guard.getSpawnLocation().getBlockX();
-                                int curY = guard.getCurrentLocation().getBlockY();
-                                int postY = guard.getSpawnLocation().getBlockY();
-                                int curZ = guard.getCurrentLocation().getBlockZ();
-                                int postZ = guard.getSpawnLocation().getBlockZ();
-
-                                guard.getCurrentLocation().getWorld().spawnParticle(Particle.BARRIER, new Location(guard.getCurrentLocation().getWorld(), guard.getCurrentLocation().getBlockX()+0.5, guard.getCurrentLocation().getBlockY()+3, guard.getCurrentLocation().getBlockZ()+0.5), 1);
-                                if (curX != postX && curY != postY && curZ != postZ) {
-                                    guard.getCurrentLocation().getWorld().playSound(guard.getCurrentLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
-                                }
-                            }
-                        }.runTaskLater(LostShardPlugin.plugin, 40);
-
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-
-                                int curX = guard.getCurrentLocation().getBlockX();
-                                int postX = guard.getSpawnLocation().getBlockX();
-                                int curY = guard.getCurrentLocation().getBlockY();
-                                int postY = guard.getSpawnLocation().getBlockY();
-                                int curZ = guard.getCurrentLocation().getBlockZ();
-                                int postZ = guard.getSpawnLocation().getBlockZ();
-
-                                if (curX != postX && curY != postY && curZ != postZ) {
-                                    guard.teleport(guard.getSpawnLocation());
-                                    guard.setCalled(false);
-                                }
-                            }
-
-                        }.runTaskLater(LostShardPlugin.plugin, 120);
+                    }.runTaskLater(LostShardPlugin.plugin, 120);
 
 
                 }
@@ -126,8 +136,7 @@ public class GuardCommand implements CommandExecutor {
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String nameCreate = stringBuilder(args, 2, " ");
 
-                                    if(nameCreate.length() > 14)
-                                    {
+                                    if (nameCreate.length() > 14) {
                                         playerSender.sendMessage(ERROR_COLOR + "You can't have a name that big! Shrink it or else the game crashes.");
                                         return true;
                                     }
@@ -158,7 +167,7 @@ public class GuardCommand implements CommandExecutor {
                                             return true;
                                         }
                                     }
-                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + GUARD_COLOR + nameDelete + ERROR_COLOR+  " in our records of Guards.");
+                                    playerSender.sendMessage(ERROR_COLOR + "We could not find " + GUARD_COLOR + nameDelete + ERROR_COLOR + " in our records of Guards.");
                                     break;
                                 case "setspawn":
                                     if (args.length == 2) {
@@ -201,11 +210,11 @@ public class GuardCommand implements CommandExecutor {
                                         int x = iteratingGuard.getCurrentLocation().getBlockX();
                                         int y = iteratingGuard.getCurrentLocation().getBlockY();
                                         int z = iteratingGuard.getCurrentLocation().getBlockZ();
-                                        BaseComponent[] tc = new ComponentBuilder(GUARD_COLOR + "" + iteratingGuard.getName() + STANDARD_COLOR + " is positioned at x:" +STANDARD_COLOR +  x + ", y:" + y + ", z:" + z + ".")
+                                        BaseComponent[] tc = new ComponentBuilder(GUARD_COLOR + "" + iteratingGuard.getName() + STANDARD_COLOR + " is positioned at x:" + STANDARD_COLOR + x + ", y:" + y + ", z:" + z + ".")
                                                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + GUARD_COLOR + iteratingGuard.getName() + STANDARD_COLOR + ".").create()))
                                                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
 
-                                       playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);
+                                        playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "-----------------");
                                     break;

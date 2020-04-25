@@ -55,6 +55,10 @@ public class ShardBanker extends ShardLocationNPC {
         ShardBanker shardBanker = null;
         double nearestDistance = Double.MAX_VALUE;
         for (ShardBanker banker : getActiveShardBankers()) {
+
+            if(!banker.getCurrentLocation().getWorld().equals(location.getWorld()))
+                continue;
+
             double distance = banker.getSpawnLocation().distance(location);
             if(distance < nearestDistance)
             {

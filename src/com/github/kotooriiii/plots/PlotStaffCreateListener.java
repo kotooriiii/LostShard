@@ -159,11 +159,11 @@ public class PlotStaffCreateListener implements Listener {
 
                     if (name.equalsIgnoreCase("arena"))
                     {
-                        Plot plot = new ArenaPlot(zoneFinish, name); //auto does it
+                        Plot plot = new ArenaPlot(player.getWorld(), zoneFinish, name); //auto does it
 
                     }
                     else {
-                        Plot plot = new Plot(zoneFinish, name); //auto does it
+                        Plot plot = new Plot(player.getWorld(), zoneFinish, name); //auto does it
                     }
 
                     player.getInventory().clear();

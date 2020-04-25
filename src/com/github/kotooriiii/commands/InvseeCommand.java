@@ -42,16 +42,11 @@ public class InvseeCommand implements CommandExecutor {
         String name = args[0];
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
-        if (!offlinePlayer.hasPlayedBefore()) {
-            playerSender.sendMessage(ERROR_COLOR + "The player you are looking for does not exist.");
-            return false;
-        }
-
-
         if (!offlinePlayer.isOnline()) {
-            playerSender.sendMessage(ERROR_COLOR + "The player is not online.");
+            playerSender.sendMessage(ERROR_COLOR + "The player you are looking for is not online.");
             return false;
         }
+
 
         Player victimPlayer = offlinePlayer.getPlayer();
         PlayerInventory inventory = victimPlayer.getInventory();

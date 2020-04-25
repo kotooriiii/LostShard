@@ -163,6 +163,7 @@ public class CastCommand implements CommandExecutor {
                                 //Check if name is already taken
                                 if (!MarkPlayer.hasMarks(playerUUID)) {
                                     playerSender.sendMessage(ERROR_COLOR + "You do not have any marks.");
+                                    recallCommand.remove(playerUUID);
                                     return false;
                                 }
 
@@ -170,6 +171,7 @@ public class CastCommand implements CommandExecutor {
 
                                 if (!markPlayer.hasMark(name)) {
                                     playerSender.sendMessage(ERROR_COLOR + "You do not have a mark by this name.");
+                                    recallCommand.remove(playerUUID);
                                     return true;
                                 }
 
@@ -177,6 +179,7 @@ public class CastCommand implements CommandExecutor {
 
                                 if (!hasIngredients(playerSender, ingredients)) {
                                     //   playerSender.sendMessage(ERROR_COLOR + "You don't have the ingredients to cast \"Recall\".");
+                                    recallCommand.remove(playerUUID);
                                     return true;
                                 }
 
@@ -184,6 +187,7 @@ public class CastCommand implements CommandExecutor {
                                 Stat stat = Stat.wrap(playerUUID);
                                 if (stat.getMana() < 15) {
                                     playerSender.sendMessage(ERROR_COLOR + "You do not have enough mana to cast \"" + "Recall" + "\".");
+                                    recallCommand.remove(playerUUID);
                                     return false;
                                 }
 
@@ -193,6 +197,7 @@ public class CastCommand implements CommandExecutor {
                                     if (timeInt.intValue() == 1)
                                         time = "second";
                                     playerSender.sendMessage(ERROR_COLOR + "You must wait " + timeInt.intValue() + " " + time + " before you can cast another spell.");
+                                    recallCommand.remove(playerUUID);
                                     return false;
                                 }
 

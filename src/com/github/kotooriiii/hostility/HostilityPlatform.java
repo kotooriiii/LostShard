@@ -5,6 +5,7 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,12 +21,14 @@ public class HostilityPlatform implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String name;
+    private String worldName;
 
     private ArrayList<Zone> zones;
 
     private int[] time;
 
-    public HostilityPlatform(String name) {
+    public HostilityPlatform(World world, String name) {
+        this.worldName = world.getName();
         this.name = name;
         this.zones = new ArrayList<>();
         this.time = new int[3];
@@ -44,6 +47,10 @@ public class HostilityPlatform implements Serializable {
         ArrayList<Player> playersInRegion = new ArrayList<Player>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+
+            if(!player.getLocation().getWorld().equals(Bukkit.getWorld(worldName)))
+                continue;
+
             if (player.isOnline() && this.contains(player)) {
                 playersInRegion.add(player);
             }
@@ -115,6 +122,11 @@ public class HostilityPlatform implements Serializable {
     }
 
     public boolean contains(Block block) {
+
+        if(!Bukkit.getWorld(worldName).equals(block.getWorld()))
+            return false;
+
+
         for (Zone zone : getZones()) {
             if (zone.contains(block)) {
                 return true;
@@ -124,6 +136,9 @@ public class HostilityPlatform implements Serializable {
     }
 
     public boolean hasAdjacency(Location location) {
+        if(!Bukkit.getWorld(worldName).equals(location.getWorld()))
+            return false;
+
         for (Zone zone : getZones()) {
             if (zone.hasAdjacency(location)) {
                 return true;

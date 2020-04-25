@@ -15,7 +15,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,7 +55,7 @@ public class BuyCommand implements CommandExecutor {
                 }
 
                 //Check second argument
-                ItemStack ingredient = SellCommand.getItem(playerSender, args[1].substring(0,1).toUpperCase() + args[1].substring(1).toLowerCase());
+                ItemStack ingredient = SellCommand.getItem(playerSender, args[1].substring(0, 1).toUpperCase() + args[1].substring(1).toLowerCase());
                 if (ingredient == null)
                     return false;
 
@@ -98,16 +97,16 @@ public class BuyCommand implements CommandExecutor {
                 }
 
                 String name = ingredient.getType().name().replace("_", " ").toLowerCase() + " ";
-                name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
-                if(ingredient.getItemMeta() instanceof PotionMeta) {
+                name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+                if (ingredient.getItemMeta() instanceof PotionMeta) {
                     name = ((PotionMeta) ingredient.getItemMeta()).getBasePotionData().getType().name();
-                    name = name.substring(0,1).toUpperCase() + name.substring(1).toUpperCase() + " ";
-                    if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
+                    name = name.substring(0, 1).toUpperCase() + name.substring(1).toUpperCase() + " ";
+                    if (((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
                         name += "extended ";
-                    else if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
+                    else if (((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
                         name += "2 Potion ";
                     else
-                        name+= "Potion ";
+                        name += "Potion ";
                 }
 
                 //The material we are searching for is out of stock.
@@ -166,7 +165,7 @@ public class BuyCommand implements CommandExecutor {
 
                         if (i != sale.getAmount() - 1) {
                             tempTotalAmountCounter = tempTotalAmountCounter + 1; //Incrementor
-                            tempTotalPriceCounter =  tempTotalPriceCounter + sale.getPrice(); //new BigDecimal(tempTotalPriceCounter + sale.getPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue(); //Incrementor
+                            tempTotalPriceCounter = tempTotalPriceCounter + sale.getPrice(); //new BigDecimal(tempTotalPriceCounter + sale.getPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue(); //Incrementor
                         }
                     }
 
@@ -189,7 +188,7 @@ public class BuyCommand implements CommandExecutor {
 
                 //Not enough items but its okay.
                 if (amount > amountCounter) {
-                 //   playerSender.sendMessage(ChatColor.RED + "You didn't receive the amount you requested for. However, enjoy a portion of what you were able to purchase.");
+                    //   playerSender.sendMessage(ChatColor.RED + "You didn't receive the amount you requested for. However, enjoy a portion of what you were able to purchase.");
                     playerSender.sendMessage(ChatColor.RED + "Only " + amountCounter + " " + name +
                             "remains in the economy.");
                     return false;
@@ -228,23 +227,22 @@ public class BuyCommand implements CommandExecutor {
                     Bank seller = Bank.wrap(sale.getSellerUUID());
 
                     double addedCurrencyRaw = ((sale.getAmount() - leftoverAmount) * sale.getPrice());
-                    BigDecimal addedCurrency = new BigDecimal(addedCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal addedCurrency = new BigDecimal(addedCurrencyRaw).setScale(2, RoundingMode.HALF_UP);
                     double newCurrencyRaw = seller.getCurrency() + addedCurrencyRaw;
-                    BigDecimal newCurrency = new BigDecimal(newCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal newCurrency = new BigDecimal(newCurrencyRaw).setScale(2, RoundingMode.HALF_UP);
 
                     seller.setCurrency(newCurrencyRaw);
 
                     OfflinePlayer sellerPlayer = Bukkit.getOfflinePlayer(seller.getPlayerUUID());
                     if (sellerPlayer.isOnline())
-                        sellerPlayer.getPlayer().sendMessage(ChatColor.GOLD + "A player has bought " + (sale.getAmount() - leftoverAmount) + " " + name + "from you for " +  addedCurrencyRaw + " gold. Your new balance is " + seller.getCurrency() + ".");
+                        sellerPlayer.getPlayer().sendMessage(ChatColor.GOLD + "A player has bought " + (sale.getAmount() - leftoverAmount) + " " + name + "from you for " + addedCurrencyRaw + " gold. Your new balance is " + seller.getCurrency() + ".");
                     sale.setAmount(leftoverAmount);
                 }
 
-//Update
-
+                //Update
                 double removedCurrencyRaw = buyerBank.getCurrency() - priceCounter;
-                BigDecimal removedCurrency = new BigDecimal(removedCurrencyRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
-                BigDecimal price = new BigDecimal(priceCounter).setScale(2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal removedCurrency = new BigDecimal(removedCurrencyRaw).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal price = new BigDecimal(priceCounter).setScale(2, RoundingMode.HALF_UP);
 
                 buyerBank.setCurrency(removedCurrencyRaw); //Takes money away!!!!
                 playerSender.sendMessage(ChatColor.GRAY + "You have bought " + amountCounter + " " + name + "for " + priceCounter + ". Your new balance is " + buyerBank.getCurrency() + ".");

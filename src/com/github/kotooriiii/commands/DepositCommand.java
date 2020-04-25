@@ -3,7 +3,6 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.npc.ShardBanker;
-import net.milkbowl.vault.chat.Chat;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

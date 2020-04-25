@@ -3,17 +3,24 @@ package com.github.kotooriiii.plots;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.List;
 import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
+import static com.github.kotooriiii.data.Maps.*;
 
 public class BlockChangePlotListener implements Listener {
     @EventHandler
@@ -35,11 +42,11 @@ public class BlockChangePlotListener implements Listener {
                 final Player playerInteracting = (Player) en;
                 final UUID playerUUID = playerInteracting.getUniqueId();
 
-                if(playerInteracting.hasPermission(STAFF_PERMISSION))
+                if (playerInteracting.hasPermission(STAFF_PERMISSION))
                     return;
 
                 //Staff no permission
-                if(plot.isStaff()){
+                if (plot.isStaff()) {
 
                     playerInteracting.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
 
@@ -69,7 +76,7 @@ public class BlockChangePlotListener implements Listener {
         //If entity is not a player then cancel it
         final UUID playerUUID = playerBlockBreak.getUniqueId();
 
-        if(playerBlockBreak.hasPermission(STAFF_PERMISSION))
+        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -78,7 +85,7 @@ public class BlockChangePlotListener implements Listener {
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if(plot.isStaff()){
+                if (plot.isStaff()) {
 
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
 
@@ -99,15 +106,16 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlaceChangePlot(BlockPlaceEvent blockPlaceEvent) {
-        final Block block = blockPlaceEvent.getBlock();
-        final Location location = block.getLocation();
+    public void onBucketfill(PlayerBucketEmptyEvent event)
+    {
+        final Location location = event.getPlayer().getLocation();
         //Check entity
-        final Player playerBlockBreak = blockPlaceEvent.getPlayer();
+        final Entity entity = event.getPlayer();
         //If entity is not a player then cancel it
-        final UUID playerUUID = playerBlockBreak.getUniqueId();
+        Player player = (Player) entity;
+        final UUID playerUUID = player.getUniqueId();
 
-        if(playerBlockBreak.hasPermission(STAFF_PERMISSION))
+        if(player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -116,7 +124,286 @@ public class BlockChangePlotListener implements Listener {
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if(plot.isStaff()){
+                if (plot.isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot drain buckets here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                //If don't have permissions
+                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot drain buckets here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBucketfill(PlayerBucketFillEvent event)
+    {
+        final Location location = event.getPlayer().getLocation();
+        //Check entity
+        final Entity entity = event.getPlayer();
+        //If entity is not a player then cancel it
+        Player player = (Player) entity;
+        final UUID playerUUID = player.getUniqueId();
+
+        if(player.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : Plot.getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot fill buckets here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                //If don't have permissions
+                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot fill buckets here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemFrameItemStack(EntityDamageByEntityEvent event)
+    {
+
+        final Location location = event.getEntity().getLocation();
+        //If entity is not a player then cancel it
+
+
+        if(!(event.getEntity()  instanceof ItemFrame))
+            return;
+
+        if(!(event.getDamager() instanceof Player))
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+
+
+        final  Player player = (Player) event.getDamager();
+        final UUID playerUUID = player.getUniqueId();
+
+
+
+
+        if(player.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : Plot.getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                //If don't have permissions
+                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemFrameItemStack(PlayerInteractEntityEvent event)
+    {
+        final Location location = event.getRightClicked().getLocation();
+        //If entity is not a player then cancel it
+
+        final  Player player = event.getPlayer();
+        final UUID playerUUID = player.getUniqueId();
+
+        if(!(event.getRightClicked() instanceof ItemFrame))
+            return;
+
+
+        if(player.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : Plot.getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                //If don't have permissions
+                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemBreakEvent(HangingBreakByEntityEvent event)
+    {
+        final Location location = event.getEntity().getLocation();
+        //Check entity
+        final Entity entity = event.getRemover();
+        //If entity is not a player then cancel it
+
+        if(!(entity instanceof Player))
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        Player player = (Player) entity;
+        final UUID playerUUID = player.getUniqueId();
+
+        if(player.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : Plot.getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                //If don't have permissions
+                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onSpawn(EntitySpawnEvent entitySpawnEvent)
+    {
+        if(entitySpawnEvent.getEntity() instanceof Player)
+            return;
+
+        Location spawnedLocation = entitySpawnEvent.getLocation();
+        Plot plot = Plot.getStandingOnPlot(spawnedLocation);
+        if(plot == null)
+            return;
+
+        if(!plot.isStaff())
+            return;
+
+        if(!isHostile(entitySpawnEvent.getEntity()))
+            return;
+
+        entitySpawnEvent.setCancelled(true);
+
+    }
+
+    @EventHandler
+    public void onExplosion(BlockExplodeEvent event) {
+        List<Block> blocksExploding = event.blockList();
+        for(Block block : blocksExploding)
+        {
+            Location loc = block.getLocation();
+            Plot plot = Plot.getStandingOnPlot(loc);
+            if(plot == null)
+                continue;
+
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        List<Block> blocksExploding = event.blockList();
+        for(Block block : blocksExploding)
+        {
+            Location loc = block.getLocation();
+            Plot plot = Plot.getStandingOnPlot(loc);
+            if(plot == null)
+                continue;
+
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onBlockPlaceChangePlot(BlockPlaceEvent blockPlaceEvent) {
+        final Block block = blockPlaceEvent.getBlock();
+        final Location location = block.getLocation();
+        //Check entity
+        final Player playerBlockBreak = blockPlaceEvent.getPlayer();
+        //If entity is not a player then cancel it
+        final UUID playerUUID = playerBlockBreak.getUniqueId();
+
+        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : Plot.getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.isStaff()) {
 
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
 
@@ -133,6 +420,127 @@ public class BlockChangePlotListener implements Listener {
 
                 break;
             }
+        }
+    }
+
+    private boolean isHostile(Entity entity) {
+
+        switch (entity.getType()) {
+
+            case DROPPED_ITEM:
+            case EXPERIENCE_ORB:
+            case AREA_EFFECT_CLOUD:
+            case EGG:
+            case LEASH_HITCH:
+            case PAINTING:
+            case ARROW:
+            case SNOWBALL:
+            case FIREBALL:
+            case SMALL_FIREBALL:
+            case ENDER_PEARL:
+            case ENDER_SIGNAL:
+            case SPLASH_POTION:
+            case THROWN_EXP_BOTTLE:
+            case ITEM_FRAME:
+            case WITHER_SKULL:
+            case PRIMED_TNT:
+            case FALLING_BLOCK:
+            case FIREWORK:
+            case SPECTRAL_ARROW:
+            case SHULKER_BULLET:
+            case DRAGON_FIREBALL:
+            case ARMOR_STAND:
+            case UNKNOWN:
+            case MINECART_COMMAND:
+            case MINECART:
+            case MINECART_CHEST:
+            case MINECART_FURNACE:
+            case MINECART_TNT:
+            case MINECART_HOPPER:
+            case MINECART_MOB_SPAWNER:
+            case EVOKER_FANGS:
+            case BOAT:
+            case FISHING_HOOK:
+            case TRIDENT:
+            case ENDER_CRYSTAL:
+            case LLAMA_SPIT:
+            case LIGHTNING:
+            case PLAYER:
+            default:
+                return false;
+
+
+            //todo might do something custom with values down here v
+            case ILLUSIONER:
+            case GIANT:
+            case ENDER_DRAGON:
+            case WITHER:
+                return true;
+
+
+            case ELDER_GUARDIAN:
+            case WITHER_SKELETON:
+            case STRAY:
+            case HUSK:
+            case ZOMBIE_VILLAGER:
+            case SKELETON_HORSE:
+            case ZOMBIE_HORSE:
+            case EVOKER:
+            case VEX:
+            case VINDICATOR:
+            case CREEPER:
+            case SKELETON:
+            case SPIDER:
+            case ZOMBIE:
+            case SLIME:
+            case GHAST:
+            case PIG_ZOMBIE:
+            case ENDERMAN:
+            case CAVE_SPIDER:
+            case SILVERFISH:
+            case BLAZE:
+            case MAGMA_CUBE:
+            case PHANTOM:
+            case WITCH:
+            case ENDERMITE:
+            case GUARDIAN:
+            case SHULKER:
+            case DROWNED:
+            case PILLAGER:
+            case RAVAGER:
+                return true;
+            case IRON_GOLEM:
+            case SNOWMAN:
+            case DONKEY:
+            case MULE:
+            case MUSHROOM_COW:
+            case PIG:
+            case SHEEP:
+            case COW:
+            case CHICKEN:
+            case SQUID:
+            case WOLF:
+            case OCELOT:
+            case BAT:
+            case HORSE:
+            case RABBIT:
+            case POLAR_BEAR:
+            case LLAMA:
+            case PARROT:
+            case VILLAGER:
+            case TURTLE:
+            case COD:
+            case SALMON:
+            case PUFFERFISH:
+            case TROPICAL_FISH:
+            case DOLPHIN:
+            case CAT:
+            case PANDA:
+            case TRADER_LLAMA:
+            case WANDERING_TRADER:
+            case FOX:
+            case BEE:
+                return false;
         }
     }
 }

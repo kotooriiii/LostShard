@@ -6,7 +6,8 @@
 
     <groupId>com.github.kotooriiii</groupId>
     <artifactId>LostShardK</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.15.2</version>
+
 
     <build>
         <plugins>
@@ -18,6 +19,59 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.discord4j:*</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.discord4j</pattern>
+                                    <shadedPattern>com.discord4j</shadedPattern>
+                                </relocation>
+
+                            </relocations>
+                            <dependencyReducedPomLocation>target/reduced-pom.xml</dependencyReducedPomLocation>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/target</outputDirectory>
+                    <flattenMode>clean</flattenMode>
+                    <pomElements>
+                        <name/>
+                    </pomElements>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
     <packaging>jar</packaging>
@@ -39,11 +93,20 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>craftbukkit</groupId>
+            <artifactId>craftbukkit-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/craftbukkit-1.15.2.jar</systemPath>
+        </dependency>
+
         <!--Discord API -->
             <dependency>
                 <groupId>com.discord4j</groupId>
                 <artifactId>discord4j-core</artifactId>
                 <version>3.1.0.M1</version>
+                <scope>provided</scope>
             </dependency>
 
     </dependencies>

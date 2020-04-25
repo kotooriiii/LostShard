@@ -5,7 +5,6 @@ import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.plots.Plot;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
-import net.milkbowl.vault.chat.Chat;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

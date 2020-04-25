@@ -72,7 +72,7 @@ public class SkillCommand implements CommandExecutor {
                         String levelString = args[3];
 
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerNameString);
-                        if(!offlinePlayer.hasPlayedBefore())
+                        if(!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline())
                         {
                             playerSender.sendMessage(ERROR_COLOR+ "The player you have listed does not have a Skills account (does the player exist?).");
                             return false;

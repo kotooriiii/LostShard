@@ -63,16 +63,21 @@ public class MoneymatchCommand implements CommandExecutor {
         String fighterA = args[0];
         String fighterB = args[1];
 
-
         OfflinePlayer offlineFighterA = Bukkit.getOfflinePlayer(fighterA);
         OfflinePlayer offlinePlayerFighterB = Bukkit.getOfflinePlayer(fighterB);
 
-        if (!offlineFighterA.hasPlayedBefore()) {
+        if(offlineFighterA.equals(offlinePlayerFighterB))
+        {
+            playerSender.sendMessage(ERROR_COLOR + "Can't duel your clones.");
+            return false;
+        }
+
+        if (!offlineFighterA.hasPlayedBefore() && !offlineFighterA.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player, " + PLAYER_COLOR + fighterA + ERROR_COLOR + ", you are looking for does not exist.");
             return false;
         }
 
-        if (!offlinePlayerFighterB.hasPlayedBefore()) {
+        if (!offlinePlayerFighterB.hasPlayedBefore() && !offlinePlayerFighterB.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player, " + PLAYER_COLOR + fighterB + ERROR_COLOR + ", you are looking for does not exist.");
             return false;
         }

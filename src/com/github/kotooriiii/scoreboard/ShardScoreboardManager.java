@@ -166,6 +166,7 @@ public class ShardScoreboardManager {
         map.put(playerName,teamName);
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+
             Scoreboard scoreboard = onlinePlayer.getScoreboard();
             scoreboard.getTeam(teamName).addEntry(playerName);
 

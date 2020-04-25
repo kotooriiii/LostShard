@@ -6,7 +6,6 @@ import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.chat.*;
-import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -100,7 +99,7 @@ public class HostilityCommand implements CommandExecutor {
 
                                         playerSender.sendMessage(STANDARD_COLOR + "Enter the time (EST) in which the match will begin for " + name + ".\nFormat: Day HourOf24:Minute" + "\nExample 1: Tue 23:25 for every Tuesday at 11:25pm.\nExample 2: Sun 0:20 for every Sunday at 12:20am.");
                                         hostilityCreatorConfirmation.remove(playerUUID);
-                                        HostilityPlatform platform = new HostilityPlatform(name);
+                                        HostilityPlatform platform = new HostilityPlatform(playerSender.getWorld(), name);
                                         hostilityTimeCreator.put(playerUUID, platform);
 
 

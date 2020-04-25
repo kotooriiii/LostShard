@@ -44,7 +44,7 @@ public class ClanCommand implements CommandExecutor {
                     //Send the help page and return.
                     Clan clan = Clan.getClan(playerUUID);
                     if (clan == null)
-                      playerSender.sendMessage(ERROR_COLOR + "You must be in a clan to enter clan chat.");
+                        playerSender.sendMessage(ERROR_COLOR + "You must be in a clan to enter clan chat.");
                     else {
                         channelManager.joinChannel(playerSender, ChannelStatus.CLAN);
                         playerSender.sendMessage(STANDARD_COLOR + "You have switched to clan chat.");
@@ -274,9 +274,11 @@ public class ClanCommand implements CommandExecutor {
         }
         return false;
     }//end of commands
+
     private void sendStaffUnknownCommand(Player playerSender) {
         playerSender.sendMessage(ERROR_COLOR + "The sub-command you provided does not exist in Clan's Staff. Use " + "/clan staff" + ERROR_COLOR + " for help.");
     }
+
     private void forceLeader(Player playerSender, String playerName, String clanName) {
         if (clanName == null) {
             playerSender.sendMessage(ERROR_COLOR + "The clan " + ERROR_COLOR + "\"" + clanName + "\"" + ERROR_COLOR + " was not able to be found.");
@@ -301,7 +303,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
-        if (!targetPlayer.hasPlayedBefore()) {
+        if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -310,7 +312,7 @@ public class ClanCommand implements CommandExecutor {
 
             case 0:
                 clan.broadcast(PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " has forcibly been assigned the new " + STANDARD_COLOR + ClanRank.LEADER + STANDARD_COLOR + " of the clan.");
-                playerSender.sendMessage(STANDARD_COLOR + "You have forcibly assigned a new leader to " + STANDARD_COLOR + "\"" +  clan.getName() + "\""  + STANDARD_COLOR + ".");
+                playerSender.sendMessage(STANDARD_COLOR + "You have forcibly assigned a new leader to " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + ".");
                 if (targetPlayer.isOnline())
                     ((Player) targetPlayer).sendMessage(STANDARD_COLOR + "You have been forcibly assigned " + STANDARD_COLOR + ClanRank.LEADER + STANDARD_COLOR + ".");
                 break;
@@ -367,7 +369,7 @@ public class ClanCommand implements CommandExecutor {
             return;
         }
 
-        BaseComponent[] tc = new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + STANDARD_COLOR + clan.getID().toString() + STANDARD_COLOR+ ". Hover and click to copy.")
+        BaseComponent[] tc = new ComponentBuilder(STANDARD_COLOR + "The clan " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + "'s UUID is " + STANDARD_COLOR + clan.getID().toString() + STANDARD_COLOR + ". Hover and click to copy.")
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "If you click on this message, the UUID of the clan will be on your text box.\nYou can copy this text and edit the clan files if you so need it to manipulate players and more.").create()))
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, clan.getID().toString()))
                 .create();
@@ -384,7 +386,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
-        if (!targetPlayer.hasPlayedBefore()) {
+        if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -405,7 +407,7 @@ public class ClanCommand implements CommandExecutor {
     private void clanWho(final Player playerSender, String targetPlayerName) {
         OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 
-        if (!targetPlayer.hasPlayedBefore()) {
+        if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
 
@@ -464,7 +466,7 @@ public class ClanCommand implements CommandExecutor {
         Check if the clan exists or we get a nullptr exception
         Check if the player even exists.
          */
-        if (!targetPlayer.hasPlayedBefore()) {
+        if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -525,7 +527,7 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!targetPlayer.hasPlayedBefore()) {
+        } else if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -588,7 +590,8 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!targetPlayer.hasPlayedBefore()) {
+        } else if (!targetPlayer.hasPlayedBefore() && !targetPlayer.isOnline()) {
+
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         } else if (!targetPlayer.isOnline()) {
@@ -814,7 +817,7 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!newLeaderPlayer.hasPlayedBefore()) {
+        } else if (!newLeaderPlayer.hasPlayedBefore() && !newLeaderPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -886,7 +889,8 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!playerDemoted.hasPlayedBefore()) {
+        } else if (!playerDemoted.hasPlayedBefore() && !playerDemoted.isOnline()) {
+
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -941,7 +945,7 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!playerDemoted.hasPlayedBefore()) {
+        } else if (!playerDemoted.hasPlayedBefore() && !playerDemoted.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -1008,7 +1012,8 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!playerPromoted.hasPlayedBefore()) {
+        } else if (!playerPromoted.hasPlayedBefore() && !playerPromoted.isOnline()) {
+
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -1055,7 +1060,7 @@ public class ClanCommand implements CommandExecutor {
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
-        } else if (!playerPromoted.hasPlayedBefore()) {
+        } else if (!playerPromoted.hasPlayedBefore() && !playerPromoted.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "The player with that name was not able to be found.");
             return;
         }
@@ -1116,7 +1121,7 @@ public class ClanCommand implements CommandExecutor {
         }
         switch (potentialClan.setName(playerUUID, clanName)) {
             case 0:
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-20);
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 20);
                 potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to \"" + clanName + "\".");
                 break;
@@ -1160,7 +1165,7 @@ public class ClanCommand implements CommandExecutor {
 
         switch (potentialClan.setTag(playerUUID, tag)) {
             case 0:
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-5);
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 5);
                 potentialClan.saveFile();
                 potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
                 break;
@@ -1195,7 +1200,7 @@ public class ClanCommand implements CommandExecutor {
         switch (clan.create(playerUUID, clanName)) {
             case 0:
 
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency()-100);
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 100);
                 clanTagCreators.put(playerUUID, clan);
                 playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created.");
                 playerSender.sendMessage(STANDARD_COLOR + "What would you like your clan tag to be? It must be 3 characters long.");
@@ -1216,7 +1221,7 @@ public class ClanCommand implements CommandExecutor {
                 break;
             case 79:
                 DecimalFormat df = new DecimalFormat("#.##");
-                playerSender.sendMessage(ERROR_COLOR + "You need 100 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) +ERROR_COLOR + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You need 100 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
                 break;
             case 21:
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that name.");

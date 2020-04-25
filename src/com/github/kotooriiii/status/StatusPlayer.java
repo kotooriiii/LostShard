@@ -69,7 +69,7 @@ public class StatusPlayer {
         return playerStatus.get(playerUUID);
     }
 
-    public boolean hasNearbyEnemy(final int range) {
+    public boolean hasNearbyEnemyRange(final int range) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         if (!offlinePlayer.isOnline())
             return false;

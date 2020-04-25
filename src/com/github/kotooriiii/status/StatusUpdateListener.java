@@ -1,6 +1,7 @@
 package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.Plot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
@@ -124,11 +125,13 @@ public class StatusUpdateListener implements Listener {
             rankPlayer.save();
         }
 
+        ShardScoreboardManager.registerScoreboard(event.getPlayer());
+
         if (StatusPlayer.getPlayerStatus().get(uuid) == null) {
             StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.WORTHY, 0);
             statusPlayer.save();
+            event.getPlayer().teleport(Plot.getPlot(Status.WORTHY.getOrganization()).getCenter());
         }
-        ShardScoreboardManager.registerScoreboard(event.getPlayer());
 
     }
 

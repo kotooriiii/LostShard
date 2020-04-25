@@ -45,6 +45,8 @@ public class Staff {
 
     public static void remove(Staff staff)
     {
+
+
       staffMap.remove(staff.playerUUID);
     }
 

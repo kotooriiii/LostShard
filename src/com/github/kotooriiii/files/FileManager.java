@@ -2,7 +2,6 @@ package com.github.kotooriiii.files;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.bank.DonorTitle;
 import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.clans.Clan;
@@ -464,25 +463,20 @@ public final class FileManager {
         String bankerName = bankFile.getName().substring(0, bankFile.getName().indexOf('.'));
 
         Inventory inventory = null;
-        ArrayList<ItemStack> itemStackArrayList = new ArrayList<>();
-        for (int i = 0; i != -1; i++) {
-            ItemStack itemStack = yaml.getItemStack("" + i);
-            if (itemStack == null)
-                break;
-            itemStackArrayList.add(itemStack);
-        }
-
-        ItemStack[] itemStacks = itemStackArrayList.toArray(new ItemStack[itemStackArrayList.size()]);
 
         UUID uuid = UUID.fromString(bankerName);
         RankPlayer rankPlayer = RankPlayer.wrap(uuid);
-
         inventory = Bukkit.createInventory(Bukkit.getPlayer(uuid), rankPlayer.getRankType().getBankInventorySize(), Bank.NAME);
-        for (int i = 0; i < itemStacks.length; i++) {
-            if (itemStacks[i] != null)
-                inventory.addItem(itemStacks[i]);
 
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack itemStack = yaml.getItemStack("chest." + i);
+            if(itemStack == null)
+                continue;
+            if (itemStack.getType().equals(Material.AIR))
+                continue;
+            inventory.setItem(i, itemStack);
         }
+
 
         String currencyString = yaml.getString("Currency");
         double currencyNum = 0.0F;
@@ -787,8 +781,13 @@ public final class FileManager {
             e.printStackTrace();
         }
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankFile);
+
         for (int i = 0; i < bank.getInventory().getSize(); i++) {
-            yaml.set("" + i, bank.getInventory().getItem(i));
+            ItemStack item = bank.getInventory().getItem(i);
+            if(item == null)
+                yaml.set("chest." + i, new ItemStack(Material.AIR, 1));
+                else
+            yaml.set("chest." + i, bank.getInventory().getItem(i));
         }
         yaml.set("Currency", bank.getCurrency());
         try {

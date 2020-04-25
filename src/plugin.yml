@@ -141,9 +141,16 @@ commands:
   ban:
   unban:
   invsee:
-
+  murdercount:
+  donate:
+  reply:
+    description:
+    usage:
+    aliases:
+      - r
   #Discord
   opt:
+
 
 
 

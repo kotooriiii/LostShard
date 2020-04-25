@@ -143,7 +143,7 @@ public class Clan {
      * @return the clan of that player, null if not in a clan
      */
     public static Clan getClan(UUID uuid) {
-        if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
+        if (uuid == null)
             return null;
 
         return playerUUIDClanMap.get(uuid);
@@ -295,7 +295,7 @@ public class Clan {
         ArrayList<Player> players = new ArrayList<>(offlinePlayers.length);
         for(OfflinePlayer offlinePlayer : offlinePlayers)
         {
-            if(offlinePlayer.isOnline() && offlinePlayer.hasPlayedBefore())
+            if(offlinePlayer.isOnline())
             {
                 players.add(offlinePlayer.getPlayer());
             }
@@ -332,7 +332,7 @@ public class Clan {
      * @return true if the player is in the clan, false if not in the clan
      */
     public boolean isInThisClan(UUID playerUUID) {
-        if (playerUUID == null || !Bukkit.getOfflinePlayer(playerUUID).hasPlayedBefore())
+        if (playerUUID == null)
             return false;
         for (UUID clanUUID : this.getAllUUIDS()) {
             if (clanUUID.equals(playerUUID)) {
@@ -365,7 +365,7 @@ public class Clan {
      * @return the ClanRank associated with that player. null, if clan does not have the player in the clan.
      */
     public ClanRank getClanRank(UUID uuid) {
-        if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
+        if (uuid == null)
             return null;
 
         for (ClanRank clanRank : ClanRank.values()) {
@@ -486,7 +486,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int setName(UUID playerSenderUUID, String clanName) {
-        if (playerSenderUUID == null || !Bukkit.getOfflinePlayer(playerSenderUUID).hasPlayedBefore() || clanName == null || clanName.isEmpty())
+        if (playerSenderUUID == null || clanName == null || clanName.isEmpty())
             return 30;
         if (!this.isInThisClan(playerSenderUUID))
             return 1;
@@ -529,7 +529,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int setTag(UUID senderPlayerUUID, String tag) {
-        if (senderPlayerUUID == null || !Bukkit.getOfflinePlayer(senderPlayerUUID).hasPlayedBefore() || tag == null || tag.isEmpty())
+        if (senderPlayerUUID == null || tag == null || tag.isEmpty())
             return 30;
         if (!this.isInThisClan(senderPlayerUUID))
             return 1;
@@ -695,7 +695,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int forceLeader(UUID candidateLeader) {
-        if (candidateLeader == null || !Bukkit.getOfflinePlayer(candidateLeader).hasPlayedBefore())
+        if (candidateLeader == null)
             return 30;
 
         if (!isInThisClan(candidateLeader)) {
@@ -759,7 +759,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int forceKick(UUID kickedUUID) {
-        if (kickedUUID == null || !Bukkit.getOfflinePlayer(kickedUUID).hasPlayedBefore())
+        if (kickedUUID == null )
             return 30;
         if (!isInThisClan(kickedUUID))
             return 2;
@@ -824,7 +824,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int leader(UUID currLeader, UUID candidateLeader) {
-        if (currLeader == null || !Bukkit.getOfflinePlayer(currLeader).hasPlayedBefore() || candidateLeader == null || !Bukkit.getOfflinePlayer(candidateLeader).hasPlayedBefore())
+        if (currLeader == null || candidateLeader == null)
             return 30;
         if (!isInThisClan(candidateLeader) || !isInThisClan(currLeader)) {
             return 1;
@@ -904,7 +904,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int demote(UUID senderUUID, UUID demotedUUID, ClanRank demotedRank) {
-        if (senderUUID == null || !Bukkit.getOfflinePlayer(senderUUID).hasPlayedBefore() || demotedUUID == null || !Bukkit.getOfflinePlayer(demotedUUID).hasPlayedBefore() || demotedRank == null)
+        if (senderUUID == null || demotedUUID == null || demotedRank == null)
             return 30;
         if (!isInThisClan(demotedUUID) || !isInThisClan(senderUUID))
             return 1;
@@ -998,7 +998,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int demote(UUID senderUUID, UUID demotedUUID) {
-        if (senderUUID == null || !Bukkit.getOfflinePlayer(senderUUID).hasPlayedBefore() || demotedUUID == null || !Bukkit.getOfflinePlayer(demotedUUID).hasPlayedBefore())
+        if (senderUUID == null || demotedUUID == null)
             return 30;
         if (!isInThisClan(demotedUUID) || !isInThisClan(senderUUID)) {
             return 1;
@@ -1093,7 +1093,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int promote(UUID senderUUID, UUID promotedUUID, ClanRank promotedRank) {
-        if (senderUUID == null || !Bukkit.getOfflinePlayer(senderUUID).hasPlayedBefore() || promotedUUID == null || !Bukkit.getOfflinePlayer(promotedUUID).hasPlayedBefore() || promotedRank == null)
+        if (senderUUID == null|| promotedUUID == null || promotedRank == null)
             return 30;
         if (!isInThisClan(promotedUUID) || !isInThisClan(senderUUID)) {
             return 1;
@@ -1186,7 +1186,7 @@ saveFile();
      */
     public int promote(UUID senderUUID, UUID promotedUUID) {
 
-        if (senderUUID == null || !Bukkit.getOfflinePlayer(senderUUID).hasPlayedBefore() || promotedUUID == null || !Bukkit.getOfflinePlayer(promotedUUID).hasPlayedBefore())
+        if (senderUUID == null|| promotedUUID == null)
             return 30;
 
         if (!isInThisClan(promotedUUID) || !isInThisClan(senderUUID)) {
@@ -1274,7 +1274,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int create(UUID playerUUID, String clanName) {
-        if (playerUUID == null || !Bukkit.getOfflinePlayer(playerUUID).hasPlayedBefore())
+        if (playerUUID == null )
             return 30;
         Clan potentialClan = Clan.getClan(playerUUID);
 
@@ -1314,7 +1314,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int disband(UUID playerUUID) {
-        if (playerUUID == null || !Bukkit.getOfflinePlayer(playerUUID).hasPlayedBefore())
+        if (playerUUID == null )
             return 30;
         if (!this.leader.equals(playerUUID)) {
             return 4;
@@ -1345,7 +1345,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int leave(UUID leaverUUID) {
-        if (leaverUUID == null || !Bukkit.getOfflinePlayer(leaverUUID).hasPlayedBefore())
+        if (leaverUUID == null )
             return 30;
         if (!isInThisClan(leaverUUID))
             return 1;
@@ -1390,7 +1390,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int acceptInvitation(UUID inviteeUUID) {
-        if (inviteeUUID == null || !Bukkit.getOfflinePlayer(inviteeUUID).hasPlayedBefore())
+        if (inviteeUUID == null)
             return 30;
         if (!invitationConfirmation.containsKey(inviteeUUID) || !invitationConfirmation.get(inviteeUUID).contains(this))
             return 4;
@@ -1433,7 +1433,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int denyInvitation(UUID inviteeUUID) {
-        if (inviteeUUID == null || !Bukkit.getOfflinePlayer(inviteeUUID).hasPlayedBefore())
+        if (inviteeUUID == null)
             return 30;
 
         if (!invitationConfirmation.containsKey(inviteeUUID) || !invitationConfirmation.get(inviteeUUID).contains(this))
@@ -1460,7 +1460,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int invite(UUID inviterUUID, UUID inviteeUUID) {
-        if (inviterUUID == null || !Bukkit.getOfflinePlayer(inviterUUID).hasPlayedBefore() || inviteeUUID == null || !Bukkit.getOfflinePlayer(inviteeUUID).hasPlayedBefore())
+        if (inviterUUID == null  || inviteeUUID == null )
             return 30;
         if (!isInThisClan(inviterUUID))
             return 1;
@@ -1504,7 +1504,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int kick(UUID kickerUUID, UUID kickedUUID) {
-        if (kickerUUID == null || !Bukkit.getOfflinePlayer(kickerUUID).hasPlayedBefore() || kickedUUID == null || !Bukkit.getOfflinePlayer(kickedUUID).hasPlayedBefore())
+        if (kickerUUID == null || kickedUUID == null )
             return 30;
         if (!isInThisClan(kickerUUID))
             return 1;
@@ -1599,7 +1599,7 @@ saveFile();
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasRankManagingPermission(UUID uuid) {
-        if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
+        if (uuid == null )
             return false;
         if (!isInThisClan(uuid))
             return false;
@@ -1619,7 +1619,7 @@ saveFile();
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasEditingPermission(UUID uuid) {
-        if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
+        if (uuid == null )
             return false;
         if (!isInThisClan(uuid))
             return false;
@@ -1639,7 +1639,7 @@ saveFile();
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasModeratingPermission(UUID uuid) {
-        if (uuid == null || !Bukkit.getOfflinePlayer(uuid).hasPlayedBefore())
+        if (uuid == null )
             return false;
 
         if (!isInThisClan(uuid))

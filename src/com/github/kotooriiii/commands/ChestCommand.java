@@ -30,7 +30,7 @@ public class ChestCommand implements CommandExecutor {
                     final Location playerLocation = playerSender.getLocation();
                     ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
                     if (banker == null || !banker.isSocialDistance(playerLocation)) {
-                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby!!!");
+                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
                     }
 

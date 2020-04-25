@@ -51,7 +51,7 @@ public class TrackCommand implements CommandExecutor {
             if (type == null) {
 
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(mobName);
-                if ((!offlinePlayer.hasPlayedBefore() || !offlinePlayer.isOnline())) {
+                if (!offlinePlayer.isOnline()) {
                     playerSender.sendMessage(ERROR_COLOR + "The mob name or player name could not be found.");
                     return false;
                 } else {

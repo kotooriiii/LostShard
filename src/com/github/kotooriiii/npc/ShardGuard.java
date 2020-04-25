@@ -1,6 +1,9 @@
 package com.github.kotooriiii.npc;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.status.Staff;
+import com.github.kotooriiii.status.Status;
+import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -286,6 +289,9 @@ public class ShardGuard extends ShardLocationNPC {
 
     private void showBounds() {
 
+        if(true)
+            return;
+
         clearBounds();
 
         List<org.bukkit.block.Block> alertingBlocks = getAlertBlocks();
@@ -324,8 +330,11 @@ public class ShardGuard extends ShardLocationNPC {
                     if (entity instanceof Player) {
                         Player player = (Player) entity;
 
-//                        if (PlayerUtil.getInstance().getGroup(player).equalsIgnoreCase("worthy"))
-//                            continue;
+
+                        if(Staff.isStaff(player.getUniqueId()))
+                            continue;
+                        if(StatusPlayer.wrap(player.getUniqueId()).getStatus().equals(Status.WORTHY))
+                            continue;
 
                         Location loc = entity.getLocation();
 
@@ -381,6 +390,10 @@ public class ShardGuard extends ShardLocationNPC {
         for (ShardGuard guard : getActiveShardGuards()) {
             if (guard.isBusy() || guard.isCalled())
                 continue;
+
+            if(!guard.getCurrentLocation().getWorld().equals(location.getWorld()))
+                continue;
+
             double distance = guard.getSpawnLocation().distance(location);
             if (distance < nearestDistance) {
                 nearestDistance = distance;

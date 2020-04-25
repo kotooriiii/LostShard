@@ -33,6 +33,7 @@ public class HealCommand implements CommandExecutor {
 
         if(args.length == 0) {
             playerSender.setHealth(playerSender.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+            playerSender.setFoodLevel(20);
             Stat stat = Stat.wrap(playerSender.getUniqueId());
             stat.setStamina(stat.getMaxStamina());
             stat.setMana(stat.getMaxMana());
@@ -42,13 +43,7 @@ public class HealCommand implements CommandExecutor {
 
             String playerName = args[0];
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-            if(!offlinePlayer.hasPlayedBefore())
-            {
-                playerSender.sendMessage(ERROR_COLOR + "That player has never played on this server.");
-                return false;
-            }
-
-            if(!offlinePlayer.isOnline())
+            if( !offlinePlayer.isOnline())
             {
                 playerSender.sendMessage(ERROR_COLOR + "The player is not online");
                 return false;
@@ -57,6 +52,8 @@ public class HealCommand implements CommandExecutor {
             Player healedPlayer = offlinePlayer.getPlayer();
 
             healedPlayer.setHealth(healedPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+            healedPlayer.setFoodLevel(20);
+
             Stat stat = Stat.wrap(healedPlayer.getUniqueId());
             stat.setStamina(stat.getMaxStamina());
             stat.setMana(stat.getMaxMana());

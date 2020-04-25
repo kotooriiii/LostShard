@@ -40,9 +40,9 @@ public class AddTitleCommand implements CommandExecutor {
                 String possibleName = args[0];
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(possibleName);
 
-                if(!offlinePlayer.hasPlayedBefore())
+                if(!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline())
                 {
-                    playerSender.sendMessage(ERROR_COLOR + "The player you are searching for has never played on this server before");
+                    playerSender.sendMessage(ERROR_COLOR + "The player you are searching for has never played on this server before.");
                     return false;
                 }
 

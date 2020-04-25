@@ -221,16 +221,12 @@ public class LinkListener implements Listener, CommandExecutor {
 
         String playerName = args[0];
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        if (!offlinePlayer.hasPlayedBefore()) {
-            privateChannel.createMessage("The player you specified has never played on the server.");
+        if(!offlinePlayer.isOnline()) {
+            privateChannel.createMessage("The player you specified must be online on the server to continue linking.");
             sendHelpMessage(privateChannel);
             return;
         }
-        if (!offlinePlayer.isOnline()) {
-            privateChannel.createMessage("The player must be on the server to continue linking.");
-            sendHelpMessage(privateChannel);
-            return;
-        }
+
 
         Player targetPlayer = offlinePlayer.getPlayer();
 

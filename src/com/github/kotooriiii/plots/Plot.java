@@ -4,10 +4,7 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -63,13 +60,13 @@ public class Plot implements Serializable {
             world = location.getWorld().getName();
         }
 
-        public PointBlock(int x, int y, int z) {
+        public PointBlock(World world, int x, int y, int z) {
             this.x = x;
             this.y = y;
             this.z = z;
             this.pitch = 0;
             this.yaw = 0;
-            world = "world";
+           this.world = world.getName();
         }
 
         public PointBlock(int x, int y, int z, float pitch, float yaw) {
@@ -138,7 +135,7 @@ public class Plot implements Serializable {
         FileManager.write(this);
     }
 
-    public Plot(Zone zone, String name) {
+    public Plot(World world, Zone zone, String name) {
 
         boolean isUnique = false;
 
@@ -158,7 +155,7 @@ public class Plot implements Serializable {
         this.name = name;
         this.ownerUUID = null;
         isStaff = true;
-        this.center = new PointBlock(-1, -1, -1);
+        this.center = new PointBlock(world, -1, -1, -1);
         this.radius = -1;
         this.zone = zone;
         this.balance = -1;
@@ -204,11 +201,18 @@ public class Plot implements Serializable {
 
     //Is block in plot
     public boolean contains(Block block) {
+
+        if(!block.getWorld().equals(this.center.getLocation().getWorld()))
+            return false;
+
         return this.zone.contains(block);
     }
 
     //Is next to plot
     public boolean isNearby(Player player) {
+
+        if(!this.center.getLocation().getWorld().equals(player.getLocation().getWorld()))
+            return false;
 
         final int distance = MINIMUM_PLOT_CREATE_RANGE;
 
@@ -252,6 +256,9 @@ public class Plot implements Serializable {
 
         Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
         for (Plot plot : allPlots) {
+
+            if(!this.center.getLocation().getWorld().equals(plot.getCenter().getWorld()))
+               continue;
 
             if (plot.equals(this))
                 continue;

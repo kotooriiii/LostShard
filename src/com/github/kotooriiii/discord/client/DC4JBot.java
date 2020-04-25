@@ -7,6 +7,7 @@ import com.github.kotooriiii.discord.events.DiscordMessageCreateEvent;
 import com.github.kotooriiii.discord.listeners.LinkListener;
 import com.github.kotooriiii.util.HelperMethods;
 import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -25,7 +26,7 @@ public class DC4JBot {
 
     public DC4JBot()
     {
-        client = DiscordClient.create(token).login().block();
+        client = DiscordClientBuilder.create(token).build().login().block();
         registerEvents();
     }
 

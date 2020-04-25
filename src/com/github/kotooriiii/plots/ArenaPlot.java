@@ -4,6 +4,7 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.Serializable;
@@ -17,8 +18,8 @@ public class ArenaPlot extends Plot implements Serializable {
         super(player, name);
     }
 
-    public ArenaPlot(Zone zone, String name) {
-        super(zone, name);
+    public ArenaPlot(World world, Zone zone, String name) {
+        super(world, zone, name);
     }
 
     public Location getSpawnA() {

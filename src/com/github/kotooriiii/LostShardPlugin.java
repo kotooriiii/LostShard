@@ -3,8 +3,11 @@ package com.github.kotooriiii;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bannedplayer.BannedJoinListener;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
+import com.github.kotooriiii.combatlog.CombatLogListener;
+import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
 import com.github.kotooriiii.discord.listeners.LinkListener;
+import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
 import com.github.kotooriiii.match.MatchCheatingListener;
 import com.github.kotooriiii.match.MatchCreatorListener;
 import com.github.kotooriiii.match.MatchDefeatListener;
@@ -55,10 +58,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
@@ -84,13 +90,13 @@ public class LostShardPlugin extends JavaPlugin {
 
     private static ChannelManager channelManager;
     private static DC4JBot dc4JBot;
-    private static Scoreboard scoreboard;
-
+    private static CombatLogManager combatLogManager;
 
     @Override
     public void onEnable() {
 
         //Console logger, plugin, and description file are all ready for public use
+     //todo to use later -->
         registerDiscord();
         logger = Logger.getLogger("Minecraft");
         plugin = this;
@@ -109,6 +115,9 @@ public class LostShardPlugin extends JavaPlugin {
 
         //Init custom recipes
         CraftingRecipes.initRecipes();
+
+        //Init combat log
+        combatLogManager = new CombatLogManager();
 
         //Register custom enchantment
         registerGlow();
@@ -138,6 +147,24 @@ public class LostShardPlugin extends JavaPlugin {
 
         for (int i = 0; i < ShardBanker.getActiveShardBankers().size(); i++) {
             ShardBanker.getActiveShardBankers().get(i).forceDestroy();
+        }
+
+        for(Player player : Bukkit.getOnlinePlayers())
+        {
+         InventoryView inventoryView =  player.getOpenInventory();
+         if(inventoryView == null)
+             continue;
+         InventoryType inventoryType = inventoryView.getType();
+         if(inventoryType == null)
+             continue;
+         if(!inventoryType.equals(InventoryType.CHEST))
+             continue;
+         if(!inventoryView.getTitle().equalsIgnoreCase(Bank.NAME))
+             continue;
+            Bank bank = Bank.getBanks().get(player.getUniqueId());
+            bank.setInventory(player.getOpenInventory().getTopInventory());
+            FileManager.write(bank);
+            inventoryView.close();
         }
 
         Stat.getStatMap().clear();
@@ -232,7 +259,14 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("unban").setExecutor(new UnbanCommand());
 
         getCommand("invsee").setExecutor(new InvseeCommand());
+        getCommand("murdercount").setExecutor(new MurdercountCommand());
 
+        getCommand("donate").setExecutor(new DonateCommand());
+        getCommand("reply").setExecutor(new ReplyCommand());
+
+
+
+        //todo to use later -->
         getCommand("opt").setExecutor(new LinkListener());
 
 
@@ -299,6 +333,13 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new InventorySeeListener(), this);
         pm.registerEvents(new MatchCheatingListener(), this);
+        pm.registerEvents(new CombatLogListener(), this);
+
+        pm.registerEvents(new HelpCommandListener(), this);
+
+        registerCustomEventListener();
+
+        //todo to use later -->
         pm.registerEvents(new LinkListener(), this);
 
     }
@@ -381,6 +422,26 @@ public class LostShardPlugin extends JavaPlugin {
 
             ShardScoreboardManager.add(player, staff.getType().getName());
         }
+    }
+
+    public void registerCustomEventListener()
+    {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for(Player player : Bukkit.getOnlinePlayers())
+                {
+                    if(player.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE))
+                    {
+                        PlayerStrengthPotionEffectEvent playerStrengthPotionEffectEvent = new PlayerStrengthPotionEffectEvent(player);
+                        Bukkit.getPluginManager().callEvent(playerStrengthPotionEffectEvent);
+                        if(playerStrengthPotionEffectEvent.isCancelled())
+                            playerStrengthPotionEffectEvent.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+
+                    }
+                }
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public void newDayScheduler() {
@@ -486,6 +547,11 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public static CombatLogManager getCombatLogManager()
+    {
+        return combatLogManager;
     }
 
 }

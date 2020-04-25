@@ -94,7 +94,7 @@ public class PlotCommand implements CommandExecutor {
                             Plot plotFriend = Plot.wrap(playerUUID);
                             OfflinePlayer friendPlayer = Bukkit.getOfflinePlayer(supply);
                             UUID friendUUID = friendPlayer.getUniqueId();
-                            if (!friendPlayer.hasPlayedBefore()) {
+                            if (!friendPlayer.hasPlayedBefore() && !friendPlayer.isOnline()) {
                                 playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
                                 return false;
                             }
@@ -124,7 +124,7 @@ public class PlotCommand implements CommandExecutor {
                             Plot jointOwnerPlot = Plot.wrap(playerUUID);
                             OfflinePlayer jointPlayer = Bukkit.getOfflinePlayer(supply);
                             UUID jointOwnerUUID = jointPlayer.getUniqueId();
-                            if (!jointPlayer.hasPlayedBefore()) {
+                            if (!jointPlayer.hasPlayedBefore() && !jointPlayer.isOnline()) {
                                 playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
                                 return false;
                             }
@@ -265,6 +265,29 @@ public class PlotCommand implements CommandExecutor {
                                     staffPlotCreator.put(playerUUID, new Object[]{null, staffSupply});
                                     giveTools(playerSender);
                                     break;
+                                case "disband":
+                                    if (args.length == 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff disband (name)");
+                                        return false;
+                                    }
+
+                                    Plot disbandingPlot = Plot.getPlot(staffSupply);
+
+                                    if(disbandingPlot == null)
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "The plot you are looking for does not exist.");
+                                        return false;
+                                    }
+
+                                    if(!disbandingPlot.isStaff())
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "The plot is a player-made plot and abuse is not accepted.");
+                                        return false;
+                                    }
+
+                                    playerSender.sendMessage(STANDARD_COLOR + "You have disbanded " + disbandingPlot.getName() + ".");
+                                    disbandingPlot.disband();
+                                    break;
                                 case "setspawn":
                                     if (args.length == 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawn (name)");
@@ -276,15 +299,20 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    Plot plot = Plot.getStandingOnPlot(playerSender);
+                                    Plot spawnPlot = Plot.getStandingOnPlot(playerSender);
 
-                                    if (!plot.isStaff() && !plot.getName().equalsIgnoreCase("order") && !plot.getName().equalsIgnoreCase("chaos")) {
+                                    if (!spawnPlot.isStaff() && !spawnPlot.getName().equalsIgnoreCase("order") && !spawnPlot.getName().equalsIgnoreCase("chaos")) {
                                         playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos. (For the banmatch/moneymatch refer to: setspawnA and setspawnB)");
                                         return false;
                                     }
 
-                                    plot.setSpawn(playerSender.getLocation());
-                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn for " + plot.getName() + " has been set to where you are standing.");
+
+                                    spawnPlot.setSpawn(playerSender.getLocation());
+
+                                    if(spawnPlot.getName().equalsIgnoreCase("order"))
+                                        spawnPlot.getCenter().getWorld().setSpawnLocation(spawnPlot.getCenter());
+
+                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn for " + spawnPlot.getName() + " has been set to where you are standing.");
 
                                     break;
                                 case "setspawna":
@@ -363,9 +391,13 @@ public class PlotCommand implements CommandExecutor {
     private void sendStaffHelp(Player player) {
         String prefix = "/plot staff";
         player.sendMessage(ChatColor.GOLD + "-Plot Staff Help-");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "disband (name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "create (name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawn (name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "tools");
+player.sendMessage(ChatColor.GOLD + "For Arena:");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawna Arena");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawnb Arena");
     }
 
     public static void giveTools(Player playerSender) {
