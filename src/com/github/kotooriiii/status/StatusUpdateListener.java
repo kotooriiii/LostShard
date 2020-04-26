@@ -34,8 +34,12 @@ public class StatusUpdateListener implements Listener {
     private static HashMap<UUID, BukkitTask> playersCorrupt = new HashMap<>();
 
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onCorruptTimer(EntityDamageByEntityEvent event) {
+
+        if(event.isCancelled())
+            return;
+
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 

@@ -20,7 +20,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class PowerCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
-    final int ADDED_XP = 25;
+    final int ADDED_XP = 125;
 
     final int MAXIMUM_POWER = 4;
 

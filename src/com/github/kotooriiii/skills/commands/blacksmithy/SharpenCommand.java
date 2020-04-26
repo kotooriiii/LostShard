@@ -20,7 +20,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class SharpenCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
-    final int ADDED_XP = 25;
+    final int ADDED_XP = 100;
 
     final int MAXIMUM_SHARPEN = 4;
 

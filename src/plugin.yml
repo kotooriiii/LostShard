@@ -74,6 +74,7 @@ commands:
   rest:
   addtitle:
   addrank:
+  suicide:
 
   #skill stuff
   archery:

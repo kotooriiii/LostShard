@@ -22,7 +22,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class HardenCommand implements CommandExecutor {
 
     final int STAMINA_COST = 25;
-    final int ADDED_XP = 25;
+    final int ADDED_XP = 100;
 
     final int MAXIUMUM_HARDEN = 2;
 

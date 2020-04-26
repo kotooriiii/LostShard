@@ -21,7 +21,7 @@ import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 public class SmeltCommand implements CommandExecutor {
 
     final int STAMINA_COST = 15;
-    final int ADDED_XP = 25;
+    final int ADDED_XP = 75;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -84,7 +84,7 @@ public class SmeltCommand implements CommandExecutor {
 
 
         } else {
-            //Break item
+            //Breaks item at the end
             playerSender.sendMessage(ChatColor.GRAY + "You smelted the item but failed to recover any usable material.");
         }
 

@@ -28,7 +28,7 @@ public class CombatLogListener implements Listener {
 
     }
 
-    @EventHandler (priority =  EventPriority.LOWEST)
+    @EventHandler (priority =  EventPriority.HIGHEST)
     public void onTag(EntityDamageByEntityEvent event)
     {
         if(event.isCancelled())

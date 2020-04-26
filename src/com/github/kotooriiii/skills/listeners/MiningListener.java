@@ -32,9 +32,7 @@ public class MiningListener implements Listener {
 
         ArrayList<ItemStack> rewards = getRewards(miningSkill.getLevel());
 
-        Collection<ItemStack> groundItems = reward(player, rewards);
-
-        drop(block.getLocation(), groundItems);
+        drop(block.getLocation(), rewards);
 
 
         miningSkill.addXP(ADDED_XP);
@@ -73,7 +71,9 @@ public class MiningListener implements Listener {
     }
 
     private Collection<ItemStack> reward(Player player, ArrayList<ItemStack> rewards) {
+
         HashMap<Integer, ItemStack> map = player.getInventory().addItem(rewards.toArray(new ItemStack[rewards.size()]));
+
         return map.values();
     }
 
@@ -222,7 +222,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.02);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.04);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.03);
 
@@ -231,17 +231,14 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.03);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.05);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
         } else if (10 <= level && level < 20) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.05);
-
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.05);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
         } else if (0 <= level && level < 10) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.10);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.05);
         }
         return lootTable;
     }

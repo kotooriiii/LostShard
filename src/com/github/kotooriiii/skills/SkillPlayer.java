@@ -287,6 +287,7 @@ public class SkillPlayer implements Serializable {
         private boolean addLevels(float levels) {
             int oldLevel = (int) Math.floor(this.level);
             this.level += levels;
+            this.level = new BigDecimal(level).setScale(2, RoundingMode.HALF_UP).floatValue();
             int newLevel = (int) Math.floor(this.level);
 
             if (newLevel > 100) {

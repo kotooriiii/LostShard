@@ -264,6 +264,8 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("donate").setExecutor(new DonateCommand());
         getCommand("reply").setExecutor(new ReplyCommand());
 
+        getCommand("suicide").setExecutor(new SuicideCommand());
+
 
 
         //todo to use later -->

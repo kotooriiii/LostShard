@@ -101,6 +101,14 @@
             <systemPath>${project.basedir}/libs/craftbukkit-1.15.2.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>luckperms</groupId>
+            <artifactId>luckperms-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/LuckPerms-Bukkit-5.0.94.jar</systemPath>
+        </dependency>
+
         <!--Discord API -->
             <dependency>
                 <groupId>com.discord4j</groupId>

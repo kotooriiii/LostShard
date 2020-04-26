@@ -19,7 +19,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class RepairCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
-    final int ADDED_XP = 25;
+    final int ADDED_XP = 75;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -85,10 +85,10 @@ public class RepairCommand implements CommandExecutor {
 
             int damageTaken = (int) Math.floor(mainHand.getType().getMaxDurability() / 3);
 
-            if (((Damageable) meta).getDamage() - damageTaken < 0)
+            if (((Damageable) meta).getDamage() - damageTaken <= 0)
                 playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             else
-                ((Damageable) meta).setDamage(((Damageable) meta).getDamage() - damageTaken);
+                ((Damageable) meta).setDamage(((Damageable) meta).getDamage() +  damageTaken);
 
             playerSender.sendMessage(ChatColor.GRAY + "You failed to repair the item, it was damaged in the process.");
         }

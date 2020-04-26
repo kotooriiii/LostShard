@@ -8,6 +8,7 @@ import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.google.common.base.Function;
+import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -37,6 +38,7 @@ public class Wand {
     private WandType type;
 
     private static HashMap<UUID, Object[]> wandOnCooldown = new HashMap<>();
+    private static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
 
     public Wand(WandType type) {
         // Set local variables to the given variables
@@ -429,8 +431,10 @@ public class Wand {
                 Boolean shouldReplaceBlock = shouldReplace.apply(bottomLeft.getBlock());
                 Boolean isEdge = (x == 0 && z == 0) || (x == 0 && z == 4) || (x == 4 && z == 0) || (x == 4 && z == 4);
 
-                if (!isEdge && shouldReplaceBlock)
+                if (!isEdge && shouldReplaceBlock){
                     bottomLeft.getBlock().setType(material);
+                    locationSavedForNoDrop.add(bottomLeft.getBlock().getLocation());
+                }
                 bottomLeft.add(0, 0, 1);
 
             }
@@ -561,6 +565,12 @@ public class Wand {
         Block targetBlock = lastTwoTargetBlocks.get(1);
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
         return targetBlock.getFace(adjacentBlock);
+    }
+
+
+    public static HashSet<Location> getLocationsForNonBlockBreak()
+    {
+        return locationSavedForNoDrop;
     }
 
 }
