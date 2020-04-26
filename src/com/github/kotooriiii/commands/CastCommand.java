@@ -156,24 +156,27 @@ public class CastCommand implements CommandExecutor {
                                 //Make a chat name
                                 recallCommand.put(playerUUID, playerSender.getLocation());
                                 HelperMethods.localBroadcast(playerSender, "Recall");
-                                playerSender.sendMessage(ChatColor.AQUA + "Where would you like to recall to?");
+                                playerSender.sendMessage(ChatColor.YELLOW + "Where would you like to recall to?");
 
                             } else {
                                 String name = HelperMethods.stringBuilder(args, 1, " ");
                                 //Check if name is already taken
-                                if (!MarkPlayer.hasMarks(playerUUID)) {
-                                    playerSender.sendMessage(ERROR_COLOR + "You do not have any marks.");
-                                    recallCommand.remove(playerUUID);
-                                    return false;
-                                }
 
-                                MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
 
-                                if (!markPlayer.hasMark(name)) {
-                                    playerSender.sendMessage(ERROR_COLOR + "You do not have a mark by this name.");
-                                    recallCommand.remove(playerUUID);
-                                    return true;
-                                }
+                                    if (!MarkPlayer.hasMarks(playerUUID)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You do not have any marks.");
+                                        recallCommand.remove(playerUUID);
+                                        return false;
+                                    }
+
+                                    MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
+
+                                    if (!markPlayer.hasMark(name)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You do not have a mark by this name.");
+                                        recallCommand.remove(playerUUID);
+                                        return true;
+                                    }
+
 
                                 ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.FEATHER, 1)};
 
