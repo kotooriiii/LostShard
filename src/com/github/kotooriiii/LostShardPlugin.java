@@ -36,6 +36,7 @@ import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
+import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatJoinListener;
 import com.github.kotooriiii.stats.StatRegenRunner;
@@ -97,7 +98,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         //Console logger, plugin, and description file are all ready for public use
      //todo to use later -->
-        registerDiscord();
+      //  registerDiscord();
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
@@ -269,7 +270,7 @@ public class LostShardPlugin extends JavaPlugin {
 
 
         //todo to use later -->
-        getCommand("opt").setExecutor(new LinkListener());
+      //  getCommand("opt").setExecutor(new LinkListener());
 
 
     }
@@ -338,11 +339,12 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new CombatLogListener(), this);
 
         pm.registerEvents(new HelpCommandListener(), this);
+        pm.registerEvents(new NoAbuseBlockBreakMaterialListener(), this);
 
         registerCustomEventListener();
 
         //todo to use later -->
-        pm.registerEvents(new LinkListener(), this);
+        //pm.registerEvents(new LinkListener(), this);
 
     }
 

@@ -556,7 +556,7 @@ public class Plot implements Serializable {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
         ZonedDateTime nextRun = now.withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-        int times = (int) Math.ceil(getBalance()/getTax()) + 1;
+        int times = (int) Math.floor(getBalance()/getTax()) + 1;
 
         if (now.compareTo(nextRun) >= 0)
             nextRun = nextRun.plusDays(times);

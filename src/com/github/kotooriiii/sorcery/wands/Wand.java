@@ -433,7 +433,11 @@ public class Wand {
 
                 if (!isEdge && shouldReplaceBlock){
                     bottomLeft.getBlock().setType(material);
+                    if(material.equals(Material.COBWEB))
                     locationSavedForNoDrop.add(bottomLeft.getBlock().getLocation());
+                    else if(material.equals(Material.AIR))
+                        locationSavedForNoDrop.remove(bottomLeft.getBlock().getLocation());
+
                 }
                 bottomLeft.add(0, 0, 1);
 
