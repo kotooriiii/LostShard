@@ -20,7 +20,6 @@ public class SuicideCommand implements CommandExecutor {
         Player player = (Player) commandSender;
         player.setHealth(0);
         //todo death msg
-        player.sendMessage(STANDARD_COLOR + "You took the easy way out.");
         return true;
     }
 }

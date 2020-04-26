@@ -12,6 +12,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -41,12 +43,13 @@ public class SkillCommand implements CommandExecutor {
                         maxSkillNum += 100;
                     }
 
-                    playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + skillNum+ "/" + maxSkillNum + " skill points.");
 
+
+                    playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + new BigDecimal(skillNum).setScale(1, RoundingMode.HALF_UP).toString() + "/" + new BigDecimal(maxSkillNum).setScale(1, RoundingMode.HALF_UP).toString() + " skill points.");
 
                     for(SkillPlayer.Skill skill : skillPlayer.getSkills())
                     {
-                        playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + ": " + ChatColor.WHITE + skill.getLevel());
+                        playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + ": " + ChatColor.WHITE + new BigDecimal(skill.getLevel()).setScale(1, RoundingMode.HALF_UP).toString());
                     }
                     return false;
                 }

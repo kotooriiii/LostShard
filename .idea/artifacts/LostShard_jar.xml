@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="LostShard:jar">
+    <output-path>$PROJECT_DIR$/../../../../../Servers/server mc 1/plugins</output-path>
+    <root id="archive" name="LostShardK.jar">
+      <element id="module-output" name="LostShardK" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-lang/commons-lang/2.6/commons-lang-2.6.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord4j-common:3.1.0.M1" />
+      <element id="library" level="project" name="LuckPerms-Bukkit-5.0.94" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord-json:1.0.2" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord4j-core:3.1.0.M1" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord4j-rest:3.1.0.M1" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord4j-voice:3.1.0.M1" />
+      <element id="library" level="project" name="Maven: com.discord4j:discord4j-gateway:3.1.0.M1" />
+      <element id="library" level="project" name="Maven: com.discord4j:stores-api:3.1.0.RC1" />
+      <element id="library" level="project" name="Maven: com.discord4j:stores-jdk:3.1.0.RC1" />
+      <element id="library" level="project" name="Maven: com.discord4j:simple-fsm:1.0.1" />
+    </root>
+  </artifact>
+</component>

@@ -50,6 +50,8 @@ public class MsgCommand implements CommandExecutor {
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
         receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
         lastMessageMap.put(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
+        lastMessageMap.put(playerSender.getUniqueId(), receivingPlayer.getUniqueId()); // this is for convo based
+
 
 
         return true;
@@ -62,6 +64,7 @@ public class MsgCommand implements CommandExecutor {
 
     public static void updateMap(UUID receive, UUID sent)
     {
-        lastMessageMap.put(receive, sent);
+        lastMessageMap.put(receive, sent); //only for person who messaged you
+        lastMessageMap.put(sent, receive); // this is for convo based
     }
 }

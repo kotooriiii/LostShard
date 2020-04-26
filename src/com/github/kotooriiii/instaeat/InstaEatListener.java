@@ -73,8 +73,12 @@ public class InstaEatListener implements Listener {
         //If you dont have enough mana stop
         if (currentStamina < staminaCost) {
             if (instaEatType.isSplashPotion()) {
-                player.sendMessage(ERROR_COLOR + "You don't have enough stamina to throw a splash potion! You need " + (staminaCost-currentStamina) + " more stamina.");
+                player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
                 playerInteractEvent.setCancelled(true);
+            } else {
+                player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
+                playerInteractEvent.setCancelled(true);
+
             }
             return;
         }

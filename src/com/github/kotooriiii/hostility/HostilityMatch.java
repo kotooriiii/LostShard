@@ -71,7 +71,7 @@ public class HostilityMatch {
 
     public HostilityMatch(HostilityPlatform platform) {
         this.platform = platform;
-        this.maxTicks = toTicks(4);//toTicks(0, 5);
+        this.maxTicks = toTicks(3);//toTicks(0, 5);
         this.lastClan = null;
         this.lastWinStreak = 0;
         init();

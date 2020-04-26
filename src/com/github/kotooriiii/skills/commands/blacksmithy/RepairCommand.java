@@ -19,7 +19,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class RepairCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
-    final int ADDED_XP = 75;
+    final int ADDED_XP = 25;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -83,18 +83,18 @@ public class RepairCommand implements CommandExecutor {
 
             //Damage item by third of durability
 
-            int damageTaken = (int) Math.floor(mainHand.getType().getMaxDurability() / 3);
+            int damageTaken = (int) Math.ceil((double) mainHand.getType().getMaxDurability() / 3);
 
-            if (((Damageable) meta).getDamage() - damageTaken <= 0)
+            if (((Damageable) meta).getDamage() + damageTaken >= mainHand.getType().getMaxDurability())
                 playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             else
-                ((Damageable) meta).setDamage(((Damageable) meta).getDamage() +  damageTaken);
+                ((Damageable) meta).setDamage(((Damageable) meta).getDamage() + damageTaken);
 
             playerSender.sendMessage(ChatColor.GRAY + "You failed to repair the item, it was damaged in the process.");
         }
 
         //Give xp for trying.
-        blacksmithy.addXP(ADDED_XP);
+        blacksmithy.addXP(getXP(mainHand));
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         mainHand.setItemMeta(meta);
         invHelper.removeIngredients();
@@ -102,14 +102,13 @@ public class RepairCommand implements CommandExecutor {
         return true;
     }
 
-    private ItemStack[] getCost(ItemStack itemStack) {
+
+    private int getXP(ItemStack itemStack) {
         Material material = itemStack.getType();
 
         switch (material) {
 
-            //BOW
-            case BOW:
-                return new ItemStack[]{new ItemStack(Material.STRING, 1)};
+
             //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
@@ -122,10 +121,97 @@ public class RepairCommand implements CommandExecutor {
             case DIAMOND_CHESTPLATE:
             case DIAMOND_LEGGINGS:
 
-            case DIAMOND_HORSE_ARMOR:
-                return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+                //GOLD
+            case GOLDEN_AXE:
+            case GOLDEN_SWORD:
+            case GOLDEN_PICKAXE:
+            case GOLDEN_HOE:
+            case GOLDEN_SHOVEL:
 
-            //GOLD
+            case GOLDEN_BOOTS:
+            case GOLDEN_HELMET:
+            case GOLDEN_CHESTPLATE:
+            case GOLDEN_LEGGINGS:
+                return 100;
+
+            //IRON
+            case IRON_AXE:
+            case IRON_SWORD:
+            case IRON_PICKAXE:
+            case IRON_HOE:
+            case IRON_SHOVEL:
+
+            case IRON_BOOTS:
+            case IRON_HELMET:
+            case IRON_CHESTPLATE:
+            case IRON_LEGGINGS:
+                return 75;
+
+            //STONE & WOOD
+            case STONE_AXE:
+            case STONE_SWORD:
+            case STONE_PICKAXE:
+            case STONE_HOE:
+            case STONE_SHOVEL:
+
+                //BOW
+            case BOW:
+
+
+            case CHAINMAIL_BOOTS:
+            case CHAINMAIL_HELMET:
+            case CHAINMAIL_CHESTPLATE:
+            case CHAINMAIL_LEGGINGS:
+
+            case WOODEN_AXE:
+            case WOODEN_SWORD:
+            case WOODEN_PICKAXE:
+            case WOODEN_HOE:
+            case WOODEN_SHOVEL:
+                return 50;
+
+        }
+        return -1;
+    }
+
+    private double getChanceOfRepair(ItemStack itemStack, SkillPlayer.Skill mining) {
+
+        Material material = itemStack.getType();
+
+
+        int useLevel ;
+        if(0 <= mining.getLevel() && mining.getLevel() <= 30 )
+        {
+            useLevel = 30 - (int) mining.getLevel();
+        } else if (30 <= mining.getLevel() && mining.getLevel() <= 60)
+        {
+            useLevel = 60 - (int) mining.getLevel();
+        } else if (60 <= mining.getLevel() && mining.getLevel() <= 80)
+        {
+            useLevel = 80 - (int) mining.getLevel();
+
+        } else if (80 <= mining.getLevel() && mining.getLevel() <= 100)
+        {
+            useLevel = 100 - (int) mining.getLevel();
+        }
+
+
+        switch (material) {
+
+
+            //DIAMOND
+            case DIAMOND_AXE:
+            case DIAMOND_SWORD:
+            case DIAMOND_PICKAXE:
+            case DIAMOND_HOE:
+            case DIAMOND_SHOVEL:
+
+            case DIAMOND_BOOTS:
+            case DIAMOND_HELMET:
+            case DIAMOND_CHESTPLATE:
+            case DIAMOND_LEGGINGS:
+
+                //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
             case GOLDEN_PICKAXE:
@@ -137,8 +223,8 @@ public class RepairCommand implements CommandExecutor {
             case GOLDEN_CHESTPLATE:
             case GOLDEN_LEGGINGS:
 
-            case GOLDEN_HORSE_ARMOR:
-                return new ItemStack[]{new ItemStack(Material.GOLD_INGOT, 1)};
+                return 0.05*(1);
+
 
             //IRON
             case IRON_AXE:
@@ -152,7 +238,76 @@ public class RepairCommand implements CommandExecutor {
             case IRON_CHESTPLATE:
             case IRON_LEGGINGS:
 
-            case IRON_HORSE_ARMOR:
+            //STONE & WOOD
+            case STONE_AXE:
+            case STONE_SWORD:
+            case STONE_PICKAXE:
+            case STONE_HOE:
+            case STONE_SHOVEL:
+
+                //BOW
+            case BOW:
+            case CHAINMAIL_BOOTS:
+            case CHAINMAIL_HELMET:
+            case CHAINMAIL_CHESTPLATE:
+            case CHAINMAIL_LEGGINGS:
+
+            case WOODEN_AXE:
+            case WOODEN_SWORD:
+            case WOODEN_PICKAXE:
+            case WOODEN_HOE:
+            case WOODEN_SHOVEL:
+                return  1; //todo fix+
+
+        }
+        return -1;
+    }
+
+    private ItemStack[] getCost(ItemStack itemStack) {
+        Material material = itemStack.getType();
+
+        switch (material) {
+
+            //BOW
+            case BOW:
+                return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+            //DIAMOND
+            case DIAMOND_AXE:
+            case DIAMOND_SWORD:
+            case DIAMOND_PICKAXE:
+            case DIAMOND_HOE:
+            case DIAMOND_SHOVEL:
+
+            case DIAMOND_BOOTS:
+            case DIAMOND_HELMET:
+            case DIAMOND_CHESTPLATE:
+            case DIAMOND_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+
+            //GOLD
+            case GOLDEN_AXE:
+            case GOLDEN_SWORD:
+            case GOLDEN_PICKAXE:
+            case GOLDEN_HOE:
+            case GOLDEN_SHOVEL:
+
+            case GOLDEN_BOOTS:
+            case GOLDEN_HELMET:
+            case GOLDEN_CHESTPLATE:
+            case GOLDEN_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.GOLD_INGOT, 1)};
+
+            //IRON
+            case IRON_AXE:
+            case IRON_SWORD:
+            case IRON_PICKAXE:
+            case IRON_HOE:
+            case IRON_SHOVEL:
+
+            case IRON_BOOTS:
+            case IRON_HELMET:
+            case IRON_CHESTPLATE:
+            case IRON_LEGGINGS:
                 return new ItemStack[]{new ItemStack(Material.IRON_INGOT, 1)};
 
             //STONE

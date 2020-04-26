@@ -251,6 +251,10 @@ public class SkillPlayer implements Serializable {
             return (float) Math.floor(CONSTANT * Math.sqrt(roundDown));
         }
 
+        public float getMaxLevel() {
+           return maxLevel;
+        }
+
         /**
          * Gets the max total XP of a certain level
          *
@@ -287,10 +291,10 @@ public class SkillPlayer implements Serializable {
         private boolean addLevels(float levels) {
             int oldLevel = (int) Math.floor(this.level);
             this.level += levels;
-            this.level = new BigDecimal(level).setScale(2, RoundingMode.HALF_UP).floatValue();
+            this.level = new BigDecimal(level).setScale(1, RoundingMode.HALF_UP).floatValue();
             int newLevel = (int) Math.floor(this.level);
 
-            if (newLevel > 100) {
+            if (this.level > 100) {
                 this.level = 100;
             }
 
@@ -324,6 +328,8 @@ public class SkillPlayer implements Serializable {
 
             BigDecimal valMessage = new BigDecimal(val).setScale(1, RoundingMode.HALF_UP);
             BigDecimal levelMessage = new BigDecimal(getLevel()).setScale(1, RoundingMode.HALF_UP);
+
+
 
             Player player = offlinePlayer.getPlayer();
             player.sendMessage(ChatColor.GOLD + "You have gained " + valMessage + " " + this.getType().getName() + ", it is now " + levelMessage + ".");
