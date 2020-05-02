@@ -152,6 +152,20 @@ public class Zone implements Serializable {
         return false;
     }
 
+    public boolean contains(Location location) {
+        int x = location.getBlockX();
+        int y = location.getBlockY();
+        int z = location.getBlockZ();
+
+        if (x1 <= x && x <= x2) {
+            if (z1 <= z && z <= z2) {
+                if (y1 <= y && y <= y2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public boolean contains(Block block) {
         int x = block.getX();
         int y = block.getY();
@@ -179,6 +193,30 @@ public class Zone implements Serializable {
         this.x1 = x1Temp;
         this.y1 = y1Temp;
         this.z1 = z1Temp;
+    }
+
+    public int getX1() {
+        return x1;
+    }
+
+    public int getX2() {
+        return x2;
+    }
+
+    public int getY1() {
+        return y1;
+    }
+
+    public int getY2() {
+        return y2;
+    }
+
+    public int getZ1() {
+        return z1;
+    }
+
+    public int getZ2() {
+        return z2;
     }
 
     public String toString() {

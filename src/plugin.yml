@@ -2,6 +2,8 @@ name: LostShardK
 main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
 depend: [LuckPerms]
+loadbefore:
+  - BuycraftX
 version: 1.0
 api-version: 1.15
 commands:
@@ -108,6 +110,8 @@ commands:
 
   #plot stuff
   plot:
+    aliases:
+      - plots
   spawn:
 
   #chat, also clan is chat
@@ -155,6 +159,7 @@ commands:
     usage:
     aliases:
       - kill
+  whois:
 
 
 

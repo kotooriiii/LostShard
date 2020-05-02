@@ -1,6 +1,5 @@
 package com.github.kotooriiii.events;
 
-import com.github.kotooriiii.plots.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

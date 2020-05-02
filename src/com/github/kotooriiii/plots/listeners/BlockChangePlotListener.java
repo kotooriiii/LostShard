@@ -1,5 +1,8 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -15,7 +18,6 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +32,7 @@ public class BlockChangePlotListener implements Listener {
         final Entity en = entityChangeBlockEvent.getEntity();
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
                 //Check entity
@@ -46,16 +48,18 @@ public class BlockChangePlotListener implements Listener {
                     return;
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
                     playerInteracting.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
-
                     entityChangeBlockEvent.setCancelled(true);
                     return;
                 }
 
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     entityChangeBlockEvent.setCancelled(true);
                     return;
                 }
@@ -80,20 +84,23 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
 
                     blockBreakEvent.setCancelled(true);
                     return;
                 }
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     blockBreakEvent.setCancelled(true);
                     return;
                 }
@@ -119,20 +126,21 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
-
+                if (plot.getType().isStaff()) {
 
                     player.sendMessage(ERROR_COLOR + "Cannot drain buckets here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot drain buckets here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -160,20 +168,22 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
 
                     player.sendMessage(ERROR_COLOR + "Cannot fill buckets here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot fill buckets here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -216,20 +226,22 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
 
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -260,20 +272,22 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
 
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -308,20 +322,22 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
 
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -342,11 +358,11 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         Location spawnedLocation = entitySpawnEvent.getLocation();
-        Plot plot = Plot.getStandingOnPlot(spawnedLocation);
+        Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(spawnedLocation);
         if(plot == null)
             return;
 
-        if(!plot.isStaff())
+        if(!plot.getType().isStaff())
             return;
 
         if(!isHostile(entitySpawnEvent.getEntity()))
@@ -362,7 +378,7 @@ public class BlockChangePlotListener implements Listener {
         for(Block block : blocksExploding)
         {
             Location loc = block.getLocation();
-            Plot plot = Plot.getStandingOnPlot(loc);
+            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
             if(plot == null)
                 continue;
 
@@ -376,7 +392,7 @@ public class BlockChangePlotListener implements Listener {
         for(Block block : blocksExploding)
         {
             Location loc = block.getLocation();
-            Plot plot = Plot.getStandingOnPlot(loc);
+            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
             if(plot == null)
                 continue;
 
@@ -398,20 +414,21 @@ public class BlockChangePlotListener implements Listener {
             return;
 
         //Iterate through all plots
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
                 //Staff no permission
-                if (plot.isStaff()) {
+                if (plot.getType().isStaff()) {
 
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
 
                     blockPlaceEvent.setCancelled(true);
                     return;
                 }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
                 //If don't have permissions
-                if (!(plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID))) {
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     blockPlaceEvent.setCancelled(true);
                     return;
                 }

@@ -114,15 +114,21 @@ public class ShardScoreboardManager {
                     if (player.getScoreboard().getObjective("profile").getDisplaySlot() == null)
                         player.getScoreboard().getObjective("profile").setDisplaySlot(DisplaySlot.SIDEBAR);
 
-
+                    Bank bank = Bank.wrap(player.getUniqueId());
+                    if(bank == null)
+                        continue;
                     Stat stat = Stat.wrap(player);
+                    if(stat == null)
+                        continue;
                     StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
+                    if(statusPlayer == null)
+                        continue;
 
                     scoreboard.getTeam("mana").setPrefix(ChatColor.WHITE + "" + (int) stat.getMana() + "/" + (int) stat.getMaxMana());
                     scoreboard.getTeam("stamina").setPrefix(ChatColor.WHITE + "" + (int) stat.getStamina() + "/" + (int) stat.getMaxStamina());
 
                     //scoreboard.getTeam("balance").setPrefix(ChatColor.GOLD + "Balance: ");
-                    scoreboard.getTeam("balance").setSuffix(ChatColor.WHITE + "" + Bank.wrap(player.getUniqueId()).getCurrency() + "");
+                    scoreboard.getTeam("balance").setSuffix(ChatColor.WHITE + "" + bank.getCurrency() + "");
 
                  //   scoreboard.getTeam("murderCount").setPrefix(ChatColor.RED + "Murder count: ");
                     scoreboard.getTeam("murderCount").setSuffix(ChatColor.WHITE + "" + statusPlayer.getKills() + "");

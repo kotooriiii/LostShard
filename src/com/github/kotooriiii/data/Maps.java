@@ -3,8 +3,6 @@ package com.github.kotooriiii.data;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.plots.Plot;
 import org.bukkit.ChatColor;
 import org.bukkit.permissions.Permission;
 

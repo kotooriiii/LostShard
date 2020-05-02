@@ -14,6 +14,10 @@ public class CastListener implements Listener {
         } else if (CastCommand.recallCommand.containsKey(event.getPlayer().getUniqueId())){
             event.getPlayer().performCommand("cast recall " + event.getMessage());
             event.setCancelled(true);
+        } else if(CastCommand.clantpCommand.contains(event.getPlayer().getUniqueId()))
+        {
+            event.getPlayer().performCommand("cast clantp " + event.getMessage());
+            event.setCancelled(true);
         }
     }
 }

@@ -12,84 +12,37 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class MarkPlayer implements Serializable {
+public class MarkPlayer {
 
-    private static final long serialVersionUID = 1L;
 
     private UUID playerUUID;
     private ArrayList<Mark> marks;
 
     private static HashMap<UUID, MarkPlayer> markPlayerHashMap = new HashMap<>();
 
-    public class Mark implements Serializable {
-        private static final long serialVersionUID = 1L;
+    public static class Mark {
 
         private String name;
-        private String worldName;
-        private int x;
-        private int y;
-        private int z;
-        private float pitch;
-        private float yaw;
+        private Location location;
 
         public Mark(String name, Location location) {
-            this(name, location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getPitch(), location.getYaw());
-            worldName = location.getWorld().getName();
-        }
-
-        public Mark(String name, int x, int y, int z) {
             this.name = name;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.pitch = 0;
-            this.yaw = 0;
-        }
-
-        public Mark(String name, int x, int y, int z, float pitch, float yaw) {
-            this.name = name;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.pitch = pitch;
-            this.yaw = yaw;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public int getZ() {
-            return z;
-        }
-
-        public float getPitch() {
-            return pitch;
-        }
-
-        public float getYaw() {
-            return yaw;
+            this.location = location;
         }
 
         public String getName() {
-            return this.name;
+            return name;
         }
 
         public Location getLocation() {
-            if (worldName == null)
-                worldName = "world";
-            return new Location(Bukkit.getWorld(this.worldName), x + 0.5, y, z + 0.5, yaw, pitch);
+
+            return location;
         }
     }
 
     public MarkPlayer(UUID playerUUID) {
         this.playerUUID = playerUUID;
         this.marks = new ArrayList<>();
-        markPlayerHashMap.put(playerUUID, this);
     }
 
     public UUID getPlayerUUID() {
@@ -112,14 +65,16 @@ public class MarkPlayer implements Serializable {
     }
 
     public boolean removeMark(String name) {
+
         for (Iterator<Mark> markIterator = marks.iterator(); markIterator.hasNext(); ) {
-            Mark mark = markIterator.next();
-            if (mark.getName().equalsIgnoreCase(name)) {
+            Mark iteratingMark = markIterator.next();
+            if (iteratingMark.getName().equalsIgnoreCase(name)) {
                 markIterator.remove();
                 save();
                 return true;
             }
         }
+
         return false;
     }
 
@@ -133,6 +88,11 @@ public class MarkPlayer implements Serializable {
         return null;
     }
 
+    public void add() {
+        markPlayerHashMap.put(playerUUID, this);
+
+    }
+
     public void save() {
         FileManager.write(this);
     }
@@ -143,16 +103,15 @@ public class MarkPlayer implements Serializable {
 
     }
 
-    public void setMarks(Mark[] marks)
-    {
+    public void setMarks(Mark[] marks) {
         ArrayList<Mark> newMarks = new ArrayList<>();
-        for(int i = 0; i < marks.length; i++)
-        {
+        for (int i = 0; i < marks.length; i++) {
             newMarks.add(marks[i]);
         }
         this.marks = newMarks;
         save();
     }
+
     public Mark[] getMarks() {
         return this.marks.toArray(new Mark[this.marks.size()]);
     }

@@ -20,6 +20,7 @@ public class WandListener implements Listener {
                 Wand wand = new Wand(type);
                 if (wand.hasIngredients(player)) {
                     wand.cast(player);
+                    event.setCancelled(true);
                 }
             }
         }

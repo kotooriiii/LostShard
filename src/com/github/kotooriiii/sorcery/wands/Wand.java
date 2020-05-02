@@ -12,16 +12,21 @@ import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Bed;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
@@ -206,10 +211,36 @@ public class Wand {
     }
 
 
+    public static boolean isLapisNearby(Location location, int range) {
+
+        int xmin = location.getBlockX() - range;
+        int xmax = location.getBlockX() + range;
+        int ymin = location.getBlockY() - range;
+        int ymax = location.getBlockY() + range;
+        int zmin = location.getBlockZ() - range;
+        int zmax = location.getBlockZ() + range;
+
+        for (int x = xmin; x <= xmax; x++) {
+            for (int y = ymin; y <= ymax; y++) {
+                for (int z = zmin; z <= zmax; z++) {
+                    if (location.getWorld().getBlockAt(x, y, z).getType().equals(Material.LAPIS_BLOCK))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     public void cast(Player player) {
 
         if (BrawlingListener.isStunned(player.getUniqueId())) {
             player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
+            return;
+        }
+
+        if (isLapisNearby(player.getLocation(), 5)) {
+            player.sendMessage(ERROR_COLOR + "You cannot seem to cast a spell here...");
             return;
         }
 
@@ -297,7 +328,7 @@ public class Wand {
                     player.sendMessage(ERROR_COLOR + "You need more room to cast this spell!");
                     return false;
                 }
-                if (!new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() + 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR) && !new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
+                if (!isAcceptableBlock(getBlockFace(player, rangeTeleport), teleportLocation.clone().add(0,1,0).getBlock(), true)) {
                     player.sendMessage(ERROR_COLOR + "Invalid target.");
                     return false;
                 } else if (new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
@@ -431,11 +462,11 @@ public class Wand {
                 Boolean shouldReplaceBlock = shouldReplace.apply(bottomLeft.getBlock());
                 Boolean isEdge = (x == 0 && z == 0) || (x == 0 && z == 4) || (x == 4 && z == 0) || (x == 4 && z == 4);
 
-                if (!isEdge && shouldReplaceBlock){
+                if (!isEdge && shouldReplaceBlock) {
                     bottomLeft.getBlock().setType(material);
-                    if(material.equals(Material.COBWEB))
-                    locationSavedForNoDrop.add(bottomLeft.getBlock().getLocation());
-                    else if(material.equals(Material.AIR))
+                    if (material.equals(Material.COBWEB))
+                        locationSavedForNoDrop.add(bottomLeft.getBlock().getLocation());
+                    else if (material.equals(Material.AIR))
                         locationSavedForNoDrop.remove(bottomLeft.getBlock().getLocation());
 
                 }
@@ -535,18 +566,77 @@ public class Wand {
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
 
         Block targetBlock;
+        Block adjacentBlock = lastTwoTargetBlocks.get(0);
         if (lastTwoTargetBlocks.size() > 1)
             targetBlock = lastTwoTargetBlocks.get(1);
         else
-            targetBlock = lastTwoTargetBlocks.get(0);
+            return player.getLocation();
 
 
-        Block adjacentBlock = lastTwoTargetBlocks.get(0);
-        if (new Location(adjacentBlock.getWorld(), adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()).getBlock().getType() == Material.AIR && new Location(targetBlock.getWorld(), targetBlock.getX(), targetBlock.getY()+1, targetBlock.getZ()).getBlock().getType() == Material.AIR) {
+        if (isAcceptableBlock(getBlockFace(player, range), player.getLocation().getWorld().getBlockAt(adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()), false) && isAcceptableBlock(getBlockFace(player, range), player.getLocation().getWorld().getBlockAt(targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()), false)) {
             adjacentBlock = new Location(adjacentBlock.getWorld(), targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()).getBlock();
         }
         return adjacentBlock.getLocation();
     }
+
+    private boolean isAcceptableBlock(BlockFace facing, Block block, boolean isStrict) {
+
+        if (block.getType().equals(Material.AIR))
+            return true;
+
+        if(block.getBoundingBox().contains(new BoundingBox(block.getX() + 0.45,block.getY() + 0.45,block.getZ() + 0.45,block.getX() + 0.55,block.getY() + 0.55,block.getZ() + 0.55)))
+        {
+            if (!block.getType().isSolid())
+                return true;
+            return false;
+        }
+
+        if (!block.getType().isSolid() && !isStrict)
+            return true;
+
+
+        if(block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().endsWith("door"))
+        {
+            Door door = (Door) block.getState().getBlockData();
+            BlockFace face = door.getFacing();
+            if(door.isOpen())
+            {
+                switch (face)
+                {
+                    case EAST:
+                        face = BlockFace.SOUTH;
+                        break;
+                    case WEST:
+                        face = BlockFace.NORTH;
+                        break;
+                    case NORTH:
+                        face = BlockFace.EAST;
+                        break;
+                    case SOUTH:
+                        face = BlockFace.WEST;
+                        break;
+                }
+            }
+
+            if(face.equals(facing))
+                return true;
+        }
+
+        if (facing.equals(BlockFace.WEST) || facing.equals(BlockFace.EAST)) {
+            if (block.getBoundingBox().getWidthZ() < 0.5) {
+                return true;
+            }
+        }
+
+        if (facing.equals(BlockFace.NORTH) || facing.equals(BlockFace.SOUTH)) {
+            if (block.getBoundingBox().getWidthX() < 0.5) {
+                return true;
+            }
+        }
+
+        return block.getBoundingBox().getHeight() < 0.5;
+    }
+
 
     private Block[] getCornerBlocks(Block block) {
         Location targetLoc = block.getLocation();
@@ -571,9 +661,16 @@ public class Wand {
         return targetBlock.getFace(adjacentBlock);
     }
 
+    public BlockFace getInvertBlockFace(Player player, final int range){
+        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
+        if (lastTwoTargetBlocks.size() != 2) return null;
+        Block targetBlock = lastTwoTargetBlocks.get(1);
+        Block adjacentBlock = lastTwoTargetBlocks.get(0);
+        return adjacentBlock.getFace(targetBlock);
+    }
 
-    public static HashSet<Location> getLocationsForNonBlockBreak()
-    {
+
+    public static HashSet<Location> getLocationsForNonBlockBreak() {
         return locationSavedForNoDrop;
     }
 

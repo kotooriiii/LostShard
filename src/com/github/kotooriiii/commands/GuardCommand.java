@@ -3,7 +3,7 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.npc.ShardGuard;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import net.md_5.bungee.api.ChatMessageType;
@@ -41,7 +41,7 @@ public class GuardCommand implements CommandExecutor {
                 if (args.length == 0) {
                     final Location playerLocation = playerSender.getLocation();
 
-                    Plot plot = Plot.getStandingOnPlot(playerLocation);
+                    Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(playerLocation);
                     //plot doesnt exist
                     if (plot == null) {
                         return false;

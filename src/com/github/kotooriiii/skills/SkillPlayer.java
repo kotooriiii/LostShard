@@ -1,7 +1,6 @@
 package com.github.kotooriiii.skills;
 
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.plots.Plot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -10,7 +9,6 @@ import org.bukkit.entity.Player;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;

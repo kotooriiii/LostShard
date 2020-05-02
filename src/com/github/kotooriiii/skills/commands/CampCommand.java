@@ -1,10 +1,11 @@
 package com.github.kotooriiii.skills.commands;
 
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -55,34 +56,23 @@ public class CampCommand implements CommandExecutor {
                     return false;
                 }
 
-                if (Plot.isStandingOnPlot(location)) {
-                    Plot plot = Plot.getStandingOnPlot(location);
+                if (LostShardPlugin.getPlotManager().isStandingOnPlot(location)) {
+                    Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
                     boolean exists = false;
 
-                    if (plot.isStaff()) {
-                        exists = false;
+                    if (!plot.getType().isStaff()) {
+                        PlayerPlot playerPlot = (PlayerPlot) plot;
+                        if (playerPlot.isOwner(playerUUID) || playerPlot.isJointOwner(playerUUID))
+                            exists = true;
                     }
 
-
-                    if (!exists) {
-
-                        if (!plot.isStaff() && !plot.getOwnerUUID().equals(playerUUID)) {
-
-                            for (UUID uuid : plot.getJointOwners()) {
-                                if (uuid.equals(playerUUID)) {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
 
                     if (!exists) {
                         playerSender.sendMessage(ERROR_COLOR + "You cannot place a campfire in this location.");
                         return false;
                     }
 
-                    //all ok
+
                 }
 
                 SurvivalismListener.Campfire campfire = new SurvivalismListener.Campfire(playerUUID, location);
@@ -107,7 +97,7 @@ public class CampCommand implements CommandExecutor {
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
 
         if (targetBlock.getType() == Material.AIR) {
-   //         Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
+            //         Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
             return null;
         }
 

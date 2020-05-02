@@ -2,7 +2,6 @@ package com.github.kotooriiii;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bannedplayer.BannedJoinListener;
-import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
@@ -26,10 +25,11 @@ import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
 import com.github.kotooriiii.plots.*;
-import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.plots.listeners.*;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.SkillPlayer;
-import com.github.kotooriiii.skills.SkillUpdateListener;
 import com.github.kotooriiii.skills.commands.CampCommand;
 import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
@@ -38,17 +38,11 @@ import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
 import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.stats.StatJoinListener;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
-import discord4j.core.DiscordClient;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -56,7 +50,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -68,7 +61,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.*;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -92,33 +84,41 @@ public class LostShardPlugin extends JavaPlugin {
     private static ChannelManager channelManager;
     private static DC4JBot dc4JBot;
     private static CombatLogManager combatLogManager;
+    private static PlotManager plotManager;
 
     @Override
     public void onEnable() {
 
         //Console logger, plugin, and description file are all ready for public use
-     //todo to use later -->
-      //  registerDiscord();
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
+
+        //Register dependency
         luckPerms = loadLuckPerms();
-        FileManager.init();
+
+        //Register managers
+        plotManager = new PlotManager();
+        combatLogManager = new CombatLogManager();
         channelManager = new ChannelManager();
 
+        //Read files (some onto the managers)
+        FileManager.init();
+
+        //Read every day
         newDayScheduler();
 
+        //Run loop to regen stats
         StatRegenRunner.regen();
 
         //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
         registerCommands();
         registerEvents();
+       // registerDiscord();
 
         //Init custom recipes
         CraftingRecipes.initRecipes();
 
-        //Init combat log
-        combatLogManager = new CombatLogManager();
 
         //Register custom enchantment
         registerGlow();
@@ -138,6 +138,8 @@ public class LostShardPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+      //  LostShardPlugin.getDiscord().getClient().logout().block();
 
         saveData();
 
@@ -173,8 +175,7 @@ public class LostShardPlugin extends JavaPlugin {
         Bank.getBanks().clear();
         StatusPlayer.getPlayerStatus().clear();
         Stat.getStatMap().clear();
-        Plot.getPlayerPlots().clear();
-
+        getPlotManager().getAllPlots().clear();;
 
         //SKILLS
 
@@ -199,7 +200,7 @@ public class LostShardPlugin extends JavaPlugin {
             FileManager.write(stat);
         }
 
-        for (Plot plot : Plot.getPlayerPlots().values()) {
+        for (Plot plot : getPlotManager().getAllPlots()) {
             FileManager.write(plot);
         }
 
@@ -267,10 +268,12 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("suicide").setExecutor(new SuicideCommand());
 
+        getCommand("whois").setExecutor(new WhoisCommand());
+
 
 
         //todo to use later -->
-      //  getCommand("opt").setExecutor(new LinkListener());
+      //getCommand("opt").setExecutor(new LinkListener());
 
 
     }
@@ -281,6 +284,9 @@ public class LostShardPlugin extends JavaPlugin {
 
     public void registerEvents() {
         PluginManager pm = this.getServer().getPluginManager();
+
+        pm.registerEvents(new InitializerListener(), this);
+
         pm.registerEvents(new EntityDeathTrackerListener(), this);
 
         pm.registerEvents(new ClanCreatorListener(), this);
@@ -293,12 +299,11 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerBankUpdateInventory(), this);
         pm.registerEvents(new ChatChannelListener(), this);
         pm.registerEvents(new StatusUpdateListener(), this);
-        pm.registerEvents(new StatJoinListener(), this);
         pm.registerEvents(new MedAndRestCancelListener(), this);
         pm.registerEvents(new WandListener(), this);
         pm.registerEvents(new HostilityTimeCreatorListener(), this);
         pm.registerEvents(new InstaEatListener(), this);
-        pm.registerEvents(new GoldArmorListener(), this);
+        pm.registerEvents(new GoldEquipmentListener(), this);
         pm.registerEvents(new PlayerEnterExitPlotRedirectListener(), this);
         pm.registerEvents(new BlockChangePlotListener(), this);
         pm.registerEvents(new EntityInteractPlotListener(), this);
@@ -306,7 +311,6 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlotStaffCreateListener(), this);
         pm.registerEvents(new PlayerSpawnMoveListener(), this);
         pm.registerEvents(new StaffUpdateListener(getLuckPerms()), this);
-        pm.registerEvents(new SkillUpdateListener(), this);
         pm.registerEvents(new CastListener(), this);
         pm.registerEvents(new FireballExplodeListener(), this);
 
@@ -341,10 +345,13 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new HelpCommandListener(), this);
         pm.registerEvents(new NoAbuseBlockBreakMaterialListener(), this);
 
+        pm.registerEvents(new PlayerRecallMoveListener(), this);
+        pm.registerEvents(new PlayerClanTPMoveListener(), this);
+
         registerCustomEventListener();
 
         //todo to use later -->
-        //pm.registerEvents(new LinkListener(), this);
+       // pm.registerEvents(new LinkListener(), this);
 
     }
 
@@ -471,12 +478,17 @@ public class LostShardPlugin extends JavaPlugin {
                 }
 
                 //Taxes every day
-                for (Plot plot : Plot.getPlayerPlots().values()) {
+                for (Plot plot : getPlotManager().getAllPlots()) {
 
-                    if (!plot.rent()) {
-                        OfflinePlayer owner = Bukkit.getOfflinePlayer(plot.getOwnerUUID());
+                    if(!plot.getType().equals(PlotType.PLAYER))
+                        continue;
+
+                    PlayerPlot playerPlot = (PlayerPlot) plot;
+
+                    if (!playerPlot.rent()) {
+                        OfflinePlayer owner = Bukkit.getOfflinePlayer(playerPlot.getOwnerUUID());
                         if (owner.isOnline()) {
-                            if (plot.getRadius() == 1)
+                            if (playerPlot.getRadius() == 1)
                                 ;//owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. You have one day left before your plot is removed.");
                             else
                                 ;//owner.getPlayer().sendMessage(STANDARD_COLOR + "You did not pay the rent today. Your plot has shrunk by one block radius.");
@@ -556,6 +568,11 @@ public class LostShardPlugin extends JavaPlugin {
     public static CombatLogManager getCombatLogManager()
     {
         return combatLogManager;
+    }
+
+    public static PlotManager getPlotManager()
+    {
+        return plotManager;
     }
 
 }

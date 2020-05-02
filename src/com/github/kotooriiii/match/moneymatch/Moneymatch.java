@@ -1,10 +1,7 @@
 package com.github.kotooriiii.match.moneymatch;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.bannedplayer.BannedPlayer;
-import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.match.Match;
-import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -12,8 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.PLAYER_COLOR;
@@ -41,8 +36,8 @@ public class Moneymatch extends Match {
             fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
         if(fighterB.isOnline())
             fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
-        withdrawalA.remove(wagerAmount);
-        withdrawalB.remove(wagerAmount);
+        withdrawalA.removeCurrency(wagerAmount);
+        withdrawalB.removeCurrency(wagerAmount);
     }
 
     @Override
@@ -56,15 +51,15 @@ public class Moneymatch extends Match {
             fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
         if(fighterB.isOnline())
             fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
-        depositA.remove(wagerAmount);
-        depositB.remove(wagerAmount);
+        depositA.removeCurrency(wagerAmount);
+        depositB.removeCurrency(wagerAmount);
     }
 
     @Override
     public void win(OfflinePlayer offlinePlayer) {
         sendToAll(PLAYER_COLOR + offlinePlayer.getName() + ChatColor.GREEN + " has won the money match.");
         Bank winnerBank = Bank.wrap(offlinePlayer.getUniqueId());
-        winnerBank.add(wagerAmount*2);
+        winnerBank.addCurrency(wagerAmount*2);
         if(offlinePlayer.isOnline())
         {
             offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount*2 + " gold has been deposited into your account.");

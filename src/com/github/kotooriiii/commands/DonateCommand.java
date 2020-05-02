@@ -23,6 +23,12 @@ public class DonateCommand implements CommandExecutor {
 
         Player player = (Player) commandSender;
 
+        boolean isUsingBuycraftMenu = true;
+        if(isUsingBuycraftMenu)
+        {
+            player.performCommand("buy");
+            return false;
+        }
         TextComponent tc = new TextComponent("-Donate-\n");
         tc.setColor(net.md_5.bungee.api.ChatColor.GOLD);
 

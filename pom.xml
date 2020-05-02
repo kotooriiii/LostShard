@@ -7,21 +7,60 @@
     <groupId>com.github.kotooriiii</groupId>
     <artifactId>LostShardK</artifactId>
     <version>1.15.2</version>
+    <packaging>jar</packaging>
+
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <minimizeJar>true</minimizeJar>
+                    <relocations>
+                        <relocation>
+                            <pattern>io.netty</pattern>
+                            <shadedPattern>private.io.netty</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>dev.trinitrotoluene.mcmirror.bstats</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>co.aikar.commands</pattern>
+                            <shadedPattern>dev.trinitrotoluene.mcmirror.acf</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
-
-    <packaging>jar</packaging>
 
     <repositories>
         <repository>
@@ -32,11 +71,30 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.48.Final</version>
+        </dependency>
+
+        <!--Discord API -->
+        <dependency>
+            <groupId>com.discord4j</groupId>
+            <artifactId>discord4j-core</artifactId>
+            <version>3.1.0.M1</version>
+            <scope>compile</scope>
+        </dependency>
         <!--This adds the Spigot API artifact to the build -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.15.2-R0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>provided</scope>
         </dependency>
 
@@ -45,6 +103,12 @@
             <artifactId>craftbukkit-api</artifactId>
             <version>1.0</version>
             <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
             <systemPath>${project.basedir}/libs/craftbukkit-1.15.2.jar</systemPath>
         </dependency>
 
@@ -53,16 +117,29 @@
             <artifactId>luckperms-api</artifactId>
             <version>1.0</version>
             <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
             <systemPath>${project.basedir}/libs/LuckPerms-Bukkit-5.0.94.jar</systemPath>
         </dependency>
 
-        <!--Discord API -->
-            <dependency>
-                <groupId>com.discord4j</groupId>
-                <artifactId>discord4j-core</artifactId>
-                <version>3.1.0.M1</version>
-                <scope>provided</scope>
-            </dependency>
+        <dependency>
+            <groupId>worldborder</groupId>
+            <artifactId>worldborder-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/WorldBorder.jar</systemPath>
+        </dependency>
+
 
     </dependencies>
 

@@ -103,4 +103,8 @@ public class Stat {
     public static HashSet<UUID> getRestingPlayers() {
         return restingPlayers;
     }
+
+    public void add() {
+        statMap.put(this.getPlayerUUID(), this);
+    }
 }

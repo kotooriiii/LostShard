@@ -32,7 +32,7 @@ public class StatCommand implements CommandExecutor {
                             ChatColor.GOLD + "-" + playerSender.getName() + "-" + "\n" +
                                     ChatColor.YELLOW + "Mana: " + ChatColor.WHITE + stat.getManaString() + "\n" +
                                     ChatColor.YELLOW + "Stamina: " + ChatColor.WHITE + stat.getStaminaString() + "\n" +
-                                    ChatColor.YELLOW + "Gold:  " + ChatColor.WHITE + bank.getCurrency() + "\n" +
+                                    ChatColor.YELLOW + "Gold: " + ChatColor.WHITE + bank.getCurrency() + "\n" +
                                     ChatColor.YELLOW + "Murder Count: " + ChatColor.WHITE + statusPlayer.getKills()
                     );
 

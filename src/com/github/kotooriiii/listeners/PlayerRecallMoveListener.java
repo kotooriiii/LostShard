@@ -1,15 +1,15 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.commands.CastCommand;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import static com.github.kotooriiii.data.Maps.spawnTimer;
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class PlayerSpawnMoveListener implements Listener {
+public class PlayerRecallMoveListener implements Listener {
     @EventHandler
     public void onPlayerSpawnMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -29,9 +29,9 @@ public class PlayerSpawnMoveListener implements Listener {
         if (fromX == toX && fromY == toY && fromZ == toZ)
             return;
 
-        if (spawnTimer.contains(player.getUniqueId())) {
-            player.sendMessage(ERROR_COLOR + "The teleportation request to spawn has been canceled due to movement.");
-            spawnTimer.remove(player.getUniqueId());
+        if (CastCommand.isCastingRecall(player.getUniqueId())) {
+            player.sendMessage(ERROR_COLOR + "The teleportation request to '" + CastCommand.getCastRecall().get(player.getUniqueId()).getName() + "' has been canceled due to movement.");
+            CastCommand.getCastRecall().remove(player.getUniqueId());
             return;
         }
     }

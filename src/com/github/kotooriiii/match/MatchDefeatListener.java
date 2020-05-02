@@ -1,6 +1,7 @@
 package com.github.kotooriiii.match;
 
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -58,13 +59,13 @@ public class MatchDefeatListener implements Listener {
 
             if(match.isFighter(player.getUniqueId()))
             {
-                if(!Plot.isStandingOnPlot(player))
+                if(!LostShardPlugin.getPlotManager().isStandingOnPlot(player))
                 {
                     match.end(player.getUniqueId());
                     return;
                 }
 
-                Plot plot = Plot.getStandingOnPlot(player);
+                Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(player);
                 if(!plot.getName().equalsIgnoreCase("arena")) {
                     match.end(player.getUniqueId());
                     return;
@@ -86,13 +87,13 @@ public class MatchDefeatListener implements Listener {
 
             if(match.isFighter(player.getUniqueId()))
             {
-                if(!Plot.isStandingOnPlot(event.getTo()))
+                if(!LostShardPlugin.getPlotManager().isStandingOnPlot(player))
                 {
                     match.end(player.getUniqueId());
                     return;
                 }
 
-                Plot plot = Plot.getStandingOnPlot(event.getTo());
+                Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(player);
                 if(!plot.getName().equalsIgnoreCase("arena")) {
                     match.end(player.getUniqueId());
                     return;

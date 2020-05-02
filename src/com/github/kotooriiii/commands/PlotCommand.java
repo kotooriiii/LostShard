@@ -3,8 +3,16 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.channels.ChannelManager;
-import com.github.kotooriiii.plots.ArenaPlot;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.PlotManager;
+import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.ShardPlotPlayer;
+import com.github.kotooriiii.plots.struct.ArenaPlot;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.plots.struct.StaffPlot;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.status.Staff;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,33 +43,41 @@ public class PlotCommand implements CommandExecutor {
             UUID playerUUID = playerSender.getUniqueId();
             //If the command is the "clan" command
             if (cmd.getName().equalsIgnoreCase("plot")) {
-                ChannelManager channelManager = LostShardPlugin.getChannelManager();
+
+                ShardPlotPlayer plotSenderPlayer = ShardPlotPlayer.wrap(playerUUID);
+                PlayerPlot[] playerPlots = plotSenderPlayer.getPlotsOwned();
+
                 //No arguments regarding this command
                 if (args.length == 0) {
-
-                    //Send the help page and return.
-                    sendHelp(playerSender);
-                    return true;
+                    sendPage(1, playerSender);
+                    return false;
                 } else if (args.length >= 1) {
                     //Sub-commands again however with proper argument.
-                    final String supply = stringBuilder(args, 1, " ");
-                    final Bank bank = Bank.wrap(playerUUID);
-                    final double currentCurrency = bank.getCurrency();
-                    final DecimalFormat df = new DecimalFormat("#.##");
+                     String supply = stringBuilder(args, 1, " ");
+                     Bank bank = Bank.wrap(playerUUID);
+                     double currentCurrency = bank.getCurrency();
+                     DecimalFormat df = new DecimalFormat("#.##");
+
+                     PlotManager plotManager = LostShardPlugin.getPlotManager();
+                     Plot standingOnPlot = plotManager.getStandingOnPlot(playerSender.getLocation());
 
                     switch (args[0].toLowerCase()) {
+                        case "help":
+                            //Send the help page and return.
+                            sendHelp(playerSender);
+                            break;
                         case "create":
                             if (args.length == 1)
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to create your own plot? /plot create (name)");
-                            else if (Plot.hasPlot(playerSender))
-                                playerSender.sendMessage(ERROR_COLOR + "You can't create more than one plot.");
-                            else if (Plot.hasNearbyPlots(playerSender))
+                            else if (plotSenderPlayer.hasReachedMaxPlots())
+                                playerSender.sendMessage(ERROR_COLOR + "You've reached the max amount of plots you can own.");
+                            else if (plotManager.hasNearbyPlots(playerSender))
                                 playerSender.sendMessage(ERROR_COLOR + "There are other plot(s) nearby. You must be a minimum of " + Plot.MINIMUM_PLOT_CREATE_RANGE + " block(s) away to create your own plot.");
                             else if (supply.length() > 16)
                                 playerSender.sendMessage(ERROR_COLOR + "The name can not exceed 16 characters.");
-                            else if (Plot.isStaffPlot(supply))
+                            else if (plotManager.isStaffPlotName(supply))
                                 playerSender.sendMessage(ERROR_COLOR + "This plot name has its place in history already. Create your own history!");
-                            else if (Plot.hasPlotName(supply))
+                            else if (plotManager.isPlot(supply))
                                 playerSender.sendMessage(ERROR_COLOR + "That plot name has already been taken.");
                             else if (!hasCreatePlotCost(playerSender)) {
                                 //The message is already taken care of.
@@ -70,83 +86,136 @@ public class PlotCommand implements CommandExecutor {
                             }
                             break;
                         case "disband":
-                            if (args.length != 1)
+                            if (args.length != 1) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to disband your plot? /plot disband");
-                            else if (!Plot.hasPlot(playerSender))
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't remove something that isn't yours.");
-                            else {
-                                disbandPlot(playerSender);
+                                return false;
                             }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't disband staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot disbandPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!disbandPlot.isOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't disband a plot that you don't own.");
+                                return false;
+                            }
+
+                            disbandPlot(playerSender);
+
                             break;
                         case "friend":
                         case "f":
                             if (args.length == 1) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to friend a player to your plot? /plot friend (username)");
                                 return false;
-                            } else if (!Plot.hasPlot(playerSender)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't friend a player without a plot.");
-                                return false;
-                            } else if (supply.length() > 16) {
-                                playerSender.sendMessage(ERROR_COLOR + "The name can not exceed 16 characters.");
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
                                 return false;
                             }
 
-                            Plot plotFriend = Plot.wrap(playerUUID);
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't friend players to staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot friendPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!friendPlot.isOwner(playerUUID) && !friendPlot.isJointOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't friend players to this plot.");
+                                return false;
+                            }
+
                             OfflinePlayer friendPlayer = Bukkit.getOfflinePlayer(supply);
                             UUID friendUUID = friendPlayer.getUniqueId();
+
                             if (!friendPlayer.hasPlayedBefore() && !friendPlayer.isOnline()) {
                                 playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
                                 return false;
                             }
 
-                            if (plotFriend.isFriend(friendUUID)) {
-                                playerSender.sendMessage(ChatColor.GOLD + "You have removed " + friendPlayer.getName() + " from being a plot friend.");
-                                plotFriend.removeFriend(friendUUID);
+                            if (friendPlot.isFriend(friendUUID)) {
+                                friendPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + friendPlayer.getName() + " from being a plot friend.");
+                                friendPlot.removeFriend(friendUUID);
                             } else {
-                                playerSender.sendMessage(ChatColor.GOLD + "You have added " + friendPlayer.getName() + " to your plot as a friend.");
-                                plotFriend.addFriend(friendUUID);
+                                friendPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " added " + friendPlayer.getName() + " to your plot as a friend.");
+                                friendPlot.addFriend(friendUUID);
                             }
                             break;
                         case "co-owner":
+                        case "coowner":
+                        case "coown":
                         case "co-own":
                         case "co":
                             if (args.length == 1) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to promote a player as co-owner to your plot? /plot co (username)");
                                 return false;
-                            } else if (!Plot.hasPlot(playerSender)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't set a player as a co-owner without a plot.");
-                                return false;
-                            } else if (supply.length() > 16) {
-                                playerSender.sendMessage(ERROR_COLOR + "The name can not exceed 16 characters.");
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
                                 return false;
                             }
 
-                            Plot jointOwnerPlot = Plot.wrap(playerUUID);
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't co-owner players to staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot jointOwnerPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!jointOwnerPlot.isOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't co-own players to this plot.");
+                                return false;
+                            }
+
                             OfflinePlayer jointPlayer = Bukkit.getOfflinePlayer(supply);
                             UUID jointOwnerUUID = jointPlayer.getUniqueId();
+
                             if (!jointPlayer.hasPlayedBefore() && !jointPlayer.isOnline()) {
                                 playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
                                 return false;
                             }
 
                             if (jointOwnerPlot.isJointOwner(jointOwnerUUID)) {
-                                playerSender.sendMessage(ChatColor.GOLD + "You have removed " + jointPlayer.getName() + " from being a plot co-owner.");
                                 jointOwnerPlot.removeJointOwner(jointOwnerUUID);
+                                jointOwnerPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + jointPlayer.getName() + " from being a plot co-owner.");
                             } else {
-                                playerSender.sendMessage(ChatColor.GOLD + "You have added " + jointPlayer.getName() + " to your plot as a co-owner.");
                                 jointOwnerPlot.addJointOwner(jointOwnerUUID);
+                                jointOwnerPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " added " + jointPlayer.getName() + " to your plot as a co-owner.");
                             }
                             break;
                         case "expand":
                             if (args.length != 1) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to expand your plot? /plot expand");
                                 return false;
-                            } else if (!Plot.hasPlot(playerSender)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't expand something that isn't yours.");
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
                                 return false;
                             }
 
-                            Plot expandPlot = Plot.wrap(playerUUID);
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't expand staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot expandPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!expandPlot.isOwner(playerUUID) && !expandPlot.isJointOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't expand this plot.");
+                                return false;
+                            }
 
                             if (!expandPlot.isExpandable()) {
                                 playerSender.sendMessage(ERROR_COLOR + "You can't expand onto other plots.");
@@ -159,15 +228,28 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             expandPlot.expand();
-                            playerSender.sendMessage(ChatColor.GOLD + "You have expanded the plot to size " + expandPlot.getSize() + ".");
+                            expandPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " expanded the plot to size " + expandPlot.getRadius() + ".");
                             break;
                         case "deposit":
                             if (args.length != 2) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to deposit currency into your plot? /plot deposit (amount)");
                                 return false;
                             }
-                            if (!Plot.hasPlot(playerSender)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't deposit into something you don't own.");
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't deposit onto staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot depositPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!depositPlot.isOwner(playerUUID) && !depositPlot.isJointOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't deposit into this plot's funds.");
                                 return false;
                             }
 
@@ -186,19 +268,29 @@ public class PlotCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            Plot plotDeposit = Plot.wrap(playerUUID);
                             bank.setCurrency(currentCurrency - deposit.doubleValue());
-                            plotDeposit.deposit(deposit.doubleValue());
-
-                            playerSender.sendMessage(ChatColor.GOLD + "You have deposited " + deposit.doubleValue() + " gold into the plot funds.");
+                            depositPlot.deposit(deposit.doubleValue());
+                            depositPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " deposited " + deposit.doubleValue() + " gold into the plot funds.");
                             break;
                         case "withdraw":
                             if (args.length != 2) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to withdraw currency from your plot? /plot withdraw (amount)");
                                 return false;
                             }
-                            if (!Plot.hasPlot(playerSender)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You don't own a plot. You can't withdraw from something you don't own.");
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't withdraw from staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot withdrawPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!withdrawPlot.isOwner(playerUUID) && !withdrawPlot.isJointOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't withdraw from this plot's funds.");
                                 return false;
                             }
 
@@ -213,31 +305,33 @@ public class PlotCommand implements CommandExecutor {
                             BigDecimal withdraw = new BigDecimal(withdrawRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
 
                             if (currentCurrency < withdraw.doubleValue()) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't withdraw more than your current balance.");
+                                playerSender.sendMessage(ERROR_COLOR + "You can't withdraw more than your current funds.");
                                 return false;
                             }
 
-                            Plot plotWithdraw = Plot.wrap(playerUUID);
                             bank.setCurrency(currentCurrency + withdraw.doubleValue());
-                            plotWithdraw.withdraw(withdraw.doubleValue());
+                            withdrawPlot.withdraw(withdraw.doubleValue());
 
-                            playerSender.sendMessage(ChatColor.GOLD + "You have withdrawn " + withdraw.doubleValue() + " gold from the plot funds.");
+                            withdrawPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " withdrew " + withdraw.doubleValue() + " gold from the plot funds.");
                             break;
                         case "info":
-                            if (args.length != 1)
+                            if (args.length != 1) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to check info on the possible plot you are standing on? /plot info");
-                            else if (!Plot.isStandingOnPlot(playerSender))
-                                playerSender.sendMessage(ERROR_COLOR + "You are not currently standing in a plot.");
-                            else {
-                                Plot infoPlot = Plot.getStandingOnPlot(playerSender);
-                                String info = infoPlot.info(playerSender);
-                                playerSender.sendMessage(info);
+                                return false;
                             }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            String info = standingOnPlot.info(playerSender);
+                            playerSender.sendMessage(info);
+
                             break;
                         case "staff":
 
-                            if(!playerSender.hasPermission(STAFF_PERMISSION))
-                            {
+                            if (!playerSender.hasPermission(STAFF_PERMISSION)) {
                                 playerSender.sendMessage(ERROR_COLOR + "You must be a staff member in order to execute admin-level plot commands.");
                                 return false;
                             }
@@ -271,94 +365,83 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    Plot disbandingPlot = Plot.getPlot(staffSupply);
+                                    Plot disbandingPlot = plotManager.getPlot(staffSupply);
 
-                                    if(disbandingPlot == null)
-                                    {
+                                    if (disbandingPlot == null) {
                                         playerSender.sendMessage(ERROR_COLOR + "The plot you are looking for does not exist.");
                                         return false;
                                     }
 
-                                    if(!disbandingPlot.isStaff())
-                                    {
-                                        playerSender.sendMessage(ERROR_COLOR + "The plot is a player-made plot and abuse is not accepted.");
-                                        return false;
-                                    }
-
                                     playerSender.sendMessage(STANDARD_COLOR + "You have disbanded " + disbandingPlot.getName() + ".");
-                                    disbandingPlot.disband();
+                                    if (disbandingPlot.getType().equals(PlotType.PLAYER)) {
+                                        playerSender.sendMessage(STANDARD_COLOR + "The plot was a player-made plot.");
+                                    }
+                                    plotManager.removePlot(disbandingPlot);
                                     break;
                                 case "setspawn":
-                                    if (args.length == 2) {
-                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawn (name)");
+                                    if (args.length != 2) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawn");
                                         return false;
                                     }
 
-                                    if (!Plot.isStandingOnPlot(playerSender)) {
+                                    if (!plotManager.isStandingOnPlot(playerSender)) {
                                         playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
                                         return false;
                                     }
 
-                                    Plot spawnPlot = Plot.getStandingOnPlot(playerSender);
-
-                                    if (!spawnPlot.isStaff() && !spawnPlot.getName().equalsIgnoreCase("order") && !spawnPlot.getName().equalsIgnoreCase("chaos")) {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos. (For the banmatch/moneymatch refer to: setspawnA and setspawnB)");
+                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_SPAWN)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos. (For the banmatch/moneymatch spawns refer to: setspawnA and setspawnB)");
                                         return false;
                                     }
 
 
-                                    spawnPlot.setSpawn(playerSender.getLocation());
+                                    StaffPlot setspawnPlot = (StaffPlot) standingOnPlot;
 
-                                    if(spawnPlot.getName().equalsIgnoreCase("order"))
-                                        spawnPlot.getCenter().getWorld().setSpawnLocation(spawnPlot.getCenter());
+                                    setspawnPlot.setSpawn(playerSender.getLocation());
 
-                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn for " + spawnPlot.getName() + " has been set to where you are standing.");
+                                    if (setspawnPlot.getName().equalsIgnoreCase("order"))
+                                        setspawnPlot.getSpawn().getWorld().setSpawnLocation(setspawnPlot.getSpawn());
+
+                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn for " + setspawnPlot.getName() + " has been set to where you are standing.");
 
                                     break;
                                 case "setspawna":
-                                    if (args.length == 2) {
+                                    if (args.length != 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawnA (name)");
                                         return false;
                                     }
 
-                                    if (!Plot.isStandingOnPlot(playerSender)) {
-                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
+                                    if (!plotManager.isStandingOnPlot(playerSender)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawnA.");
                                         return false;
                                     }
 
-                                    Plot plotA = Plot.getStandingOnPlot(playerSender);
-
-                                    if (!plotA.getName().equalsIgnoreCase("arena"))
-                                    {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
+                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order spawn refer to: setspawn)");
                                         return false;
                                     }
 
-                                    ArenaPlot arenaPlotA = (ArenaPlot) plotA;
+                                    ArenaPlot arenaPlotA = (ArenaPlot) standingOnPlot;
 
                                     arenaPlotA.setSpawnA(playerSender.getLocation());
                                     playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + arenaPlotA.getName() + " has been set to where you are standing.");
                                     break;
                                 case "setspawnb":
-                                    if (args.length == 2) {
+                                    if (args.length != 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawnB (name)");
                                         return false;
                                     }
 
-                                    if (!Plot.isStandingOnPlot(playerSender)) {
-                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawn.");
+                                    if (!plotManager.isStandingOnPlot(playerSender)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You must be standing on a plot in order to set a spawnB.");
                                         return false;
                                     }
 
-                                    Plot plotB = Plot.getStandingOnPlot(playerSender);
-
-                                    if (!plotB.getName().equalsIgnoreCase("arena"))
-                                    {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order refer to: setspawn)");
+                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order spawn refer to: setspawn)");
                                         return false;
                                     }
-
-                                    ArenaPlot arenaPlotB = (ArenaPlot) plotB;
+                                    ArenaPlot arenaPlotB = (ArenaPlot) standingOnPlot;
 
                                     arenaPlotB.setSpawnB(playerSender.getLocation());
                                     playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + arenaPlotB.getName() + " has been set to where you are standing.");
@@ -375,7 +458,21 @@ public class PlotCommand implements CommandExecutor {
                             }
                             break;
                         default: //Not a premade command. This means something like: /clans chocolatebunnies white
-                            sendUnknownCommand(playerSender);
+
+                            String numberString = args[0];
+                            if (!NumberUtils.isNumber(numberString) || numberString.contains(".")) {
+
+                                playerSender.sendMessage(ERROR_COLOR + "You must use a positive integer for a page.");
+                                return false;
+                            }
+
+                            int page = Integer.parseInt(numberString);
+
+                            if (page <= 0) {
+                                playerSender.sendMessage(ERROR_COLOR + "You must use a positive integer for a page.");
+                                return false;
+                            }
+                            sendPage(page, playerSender);
                             break;
                     }
 
@@ -393,11 +490,11 @@ public class PlotCommand implements CommandExecutor {
         player.sendMessage(ChatColor.GOLD + "-Plot Staff Help-");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "disband (name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "create (name)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawn (name)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawn");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "tools");
-player.sendMessage(ChatColor.GOLD + "For Arena:");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawna Arena");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawnb Arena");
+        player.sendMessage(ChatColor.GOLD + "For Arena:");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawna");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "setspawnb");
     }
 
     public static void giveTools(Player playerSender) {
@@ -442,7 +539,7 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
 
     private void disbandPlot(Player playerSender) {
         Bank bank = Bank.wrap(playerSender.getUniqueId());
-        Plot plot = Plot.wrap(playerSender.getUniqueId());
+        PlayerPlot plot = (PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(playerSender.getLocation());
 
         double currentCurrency = bank.getCurrency();
 
@@ -451,8 +548,8 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
         double funds = plot.getBalance();
 
         bank.setCurrency(currentCurrency + refund + funds);
-        playerSender.sendMessage(ChatColor.GOLD + "You have disbanded " + plot.getName() + ".");
-        playerSender.sendMessage(ChatColor.GOLD + "You have been refunded " + df.format(refund) + " gold for " + (Plot.REFUND_RATE * 100) + "% of the plot's value.");
+        plot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " disbanded " + plot.getName() + ".");
+        playerSender.sendMessage(ChatColor.GOLD + "You have been refunded " + df.format(refund) + " gold for " + (PlayerPlot.REFUND_RATE * 100) + "% of the plot's value.");
         playerSender.sendMessage(ChatColor.GOLD + "You have been given the remaining funds from your plot's balance (" + df.format(funds) + ").");
 
     }
@@ -461,8 +558,8 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
         Bank bank = Bank.wrap(player.getUniqueId());
         double currentCurrency = bank.getCurrency();
 
-        if (currentCurrency < Plot.CREATE_COST) {
-            player.sendMessage(ERROR_COLOR + "You do not have enough funds in the plot’s balance to expand your plot any further. You need " + Plot.CREATE_COST + " gold to expand to the next size.");
+        if (currentCurrency < PlayerPlot.CREATE_COST) {
+            player.sendMessage(ERROR_COLOR + "You do not have enough funds in the plot’s balance to expand your plot any further. You need " + PlayerPlot.CREATE_COST + " gold to expand to the next size.");
             return false;
         }
 
@@ -478,11 +575,13 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
         Bank bank = Bank.wrap(player.getUniqueId());
         ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
 
-        bank.setCurrency(bank.getCurrency() - Plot.CREATE_COST);
+        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
         removeIngredients(player, ingredients);
 
-        Plot plot = new Plot(player, name);
-        player.sendMessage(ChatColor.GOLD + "You have created the plot \"" + plot.getName() + "\", it cost $" + Plot.CREATE_COST + " and 1 diamond.");
+
+        PlayerPlot playerPlot = new PlayerPlot(name, player.getUniqueId(), player.getLocation());
+        LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
+        player.sendMessage(ChatColor.GOLD + "You have created the plot \"" + playerPlot.getName() + "\", it cost $" + PlayerPlot.CREATE_COST + " and 1 diamond.");
     }
 
     private void sendHelp(Player player) {
@@ -495,6 +594,9 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit (amount)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw (amount)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "info");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "help");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "[page]");
+
 
 
     }
@@ -583,5 +685,47 @@ player.sendMessage(ChatColor.GOLD + "For Arena:");
             return null;
         }
         return hashmap;
+    }
+
+    public void sendPage(int page, Player playerSender) {
+
+        UUID playerUUID = playerSender.getUniqueId();
+        ShardPlotPlayer shardPlotPlayer = ShardPlotPlayer.wrap(playerUUID);
+        final int amtOfPlotsPerPage = 3;
+        final int MAX_PLOTS = shardPlotPlayer.getMaxPlots();
+
+        int size;
+        PlayerPlot[] plots = ShardPlotPlayer.wrap(playerUUID).getPlotsOwned();
+        size = plots.length;
+
+
+        int pages = (int) Math.ceil((double) size / amtOfPlotsPerPage);
+        if (pages == 0)
+            pages = 1;
+        int pageCounter = page;
+        int markCounter = 0;
+
+
+        if (page > pages) {
+            playerSender.sendMessage(ERROR_COLOR + "You do not have any more plot pages.");
+            return;
+        }
+
+        playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Plots-");
+
+        playerSender.sendMessage(ChatColor.GOLD + "Pg " + pageCounter + " of " + pages + " (" + size + " of " + MAX_PLOTS + " plots used)");
+
+        for (int i = (page - 1) * amtOfPlotsPerPage; i < size; i++) {
+            if (markCounter == amtOfPlotsPerPage) {
+                return;
+            }
+
+            if (plots == null)
+                break;
+
+            playerSender.sendMessage(ChatColor.WHITE + "- " + plots[i].getName() + " - " + "(" + plots[i].getCenter().getBlockX() + "," + plots[i].getCenter().getBlockY() + "," + plots[i].getCenter().getBlockZ() + ")");
+
+            markCounter++;
+        }
     }
 }

@@ -19,8 +19,6 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class RepairCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
-    final int ADDED_XP = 25;
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
 
@@ -69,7 +67,7 @@ public class RepairCommand implements CommandExecutor {
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
-        double chance = level * (0.01);
+        double chance = getChanceOfRepair(mainHand, level);
         double random = Math.random();
 
 
@@ -174,25 +172,21 @@ public class RepairCommand implements CommandExecutor {
         return -1;
     }
 
-    private double getChanceOfRepair(ItemStack itemStack, SkillPlayer.Skill mining) {
+    private double getChanceOfRepair(ItemStack itemStack, int level) {
 
         Material material = itemStack.getType();
 
+        int useLevel = 0;
+        if (0 <= level && level <= 30) {
+            useLevel = level - 0;
 
-        int useLevel ;
-        if(0 <= mining.getLevel() && mining.getLevel() <= 30 )
-        {
-            useLevel = 30 - (int) mining.getLevel();
-        } else if (30 <= mining.getLevel() && mining.getLevel() <= 60)
-        {
-            useLevel = 60 - (int) mining.getLevel();
-        } else if (60 <= mining.getLevel() && mining.getLevel() <= 80)
-        {
-            useLevel = 80 - (int) mining.getLevel();
+        } else if (30 <= level && level <= 60) {
+            useLevel = level - 30;
+        } else if (60 <= level && level <= 80) {
+            useLevel = level - 60;
 
-        } else if (80 <= mining.getLevel() && mining.getLevel() <= 100)
-        {
-            useLevel = 100 - (int) mining.getLevel();
+        } else if (80 <= level && level <= 100) {
+            useLevel = level - 80;
         }
 
 
@@ -210,7 +204,12 @@ public class RepairCommand implements CommandExecutor {
             case DIAMOND_HELMET:
             case DIAMOND_CHESTPLATE:
             case DIAMOND_LEGGINGS:
-
+                if (level < 80)
+                    return 0;
+                else if(level > 100)
+                    return 1;
+                else
+                    return (1/20) * (useLevel);
                 //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
@@ -222,10 +221,12 @@ public class RepairCommand implements CommandExecutor {
             case GOLDEN_HELMET:
             case GOLDEN_CHESTPLATE:
             case GOLDEN_LEGGINGS:
-
-                return 0.05*(1);
-
-
+                if (level < 60)
+                    return 0;
+                else if (level > 80)
+                    return 1;
+                else
+                    return (1/20) * (useLevel);
             //IRON
             case IRON_AXE:
             case IRON_SWORD:
@@ -237,8 +238,13 @@ public class RepairCommand implements CommandExecutor {
             case IRON_HELMET:
             case IRON_CHESTPLATE:
             case IRON_LEGGINGS:
-
-            //STONE & WOOD
+                if (level < 30)
+                    return 0;
+                else if(level > 60)
+                    return 1;
+                else
+                    return (1/30) * (useLevel);
+                //STONE & WOOD
             case STONE_AXE:
             case STONE_SWORD:
             case STONE_PICKAXE:
@@ -257,8 +263,12 @@ public class RepairCommand implements CommandExecutor {
             case WOODEN_PICKAXE:
             case WOODEN_HOE:
             case WOODEN_SHOVEL:
-                return  1; //todo fix+
-
+                if (level < 0)
+                    return 0;
+                else if (level > 30)
+                    return 1;
+                else
+                    return (1/30) * (useLevel);
         }
         return -1;
     }

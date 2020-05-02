@@ -1,14 +1,17 @@
 package com.github.kotooriiii.sorcery.listeners;
 
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+
+import java.awt.*;
 
 public class FireballExplodeListener implements Listener {
 
@@ -23,11 +26,16 @@ public class FireballExplodeListener implements Listener {
 
         damage(location, DAMAGE, RADIUS);
 
-        if (Plot.isStandingOnPlot(location)) {
-            Plot standingPlot = Plot.getStandingOnPlot(location);
-            if (standingPlot.isStaff() || (!standingPlot.isJointOwner(shooter.getUniqueId()) && !standingPlot.isOwner(shooter.getUniqueId()))) {
+        if (LostShardPlugin.getPlotManager().isStandingOnPlot(location)) {
+            Plot standingPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
+
+            if (standingPlot.getType().isStaff())
                 return;
-            }
+
+            PlayerPlot playerPlot = (PlayerPlot) standingPlot;
+            if(!playerPlot.isJointOwner(shooter.getUniqueId()) && !playerPlot.isOwner(shooter.getUniqueId()))
+                    return;
+
         }
 
         destroy(location, 2);

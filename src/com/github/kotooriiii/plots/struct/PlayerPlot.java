@@ -1,187 +1,100 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.struct;
 
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.*;
-import org.bukkit.block.Block;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.platforms;
+import static com.github.kotooriiii.plots.PlotManager.allPlots;
 
-public class Plot implements Serializable {
+public class PlayerPlot extends Plot {
 
-    private static final long serialVersionUID = 1L;
-
-    private UUID id;
-
-    private String name;
-    private boolean isStaff;
+    /**
+     * The plot's owner.
+     */
     private UUID ownerUUID;
-    private Zone zone;
+    /**
+     * The plot's center location
+     */
+    private Location center;
 
-    private PointBlock center;
-
+    /**
+     * The default radius of a plot when first created
+     */
     private final static int defaultRadius = 5;
+    /**
+     * The plot's current radius.
+     */
     private int radius;
 
+    /**
+     * The plot's current funds.
+     */
     private double balance;
 
+    /**
+     * The plot's friends
+     */
     private ArrayList<UUID> friends;
+    /**
+     * The plot's co-owners.
+     */
     private ArrayList<UUID> jointOwners;
 
+    /**
+     * The cost to create a plot
+     */
     public static final int CREATE_COST = 10;
+    /**
+     * The refund rate you receive when you disband a plot.
+     */
     public static final double REFUND_RATE = 0.75;
-    public static final int MINIMUM_PLOT_CREATE_RANGE = 10;
 
-    public static HashMap<UUID, Plot> playerPlots = new HashMap<>();
-    public static ArrayList<Plot> allPlots = new ArrayList<>();
+    public PlayerPlot(String name, UUID playerOwner, Location center) {
 
-    protected class PointBlock implements Serializable {
-        private static final long serialVersionUID = 1L;
+        super(center.getWorld(), name);
 
-        private String world;
-        private int x;
-        private int y;
-        private int z;
-        private float pitch;
-        private float yaw;
-
-        public PointBlock(Location location) {
-            this(location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getPitch(), location.getYaw());
-            world = location.getWorld().getName();
-        }
-
-        public PointBlock(World world, int x, int y, int z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.pitch = 0;
-            this.yaw = 0;
-           this.world = world.getName();
-        }
-
-        public PointBlock(int x, int y, int z, float pitch, float yaw) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.pitch = pitch;
-            this.yaw = yaw;
-            world = "world";
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public int getZ() {
-            return z;
-        }
-
-        public float getPitch() {
-            return pitch;
-        }
-
-        public float getYaw() {
-            return yaw;
-        }
-
-        public Location getLocation() {
-            if(world == null)
-                world="world";
-            return new Location(Bukkit.getWorld(world), x + 0.5, y, z + 0.5, yaw, pitch);
-        }
-    }
-
-    public Plot(Player player, String name) {
-
-        boolean isUnique = false;
-
-        uniqueLoop:
-        while (!isUnique) {
-            UUID possibleID = UUID.randomUUID();
-            plotLoop:
-            for (Plot plot : allPlots) {
-                if (plot.getID().equals(possibleID))
-                    continue uniqueLoop;
-
-            }
-            this.id = possibleID;
-            isUnique = true;
-        }
-
-        this.name = name;
-        this.ownerUUID = player.getUniqueId();
-        this.center = new PointBlock(player.getLocation());
+        this.ownerUUID = playerOwner;
+        this.center = center;
         this.radius = defaultRadius;
-        this.zone = getCalculatedZone();
+
+        this.zone = calculateZone();
+        this.plotType = PlotType.PLAYER;
+
         this.balance = 0;
         this.friends = new ArrayList<>();
         this.jointOwners = new ArrayList<>();
-        playerPlots.put(ownerUUID, this);
-        allPlots.add(this);
-        FileManager.write(this);
     }
 
-    public Plot(World world, Zone zone, String name) {
-
-        boolean isUnique = false;
-
-        uniqueLoop:
-        while (!isUnique) {
-            UUID possibleID = UUID.randomUUID();
-            plotLoop:
-            for (Plot plot : allPlots) {
-                if (plot.getID().equals(possibleID))
-                    continue uniqueLoop;
-
-            }
-            this.id = possibleID;
-            isUnique = true;
-        }
-
-        this.name = name;
-        this.ownerUUID = null;
-        isStaff = true;
-        this.center = new PointBlock(world, -1, -1, -1);
-        this.radius = -1;
-        this.zone = zone;
-        this.balance = -1;
-        this.friends = new ArrayList<>();
-        this.jointOwners = new ArrayList<>();
-        allPlots.add(this);
-        FileManager.write(this);
-    }
-
-    public void setSpawn(Location location) {
-        this.center = new PointBlock(location);
-        FileManager.write(this);
-    }
-
-    //Set the zone variable
-    private Zone getCalculatedZone() {
+    @Override
+    protected Zone calculateZone() {
         Location center = this.getCenter();
+
+        //Coordinates of the center block location
         int centerX = center.getBlockX();
         int centerZ = center.getBlockZ();
 
+        //Take into account the radius of the plot respective to x-axis
         int minX = centerX - radius;
         int maxX = centerX + radius;
 
-        int minY = 0;
-        int maxY = 256;
+        //Take into account the height of the plot.
+        int minY = 0; //The lowest can only ever be 0.
+        int maxY = center.getWorld().getMaxHeight(); //This is able to be changed later so make sure we use a method to take this into account
 
+        //Take into account the radius of the plot respective to x-axis
         int minZ = centerZ - radius;
         int maxZ = centerZ + radius;
 
@@ -189,56 +102,33 @@ public class Plot implements Serializable {
         return zone;
     }
 
-    //Is player in plot
-    public boolean contains(Player player) {
-        return contains(player.getLocation());
+    public void sendToMembers(String message) {
+        ArrayList<UUID> allMembers = new ArrayList<>();
+        allMembers.add(ownerUUID);
+        allMembers.addAll(jointOwners);
+        allMembers.addAll(friends);
+
+        for (UUID uuid : allMembers) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if(!offlinePlayer.isOnline())
+                continue;
+            offlinePlayer.getPlayer().sendMessage(message);
+
+        }
     }
 
-    //Is location in plot
-    public boolean contains(Location location) {
-        return contains(location.getBlock());
-    }
 
-    //Is block in plot
-    public boolean contains(Block block) {
-
-        if(!block.getWorld().equals(this.center.getLocation().getWorld()))
-            return false;
-
-        return this.zone.contains(block);
-    }
-
-    //Is next to plot
-    public boolean isNearby(Player player) {
-
-        if(!this.center.getLocation().getWorld().equals(player.getLocation().getWorld()))
-            return false;
-
-        final int distance = MINIMUM_PLOT_CREATE_RANGE;
-
-        Location center = this.getCenter();
-        int centerX = center.getBlockX();
-        int centerZ = center.getBlockZ();
-
-        int minX = centerX - radius - distance;
-        int maxX = centerX + radius + distance;
-
-        int minY = 0;
-        int maxY = 256;
-
-        int minZ = centerZ - radius - distance;
-        int maxZ = centerZ + radius + distance;
-
-        Zone zone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
-        if (zone.contains(player.getLocation().getBlock()))
-            return true;
-        return false;
-    }
-
-    //Is expandable? so no collision with other plots occur
+    /**
+     * Checks if the plot is able to be expanded.
+     * A plot can only expand if it can grow by one block radius and still have a one block space between plots.
+     *
+     * @return true if can expand, false otherwise.
+     */
     public boolean isExpandable() {
 
+        //Distance trying to expand to
         final int distance = 1;
+        //Blocks needed to be spaced (padding)
         final int leeway = 1;
 
         Location center = this.getCenter();
@@ -255,10 +145,11 @@ public class Plot implements Serializable {
         int maxZ = centerZ + radius + distance + leeway;
 
         Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
+
         for (Plot plot : allPlots) {
 
-            if(!this.center.getLocation().getWorld().equals(plot.getCenter().getWorld()))
-               continue;
+            if (!world.equals(plot.getWorld()))
+                continue;
 
             if (plot.equals(this))
                 continue;
@@ -269,15 +160,21 @@ public class Plot implements Serializable {
         return true;
     }
 
-    //Disbanding and getting refund
+    /**
+     * Disbands the plot. Removes the plot completely invoking the PlotManager#removePlot(Plot plot) method.
+     *
+     * @return a refund of what the player spent creating the plot and the expansion of the plot.
+     */
     public double disband() {
-        if(!isStaff)
-            playerPlots.remove(ownerUUID);
-        allPlots.remove(this);
-        FileManager.removeFile(this);
+        LostShardPlugin.getPlotManager().removePlot(this);
         return refund();
     }
 
+    /**
+     * Calculates the money spent on the plot.
+     *
+     * @return money spent on plot (plot create cost AND size of plot)
+     */
     private double refund() {
         final double percentage = REFUND_RATE;
         double adder = 0;
@@ -298,7 +195,11 @@ public class Plot implements Serializable {
         return percentage * (adder + CREATE_COST);
     }
 
-    //Get tax rate
+    /**
+     * Gets the plot's tax. The plot tax is determined by plot size.
+     *
+     * @return plot's tax
+     */
     public double getTax() {
         double goldPerPlot;
         if (radius <= defaultRadius) {
@@ -306,11 +207,14 @@ public class Plot implements Serializable {
         } else {
             goldPerPlot = (radius - defaultRadius);
         }
-
-
         return goldPerPlot;
     }
 
+    /**
+     * Uses the plot's funds to pay the daily rent. If the plot doesn't have the necessary funds to pay taxes, it shrinks to the size before.
+     *
+     * @return true if the plot had enough funds, false if the plot didn't have the funds to pay for tax, consequently, shrinking.
+     */
     public boolean rent() {
         if (getBalance() < getTax()) {
             this.balance = 0;
@@ -318,11 +222,15 @@ public class Plot implements Serializable {
             return false;
         }
         this.balance = this.balance - getTax();
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
         return true;
     }
 
-    //ExpandCost
+    /**
+     * Gets the cost to expand your plot to the next size
+     *
+     * @return the cost to expand plot
+     */
     public double getExpandCost() {
         //If the plot is between size 5 (inclusive) and
         if (1 <= radius && radius < 10) {
@@ -342,20 +250,17 @@ public class Plot implements Serializable {
 
     //Expand management
     public void expand() {
-        this.balance -= getExpandCost();
-        this.radius++;
-        this.zone = getCalculatedZone();
-        FileManager.write(this);
-
+        setBalance(this.balance - getExpandCost());
+        setRadius(this.radius + 1);
+        LostShardPlugin.getPlotManager().savePlot(this);
     }
 
     public void shrink() {
-        this.radius--;
-        this.zone = getCalculatedZone();
-        if (this.radius == 0) {
+        setRadius(this.radius - 1);
+        if (this.getRadius() == 0) {
             disband();
         } else {
-            FileManager.write(this);
+            LostShardPlugin.getPlotManager().savePlot(this);
         }
     }
 
@@ -363,13 +268,13 @@ public class Plot implements Serializable {
 
     public double deposit(double deposit) {
         this.balance += deposit;
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
         return this.balance;
     }
 
     public double withdraw(double withdraw) {
         this.balance -= withdraw;
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
         return this.balance;
     }
 
@@ -389,7 +294,7 @@ public class Plot implements Serializable {
             removeJointOwner(playerUUID);
 
         boolean isSuccessful = friends.add(playerUUID);
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
 
         return isSuccessful;
     }
@@ -399,7 +304,7 @@ public class Plot implements Serializable {
             return false;
 
         boolean isSuccessful = friends.remove(playerUUID);
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
 
         return isSuccessful;
     }
@@ -421,7 +326,7 @@ public class Plot implements Serializable {
 
         boolean isSuccessful = jointOwners.add(playerUUID);
 
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
 
         return isSuccessful;
     }
@@ -432,7 +337,7 @@ public class Plot implements Serializable {
 
         boolean isSuccessful = jointOwners.remove(playerUUID);
 
-        FileManager.write(this);
+        LostShardPlugin.getPlotManager().savePlot(this);
 
         return isSuccessful;
     }
@@ -443,65 +348,21 @@ public class Plot implements Serializable {
         return ownerUUID.equals(playerUUID);
     }
 
-    //BASIC GETTERS
 
-    public boolean isDisbanded() {
-        return radius == 0;
-    }
-
-    public UUID getOwnerUUID() {
-        return ownerUUID;
-    }
-
-    public Location getCenter() {
-        return center.getLocation();
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public int getSize() {
-        return radius;
-    }
-
-    public boolean isStaff() {
-        return isStaff;
-    }
-
-    public void setStaff(boolean isStaff)
-    {
-        this.isStaff = isStaff;
-    }
-    public double getBalance() {
-        return balance;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Zone getZone() {
-        return zone;
-    }
-
-    public UUID getID() {
-        return id;
-    }
-
-    //Info returner
+    @Override
     public String info(Player perspectivePlayer) {
 
-        if (isStaffPlot(this)) {
-            return ChatColor.GRAY + "This sacred land belongs to " + this.getName() + ".";
-        }
-
         OfflinePlayer owner = Bukkit.getOfflinePlayer(ownerUUID);
+
+
+
         ArrayList<OfflinePlayer> friends = new ArrayList<>();
-        OfflinePlayer[] friendsArray = friends.toArray(new OfflinePlayer[friends.size()]);
         for (UUID friendUUID : this.getFriends()) {
             friends.add(Bukkit.getOfflinePlayer(friendUUID));
         }
+        OfflinePlayer[] friendsArray = friends.toArray(new OfflinePlayer[friends.size()]);
+
+
         ArrayList<OfflinePlayer> jointOwners = new ArrayList<>();
         for (UUID jointOwnerUUID : this.getJointOwners()) {
             jointOwners.add(Bukkit.getOfflinePlayer(jointOwnerUUID));
@@ -511,7 +372,7 @@ public class Plot implements Serializable {
         DecimalFormat df = new DecimalFormat("#.##");
 
         //Header
-        String header = ChatColor.GOLD + "-" + this.name + "'s Plot Info-";
+        String header = ChatColor.GOLD + "-" + this.getName() + "'s Plot Info-";
 
         //Relationship to plot
         String relationshipToPlot = "";
@@ -524,13 +385,13 @@ public class Plot implements Serializable {
 
         String ownerString = ChatColor.YELLOW + "\nOwner: " + ChatColor.WHITE + owner.getName();
 
-        String size = ChatColor.YELLOW + "\nSize: " + ChatColor.WHITE + getSize();
+        String size = ChatColor.YELLOW + "\nSize: " + ChatColor.WHITE + this.getRadius()*2;
 
         String privacy = "";
         if (!relationshipToPlot.isEmpty())
             privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + df.format(getTax()) + "\n"
                     + ChatColor.GRAY + "(" + daysLeft() + ")";
-        String location = ChatColor.YELLOW + "\nCenter: " + ChatColor.WHITE + "(" + center.getX() + ", " + center.getY() + ", " + center.getZ() + ") " + ChatColor.YELLOW + "Distance from Center: " + ChatColor.WHITE + getRadius();
+        String location = ChatColor.YELLOW + "\nCenter: " + ChatColor.WHITE + "(" + center.getBlockX() + ", " + center.getBlockY() + ", " + center.getBlockZ() + ") " + ChatColor.YELLOW + "Distance from Center: " + ChatColor.WHITE + getRadius();
 
         String jointOwnerConcat = ChatColor.YELLOW + "\nCo-owners: " + ChatColor.WHITE;
         for (int i = 0; i < jointOwnersArray.length; i++) {
@@ -556,7 +417,7 @@ public class Plot implements Serializable {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/New_York"));
         ZonedDateTime nextRun = now.withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-        int times = (int) Math.floor(getBalance()/getTax()) + 1;
+        int times = (int) Math.floor(getBalance() / getTax()) + 1;
 
         if (now.compareTo(nextRun) >= 0)
             nextRun = nextRun.plusDays(times);
@@ -644,124 +505,42 @@ public class Plot implements Serializable {
         }
     }
 
-    //Static managers
-    public static HashMap<UUID, Plot> getPlayerPlots() {
-        return playerPlots;
+    //Getter /setter
+
+    public UUID getOwnerUUID() {
+        return ownerUUID;
     }
 
-    public static ArrayList<Plot> getAllPlots() {
-        return allPlots;
+    public Location getCenter() {
+        return center;
     }
 
-    public static boolean isStaffPlot(Plot plot) {
-        return plot.isStaff;
+    public int getRadius() {
+        return radius;
     }
 
-    public static boolean isPlot(String name) {
-        for (Plot plot : allPlots) {
-            if (plot.getName().equalsIgnoreCase(name))
-                return true;
-        }
-        return false;
+    public void setRadius(int radius) {
+        this.radius = radius;
+        setZone(calculateZone());
     }
 
-    public static Plot getPlot(String name) {
-        for (Plot plot : allPlots) {
-            if (plot.getName().equalsIgnoreCase(name))
-                return plot;
-        }
-        return null;
+    public double getBalance() {
+        return balance;
     }
 
-    public static boolean isStaffPlot(String name) {
-
-        //Is reserved for order and chaos
-        if (name.equalsIgnoreCase("order") || name.equalsIgnoreCase("chaos") || name.equalsIgnoreCase("arena"))
-            return true;
-
-        //Is reserved
-        for (HostilityPlatform platform : platforms) {
-            if (platform.getName().equalsIgnoreCase(name))
-                return true;
-        }
-
-
-        for (Plot plot : allPlots) {
-            if (plot.getName().equalsIgnoreCase(name)) {
-                if (plot.isStaff)
-                    return true;
-                else return false;
-
-            }
-        }
-        return false;
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 
-    public static boolean hasPlotName(String name) {
-
-        for (Plot plot : getPlayerPlots().values()) {
-            if (plot.getName().equalsIgnoreCase(name))
-                return true;
-        }
-
-        return false;
+    public void setCenter(Location center) {
+        this.center = center;
     }
 
-    public static boolean hasPlot(Player player) {
-        return wrap(player.getUniqueId()) != null;
+    public void setFriends(ArrayList<UUID> friends) {
+        this.friends = friends;
     }
 
-    public static boolean isStandingOnPlot(Player player) {
-        for (Plot plot : allPlots) {
-            if (plot.contains(player))
-                return true;
-        }
-        return false;
-    }
-
-    public static boolean isStandingOnPlot(Location location) {
-        for (Plot plot : allPlots) {
-            if (plot.contains(location))
-                return true;
-        }
-        return false;
-    }
-
-    public static Plot getStandingOnPlot(Player player) {
-        for (Plot plot : allPlots) {
-            if (plot.contains(player))
-                return plot;
-        }
-        return null;
-    }
-
-    public static Plot getStandingOnPlot(Location location) {
-        for (Plot plot : allPlots) {
-            if (plot.contains(location))
-                return plot;
-        }
-        return null;
-    }
-
-    public static boolean hasNearbyPlots(Player player) {
-        for (Plot plot : allPlots) {
-            if (plot.isNearby(player))
-                return true;
-        }
-        return false;
-    }
-
-    public static void add(Plot plot) {
-        if (Plot.isStaffPlot(plot))
-            allPlots.add(plot);
-        else {
-            getPlayerPlots().put(plot.getOwnerUUID(), plot);
-            allPlots.add(plot);
-        }
-
-    }
-
-    public static Plot wrap(UUID ownerUUID) {
-        return playerPlots.get(ownerUUID);
+    public void setJointOwners(ArrayList<UUID> jointOwners) {
+        this.jointOwners = jointOwners;
     }
 }

@@ -18,11 +18,10 @@ public class Bank {
     public final static String NAME = ChatColor.GRAY + "Bank";
     private final static HashMap<UUID, Bank> banks = new HashMap<>();
 
-    public Bank(UUID playerUUID, Inventory inventory, double currency)
-    {
+    public Bank(UUID playerUUID, Inventory inventory, double currency) {
         this.inventory = inventory;
         this.playerUUID = playerUUID;
-        this.currency=currency;
+        this.currency = currency;
     }
 
     public UUID getPlayerUUID() {
@@ -34,27 +33,23 @@ public class Bank {
     }
 
 
-
-    public double getCurrency()
-    {
+    public double getCurrency() {
         return new BigDecimal(currency).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     public void setCurrency(double currency) {
         this.currency = currency;
-        FileManager.write(this);
+        save();
     }
 
-    public void add(double currency)
-    {
+    public void addCurrency(double currency) {
         this.currency += currency;
-        FileManager.write(this);
+        save();
     }
 
-    public void remove(double currency)
-    {
+    public void removeCurrency(double currency) {
         this.currency -= currency;
-        FileManager.write(this);
+        save();
     }
 
     public void setInventory(Inventory inventory) {
@@ -65,8 +60,15 @@ public class Bank {
         return banks;
     }
 
-    public static Bank wrap(UUID playerUUID)
-    {
+    public void add() {
+        banks.put(this.playerUUID, this);
+    }
+
+    public static Bank wrap(UUID playerUUID) {
         return getBanks().get(playerUUID);
+    }
+
+    public void save() {
+        FileManager.write(this);
     }
 }

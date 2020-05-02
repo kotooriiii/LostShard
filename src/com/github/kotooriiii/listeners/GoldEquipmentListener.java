@@ -1,18 +1,57 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.plots.struct.PlayerPlot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 
 
-public class GoldArmorListener implements Listener {
+public class GoldEquipmentListener implements Listener {
+
+    @EventHandler
+    public void onHit(EntityDamageByEntityEvent event) {
+        if (event.isCancelled())
+            return;
+        Entity damager = event.getDamager();
+        if (!(damager instanceof Player))
+            return;
+
+        if(!(event.getEntity() instanceof LivingEntity))
+            return;
+
+        Player player = (Player) damager;
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if(mainHand == null)
+            return;
+
+        if(!mainHand.getType().equals(Material.GOLDEN_SWORD))
+            return;
+
+        //Player damaging an entity with a gold sword
+        final int damage = 5;
+
+        event.getEntity().getLocation().getWorld().strikeLightningEffect(event.getEntity().getLocation());
+        for(Entity entity : player.getLocation().getWorld().getNearbyEntities(player.getLocation(), 1, 1, 1))
+        {
+            if(!(entity instanceof LivingEntity))
+                continue;
+            if(player.equals(entity))
+                continue;
+
+            LivingEntity livingEntity = (LivingEntity) entity;
+            livingEntity.damage(damage);
+        }
+    }
+
     @EventHandler
     public void onDrowning(EntityDamageEvent entityDamageEvent) {
         Entity entity = entityDamageEvent.getEntity();

@@ -1,7 +1,9 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,12 +30,12 @@ public class PlayerStatusRespawnListener implements Listener {
         stat.setMana(stat.getMaxMana());
         stat.setStamina(stat.getMaxStamina());
         String organization = statusPlayer.getStatus().getOrganization();
-        Plot plot = Plot.getPlot(organization);
-        if(plot == null || plot.getCenter() == null) {
+        SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
+        if(plot == null || plot.getSpawn() == null) {
             Bukkit.broadcastMessage(ERROR_COLOR + "The spawn is not created for " + organization + ".") ;
             return null;
         }
 
-        return plot.getCenter();
+        return plot.getSpawn();
     }
 }

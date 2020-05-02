@@ -7,20 +7,26 @@ import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.discord.links.LinkPlayer;
+import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.muted.MutedPlayer;
 import com.github.kotooriiii.npc.ShardBanker;
 import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.PlotManager;
+import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.ShardPlotPlayer;
+import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_15_R1.util.CraftDamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,6 +50,9 @@ public final class FileManager {
     private static File sales_folder = new File(plugin_folder + File.separator + "sales");
     private static File stats_folder = new File(plugin_folder + File.separator + "stats");
     private static File plots_folder = new File(plugin_folder + File.separator + "plots");
+    private static File plots_staff_folder = new File(plots_folder + File.separator + "staff");
+    private static File plots_players_folder = new File(plots_folder + File.separator + "players");
+
     private static File skills_folder = new File(plugin_folder + File.separator + "skills");
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
@@ -69,6 +78,9 @@ public final class FileManager {
         sales_folder.mkdirs();
         stats_folder.mkdirs();
         plots_folder.mkdirs();
+        plots_staff_folder.mkdirs();
+        plots_players_folder.mkdirs();
+
         skills_folder.mkdirs();
         marks_folder.mkdirs();
         muted_folder.mkdirs();
@@ -168,13 +180,18 @@ public final class FileManager {
             }
         }
 
+        for (File file : bank_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            Bank bank = FileManager.readBankFile(player.getUniqueId());
-            if (bank == null)
-                return;
-            Bank.getBanks().put(player.getUniqueId(), bank);
+            Bank bank = FileManager.readBankFile(file);
+            if (bank == null) {
+                LostShardPlugin.logger.info("\n\n" + "There was a bank file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
+                continue;
+            }
+            bank.add();
         }
+
 
         for (File file : sales_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
@@ -200,17 +217,9 @@ public final class FileManager {
             }
         }
 
-        for (File file : plots_folder.listFiles()) {
-            if (!file.getName().endsWith(".obj"))
-                continue;
 
-            Plot plot = readPlot(file);
-            if (plot == null) {
-                LostShardPlugin.logger.info("\n\n" + "There was a plot file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
-                continue;
-            }
-            Plot.add(plot);
-        }
+        //Created a method since it was a long process
+        readPlots();
 
         for (File file : skills_folder.listFiles()) {
             if (!file.getName().endsWith(".obj"))
@@ -225,7 +234,7 @@ public final class FileManager {
         }
 
         for (File file : marks_folder.listFiles()) {
-            if (!file.getName().endsWith(".obj"))
+            if (!file.getName().endsWith(".yml"))
                 continue;
 
             MarkPlayer markPlayer = readMarks(file);
@@ -248,8 +257,7 @@ public final class FileManager {
             mutedPlayer.add();
         }
 
-        for(File file : links_folder.listFiles())
-        {
+        for (File file : links_folder.listFiles()) {
             if (!file.getName().endsWith(".obj"))
                 continue;
 
@@ -264,7 +272,7 @@ public final class FileManager {
     }
 
     public static void ban(UUID uuid, ZonedDateTime zdt, String banMessage) {
-        if(isBanned(uuid))
+        if (isBanned(uuid))
             return;
         FileManager.write(new BannedPlayer(uuid, zdt, banMessage));
     }
@@ -470,7 +478,7 @@ public final class FileManager {
 
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack itemStack = yaml.getItemStack("chest." + i);
-            if(itemStack == null)
+            if (itemStack == null)
                 continue;
             if (itemStack.getType().equals(Material.AIR))
                 continue;
@@ -557,19 +565,155 @@ public final class FileManager {
         return stat;
     }
 
-    public static Plot readPlot(File plotFile) {
-        try {
-            FileInputStream fis = new FileInputStream(plotFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            Plot plot = (Plot) ois.readObject();
-            return plot;
+    public static void readPlots() {
+        for (File playerFolder : plots_players_folder.listFiles()) {
+            if (!playerFolder.isDirectory())
+                continue;
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            String ownerUUIDString = playerFolder.getName();
+
+            ShardPlotPlayer shardPlotPlayer = new ShardPlotPlayer(UUID.fromString(ownerUUIDString));
+            shardPlotPlayer.add();
+
+
+            for (File plotFile : playerFolder.listFiles()) {
+                PlayerPlot playerPlot = readPlayerPlot(plotFile, UUID.fromString(ownerUUIDString));
+
+                LostShardPlugin.getPlotManager().addPlot(playerPlot, false);
+            }
+        }
+
+        for (File file : plots_staff_folder.listFiles()) {
+            StaffPlot staffPlot = readStaffPlot(file);
+            LostShardPlugin.getPlotManager().addPlot(staffPlot, false);
+
+        }
+    }
+
+
+    public static PlayerPlot readPlayerPlot(File playerPlotFile, UUID ownerUUID) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(playerPlotFile);
+
+        String plotIDString = playerPlotFile.getName().substring(0, playerPlotFile.getName().indexOf('.'));
+
+        UUID plotID = UUID.fromString(plotIDString);
+
+        //BASIC PLOT YAML
+        String plotName = yaml.getString("Name");
+
+        //The "center" field returns a world as well
+        String worldUUIDString = yaml.getString("World");
+        UUID worldUID = UUID.fromString(worldUUIDString);
+
+        //This is automatically calculated when constructor initializes.
+        String plotTypeName = yaml.getString("Type");
+        PlotType plotType = PlotType.valueOf(plotTypeName);
+
+
+        //This is automatically calculated when radius is calculated.
+        int x1 = yaml.getInt("Zone.X1");
+        int x2 = yaml.getInt("Zone.X2");
+        int y1 = yaml.getInt("Zone.Y1");
+        int y2 = yaml.getInt("Zone.Y2");
+        int z1 = yaml.getInt("Zone.Z1");
+        int z2 = yaml.getInt("Zone.Z2");
+        //END
+
+        int radius = yaml.getInt("Radius");
+        double balance = yaml.getDouble("Balance");
+        Location center = yaml.getLocation("Center");
+
+        List<String> friendsList = yaml.getStringList("Friends");
+        ArrayList<UUID> friendsUUIDList = new ArrayList<UUID>();
+
+        if (friendsList != null) {
+            for (int i = 0; i < friendsList.size(); i++) {
+                UUID friendUUID = UUID.fromString(friendsList.get(i));
+                friendsUUIDList.add(friendUUID);
+            }
+        }
+
+        List<String> jointOwnerList = yaml.getStringList("JointOwners");
+        ArrayList<UUID> jointOwnerUUIDList = new ArrayList<UUID>();
+        if (jointOwnerList != null) {
+            for (int i = 0; i < jointOwnerList.size(); i++) {
+                UUID jointOwnerUUID = UUID.fromString(jointOwnerList.get(i));
+                jointOwnerUUIDList.add(jointOwnerUUID);
+            }
+        }
+
+        PlayerPlot playerPlot = new PlayerPlot(plotName, ownerUUID, center);
+        playerPlot.setID(plotID);
+        playerPlot.setRadius(radius);
+        playerPlot.setBalance(balance);
+        playerPlot.setFriends(friendsUUIDList);
+        playerPlot.setJointOwners(jointOwnerUUIDList);
+
+
+        return playerPlot;
+    }
+
+    public static StaffPlot readStaffPlot(File staffPlotFile) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(staffPlotFile);
+
+        String plotIDString = staffPlotFile.getName().substring(0, staffPlotFile.getName().indexOf('.'));
+
+        UUID plotID = UUID.fromString(plotIDString);
+
+        //BASIC PLOT YAML
+        String plotName = yaml.getString("Name");
+        String worldUUIDString = yaml.getString("World");
+        UUID worldUID = UUID.fromString(worldUUIDString);
+
+        //This is automatically calculated when constructor initializes.
+        String plotTypeName = yaml.getString("Type");
+        PlotType plotType = PlotType.valueOf(plotTypeName);
+
+
+        //This is automatically calculated when radius is calculated.
+        int x1 = yaml.getInt("Zone.X1");
+        int x2 = yaml.getInt("Zone.X2");
+        int y1 = yaml.getInt("Zone.Y1");
+        int y2 = yaml.getInt("Zone.Y2");
+        int z1 = yaml.getInt("Zone.Z1");
+        int z2 = yaml.getInt("Zone.Z2");
+        Zone zone = new Zone(x1, x2, y1, y2, z1, z2);
+        //END
+
+        Location spawn = yaml.getLocation("Spawn");
+
+        switch (plotType) {
+            case PLAYER:
+            case DEFAULT:
+            case STAFF_DEFAULT:
+                return null;
+            case STAFF_ARENA:
+                Location spawnA = yaml.getLocation("SpawnA");
+                Location spawnB = yaml.getLocation("SpawnB");
+
+                ArenaPlot arenaPlot = new ArenaPlot(Bukkit.getWorld(worldUID), zone, plotName);
+                arenaPlot.setID(plotID);
+                if (spawn != null)
+                    arenaPlot.setSpawn(spawn);
+                if (spawnA != null)
+                    arenaPlot.setSpawnA(spawnA);
+                if (spawnB != null)
+                    arenaPlot.setSpawnB(spawnB);
+                return arenaPlot;
+            case STAFF_HOSTILITY:
+                HostilityPlot hostilityPlot = new HostilityPlot(Bukkit.getWorld(worldUID), zone, plotName);
+                hostilityPlot.setID(plotID);
+                if (spawn != null)
+                    hostilityPlot.setSpawn(spawn);
+                return hostilityPlot;
+            case STAFF_SPAWN:
+                SpawnPlot spawnPlot = new SpawnPlot(Bukkit.getWorld(worldUID), zone, plotName);
+                spawnPlot.setID(plotID);
+                if (spawn != null)
+                    spawnPlot.setSpawn(spawn);
+                return spawnPlot;
         }
         return null;
     }
@@ -592,20 +736,19 @@ public final class FileManager {
     }
 
     public static MarkPlayer readMarks(File markFile) {
-        try {
-            FileInputStream fis = new FileInputStream(markFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            MarkPlayer markPlayer = (MarkPlayer) ois.readObject();
-            return markPlayer;
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(markFile);
+        String uuidString = markFile.getName().substring(0, markFile.getName().indexOf('.'));
+
+        MarkPlayer markPlayer = new MarkPlayer(UUID.fromString(uuidString));
+
+        final Set<String> keys = yaml.getKeys(false);
+        for (String markName : keys) {
+            Location markLocation = yaml.getLocation(markName);
+            markPlayer.addMark(markName, markLocation);
         }
-        return null;
+
+        return markPlayer;
     }
 
     public static MutedPlayer readMutedPlayer(File mutedFile) {
@@ -784,10 +927,10 @@ public final class FileManager {
 
         for (int i = 0; i < bank.getInventory().getSize(); i++) {
             ItemStack item = bank.getInventory().getItem(i);
-            if(item == null)
+            if (item == null)
                 yaml.set("chest." + i, new ItemStack(Material.AIR, 1));
-                else
-            yaml.set("chest." + i, bank.getInventory().getItem(i));
+            else
+                yaml.set("chest." + i, bank.getInventory().getItem(i));
         }
         yaml.set("Currency", bank.getCurrency());
         try {
@@ -883,19 +1026,102 @@ public final class FileManager {
         }
     }
 
+
     public static void write(Plot plot) {
+        if (!plot.getType().isStaff()) {
+            write((PlayerPlot) plot);
+        } else {
+            write((StaffPlot) plot);
+        }
+    }
+
+    public static void write(PlayerPlot playerPlot) {
+        File file;
+
+        file = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getID() + ".yml");
+
+        if (file.exists()) {
+            file.delete();
+        }
+
+        int radius = playerPlot.getRadius();
+        double balance = playerPlot.getBalance();
+        Location center = playerPlot.getCenter();
+
+        UUID[] friends = playerPlot.getFriends();
+        UUID[] jointOwners = playerPlot.getJointOwners();
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        yaml.set("Name", playerPlot.getName());
+        yaml.set("World", playerPlot.getWorld().getUID() + "");
+        yaml.set("Type", playerPlot.getType().name());
+        yaml.set("Zone.X1", playerPlot.getZone().getX1());
+        yaml.set("Zone.X2", playerPlot.getZone().getX2());
+        yaml.set("Zone.Y1", playerPlot.getZone().getY1());
+        yaml.set("Zone.Y2", playerPlot.getZone().getY2());
+        yaml.set("Zone.Z1", playerPlot.getZone().getZ1());
+        yaml.set("Zone.Z2", playerPlot.getZone().getZ2());
+
+
+        yaml.set("Radius", radius);
+        yaml.set("Balance", balance);
+        yaml.set("Center", center);
+
+        ArrayList<String> friendsList = new ArrayList<>(friends.length);
+        for (UUID uuid : friends)
+            friendsList.add(uuid.toString());
+
+        ArrayList<String> jointOwnerList = new ArrayList<>(jointOwners.length);
+        for (UUID uuid : jointOwners)
+            jointOwnerList.add(uuid.toString());
+
+
+        yaml.set("Friends", friendsList);
+        yaml.set("JointOwners", jointOwnerList);
+
+
         try {
-            File file = new File(plots_folder + File.separator + plot.getID() + ".obj");
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-            oos.writeObject(plot);
-            oos.close();
-        } catch (FileNotFoundException e) {
+            yaml.save(file);
+        } catch (IOException e) {
             e.printStackTrace();
+        }
+
+
+    }
+
+    public static void write(StaffPlot staffPlot) {
+
+        File file;
+
+        file = new File(plots_staff_folder + File.separator + staffPlot.getID() + ".yml");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        yaml.set("Name", staffPlot.getName());
+        yaml.set("World", staffPlot.getWorld().getUID() + "");
+        yaml.set("Type", staffPlot.getType().name());
+        yaml.set("Zone.X1", staffPlot.getZone().getX1());
+        yaml.set("Zone.X2", staffPlot.getZone().getX2());
+        yaml.set("Zone.Y1", staffPlot.getZone().getY1());
+        yaml.set("Zone.Y2", staffPlot.getZone().getY2());
+        yaml.set("Zone.Z1", staffPlot.getZone().getZ1());
+        yaml.set("Zone.Z2", staffPlot.getZone().getZ2());
+
+        yaml.set("Spawn", staffPlot.getSpawn());
+
+        if (staffPlot.getType().equals(PlotType.STAFF_ARENA)) {
+            ArenaPlot arenaPlot = (ArenaPlot) staffPlot;
+            yaml.set("SpawnA", arenaPlot.getSpawnA());
+            yaml.set("SpawnB", arenaPlot.getSpawnB());
+
+        }
+
+        try {
+            yaml.save(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -920,18 +1146,27 @@ public final class FileManager {
     }
 
     public static void write(MarkPlayer markPlayer) {
+        String fileName = markPlayer.getPlayerUUID() + ".yml";
+        File markPlayerFile = new File(marks_folder + File.separator + fileName);
+
         try {
-            File file = new File(marks_folder + File.separator + markPlayer.getPlayerUUID() + ".obj");
-            if (file.exists()) {
-                file.delete();
+            if (markPlayerFile.exists()) {
+                markPlayerFile.delete();
             }
-            file.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-            oos.writeObject(markPlayer);
-            oos.close();
-        } catch (FileNotFoundException e) {
+            markPlayerFile.createNewFile();
+
+
+        } catch (IOException e) {
             e.printStackTrace();
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(markPlayerFile);
+        MarkPlayer.Mark[] marks = markPlayer.getMarks();
+
+        for (int i = 0; i < marks.length; i++)
+            yaml.set(marks[i].getName(), marks[i].getLocation());
+
+        try {
+            yaml.save(markPlayerFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -977,7 +1212,7 @@ public final class FileManager {
     }
 
     public static void write(LinkPlayer linkPlayer) {
-        String fileName = linkPlayer.getUserSnowflake()+ ".obj";
+        String fileName = linkPlayer.getUserSnowflake() + ".obj";
         File file = new File(links_folder + File.separator + fileName);
         try {
             if (file.exists()) {
@@ -993,6 +1228,17 @@ public final class FileManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Deprecated
+    public static void write(ShardPlotPlayer shardPlotPlayer) {
+        String fileName = shardPlotPlayer.getOwnerUUID() + "";
+        File file = new File(plots_players_folder + File.separator + fileName);
+        file.mkdirs();
+        for (PlayerPlot playerPlot : shardPlotPlayer.getPlotsOwned()) {
+            write(playerPlot);
+        }
+
     }
 
     public static void removeFile(Clan clan) {
@@ -1060,7 +1306,13 @@ public final class FileManager {
     }
 
     public static void removeFile(Plot plot) {
-        File plotFile = new File(plots_folder + File.separator + plot.getID() + ".obj");
+        File plotFile;
+        if (!plot.getType().isStaff()) {
+            PlayerPlot playerPlot = ((PlayerPlot) plot);
+            plotFile = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getID() + ".yml");
+        } else {
+            plotFile = new File(plots_staff_folder + File.separator + plot.getID() + ".yml");
+        }
 
         if (plotFile.exists())
             plotFile.delete();
@@ -1105,6 +1357,19 @@ public final class FileManager {
         if (linkPlayerFile.exists())
             linkPlayerFile.delete();
 
+    }
+
+    @Deprecated
+    public static void removeFile(ShardPlotPlayer shardPlotPlayer) {
+        File shardPlotPlayerFolder = new File(plots_players_folder + File.separator + shardPlotPlayer.getOwnerUUID());
+
+        if (!shardPlotPlayerFolder.isDirectory())
+            return;
+        if (shardPlotPlayerFolder.exists()) {
+            for (File file : shardPlotPlayerFolder.listFiles()) {
+                file.delete();
+            }
+        }
     }
 
 

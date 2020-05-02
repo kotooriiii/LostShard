@@ -1,7 +1,15 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.block.EnderChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,10 +33,19 @@ public class EntityInteractPlotListener implements Listener {
         Entity en = entityInteractEvent.getEntity();
 
         //Iterate through all plots
-        for (Plot plot : Plot.getPlayerPlots().values()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+
+
             //If the block being interacted is in the location of a plot
             if(plot.contains(location))
             {
+
+                if(!plot.getType().equals(PlotType.PLAYER))
+                {
+                    entityInteractEvent.setCancelled(true);
+                    return;
+                }
+
 
                 //If entity is not a player then cancel it
                 if(!(en instanceof Player))
@@ -43,7 +60,9 @@ public class EntityInteractPlotListener implements Listener {
                 if(playerInteracting.hasPermission(STAFF_PERMISSION))
                     return;
                 //If don't have permissions
-                if(!(plot.isFriend(playerUUID) || plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID)))
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+                if(!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID)))
                 {
                     entityInteractEvent.setCancelled(true);
                     return;
@@ -68,14 +87,31 @@ public class EntityInteractPlotListener implements Listener {
         if(playerInteracting.hasPermission(STAFF_PERMISSION))
             return;
 
+
+        if(block instanceof Container)
+            return;
+        if(block.getType().equals(Material.CHEST))
+            return;
+
         //Iterate through all plots
-        for (Plot plot : Plot.getPlayerPlots().values()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+
+
             //If the block being interacted is in the location of a plot
             if(plot.contains(location))
             {
 
+                if(!plot.getType().equals(PlotType.PLAYER))
+                {
+                    playerInteractEvent.setCancelled(true);
+                    return;
+                }
+
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
                 //If don't have permissions
-                if(!(plot.isFriend(playerUUID) || plot.isJointOwner(playerUUID) || plot.isOwner(playerUUID)))
+                if(!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID)))
                 {
                     playerInteractEvent.setCancelled(true);
                     return;

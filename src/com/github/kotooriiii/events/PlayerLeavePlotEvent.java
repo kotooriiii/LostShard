@@ -1,6 +1,6 @@
 package com.github.kotooriiii.events;
 
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

@@ -1,28 +1,21 @@
 package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.ScoreboardManager;
 
-import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -117,26 +110,6 @@ public class StatusUpdateListener implements Listener {
             damagerStatusPlayer.setStatus(Status.EXILED);
             playersCorrupt.remove(damagerPlayer.getUniqueId());
         }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onJoin(PlayerJoinEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-
-        if(RankPlayer.getRankPlayerMap().get(uuid) == null)
-        {
-            RankPlayer rankPlayer = new RankPlayer(uuid, RankType.DEFAULT);
-            rankPlayer.save();
-        }
-
-        ShardScoreboardManager.registerScoreboard(event.getPlayer());
-
-        if (StatusPlayer.getPlayerStatus().get(uuid) == null) {
-            StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.WORTHY, 0);
-            statusPlayer.save();
-            event.getPlayer().teleport(Plot.getPlot(Status.WORTHY.getOrganization()).getCenter());
-        }
-
     }
 
     public static HashMap<UUID, BukkitTask> getPlayersCorrupt() {

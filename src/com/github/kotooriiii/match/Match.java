@@ -1,9 +1,9 @@
 package com.github.kotooriiii.match;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.plots.ArenaPlot;
-import com.github.kotooriiii.plots.PlayerStatusRespawnListener;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.struct.ArenaPlot;
+import com.github.kotooriiii.plots.listeners.PlayerStatusRespawnListener;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -141,7 +141,7 @@ public class Match {
         Player playerA = fighterA.getPlayer();
         Player playerB = fighterB.getPlayer();
 
-        ArenaPlot arenaPlot = (ArenaPlot) Plot.getPlot("Arena");
+        ArenaPlot arenaPlot = (ArenaPlot) LostShardPlugin.getPlotManager().getPlot("Arena");
 
         if (arenaPlot == null) {
             sendToAll(ERROR_COLOR + "The arena plot has not been set.");

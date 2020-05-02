@@ -32,7 +32,7 @@ public class HelpCommandListener implements Listener {
                     "For information regarding the server’s features, check out\nour wiki/info page at:\n");
             tc.setColor(net.md_5.bungee.api.ChatColor.GOLD);
 
-            TextComponent component = new TextComponent("Help for Lostshard");
+            TextComponent component = new TextComponent("https://docs.google.com/document/d/1UfFwn_xJrgPkjKC9Bs7OAFAG22IDhPg4wmk7cZtsv9c/edit?usp=sharing");
             component.setColor(ChatColor.GOLD);
             component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to help site.").color(ChatColor.GOLD).create()));
             component.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.google.com/document/d/1UfFwn_xJrgPkjKC9Bs7OAFAG22IDhPg4wmk7cZtsv9c/edit?usp=sharing"));

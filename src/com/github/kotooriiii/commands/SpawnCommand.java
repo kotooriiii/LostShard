@@ -1,8 +1,8 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.plots.Plot;
+import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
@@ -12,7 +12,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.text.DecimalFormat;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -56,11 +55,11 @@ public class SpawnCommand implements CommandExecutor {
                                 StatusPlayer statusPlayer = StatusPlayer.wrap(playerSender.getUniqueId());
                                 Stat stat = Stat.wrap(playerSender);
                                 String organization = statusPlayer.getStatus().getOrganization();
-                                Plot plot = Plot.getPlot(organization);
+                                SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
 
                            //     if(plot.getCenter().getBlock())
 
-                                playerSender.teleport(plot.getCenter());
+                                playerSender.teleport(plot.getSpawn());
                                 stat.setStamina(0);
                                 stat.setMana(0);
                                 playerSender.sendMessage(ChatColor.GOLD + "You have teleported to spawn.");

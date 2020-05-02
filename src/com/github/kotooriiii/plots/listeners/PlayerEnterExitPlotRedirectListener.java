@@ -1,7 +1,9 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.PlayerEnterPlotEvent;
 import com.github.kotooriiii.events.PlayerLeavePlotEvent;
+import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -30,7 +32,7 @@ public class PlayerEnterExitPlotRedirectListener implements Listener {
         if (fromX == toX && fromY == toY && fromZ == toZ)
             return;
 
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             if (!(plot.contains(to) && !plot.contains(from)))
                 continue;
 
@@ -68,7 +70,7 @@ public class PlayerEnterExitPlotRedirectListener implements Listener {
         if (fromX == toX && fromY == toY && fromZ == toZ)
             return;
 
-        for (Plot plot : Plot.getAllPlots()) {
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             if (!(!plot.contains(to) && plot.contains(from)))
                 continue;
 

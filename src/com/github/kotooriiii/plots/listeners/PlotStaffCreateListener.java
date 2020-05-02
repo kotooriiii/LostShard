@@ -1,26 +1,22 @@
-package com.github.kotooriiii.plots;
+package com.github.kotooriiii.plots.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.npc.ShardNMS;
-import org.bukkit.Bukkit;
+import com.github.kotooriiii.plots.struct.ArenaPlot;
+import com.github.kotooriiii.plots.struct.HostilityPlot;
+import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.plots.struct.SpawnPlot;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 
 import java.util.Iterator;
 import java.util.List;
@@ -144,7 +140,7 @@ public class PlotStaffCreateListener implements Listener {
                     boolean isFound = false;
                     Plot plotFound = null;
 
-                    for (Iterator<Plot> iterator = Plot.getAllPlots().iterator(); iterator.hasNext(); ) {
+                    for (Iterator<Plot> iterator = LostShardPlugin.getPlotManager().getAllPlots().iterator(); iterator.hasNext(); ) {
                         Plot next = iterator.next();
                         if (next.getName().equalsIgnoreCase(name)) {
                             player.sendMessage(ERROR_COLOR + "The last plot with this name has been cleared. What this means is that the last spawn was also removed.");
@@ -154,24 +150,29 @@ public class PlotStaffCreateListener implements Listener {
                     }
 
                     if (isFound)
-                        plotFound.disband();
+                        LostShardPlugin.getPlotManager().removePlot(plotFound);
 
 
-                    if (name.equalsIgnoreCase("arena"))
-                    {
-                        Plot plot = new ArenaPlot(player.getWorld(), zoneFinish, name); //auto does it
-
+                    Plot plot;
+                    switch (name.toLowerCase()) {
+                        case "arena":
+                            plot = new ArenaPlot(player.getWorld(), zoneFinish, name);
+                            break;
+                        case "order":
+                        case "chaos":
+                            plot = new SpawnPlot(player.getWorld(), zoneFinish, name);
+                            break;
+                        default:
+                            plot = new HostilityPlot(player.getWorld(), zoneFinish, name);
+                            break;
                     }
-                    else {
-                        Plot plot = new Plot(player.getWorld(), zoneFinish, name); //auto does it
-                    }
+                    LostShardPlugin.getPlotManager().addPlot(plot, true);
 
                     player.getInventory().clear();
                     player.sendMessage(STANDARD_COLOR + "You have saved the staff plot, \"" + name + "\".");
                     staffPlotCreator.remove(player.getUniqueId());
                     playerInteractEvent.setCancelled(true);
 
-                    //removed in block event
                 }
                 break;
             default:
