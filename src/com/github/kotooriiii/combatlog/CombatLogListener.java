@@ -47,21 +47,39 @@ public class CombatLogListener implements Listener {
 
         String message = StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor() + player.getName();
         message += ChatColor.WHITE + " was killed by ";
-        for (int i = 0; i < attackers.length; i++) {
+
+        int counter = 0;
+        for (int i = attackers.length - 1; i >= 0; i--) {
             OfflinePlayer offlinePlayer = attackers[i];
             ChatColor color = StatusPlayer.wrap(offlinePlayer.getUniqueId()).getStatus().getChatColor();
+            if (counter == 3) {
+                break;
+            }
 
-            if (i == 0) {
+            if (i == attackers.length - 1) {
                 //The first element
                 message += color + offlinePlayer.getName();
-            } else if (i < attackers.length - 1) {
-                //Before the last element
+            } else if (0 < i) {
+                //Not last
                 message += ChatColor.WHITE + ", " + color + offlinePlayer.getName();
-            } else {
+
+            } else if (i==0){
                 //On the last element
-                message += ChatColor.WHITE + ", and " + color + offlinePlayer.getName() + ChatColor.WHITE + ".";
+                if(attackers.length == 2)
+                {
+                    message += ChatColor.WHITE + " and " + color + offlinePlayer.getName() ;
+
+                } else {
+                    message += ChatColor.WHITE + ", and " + color + offlinePlayer.getName();
+                }
+            } else {
+                message += "null";
             }
+
+            counter++;
         }
+
+        message += ChatColor.WHITE + ".";
 
         LostShardPlugin.getCombatLogManager().remove(player.getUniqueId());
         event.setDeathMessage(message);

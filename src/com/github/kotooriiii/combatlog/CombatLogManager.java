@@ -66,7 +66,8 @@ public class CombatLogManager {
         if (taggedPlayer == null) {
             taggedPlayer = new CombatTaggedPlayer(playerUUID);
         }
-        taggedPlayer.addAttacker(attackerUUID);
+        if (!taggedPlayer.isAttacker(attackerUUID))
+            taggedPlayer.addAttacker(attackerUUID);
         combatTaggedPlayersInvolved.put(playerUUID, taggedPlayer);
     }
 
@@ -74,8 +75,7 @@ public class CombatLogManager {
         return combatLoggedPlayerTask.containsKey(playerUUID);
     }
 
-    public CombatTaggedPlayer wrap(UUID playerUUID)
-    {
+    public CombatTaggedPlayer wrap(UUID playerUUID) {
         return combatTaggedPlayersInvolved.get(playerUUID);
     }
 }

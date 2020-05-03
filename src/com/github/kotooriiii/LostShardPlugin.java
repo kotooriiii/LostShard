@@ -86,6 +86,8 @@ public class LostShardPlugin extends JavaPlugin {
     private static CombatLogManager combatLogManager;
     private static PlotManager plotManager;
 
+    private static int gameTicks = 0;
+
     @Override
     public void onEnable() {
 
@@ -453,6 +455,15 @@ public class LostShardPlugin extends JavaPlugin {
                 }
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
+
+        new BukkitRunnable()
+        {
+            @Override
+            public void run()
+            {
+                gameTicks++;
+            }
+        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 1);
     }
 
     public void newDayScheduler() {
@@ -559,6 +570,10 @@ public class LostShardPlugin extends JavaPlugin {
         // Save all the settings to the config
         config.options().copyDefaults(true);
         this.saveConfig();
+    }
+
+    public static int getGameTicks() {
+        return gameTicks;
     }
 
     public static ChannelManager getChannelManager() {

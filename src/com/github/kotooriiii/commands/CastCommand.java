@@ -344,8 +344,8 @@ public class CastCommand implements CommandExecutor {
             return null;
 
 
-        int rX = data.getRadiusX();
-        int rZ = data.getRadiusZ();
+        int rX = data.getRadiusX()-2;
+        int rZ = data.getRadiusZ()-2;
 
         Random random = new Random();
         int ranX = random.nextInt(((rX) * 2)+1) - (rX);

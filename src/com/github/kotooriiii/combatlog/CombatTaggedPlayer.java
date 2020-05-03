@@ -45,4 +45,7 @@ public class CombatTaggedPlayer {
         return attackersOnline.toArray(new Player[attackersOnline.size()]);
     }
 
+    public boolean isAttacker(UUID attackerUUID) {
+        return attackersUUIDSet.contains(attackerUUID);
+    }
 }
