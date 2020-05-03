@@ -10,11 +10,11 @@ import java.util.UUID;
 
 public class CombatTaggedPlayer {
     private UUID defenderUUID;
-    private HashSet<UUID> attackersUUIDSet;
+    private ArrayList<UUID> attackersUUIDSet;
 
     public CombatTaggedPlayer(UUID defenderUUID) {
         this.defenderUUID = defenderUUID;
-        this.attackersUUIDSet = new HashSet<>();
+        this.attackersUUIDSet = new ArrayList<>();
     }
 
     public boolean addAttacker(Player attacker) {
