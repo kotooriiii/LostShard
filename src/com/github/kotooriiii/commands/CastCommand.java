@@ -372,7 +372,7 @@ public class CastCommand implements CommandExecutor {
 
 
         Stat stat = Stat.wrap(playerSender.getUniqueId());
-        stat.setMana(stat.getMana() - getManaCost());
+        stat.setMana(stat.getMana() - getRecallManaCost());
         removeIngredients(playerSender, getIngredientCost());
 
 
@@ -447,7 +447,12 @@ public class CastCommand implements CommandExecutor {
         }.runTaskTimer(LostShardPlugin.plugin, 20, 20);
     }
 
-    public static int getManaCost() {
+    public static int getRecallManaCost() {
+        return 15;
+    }
+
+    public static int getClanTPManaCost()
+    {
         return 15;
     }
 
@@ -473,7 +478,7 @@ public class CastCommand implements CommandExecutor {
 
 
         Stat stat = Stat.wrap(playerUUID);
-        if (stat.getMana() < getManaCost()) {
+        if (stat.getMana() < getRecallManaCost()) {
             playerSender.sendMessage(ERROR_COLOR + "You do not have enough mana to cast \"" + "Recall" + "\".");
             recallCommand.remove(playerUUID);
             return false;
@@ -509,6 +514,13 @@ public class CastCommand implements CommandExecutor {
 
         if (!hasIngredients(playerSender, ingredients)) {
             //   playerSender.sendMessage(ERROR_COLOR + "You don't have the ingredients to cast \"Recall\".");
+            clantpCommand.remove(playerUUID);
+            return false;
+        }
+
+        Stat stat = Stat.wrap(playerUUID);
+        if (stat.getMana() < getClanTPManaCost()) {
+            playerSender.sendMessage(ERROR_COLOR + "You do not have enough mana to cast \"" + "Clan Teleport" + "\".");
             clantpCommand.remove(playerUUID);
             return false;
         }
