@@ -1,5 +1,7 @@
 package com.github.kotooriiii.sorcery.wands;
 
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,8 +18,13 @@ public class WandListener implements Listener {
         Player player = event.getPlayer();
         if (action.equals(Action.LEFT_CLICK_AIR) || action.equals(Action.LEFT_CLICK_BLOCK)) {
             if (isWielding(player)) {
-                WandType type = getWielding(player);
-                Wand wand = new Wand(type);
+                SpellType type = getWielding(player);
+                if(type == null)
+                    return;
+                Spell spell = Spell.of(type);
+                if(spell == null)
+                    return;
+                Wand wand = new Wand(spell);
                 if (wand.hasIngredients(player)) {
                     wand.cast(player);
                     event.setCancelled(true);

@@ -3,7 +3,6 @@ package com.github.kotooriiii.commands;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import com.github.kotooriiii.sorcery.wands.Wand;
-import com.github.kotooriiii.sorcery.wands.WandType;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
