@@ -44,8 +44,6 @@ public class Wand {
 
     private Spell spell;
 
-    private static HashMap<UUID, Object[]> wandOnCooldown = new HashMap<>();
-
     public Wand(Spell spell) {
         // Set local variables to the given variables
         this.spell = spell;

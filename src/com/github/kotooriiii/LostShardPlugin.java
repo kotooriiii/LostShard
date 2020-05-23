@@ -43,6 +43,7 @@ import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
+import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -351,6 +352,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerClanTPMoveListener(), this);
 
         pm.registerEvents(new PlayerStrengthPotionEffectListener(), this);
+
+        pm.registerEvents(new WeatherManagerListener(), this);
 
         registerCustomEventListener();
 
