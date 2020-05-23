@@ -27,14 +27,17 @@ public abstract class Spell {
     private double cooldown;
     private int manaCost;
 
+    private boolean isWandable;
+
     protected static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
 
-    public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost) {
+    public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isWandable) {
         this.type = type;
         this.chatColor = color;
         this.ingredients = ingredients;
         this.cooldown = cooldown;
         this.manaCost = manaCost;
+        this.isWandable = isWandable;
     }
 
     public static Spell of(SpellType type) {
@@ -85,7 +88,7 @@ public abstract class Spell {
         return manaCost;
     }
 
-    public boolean isLapisNearby(Location location, int range) {
+    public static boolean isLapisNearby(Location location, int range) {
 
         int xmin = location.getBlockX() - range;
         int xmax = location.getBlockX() + range;
@@ -234,6 +237,9 @@ public abstract class Spell {
             return false;
         }
 
+        if(!this.hasIngredients(player))
+            return false;
+
         // Don't execute any action if the player is on cooldown
         if (isCooldown(player))
             return false;
@@ -255,6 +261,9 @@ public abstract class Spell {
 
     public void cast(Player player)
     {
+
+        if(!hasCastingRequirements(player))
+            return;
 
         // Run the wand action
         if (!executeSpell(player))

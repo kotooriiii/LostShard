@@ -176,7 +176,7 @@ public class RepairCommand implements CommandExecutor {
 
         Material material = itemStack.getType();
 
-        int useLevel = 0;
+        double useLevel = 0;
         if (0 <= level && level <= 30) {
             useLevel = level - 0;
 
@@ -209,7 +209,7 @@ public class RepairCommand implements CommandExecutor {
                 else if(level > 100)
                     return 1;
                 else
-                    return (1/20) * (useLevel);
+                    return ((double) 1/20) * (useLevel);
                 //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
@@ -226,7 +226,7 @@ public class RepairCommand implements CommandExecutor {
                 else if (level > 80)
                     return 1;
                 else
-                    return (1/20) * (useLevel);
+                    return ((double) 1/20) * (useLevel);
             //IRON
             case IRON_AXE:
             case IRON_SWORD:
@@ -243,7 +243,7 @@ public class RepairCommand implements CommandExecutor {
                 else if(level > 60)
                     return 1;
                 else
-                    return (1/30) * (useLevel);
+                    return ((double) 1/30) * (useLevel);
                 //STONE & WOOD
             case STONE_AXE:
             case STONE_SWORD:
@@ -268,7 +268,7 @@ public class RepairCommand implements CommandExecutor {
                 else if (level > 30)
                     return 1;
                 else
-                    return (1/30) * (useLevel);
+                    return ((double) 1/30) * (useLevel);
         }
         return -1;
     }

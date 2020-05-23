@@ -1,5 +1,6 @@
 package com.github.kotooriiii.sorcery.listeners;
 
+import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.wands.Wand;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -12,7 +13,7 @@ public class NoAbuseBlockBreakMaterialListener implements Listener {
     public void onBreak(BlockBreakEvent event) {
         {
             Location loc = event.getBlock().getLocation();
-            if (Wand.getLocationsForNonBlockBreak().contains(loc))
+            if (Spell.getLocationsForNonBlockBreak().contains(loc))
                 event.setDropItems(false);
         }
     }

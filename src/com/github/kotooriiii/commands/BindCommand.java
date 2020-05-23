@@ -1,5 +1,7 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import com.github.kotooriiii.sorcery.wands.Wand;
@@ -38,15 +40,15 @@ public class BindCommand implements CommandExecutor {
                     // Loop through all possible
                     boolean isFound = false;
                     Wand wand = null;
-                    for (WandType wandType : WandType.values()) {
+                    for (SpellType spellType : SpellType.values()) {
 
                         // Check if wand is the one requested
-                        for(String iname : wandType.getNames())
+                        for(String iname : spellType.getNames())
                         {
                             if(iname.equalsIgnoreCase(namebuilder))
                             {
                                 // Create wand item
-                                wand =  new Wand(wandType);
+                                wand =  new Wand(Spell.of(spellType));
                                 isFound = true;
                                 break;
                             }

@@ -196,12 +196,12 @@ public class HostilityMatch {
 
         int[] timerMinAlert = new int[]
                 {
-                        8, 6, 4, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                        3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
                 };
         int[] timerSecAlert = new int[]
                 {
-                        0, 0, 0, 0, 0, 30, 15, 10, 5, 4, 3, 2, 1, 0
+                         0, 0, 0, 30, 15, 10, 5, 4, 3, 2, 1, 0
 
                 };
 

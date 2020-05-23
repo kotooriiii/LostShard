@@ -19,16 +19,14 @@ public class WandListener implements Listener {
         if (action.equals(Action.LEFT_CLICK_AIR) || action.equals(Action.LEFT_CLICK_BLOCK)) {
             if (isWielding(player)) {
                 SpellType type = getWielding(player);
-                if(type == null)
+                if (type == null)
                     return;
                 Spell spell = Spell.of(type);
-                if(spell == null)
+                if (spell == null)
                     return;
                 Wand wand = new Wand(spell);
-                if (wand.hasIngredients(player)) {
-                    wand.cast(player);
-                    event.setCancelled(true);
-                }
+                wand.cast(player);
+                event.setCancelled(true);
             }
         }
     }

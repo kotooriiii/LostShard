@@ -1,11 +1,13 @@
 package com.github.kotooriiii.sorcery.spells.type;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +28,8 @@ public class HealSpell extends Spell {
                 ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
                 1.0f,
-                20);
+                20,
+                true);
     }
 
 
@@ -41,8 +44,29 @@ public class HealSpell extends Spell {
     }
 
     @Override
-    public void cast(Player player) {
+    public void updateCooldown(Player player)
+    {
+        healSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
+        // This runnable will remove the player from cooldown list after a given time
+        BukkitRunnable runnable = new BukkitRunnable() {
+            final double cooldown = getCooldown() * 20;
+            int counter = 0;
 
+            @Override
+            public void run() {
+
+                if (counter >= cooldown) {
+                    healSpellCooldownMap.remove(player.getUniqueId());
+                    this.cancel();
+                    return;
+                }
+
+                counter += 1;
+                Double newCooldown = new Double(cooldown - counter);
+                healSpellCooldownMap.put(player.getUniqueId(), newCooldown);
+            }
+        };
+        runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public boolean isCooldown(Player player) {

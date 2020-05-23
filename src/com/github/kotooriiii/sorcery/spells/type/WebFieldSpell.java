@@ -34,7 +34,8 @@ public class WebFieldSpell extends Spell {
                 ChatColor.AQUA,
                 new ItemStack[]{new ItemStack(Material.STRING, 1)},
                 1.0f,
-                15);
+                15,
+                true);
     }
 
     @Override
@@ -75,8 +76,29 @@ public class WebFieldSpell extends Spell {
     }
 
     @Override
-    public void cast(Player player) {
+    public void updateCooldown(Player player)
+    {
+        webFieldSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
+        // This runnable will remove the player from cooldown list after a given time
+        BukkitRunnable runnable = new BukkitRunnable() {
+            final double cooldown = getCooldown() * 20;
+            int counter = 0;
 
+            @Override
+            public void run() {
+
+                if (counter >= cooldown) {
+                    webFieldSpellCooldownMap.remove(player.getUniqueId());
+                    this.cancel();
+                    return;
+                }
+
+                counter += 1;
+                Double newCooldown = new Double(cooldown - counter);
+                webFieldSpellCooldownMap.put(player.getUniqueId(), newCooldown);
+            }
+        };
+        runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public boolean isCooldown(Player player) {

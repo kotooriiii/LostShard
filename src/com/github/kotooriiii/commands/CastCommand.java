@@ -4,6 +4,8 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import com.wimbli.WorldBorder.BorderData;
@@ -20,7 +22,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.*;
-import static com.github.kotooriiii.sorcery.wands.Wand.isLapisNearby;
 
 public class CastCommand implements CommandExecutor {
 
@@ -46,7 +47,7 @@ public class CastCommand implements CommandExecutor {
             //If the command is the "guards" command
             if (cmd.getName().equalsIgnoreCase("cast")) {
 
-                if (isLapisNearby(playerSender.getLocation(), 5)) {
+                if (Spell.isLapisNearby(playerSender.getLocation(), 5)) {
                     playerSender.sendMessage(ERROR_COLOR + "You cannot seem to cast a spell here...");
                     return false;
                 }
@@ -77,7 +78,6 @@ public class CastCommand implements CommandExecutor {
 
                                 clantpCommand.remove(playerUUID);
 
-                                Clan clan = Clan.getClan(playerUUID);
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
 
                                 if (!hasClanTPRequirements(playerSender, offlinePlayer)) {
@@ -250,8 +250,7 @@ public class CastCommand implements CommandExecutor {
                                     if (name.equalsIgnoreCase("random")) {
 
                                         Location randomLoc = randomRecall(playerSender);
-                                        if(randomLoc==null)
-                                        {
+                                        if (randomLoc == null) {
                                             playerSender.sendMessage(ERROR_COLOR + "There is no world border set or the shape is not a square. The recall feature has been disabled, please notify staff.");
                                             return false;
                                         }
@@ -325,7 +324,15 @@ public class CastCommand implements CommandExecutor {
                             }
                             break;
                         default:
-                            playerSender.sendMessage(ERROR_COLOR + "Invalid command.");
+                            SpellType type = SpellType.matchSpellType(args[0].toLowerCase());
+                            if (type != null) {
+                                Spell spell = Spell.of(type);
+                                if (spell != null) {
+                                    spell.cast(playerSender);
+                                    return true;
+                                }
+                            }
+                            playerSender.sendMessage(ERROR_COLOR + "The spell does not exist.");
                             break;
                     }
                 }
@@ -344,12 +351,12 @@ public class CastCommand implements CommandExecutor {
             return null;
 
 
-        int rX = data.getRadiusX()-2;
-        int rZ = data.getRadiusZ()-2;
+        int rX = data.getRadiusX() - 2;
+        int rZ = data.getRadiusZ() - 2;
 
         Random random = new Random();
-        int ranX = random.nextInt(((rX) * 2)+1) - (rX);
-        int ranZ = random.nextInt(((rZ) * 2)+1) - (rZ);
+        int ranX = random.nextInt(((rX) * 2) + 1) - (rX);
+        int ranZ = random.nextInt(((rZ) * 2) + 1) - (rZ);
 
         int cX = (int) data.getX();
         int cZ = (int) data.getZ();
@@ -451,8 +458,7 @@ public class CastCommand implements CommandExecutor {
         return 15;
     }
 
-    public static int getClanTPManaCost()
-    {
+    public static int getClanTPManaCost() {
         return 15;
     }
 

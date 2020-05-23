@@ -17,7 +17,7 @@ public class HostilityPlot extends StaffPlot {
 
     @Override
     public String info(Player perspectivePlayer) {
-        String header = ChatColor.GOLD + "-Order's Plot Info-";
+        String header = ChatColor.GOLD + "-" +getName() + "'s Plot Info-";
         String owner = ChatColor.YELLOW + "Owner: " + ChatColor.WHITE + "Nickolov";
         String size = ChatColor.YELLOW + "Size: " + ChatColor.WHITE + 10;
         String center = "The spawn has not been created yet.";

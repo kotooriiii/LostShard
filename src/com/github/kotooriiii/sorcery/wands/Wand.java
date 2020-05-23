@@ -110,4 +110,8 @@ public class Wand {
     public void cast(Player player) {
         spell.cast(player);
     }
+
+    public Spell getSpell() {
+        return spell;
+    }
 }

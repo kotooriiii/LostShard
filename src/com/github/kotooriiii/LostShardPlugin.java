@@ -350,6 +350,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerRecallMoveListener(), this);
         pm.registerEvents(new PlayerClanTPMoveListener(), this);
 
+        pm.registerEvents(new PlayerStrengthPotionEffectListener(), this);
+
         registerCustomEventListener();
 
         //todo to use later -->

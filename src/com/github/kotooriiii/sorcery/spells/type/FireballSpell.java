@@ -32,7 +32,8 @@ public class FireballSpell extends Spell {
                 ChatColor.RED,
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0f,
-                15);
+                15,
+                true);
     }
 
     @Override
