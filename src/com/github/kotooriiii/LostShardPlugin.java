@@ -5,7 +5,6 @@ import com.github.kotooriiii.bannedplayer.BannedJoinListener;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
-import com.github.kotooriiii.discord.listeners.LinkListener;
 import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
 import com.github.kotooriiii.match.MatchCheatingListener;
 import com.github.kotooriiii.match.MatchCreatorListener;
@@ -51,10 +50,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -63,10 +64,13 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -88,6 +92,63 @@ public class LostShardPlugin extends JavaPlugin {
     private static PlotManager plotManager;
 
     private static int gameTicks = 0;
+
+
+    public static class LSBorder {
+        public int cX;
+        public int cZ;
+        public int radiusX;
+        public int radiusZ;
+
+        public LSBorder(int cX, int cZ, int radiusX, int radiusZ) {
+            this.cX = cX;
+            this.cZ = cZ;
+            this.radiusX = radiusX;
+            this.radiusZ = radiusZ;
+        }
+
+        public int getX() {
+            return cX;
+        }
+
+        public int getZ() {
+            return cZ;
+        }
+
+        public int getRadiusX() {
+            return radiusX;
+        }
+
+        public int getRadiusZ() {
+            return radiusZ;
+        }
+    }
+
+    private static LSBorder fetchBorder(String worldName)
+    {
+        Plugin plugin =  Bukkit.getPluginManager().getPlugin("WorldBorder");
+        if(plugin == null)
+            return null;
+        File wbFolder = plugin.getDataFolder();
+        if(!wbFolder.exists())
+            return null;
+        File wbConfig = new File(wbFolder, "config.yml");
+        if(!wbConfig.exists())
+            return null;
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(wbConfig);
+
+        int cX = (int) yaml.getDouble("worlds." + worldName + ".x");
+        int cZ = (int) yaml.getDouble("worlds." + worldName + ".z");
+        int rX = yaml.getInt("worlds." + worldName + ".radiusX");
+        int rZ = yaml.getInt("worlds." + worldName + ".radiusZ");
+
+
+        if (rX == 0 && rZ == 0)
+            return null;
+
+        return new LSBorder(cX, cZ, rX, rZ);
+    }
+
 
     @Override
     public void onEnable() {
@@ -135,7 +196,6 @@ public class LostShardPlugin extends JavaPlugin {
 
         loadConfig();
         ShardScoreboardManager.updateScoreboard();
-
     }
 
 
@@ -595,4 +655,8 @@ public class LostShardPlugin extends JavaPlugin {
         return plotManager;
     }
 
+    public static LSBorder getBorder(String worldName)
+    {
+        return fetchBorder(worldName);
+    }
 }

@@ -14,11 +14,14 @@ import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -345,22 +348,17 @@ public class CastCommand implements CommandExecutor {
     public Location randomRecall(Player player) {
 
         World world = player.getLocation().getWorld();
+        String worldName = world.getName();
 
-        BorderData data = Config.Border(world.getName()); //todo fix this
-        if (data == null)
-            return null;
-
-
-        int rX = data.getRadiusX() - 2;
-        int rZ = data.getRadiusZ() - 2;
+        LostShardPlugin.LSBorder border = LostShardPlugin.getBorder(worldName);
+        int cX = border.getX();
+        int cZ = border.getZ();
+        int rX = border.getRadiusX();
+        int rZ = border.getRadiusZ();
 
         Random random = new Random();
         int ranX = random.nextInt(((rX) * 2) + 1) - (rX);
         int ranZ = random.nextInt(((rZ) * 2) + 1) - (rZ);
-
-        int cX = (int) data.getX();
-        int cZ = (int) data.getZ();
-
 
         int blockX = ranX + cX;
         int blockZ = ranZ + cZ;

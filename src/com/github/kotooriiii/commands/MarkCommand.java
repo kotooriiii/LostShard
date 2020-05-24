@@ -46,9 +46,10 @@ public class MarkCommand implements CommandExecutor {
 
                                 Player playerReceivingMark = offlinePlayer.getPlayer();
 
-                                if(!playerReceivingMark.getWorld().equals(playerSender.getWorld()) || playerReceivingMark.getLocation().distance(playerSender.getLocation()) > 5)
+                                int distanceToGiveMark = 10; //exclude
+                                if(!playerReceivingMark.getWorld().equals(playerSender.getWorld()) || playerReceivingMark.getLocation().distance(playerSender.getLocation()) > distanceToGiveMark)
                                 {
-                                    playerSender.sendMessage(ERROR_COLOR + "The player must be within 5 blocks.");
+                                    playerSender.sendMessage(ERROR_COLOR + "The player must be within " + distanceToGiveMark + " blocks.");
                                     return false;
                                 }
 

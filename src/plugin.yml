@@ -2,8 +2,11 @@ name: LostShardK
 main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
 depend: [LuckPerms]
+softdepend:
+  - WorldBorder
 loadbefore:
   - BuycraftX
+
 version: 1.0
 api-version: 1.15
 commands:
