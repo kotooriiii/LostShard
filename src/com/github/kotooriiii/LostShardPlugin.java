@@ -42,6 +42,7 @@ import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
+import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -51,6 +52,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -65,12 +67,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -90,8 +91,20 @@ public class LostShardPlugin extends JavaPlugin {
     private static DC4JBot dc4JBot;
     private static CombatLogManager combatLogManager;
     private static PlotManager plotManager;
+    private static WeatherManager weatherManager;
 
     private static int gameTicks = 0;
+
+    private static boolean isResetting = false;
+
+    public static void setReset(boolean tempIsReset) {
+        isResetting = tempIsReset;
+    }
+
+    public static boolean getReset()
+    {
+        return isResetting;
+    }
 
 
     public static class LSBorder {
@@ -165,6 +178,9 @@ public class LostShardPlugin extends JavaPlugin {
         plotManager = new PlotManager();
         combatLogManager = new CombatLogManager();
         channelManager = new ChannelManager();
+        weatherManager = new WeatherManager();
+        weatherManager.setWeatherFrequency(new WeatherManager.WeatherFrequency(8));
+
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -247,10 +263,19 @@ public class LostShardPlugin extends JavaPlugin {
 
 
         logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
+
+
+        if(isResetting) {
+            try {
+                FileUtils.deleteDirectory(LostShardPlugin.plugin.getDataFolder());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         plugin = null;
         logger = null;
         pluginDescriptionFile = null;
-
     }
 
     private void saveData() {
@@ -333,6 +358,10 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("whois").setExecutor(new WhoisCommand());
 
+        getCommand("lostshard").setExecutor(new LostShardCommand());
+        getCommand("blacksmithy").setExecutor(new BlacksmithyCommand());
+
+
 
 
         //todo to use later -->
@@ -414,6 +443,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerStrengthPotionEffectListener(), this);
 
         pm.registerEvents(new WeatherManagerListener(), this);
+        pm.registerEvents(new PlayerFirstTimeJoinListener(), this);
 
         registerCustomEventListener();
 
@@ -654,6 +684,8 @@ public class LostShardPlugin extends JavaPlugin {
     {
         return plotManager;
     }
+
+    public static WeatherManager getWeatherManager() {return  weatherManager;}
 
     public static LSBorder getBorder(String worldName)
     {

@@ -55,27 +55,43 @@ public class ChatChannelListener implements Listener {
         ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage());
         Bukkit.getPluginManager().callEvent(shardChatEvent);
 
-        if (shardChatEvent.isCancelled()) {
+        if (shardChatEvent.isCancelled())
             return;
-        }
 
+        //Player sending message
         Player player = asyncPlayerChatEvent.getPlayer();
 
+        //Channel player belongs to
         ChannelStatus channelStatus = LostShardPlugin.getChannelManager().getChannel(player);
-        Stat stat = Stat.wrap(player);
         String prefix = channelStatus.getPrefix();
+
+        //Grab stat to later grab title
+        Stat stat = Stat.wrap(player);
         String title = stat.getTitle();
+
+        //Clan
+        Clan clan = Clan.getClan(player.getUniqueId());
+        String clanTag = "";
+        if(clan != null)
+            clanTag = ChatColor.GREEN + clan.getTag().toUpperCase();
+
+        //If has a title
         if (!title.isEmpty())
             title = ChatColor.WHITE + title;
+
+        //Color of status player is in [worthy,exiled,etc]
         ChatColor color = StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor();
 
+        //Staff prefix
         if (Staff.isStaff(player.getUniqueId())) {
             Staff staff = Staff.wrap(player.getUniqueId());
             color = staff.getType().getChatColor();
             prefix = ChatColor.GOLD + "[" + prefix + ChatColor.GOLD + "]";
         } else {
-
+            //Not staff
             RankPlayer rankPlayer = RankPlayer.wrap(player.getUniqueId());
+
+            //Donator maybe?
             if (rankPlayer.isDonator()) {
                 prefix = rankPlayer.getChannelContent(channelStatus.getPrefix());
             } else {
@@ -84,10 +100,12 @@ public class ChatChannelListener implements Listener {
             }
         }
 
+        //Color name of player
         String name = color + player.getName();
+        //Get message
         String message = asyncPlayerChatEvent.getMessage();
 
-        String[] properties = new String[]{prefix, title, name};
+        String[] properties = new String[]{prefix, clanTag,  title, name};
         String builder = HelperMethods.stringBuilder(properties, 0, " ");
 
 

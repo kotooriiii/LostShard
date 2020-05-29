@@ -174,10 +174,11 @@ public class BrawlingListener implements Listener {
             }
 
             //Stun timer
-            final int stunTimer = 20 * 1;
+            final int stunTimer = 15;
 
             //Properties of object
             Object[] properties = new Object[]{null, new Double(stunTimer)};
+            stunMap.put(defender.getUniqueId(), properties);
 
             //Cancel timer
             properties[0] = new BukkitRunnable() {
@@ -202,16 +203,14 @@ public class BrawlingListener implements Listener {
                         return;
                     }
 
-                    counter += 20;
+                    counter += 1;
                     Object[] properties = getStunMap().get(playerUUID);
                     int left = timer - counter;
                     if (left < 0) left = 0;
 
                     properties[1] = new Double(left);
                 }
-            }.runTaskTimer(LostShardPlugin.plugin, 20, 20);
-            stunMap.put(defender.getUniqueId(), properties);
-
+            }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
         }
     }
 

@@ -3,6 +3,7 @@ package com.github.kotooriiii.plots.struct;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -216,6 +217,11 @@ public class PlayerPlot extends Plot {
      * @return true if the plot had enough funds, false if the plot didn't have the funds to pay for tax, consequently, shrinking.
      */
     public boolean rent() {
+
+        if(!RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
+            return true;
+
+
         if (getBalance() < getTax()) {
             this.balance = 0;
             shrink();

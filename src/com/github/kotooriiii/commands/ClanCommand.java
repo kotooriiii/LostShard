@@ -655,7 +655,7 @@ public class ClanCommand implements CommandExecutor {
                 playerSender.sendMessage(ERROR_COLOR + "Your clan has reached max capacity. You can not invite any more players.");
                 break;
             case 20:
-                playerSender.sendMessage(STANDARD_COLOR + "You canceled the invitation for" + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to join your clan.");
+                playerSender.sendMessage(STANDARD_COLOR + "You canceled the invitation for " + PLAYER_COLOR + targetPlayer.getName() + STANDARD_COLOR + " to join your clan.");
                 if (targetPlayer.isOnline())
                     ((Player) targetPlayer).sendMessage(STANDARD_COLOR + senderClan.getName() + STANDARD_COLOR + " has canceled your invitation to join the clan.");
                 invitationConfirmation.get(targetPlayerUUID).remove(senderClan);
@@ -1200,7 +1200,7 @@ public class ClanCommand implements CommandExecutor {
         switch (clan.create(playerUUID, clanName)) {
             case 0:
 
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 100);
+                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 50);
                 clanTagCreators.put(playerUUID, clan);
                 playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created.");
                 playerSender.sendMessage(STANDARD_COLOR + "What would you like your clan tag to be? It must be 3 characters long.");
@@ -1221,7 +1221,7 @@ public class ClanCommand implements CommandExecutor {
                 break;
             case 79:
                 DecimalFormat df = new DecimalFormat("#.##");
-                playerSender.sendMessage(ERROR_COLOR + "You need 100 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You need 50 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
                 break;
             case 21:
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that name.");

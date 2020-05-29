@@ -1280,7 +1280,7 @@ saveFile();
 
         if (potentialClan != null) {
             return 1;
-        } else if (Bank.getBanks().get(playerUUID).getCurrency()<100) {
+        } else if (Bank.getBanks().get(playerUUID).getCurrency()<50) {
             return 79;
         } else if (clanName.length() < 3) {
             return 10;

@@ -193,9 +193,9 @@ public class ArcheryListener implements Listener {
         if (force <= 0.1)
             damage = 1;
         else if (force <= 0.9)
-            damage = 6;
+            damage = 3;
         else if (force <= 1)
-            damage = 9;
+            damage = 5;
 
         if(level>=100)
         {
@@ -228,7 +228,7 @@ public class ArcheryListener implements Listener {
 
         //power
         if (power == 0) power = -1;
-        float powerRatio = 25 * (power + 1);
+        float powerRatio = 10 * (power + 1);
         int bonusDamage = new BigDecimal(powerRatio * (float) damage).setScale(0, RoundingMode.HALF_UP).intValue();
         damage = damage + bonusDamage;
 

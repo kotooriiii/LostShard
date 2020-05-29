@@ -71,6 +71,11 @@ public abstract class Plot implements Serializable {
      * @return true if location is inside a plot, false otherwise.
      */
     public boolean contains(Location location) {
+
+        if(!location.getWorld().equals(this.getWorld()))
+            return false;
+
+
         return this.zone.contains(location);
     }
 

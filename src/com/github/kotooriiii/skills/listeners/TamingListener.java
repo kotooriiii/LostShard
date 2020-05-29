@@ -63,6 +63,7 @@ public class TamingListener implements Listener {
         }
     }
 
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onTamingEvent(EntityTameEvent event) {
         LivingEntity entity = event.getEntity();
@@ -89,6 +90,7 @@ public class TamingListener implements Listener {
         if (entity instanceof Tameable) {
             //entity is not tamed!!
             Tameable tameable = (Tameable) entity;
+            //MUST NOT BE TAMED FOR THIS CASE TO TRIGGER
             if (!tameable.isTamed())
                 return;
         }
@@ -105,12 +107,21 @@ public class TamingListener implements Listener {
 
         //Check if the item is a tameable item
 
+
         boolean exists = false;
         for (Material breedingFood : getBreedingFoods(entity))
             if (itemStack.getType().equals(breedingFood))
                 exists = true;
         if (!exists)
             return;
+
+           /*
+        If entity is tameable, Entity is tamed.
+        Entity is living
+        Entity lower than full hp
+        Is of our definition 'tameable'
+         */
+
         addXP(player, entity);
     }
 
@@ -119,7 +130,7 @@ public class TamingListener implements Listener {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
 
-        //If entity is tameable
+        //If entity is not tameable
         if (!(entity instanceof Tameable))
             return;
 
@@ -838,8 +849,8 @@ public class TamingListener implements Listener {
     public static Wolf[] getWolves(Player player) {
         ArrayList<Wolf> wolves = new ArrayList<>();
 
-        for(World world : Bukkit.getWorlds()) {
-            for (Entity entity : world.getLivingEntities()){
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getLivingEntities()) {
                 if (entity instanceof Wolf) {
                     Wolf wolf = (Wolf) entity;
                     if (!wolf.isTamed())

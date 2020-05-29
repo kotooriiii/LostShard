@@ -304,7 +304,7 @@ public class PlotCommand implements CommandExecutor {
                             double withdrawRaw = Double.parseDouble(args[1]);
                             BigDecimal withdraw = new BigDecimal(withdrawRaw).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-                            if (currentCurrency < withdraw.doubleValue()) {
+                            if (withdrawPlot.getBalance() < withdraw.doubleValue()) {
                                 playerSender.sendMessage(ERROR_COLOR + "You can't withdraw more than your current funds.");
                                 return false;
                             }
@@ -587,12 +587,12 @@ public class PlotCommand implements CommandExecutor {
     private void sendHelp(Player player) {
         String prefix = "/plot";
         player.sendMessage(ChatColor.GOLD + "-Plot Help-");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "create (name)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "create" + " " + ChatColor.YELLOW + "(name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "disband");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "friend (username)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "co (name)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit (amount)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw (amount)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "friend" + " " + ChatColor.YELLOW + "(username)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "co" + " " + ChatColor.YELLOW + "(username)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit" + " " + ChatColor.YELLOW  + "(amount)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw" + " " + ChatColor.YELLOW+ "(amount)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "info");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "help");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "[page]");

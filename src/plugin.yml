@@ -10,6 +10,9 @@ loadbefore:
 version: 1.0
 api-version: 1.15
 commands:
+  lostshard:
+    aliases:
+      - ls
   ff:
     description:
     usage:
@@ -85,6 +88,7 @@ commands:
   swordsmanship:
   mining:
   fishing:
+  blacksmithy:
 
   smithing:
   smelt:

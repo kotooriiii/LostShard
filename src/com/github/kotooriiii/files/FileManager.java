@@ -36,8 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
 
-import static com.github.kotooriiii.data.Maps.platforms;
-import static com.github.kotooriiii.data.Maps.playerUUIDClanMap;
+import static com.github.kotooriiii.data.Maps.*;
 
 public final class FileManager {
     private static File plugin_folder = LostShardPlugin.plugin.getDataFolder();
@@ -60,6 +59,8 @@ public final class FileManager {
     private static File discord_folder = new File(plugin_folder + File.separator + "discord");
     private static File links_folder = new File(discord_folder + File.separator + "links");
 
+    private static File config = new File(plugin_folder + File.separator + "config.yml");
+
 
     private static File banned_folder = new File(plugin_folder + File.separator + "banned-players");
 
@@ -67,7 +68,15 @@ public final class FileManager {
     private FileManager() {
     }
 
+    public static void reset()
+    {
+        Bukkit.broadcastMessage(ChatColor.DARK_RED + "* * * \nThe server has been ordered to reset all LostShard content.\nShutting down server to finalize deleting content.\n* * *");
+        LostShardPlugin.setReset(true);
+        Bukkit.getServer().shutdown();
+    }
+
     public static void init() {
+
         plugin_folder.mkdir();
         clans_folder.mkdir();
         hostility_platform_folder.mkdirs();
