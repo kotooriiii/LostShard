@@ -223,7 +223,7 @@ public class HostilityMatch {
                     winStreak++;
                     if (winStreak == 3) {
                         this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
-                        capturingClan.broadcast("Your clan has fully captured " + platform.getName() + ".");
+                        capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
                         capturingClan.setHostilityBuff(true);
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
                         capturingClan.saveFile();
