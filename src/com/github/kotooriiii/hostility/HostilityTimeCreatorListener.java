@@ -1,6 +1,6 @@
 package com.github.kotooriiii.hostility;
 
-import com.github.kotooriiii.channels.ShardChatEvent;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.commands.HostilityCommand;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.entity.Player;
@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import java.text.DecimalFormat;
-import java.util.Calendar;
 
 import static com.github.kotooriiii.data.Maps.*;
 

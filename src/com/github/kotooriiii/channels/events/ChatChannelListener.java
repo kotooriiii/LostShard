@@ -1,9 +1,9 @@
-package com.github.kotooriiii.channels;
+package com.github.kotooriiii.channels.events;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.channels.ChannelStatus;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.ranks.RankPlayer;
-import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -72,7 +72,7 @@ public class ChatChannelListener implements Listener {
         //Clan
         Clan clan = Clan.getClan(player.getUniqueId());
         String clanTag = "";
-        if(clan != null)
+        if (clan != null)
             clanTag = ChatColor.GREEN + clan.getTag().toUpperCase();
 
         //If has a title
@@ -105,15 +105,32 @@ public class ChatChannelListener implements Listener {
         //Get message
         String message = asyncPlayerChatEvent.getMessage();
 
-        String[] properties = new String[]{prefix, clanTag,  title, name};
+        //Message Color
+        ChatColor messageColor = ChatColor.WHITE;
+
+        if(LostShardPlugin.getChannelManager().isAdminChat())
+        {
+            if(!player.hasPermission(STAFF_PERMISSION))
+            {
+                //todo maybe a message saying u cant speak during admin chat ?
+                player.sendMessage(ChatColor.RED + "Chat is muted.");
+                return;
+            }
+
+            prefix = ChatColor.WHITE + "[" + ChatColor.DARK_PURPLE + "Admin" + ChatColor.WHITE + "]";
+        }
+
+
+        String[] properties = new String[]{prefix, clanTag, title, name};
         String builder = HelperMethods.stringBuilder(properties, 0, " ");
+
 
 
         ArrayList<Player> recipients = getRecipients(player);
         if (recipients == null)
             return;
         for (Player recipient : recipients) {
-            recipient.sendMessage(builder + ChatColor.WHITE + ": " + message);
+            recipient.sendMessage(builder + messageColor + ": " + message);
         }
     }
 

@@ -1,11 +1,10 @@
 package com.github.kotooriiii.match;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.channels.ShardChatEvent;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.match.moneymatch.Moneymatch;
 import com.github.kotooriiii.util.HelperMethods;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;

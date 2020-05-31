@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FishingListener  implements Listener {
+public class FishingListener implements Listener {
 
     final int ADDED_XP = 50;
 
@@ -29,16 +29,11 @@ public class FishingListener  implements Listener {
         Player player = event.getPlayer();
         Entity entity = event.getCaught();
 
-        if(entity == null)
+        if (entity == null)
             return;
 
-        if(!(entity instanceof Item))
+        if (!(entity instanceof Item))
             return;
-
-
-        Item item = (Item) entity;
-        Vector origVector = item.getVelocity();
-        Vector vector = new Vector(origVector.getX(), origVector.getY(), origVector.getZ()).multiply(2);
 
         if (!isFishingRod(player.getInventory().getItemInMainHand()))
             return;
@@ -47,17 +42,13 @@ public class FishingListener  implements Listener {
 
         ArrayList<ItemStack> rewards = getRewards(fishingSkill.getLevel());
 
-        Collection<ItemStack> groundItems = reward(player, rewards);
-
-        drop(item.getLocation(), groundItems, vector);
+        reward(entity, rewards);
 
         fishingSkill.addXP(ADDED_XP);
     }
 
-    private boolean isFishingRod(ItemStack itemStack)
-    {
-        switch (itemStack.getType())
-        {
+    private boolean isFishingRod(ItemStack itemStack) {
+        switch (itemStack.getType()) {
             case FISHING_ROD:
                 return true;
         }
@@ -72,9 +63,12 @@ public class FishingListener  implements Listener {
         }
     }
 
-    private Collection<ItemStack> reward(Player player, ArrayList<ItemStack> rewards) {
-        HashMap<Integer, ItemStack> map = player.getInventory().addItem(rewards.toArray(new ItemStack[rewards.size()]));
-        return map.values();
+    private void reward(Entity entity, ArrayList<ItemStack> rewards) {
+
+        for (ItemStack rewardedItemStack : rewards) {
+            Item rewardedItem = entity.getWorld().dropItem(entity.getLocation(), rewardedItemStack);
+            rewardedItem.setVelocity(entity.getVelocity());
+        }
     }
 
     private ArrayList<ItemStack> getRewards(float level) {

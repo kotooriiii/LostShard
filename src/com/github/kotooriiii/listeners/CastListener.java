@@ -1,6 +1,6 @@
 package com.github.kotooriiii.listeners;
 
-import com.github.kotooriiii.channels.ShardChatEvent;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.commands.CastCommand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

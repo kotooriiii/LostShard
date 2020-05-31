@@ -2,6 +2,9 @@ package com.github.kotooriiii;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bannedplayer.BannedJoinListener;
+import com.github.kotooriiii.channels.commands.AdminChatCommand;
+import com.github.kotooriiii.channels.commands.ClearChatCommand;
+import com.github.kotooriiii.channels.commands.ClearChatAllCommand;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
@@ -11,7 +14,7 @@ import com.github.kotooriiii.match.MatchCreatorListener;
 import com.github.kotooriiii.match.MatchDefeatListener;
 import com.github.kotooriiii.match.banmatch.*;
 import com.github.kotooriiii.channels.ChannelManager;
-import com.github.kotooriiii.channels.ChatChannelListener;
+import com.github.kotooriiii.channels.events.ChatChannelListener;
 import com.github.kotooriiii.match.moneymatch.MoneymatchCommand;
 import com.github.kotooriiii.muted.listeners.MuteListener;
 import com.github.kotooriiii.clans.Clan;
@@ -361,6 +364,10 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("lostshard").setExecutor(new LostShardCommand());
         getCommand("blacksmithy").setExecutor(new BlacksmithyCommand());
 
+        getCommand("clearchat").setExecutor(new ClearChatCommand());
+        getCommand("clearchatall").setExecutor(new ClearChatAllCommand());
+        getCommand("adminchat").setExecutor(new AdminChatCommand());
+
 
 
 
@@ -444,6 +451,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new WeatherManagerListener(), this);
         pm.registerEvents(new PlayerFirstTimeJoinListener(), this);
+
+        pm.registerEvents(new RemovePhantomListener(), this);
 
         registerCustomEventListener();
 

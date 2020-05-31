@@ -11,6 +11,7 @@ public class ChannelManager {
 
     private HashMap<ChannelStatus, ArrayList<UUID>> channels;
     private HashMap<UUID, ChannelStatus> playerChannel;
+    private boolean isAdminChat;
 
     public ChannelManager()
     {
@@ -20,6 +21,15 @@ public class ChannelManager {
         {
             joinChannel(player, ChannelStatus.GLOBAL);
         }
+        isAdminChat = false;
+    }
+
+    public boolean isAdminChat() {
+        return isAdminChat;
+    }
+
+    public void setAdminChat(boolean adminChat) {
+        isAdminChat = adminChat;
     }
 
     public void joinChannel(Player player, ChannelStatus status)

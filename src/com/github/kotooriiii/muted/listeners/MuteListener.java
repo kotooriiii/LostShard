@@ -1,9 +1,7 @@
 package com.github.kotooriiii.muted.listeners;
 
-import com.github.kotooriiii.channels.ShardChatEvent;
-import com.github.kotooriiii.commands.MuteCommand;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.muted.MutedPlayer;
-import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class LostShardCommand implements CommandExecutor {
 
@@ -16,7 +17,7 @@ public class LostShardCommand implements CommandExecutor {
         if (!command.getName().equalsIgnoreCase("lostshard"))
             return false;
 
-        if (!commandSender.hasPermission("lostshard")) {
+        if (!commandSender.hasPermission(STAFF_PERMISSION)) {
             commandSender.sendMessage(ERROR_COLOR + "You must be staff to access this command.");
             return false;
         }
