@@ -42,7 +42,7 @@ public class FishingListener implements Listener {
 
         ArrayList<ItemStack> rewards = getRewards(fishingSkill.getLevel());
 
-        reward(entity, rewards);
+        reward(player, entity, rewards);
 
         fishingSkill.addXP(ADDED_XP);
     }
@@ -63,11 +63,14 @@ public class FishingListener implements Listener {
         }
     }
 
-    private void reward(Entity entity, ArrayList<ItemStack> rewards) {
+    private void reward(Player player, Entity entity, ArrayList<ItemStack> rewards) {
 
         for (ItemStack rewardedItemStack : rewards) {
+
             Item rewardedItem = entity.getWorld().dropItem(entity.getLocation(), rewardedItemStack);
-            rewardedItem.setVelocity(entity.getVelocity());
+            Vector vector = player.getLocation().toVector().subtract(entity.getLocation().toVector());
+            vector = vector.multiply(0.1);
+            rewardedItem.setVelocity(vector);
         }
     }
 
