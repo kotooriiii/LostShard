@@ -35,7 +35,7 @@ public class WebFieldSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.STRING, 1)},
                 1.0f,
                 15,
-                true);
+                true, true, false);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class HealSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
                 1.0f,
                 20,
-                true);
+                true, true, false);
     }
 
 

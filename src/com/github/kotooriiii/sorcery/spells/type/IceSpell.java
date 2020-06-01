@@ -34,7 +34,7 @@ public class IceSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.STRING, 1)},
                 2.0f,
                 15,
-                true);
+                true, true, false);
 
     }
 

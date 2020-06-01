@@ -27,17 +27,22 @@ public abstract class Spell {
     private double cooldown;
     private int manaCost;
 
+    private boolean isCastable;
     private boolean isWandable;
+    private boolean isScrollable;
 
     protected static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
 
-    public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isWandable) {
+    public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
         this.type = type;
         this.chatColor = color;
         this.ingredients = ingredients;
         this.cooldown = cooldown;
         this.manaCost = manaCost;
+
+        this.isCastable  = isCastable;
         this.isWandable = isWandable;
+        this.isScrollable = isScrollable;
     }
 
     public static Spell of(SpellType type) {
@@ -55,6 +60,8 @@ public abstract class Spell {
                 return new TeleportSpell();
             case WEB_FIELD:
                 return new WebFieldSpell();
+            case DARKNESS:
+                return new DarknessSpell();
             default:
                 return null;
         }
@@ -251,6 +258,18 @@ public abstract class Spell {
             return false;
         }
         return true;
+    }
+
+    public boolean isCastable() {
+        return isCastable;
+    }
+
+    public boolean isWandable() {
+        return isWandable;
+    }
+
+    public boolean isScrollable() {
+        return isScrollable;
     }
 
     public abstract boolean isCooldown(Player player);

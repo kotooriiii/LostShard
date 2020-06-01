@@ -34,7 +34,7 @@ public class LightningSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0f,
                 20,
-                true);
+                true, true, false);
 
     }
 

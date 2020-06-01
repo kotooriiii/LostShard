@@ -80,27 +80,30 @@ public class Wand {
         ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (itemStack == null || itemStack.getItemMeta() == null || itemStack.getItemMeta().getLore() == null || itemStack.getItemMeta().getLore().isEmpty())
             return false;
-        if(!itemStack.getType().equals(Material.STICK))
+        if (!itemStack.getType().equals(Material.STICK))
             return false;
 
         for (SpellType type : SpellType.values()) {
             String lastLine = itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size() - 1);
-            if (lastLine.equals("ID:" + type.getName()))
-                return true;
+            if (lastLine.equals("ID:" + type.getName())) {
+                if (Spell.of(type).isWandable())
+                    return true;
+            }
         }
         return false;
     }
 
-    public static SpellType  getWielding(Player player) {
+    public static SpellType getWielding(Player player) {
         ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (itemStack == null || itemStack.getItemMeta() == null || itemStack.getItemMeta().getLore() == null || itemStack.getItemMeta().getLore().isEmpty())
             return null;
-        if(!itemStack.getType().equals(Material.STICK))
+        if (!itemStack.getType().equals(Material.STICK))
             return null;
         for (SpellType type : SpellType.values()) {
             String lastLine = itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size() - 1);
             if (lastLine.equals("ID:" + type.getName()))
-                return type;
+                if (Spell.of(type).isWandable())
+                    return type;
         }
         return null;
     }

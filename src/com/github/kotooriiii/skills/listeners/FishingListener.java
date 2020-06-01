@@ -1,5 +1,6 @@
 package com.github.kotooriiii.skills.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.SkillPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -65,12 +67,19 @@ public class FishingListener implements Listener {
 
     private void reward(Player player, Entity entity, ArrayList<ItemStack> rewards) {
 
+        final Location fishedLocation = entity.getLocation();
+
         for (ItemStack rewardedItemStack : rewards) {
 
-            Item rewardedItem = entity.getWorld().dropItem(entity.getLocation(), rewardedItemStack);
-            Vector vector = player.getLocation().toVector().subtract(entity.getLocation().toVector());
-            vector = vector.multiply(0.1);
-            rewardedItem.setVelocity(vector);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Item rewardedItem = entity.getWorld().dropItem(fishedLocation, rewardedItemStack);
+                    Vector vector = player.getLocation().toVector().subtract(fishedLocation.toVector());
+                    vector =vector.multiply(0.1);
+                    rewardedItem.setVelocity(vector);
+                }
+            }.runTaskLater(LostShardPlugin.plugin, 5);
         }
     }
 

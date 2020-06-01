@@ -39,6 +39,7 @@ import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
 import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
+import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -453,6 +454,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerFirstTimeJoinListener(), this);
 
         pm.registerEvents(new RemovePhantomListener(), this);
+
+        pm.registerEvents(new ScrollListener(), this);
 
         registerCustomEventListener();
 

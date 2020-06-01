@@ -33,7 +33,7 @@ public class TeleportSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.FEATHER, 1)},
                 1.0f,
                 15,
-                true);
+                true, true, false);
     }
 
     @Override

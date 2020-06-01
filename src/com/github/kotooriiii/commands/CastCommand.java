@@ -331,8 +331,10 @@ public class CastCommand implements CommandExecutor {
                             if (type != null) {
                                 Spell spell = Spell.of(type);
                                 if (spell != null) {
-                                    spell.cast(playerSender);
-                                    return true;
+                                    if(Spell.of(type).isCastable()) {
+                                        spell.cast(playerSender);
+                                        return true;
+                                    }
                                 }
                             }
                             playerSender.sendMessage(ERROR_COLOR + "The spell does not exist.");
