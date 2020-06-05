@@ -220,7 +220,7 @@ public class SwordsmanshipListener implements Listener {
 
                     properties[1] = new Double(left);
                 }
-            }.runTaskTimer(LostShardPlugin.plugin, 20, 20);
+            }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
 
             bleedingMap.put(defender.getUniqueId(), properties);
 

@@ -45,7 +45,7 @@ public class ArcheryListener implements Listener {
         //The code for each skill will follow on the bottom
         //
 
-        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
+        if (!(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -73,7 +73,7 @@ public class ArcheryListener implements Listener {
         //The code for each skill will follow on the bottom
         //
 
-        if (!event.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
+        if (!(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderEntity);
@@ -106,7 +106,7 @@ public class ArcheryListener implements Listener {
         //
         //The code for each skill will follow on the bottom
         //
-        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damager instanceof AbstractArrow))
+        if (!(damager instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -137,7 +137,7 @@ public class ArcheryListener implements Listener {
         //
         //The code for each skill will follow on the bottom
         //
-        if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE) || !(damagerEntity instanceof AbstractArrow))
+        if (!(damagerEntity instanceof AbstractArrow))
             return;
 
         addXP(damagerPlayer, defenderEntity);
@@ -180,44 +180,46 @@ public class ArcheryListener implements Listener {
     private void applyLevelBonus(Player damager, Player defender, EntityDamageByEntityEvent event) {
         int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getArchery().getLevel();
 
-        AbstractArrow arrow = (Arrow) event.getDamager();
+        AbstractArrow arrow = (AbstractArrow) event.getDamager();
         String[] properties = arrow.getCustomName().split(":");
 
         String id = properties[0];
         double force = Double.valueOf(properties[1]);
         int power = Integer.parseInt(properties[2]);
 
-        int damage = 0;
+        double damage = 0;
 
         //force
-        if (force <= 0.1)
-            damage = 1;
-        else if (force <= 0.9)
+        if (force <= 0.5)
             damage = 3;
-        else if (force <= 1)
+        else if (force <= 0.9)
             damage = 5;
+        else if (force <= 1)
+            damage = 7;
+
+        double archeryBonusDamage = 0;
 
         if(level>=100)
         {
-            damage += 4;
+            archeryBonusDamage += 4;
             applyKnockback(damager, defender, arrow, 0.2);
             applyPierce(damager, defender, arrow, event, 0.15);
         }
         else if(75 <= level && level < 100)
         {
-            damage += 3;
+            archeryBonusDamage += 3;
             applyKnockback(damager, defender, arrow, 0.15);
             applyPierce(damager, defender, arrow, event, 0.10);
         }
         else if(50 <= level && level < 75)
         {
-            damage += 2;
+            archeryBonusDamage += 2;
             applyKnockback(damager, defender, arrow, 0.10);
             applyPierce(damager, defender, arrow, event, 0.075);
         }
         else if(25 <= level && level < 50)
         {
-            damage += 1;
+            archeryBonusDamage += 1;
             applyKnockback(damager, defender, arrow, 0.07);
             applyPierce(damager, defender, arrow, event, 0.05);
         }
@@ -228,11 +230,13 @@ public class ArcheryListener implements Listener {
 
         //power
         if (power == 0) power = -1;
-        float powerRatio = 10 * (power + 1);
-        int bonusDamage = new BigDecimal(powerRatio * (float) damage).setScale(0, RoundingMode.HALF_UP).intValue();
-        damage = damage + bonusDamage;
+        double powerRatio = 0.35 * (power + 1);
+        double powerDamage = powerRatio*damage;
 
-        event.setDamage(damage);
+
+        double finalDamage = damage + powerDamage + archeryBonusDamage;
+
+        event.setDamage(finalDamage);
     }
 
     private boolean addXP(Player player, Entity entity) {

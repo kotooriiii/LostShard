@@ -40,6 +40,7 @@ import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
 import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
+import com.github.kotooriiii.sorcery.spells.type.CloneSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -105,8 +106,7 @@ public class LostShardPlugin extends JavaPlugin {
         isResetting = tempIsReset;
     }
 
-    public static boolean getReset()
-    {
+    public static boolean getReset() {
         return isResetting;
     }
 
@@ -141,16 +141,15 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    private static LSBorder fetchBorder(String worldName)
-    {
-        Plugin plugin =  Bukkit.getPluginManager().getPlugin("WorldBorder");
-        if(plugin == null)
+    private static LSBorder fetchBorder(String worldName) {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("WorldBorder");
+        if (plugin == null)
             return null;
         File wbFolder = plugin.getDataFolder();
-        if(!wbFolder.exists())
+        if (!wbFolder.exists())
             return null;
         File wbConfig = new File(wbFolder, "config.yml");
-        if(!wbConfig.exists())
+        if (!wbConfig.exists())
             return null;
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(wbConfig);
 
@@ -198,7 +197,7 @@ public class LostShardPlugin extends JavaPlugin {
         //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
         registerCommands();
         registerEvents();
-       // registerDiscord();
+        // registerDiscord();
 
         //Init custom recipes
         CraftingRecipes.initRecipes();
@@ -222,7 +221,7 @@ public class LostShardPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
 
-      //  LostShardPlugin.getDiscord().getClient().logout().block();
+        //  LostShardPlugin.getDiscord().getClient().logout().block();
 
         saveData();
 
@@ -235,18 +234,17 @@ public class LostShardPlugin extends JavaPlugin {
             ShardBanker.getActiveShardBankers().get(i).forceDestroy();
         }
 
-        for(Player player : Bukkit.getOnlinePlayers())
-        {
-         InventoryView inventoryView =  player.getOpenInventory();
-         if(inventoryView == null)
-             continue;
-         InventoryType inventoryType = inventoryView.getType();
-         if(inventoryType == null)
-             continue;
-         if(!inventoryType.equals(InventoryType.CHEST))
-             continue;
-         if(!inventoryView.getTitle().equalsIgnoreCase(Bank.NAME))
-             continue;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            InventoryView inventoryView = player.getOpenInventory();
+            if (inventoryView == null)
+                continue;
+            InventoryType inventoryType = inventoryView.getType();
+            if (inventoryType == null)
+                continue;
+            if (!inventoryType.equals(InventoryType.CHEST))
+                continue;
+            if (!inventoryView.getTitle().equalsIgnoreCase(Bank.NAME))
+                continue;
             Bank bank = Bank.getBanks().get(player.getUniqueId());
             bank.setInventory(player.getOpenInventory().getTopInventory());
             FileManager.write(bank);
@@ -258,7 +256,8 @@ public class LostShardPlugin extends JavaPlugin {
         Bank.getBanks().clear();
         StatusPlayer.getPlayerStatus().clear();
         Stat.getStatMap().clear();
-        getPlotManager().getAllPlots().clear();;
+        getPlotManager().getAllPlots().clear();
+        ;
 
         //SKILLS
 
@@ -269,7 +268,7 @@ public class LostShardPlugin extends JavaPlugin {
         logger.info(pluginDescriptionFile.getName() + " has been successfully disabled on the server.");
 
 
-        if(isResetting) {
+        if (isResetting) {
             try {
                 FileUtils.deleteDirectory(LostShardPlugin.plugin.getDataFolder());
             } catch (IOException e) {
@@ -369,11 +368,14 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("clearchatall").setExecutor(new ClearChatAllCommand());
         getCommand("adminchat").setExecutor(new AdminChatCommand());
 
-
+        getCommand("book").setExecutor(new BookCommand());
+        getCommand("wiki").setExecutor(new WikiCommand());
+        getCommand("youtube").setExecutor(new YoutubeCommand());
+        getCommand("doc").setExecutor(new DocCommand());
 
 
         //todo to use later -->
-      //getCommand("opt").setExecutor(new LinkListener());
+        //getCommand("opt").setExecutor(new LinkListener());
 
 
     }
@@ -457,10 +459,14 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new ScrollListener(), this);
 
+        pm.registerEvents(new CloneSpell(), this);
+
+        pm.registerEvents(new DropLostShardBookListener(), this);
+        pm.registerEvents(new PlayerFirstJoinEvent(), this);
         registerCustomEventListener();
 
         //todo to use later -->
-       // pm.registerEvents(new LinkListener(), this);
+        // pm.registerEvents(new LinkListener(), this);
 
     }
 
@@ -544,18 +550,15 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    public void registerCustomEventListener()
-    {
+    public void registerCustomEventListener() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for(Player player : Bukkit.getOnlinePlayers())
-                {
-                    if(player.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE))
-                    {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE)) {
                         PlayerStrengthPotionEffectEvent playerStrengthPotionEffectEvent = new PlayerStrengthPotionEffectEvent(player);
                         Bukkit.getPluginManager().callEvent(playerStrengthPotionEffectEvent);
-                        if(playerStrengthPotionEffectEvent.isCancelled())
+                        if (playerStrengthPotionEffectEvent.isCancelled())
                             playerStrengthPotionEffectEvent.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
 
                     }
@@ -563,11 +566,9 @@ public class LostShardPlugin extends JavaPlugin {
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
 
-        new BukkitRunnable()
-        {
+        new BukkitRunnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 gameTicks++;
             }
         }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 1);
@@ -598,7 +599,7 @@ public class LostShardPlugin extends JavaPlugin {
                 //Taxes every day
                 for (Plot plot : getPlotManager().getAllPlots()) {
 
-                    if(!plot.getType().equals(PlotType.PLAYER))
+                    if (!plot.getType().equals(PlotType.PLAYER))
                         continue;
 
                     PlayerPlot playerPlot = (PlayerPlot) plot;
@@ -687,20 +688,19 @@ public class LostShardPlugin extends JavaPlugin {
         return channelManager;
     }
 
-    public static CombatLogManager getCombatLogManager()
-    {
+    public static CombatLogManager getCombatLogManager() {
         return combatLogManager;
     }
 
-    public static PlotManager getPlotManager()
-    {
+    public static PlotManager getPlotManager() {
         return plotManager;
     }
 
-    public static WeatherManager getWeatherManager() {return  weatherManager;}
+    public static WeatherManager getWeatherManager() {
+        return weatherManager;
+    }
 
-    public static LSBorder getBorder(String worldName)
-    {
+    public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
     }
 }

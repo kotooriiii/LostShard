@@ -2,7 +2,9 @@ package com.github.kotooriiii.combatlog;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AbstractArrow;
@@ -16,6 +18,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
@@ -41,7 +45,23 @@ public class CombatLogListener implements Listener {
             return;
 
         CombatTaggedPlayer taggedPlayer = combatLogManager.wrap(player.getUniqueId());
+
+
+        Set<OfflinePlayer> attackersSet = new LinkedHashSet<>();
         OfflinePlayer[] attackers = taggedPlayer.getAttackers();
+
+        for (OfflinePlayer offlinePlayer : attackers) {
+            attackersSet.add(offlinePlayer);
+        }
+
+        Player killer = event.getEntity().getKiller();
+        if(killer != null) {
+            attackersSet.add(Bukkit.getOfflinePlayer(killer.getUniqueId()));
+        }
+
+        attackers = attackersSet.toArray(new OfflinePlayer[attackersSet.size()]);
+
+
         if (attackers.length == 0)
             return;
 
@@ -51,7 +71,11 @@ public class CombatLogListener implements Listener {
         int counter = 0;
         for (int i = attackers.length - 1; i >= 0; i--) {
             OfflinePlayer offlinePlayer = attackers[i];
-            ChatColor color = StatusPlayer.wrap(offlinePlayer.getUniqueId()).getStatus().getChatColor();
+            if(offlinePlayer == null || (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()))
+                continue;
+            StatusPlayer statusPlayer =  StatusPlayer.wrap(offlinePlayer.getUniqueId());
+            Status status = statusPlayer.getStatus();
+            ChatColor color = status.getChatColor();
             if (counter == 3) {
                 break;
             }

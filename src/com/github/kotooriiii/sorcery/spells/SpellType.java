@@ -3,7 +3,8 @@ package com.github.kotooriiii.sorcery.spells;
 public enum SpellType {
     FIREBALL(new String[]{"Fireball"}), HEAL(new String[]{"Heal Self", "Heal"}),
     ICE(new String[]{"Ice Ball", "Ice"}), LIGHTNING(new String[]{"Lightning"}),
-    TELEPORT(new String[]{"Teleport"}), WEB_FIELD(new String[]{"Web Field", "Web"}), DARKNESS(new String[]{"Darkness"});
+    TELEPORT(new String[]{"Teleport"}), WEB_FIELD(new String[]{"Web Field", "Web"}),
+    DARKNESS(new String[]{"Darkness"}), CLONE(new String[]{"Clone"});
 
     private String[] names;
 

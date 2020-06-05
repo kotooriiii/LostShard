@@ -19,6 +19,8 @@ public class PlayerFirstTimeJoinListener implements Listener {
 
         //player has not played before
         SpawnPlot spawnPlot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot("order");
+        if(spawnPlot == null || spawnPlot.getSpawn() == null)
+            return;
         player.teleport(spawnPlot.getSpawn());
 
     }

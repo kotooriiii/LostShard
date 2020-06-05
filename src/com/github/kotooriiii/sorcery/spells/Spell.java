@@ -62,6 +62,8 @@ public abstract class Spell {
                 return new WebFieldSpell();
             case DARKNESS:
                 return new DarknessSpell();
+            case CLONE:
+                return new CloneSpell();
             default:
                 return null;
         }
@@ -278,15 +280,15 @@ public abstract class Spell {
 
     public abstract void updateCooldown(Player player);
 
-    public void cast(Player player)
+    public boolean cast(Player player)
     {
 
         if(!hasCastingRequirements(player))
-            return;
+            return false;
 
         // Run the wand action
         if (!executeSpell(player))
-            return;
+            return false;
 
         Stat stat = Stat.wrap(player.getUniqueId());
         stat.setMana(stat.getMana() - this.getManaCost());
@@ -294,6 +296,7 @@ public abstract class Spell {
 
         localBroadcast(player, this.getName());
         updateCooldown(player);
+        return true;
     }
 
 }

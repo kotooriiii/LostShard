@@ -50,10 +50,11 @@ public class ShardBaseNPC extends ShardNMS {
      * The NPC entity we are working with
      */
     private final EntityPlayer npc;
+    protected PlayerInteractManager playerInteractManager;
     /**
      * The hitboxes the npc has
      */
-    private EntityArmorStand[] armorStands;
+    protected EntityArmorStand[] armorStands;
 
     /**
      * Name of NPC
@@ -89,18 +90,18 @@ public class ShardBaseNPC extends ShardNMS {
         */
         gameProfile.getProperties().put("textures", new Property("textures", skin.getTexture(), skin.getSignature()));
 
-
+this.playerInteractManager = new PlayerInteractManager(minecraftWorld);
         //Save object
-        npc = new EntityPlayer(minecraftServer, minecraftWorld, gameProfile, new PlayerInteractManager(minecraftWorld)) {
-            @Override
-            public void setMot(Vec3D vec3d) {
-
-            }
-
-            @Override
-            public void setMot(double d0, double d1, double d2) {
-
-            }
+        npc = new EntityPlayer(minecraftServer, minecraftWorld, gameProfile, playerInteractManager) {
+//            @Override
+//            public void setMot(Vec3D vec3d) {
+//
+//            }
+//
+//            @Override
+//            public void setMot(double d0, double d1, double d2) {
+//
+//            }
 
             @Override
             public void collide(Entity e) {
@@ -110,8 +111,6 @@ public class ShardBaseNPC extends ShardNMS {
                 super.collide(e);
             }
         };
-
-        npc.persist = true;
 
         //Save the location as just the world with init coords.
         setCurrentLocation(new Location(world, 0, 0, 0));
@@ -184,6 +183,7 @@ public class ShardBaseNPC extends ShardNMS {
         //Send packets
         sendPacket(playerDeclarePacket);
         sendPacket(playerSpawnPacket);
+
 
         //Delay and then remove from Tablist
         new BukkitRunnable() {
@@ -425,7 +425,7 @@ public class ShardBaseNPC extends ShardNMS {
         return isDestroyed;
     }
 
-    private void setDestroyed(boolean destroyed) {
+    protected void setDestroyed(boolean destroyed) {
         isDestroyed = destroyed;
     }
 
@@ -433,7 +433,7 @@ public class ShardBaseNPC extends ShardNMS {
         return isSpawned;
     }
 
-    private void setSpawned(boolean spawned) {
+    protected void setSpawned(boolean spawned) {
         isSpawned = spawned;
     }
 
@@ -441,7 +441,7 @@ public class ShardBaseNPC extends ShardNMS {
         return currentLocation;
     }
 
-    private void setCurrentLocation(Location currentLocation) {
+    protected void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
     }
 

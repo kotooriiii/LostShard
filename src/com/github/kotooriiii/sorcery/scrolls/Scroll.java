@@ -82,8 +82,8 @@ public class Scroll {
         return null;
     }
 
-    public void cast(Player player) {
-        spell.cast(player);
+    public boolean cast(Player player) {
+       return spell.cast(player);
     }
 
     public Spell getSpell() {

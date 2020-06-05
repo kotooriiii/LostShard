@@ -20,7 +20,9 @@ public class PlayerStatusRespawnListener implements Listener {
     {
         Player player = event.getPlayer();
 
-        event.setRespawnLocation(getSpawnLocation(player));
+        Location loc = getSpawnLocation(player);
+        if(loc!=null)
+        event.setRespawnLocation(loc);
     }
 
     public static Location getSpawnLocation(Player player)

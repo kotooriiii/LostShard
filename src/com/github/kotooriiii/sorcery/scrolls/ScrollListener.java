@@ -20,9 +20,11 @@ public class ScrollListener implements Listener {
                 Scroll scroll = Scroll.getWielding(player);
                 if (scroll == null)
                     return;
-                scroll.cast(player);
-                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+
                 event.setCancelled(true);
+                if(!scroll.cast(player))
+                    return;
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             }
         }
     }

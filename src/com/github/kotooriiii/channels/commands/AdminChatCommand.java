@@ -17,10 +17,10 @@ public class AdminChatCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
 
-        if(!sender.hasPermission(STAFF_PERMISSION))
+        if (!sender.hasPermission(STAFF_PERMISSION))
             return false;
 
-        if(!cmd.getName().equalsIgnoreCase("adminchat"))
+        if (!cmd.getName().equalsIgnoreCase("adminchat"))
             return false;
 
         /*
@@ -33,13 +33,14 @@ public class AdminChatCommand implements CommandExecutor {
 
         boolean isCurrentlyAdminChat = channelManager.isAdminChat();
 
-        if(isCurrentlyAdminChat)
-        {
-            for(Player player : Bukkit.getOnlinePlayers())
-                player.sendMessage(STANDARD_COLOR + "You have switched to admin chat.");
-        } else {
-            for(Player player : Bukkit.getOnlinePlayers())
+        if (isCurrentlyAdminChat) {
+            for (Player player : Bukkit.getOnlinePlayers())
                 player.sendMessage(STANDARD_COLOR + "You have switched to " + LostShardPlugin.getChannelManager().getChannel(player).getName().toLowerCase() + " chat.");
+
+        } else {
+            for (Player player : Bukkit.getOnlinePlayers())
+                player.sendMessage(STANDARD_COLOR + "You have switched to admin chat.");
+
         }
 
         channelManager.setAdminChat(!isCurrentlyAdminChat);
