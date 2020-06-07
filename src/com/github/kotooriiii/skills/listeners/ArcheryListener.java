@@ -191,11 +191,11 @@ public class ArcheryListener implements Listener {
 
         //force
         if (force <= 0.5)
-            damage = 3;
+            damage = 1;
         else if (force <= 0.9)
-            damage = 5;
+            damage = 3;
         else if (force <= 1)
-            damage = 7;
+            damage = 5;
 
         double archeryBonusDamage = 0;
 
@@ -228,13 +228,14 @@ public class ArcheryListener implements Listener {
 
         }
 
+
         //power
         if (power == 0) power = -1;
-        double powerRatio = 0.35 * (power + 1);
-        double powerDamage = powerRatio*damage;
+        double powerRatio = 0.25 * (power + 1);
+        double powerDamage = powerRatio*(damage+archeryBonusDamage);
 
 
-        double finalDamage = damage + powerDamage + archeryBonusDamage;
+        double finalDamage = (damage+archeryBonusDamage) + powerDamage;
 
         event.setDamage(finalDamage);
     }

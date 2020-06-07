@@ -5,6 +5,7 @@ import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -202,14 +204,13 @@ public class SwordsmanshipListener implements Listener {
                     double newHP = ((Player) defender).getHealth() - 1;
 
                     if (newHP <= 0) {
-                        if(!defender.isDead())
-                        ((Player) defender).setHealth(0);
+                        if (!defender.isDead())
+                            ((Player) defender).setHealth(0);
                         getBleedingMap().remove(playerUUID);
                         this.cancel();
                         return;
 
-                    }
-                    else {
+                    } else {
                         ((Player) defender).setHealth(newHP);
                     }
 
@@ -227,10 +228,22 @@ public class SwordsmanshipListener implements Listener {
         }
     }
 
+    private boolean isCrit(Player damager) {
+        return damager.getFallDistance() > 0.0f && !damager.isOnGround() && !damager.getLocation().getBlock().isLiquid() && !damager.isSprinting()  &&!damager.isInsideVehicle() && !damager.hasPotionEffect(PotionEffectType.BLINDNESS);
+    }
+
     private void applyLevelBonus(Player damager, Entity defender, EntityDamageByEntityEvent event) {
         int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getSwordsmanship().getLevel();
 
-        int damage = (int) event.getDamage();
+        double damage = (int) event.getDamage();
+
+        boolean isCrit = isCrit(damager);
+
+        if (isCrit) {
+            damage/=1.5f;
+        }
+
+        damage -= 4;
 
         if (level >= 100) {
             damage += 4;
@@ -248,7 +261,16 @@ public class SwordsmanshipListener implements Listener {
 
         }
 
-        event.setDamage(damage);
+
+        if(isCrit)
+            damage*=1.5f;
+
+        double sharpnessLevel = damager.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.DAMAGE_ALL);
+        double sharpnessDamage = 0.5 * sharpnessLevel + 0.5;
+
+        double totalDamage = damage + sharpnessDamage;
+
+        event.setDamage(totalDamage);
     }
 
     private boolean addXP(Player player, Entity entity) {

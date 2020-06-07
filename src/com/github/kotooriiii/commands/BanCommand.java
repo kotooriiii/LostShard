@@ -54,7 +54,7 @@ public class BanCommand implements CommandExecutor {
                 return false;
             }
 
-            if (Staff.isStaff(playerSender.getUniqueId())) {
+            if (Staff.isStaff(offlinePlayer.getUniqueId())) {
                 if (offlinePlayer.isOnline()) {
                     offlinePlayer.getPlayer().sendMessage(ERROR_COLOR + playerSender.getName() + " tried to ban you.");
 

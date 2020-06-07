@@ -359,8 +359,27 @@ public class CastCommand implements CommandExecutor {
         int rZ = border.getRadiusZ();
 
         Random random = new Random();
-        int ranX = random.nextInt(((rX) * 2) + 1) - (rX);
-        int ranZ = random.nextInt(((rZ) * 2) + 1) - (rZ);
+
+        /*
+
+        Why this crazy magic value?
+        rX is the radius.
+        Multiply by two to include the whole diameter.
+        After random value is set remove the radius to include negative number
+
+        Example: Radius is 3
+        random values possible are: 0 1 2. DONT INCLUDE 3. Radius by Worldborder is EXCLUSIVE
+
+        mult by two: 0 1 2 _ 3 4 5
+        subtract 1: 0 1 _ 2 _ 3 4
+        PICK RANDOM
+        add one: 1 2 _ 3 _ 4 5
+        subtract radius (3): -2 -1 0 1 2
+
+         */
+
+        int ranX = random.nextInt(((rX) * 2) - 1) + 1 - (rX);
+        int ranZ =  random.nextInt(((rZ) * 2) - 1) + 1 - (rZ);
 
         int blockX = ranX + cX;
         int blockZ = ranZ + cZ;

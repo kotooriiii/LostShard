@@ -136,7 +136,7 @@ public class ShardGuard extends ShardLocationNPC {
         //Get the world
         World w = player.getWorld();
         //Play the enderman sound
-        w.playSound(loc, Sound.ENTITY_ENDERMAN_SCREAM, 10, 0);
+        //w.playSound(loc, Sound.ENTITY_ENDERMAN_SCREAM, 10, 0);
         //Spawn particle at location
         w.spawnParticle(Particle.FIREWORKS_SPARK, getCurrentLocation(), 20, 0.3, 0.3, 0.3);
         //Slow player
@@ -164,7 +164,7 @@ public class ShardGuard extends ShardLocationNPC {
             public void run() {
                 if (isDestroyed())
                     return;
-                w.playSound(playerLocation, Sound.ENTITY_PLAYER_BURP, 10, 0);
+               // w.playSound(playerLocation, Sound.ENTITY_PLAYER_BURP, 10, 0);
             }
         }.runTaskLater(LostShardPlugin.plugin, 10);
 

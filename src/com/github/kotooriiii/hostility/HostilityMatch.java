@@ -6,8 +6,10 @@ import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -201,7 +203,7 @@ public class HostilityMatch {
                 };
         int[] timerSecAlert = new int[]
                 {
-                         0, 0, 0, 30, 15, 10, 5, 4, 3, 2, 1, 0
+                        0, 0, 0, 30, 15, 10, 5, 4, 3, 2, 1, 0
 
                 };
 
@@ -234,40 +236,82 @@ public class HostilityMatch {
                         itemLore.add(ChatColor.GOLD + platform.getName() + " Prize");
 
                         //GOLD ITEM STACK
-                        ItemStack goldItemStack = new ItemStack(Material.GOLD_INGOT, 50);
+                        ItemStack goldItemStack = new ItemStack(Material.GOLD_INGOT, 100);
                         ItemMeta goldItemMeta = goldItemStack.getItemMeta();
                         goldItemMeta.setLore(itemLore);
                         goldItemStack.setItemMeta(goldItemMeta);
 
-                        //DRAGON ITEM STACK
-                        ItemStack dragonItemStack = new ItemStack(Material.DRAGON_EGG, 1);
-                        ItemMeta dragonItemMeta = dragonItemStack.getItemMeta();
-                        dragonItemMeta.setLore(itemLore);
-                        dragonItemStack.setItemMeta(dragonItemMeta);
+                        //FEATHER ITEM STACK
+                        ItemStack featherItemStack = new ItemStack(Material.FEATHER, 128);
+                        ItemMeta featherItemMeta = featherItemStack.getItemMeta();
+                        featherItemMeta.setLore(itemLore);
+                        featherItemStack.setItemMeta(featherItemMeta);
+
+                        //MELON ITEM STACK
+                        ItemStack melonItemStack = new ItemStack(Material.MELON, 32);
+                        ItemMeta melonItemMeta = melonItemStack.getItemMeta();
+                        melonItemMeta.setLore(itemLore);
+                        melonItemStack.setItemMeta(melonItemMeta);
+
+                        //FORTUNE 3 ITEM STACK
+                        ItemStack fortuneItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta fortuneMeta = (EnchantmentStorageMeta) fortuneItemStack.getItemMeta();
+                        fortuneMeta.addStoredEnchant(Enchantment.LOOT_BONUS_BLOCKS, 3, true);
+                        fortuneMeta.setLore(itemLore);
+                        fortuneItemStack.setItemMeta(fortuneMeta);
+
+                        //HAVOK
+
+                        //ROTTEN FLESH ITEM STACK
+                        ItemStack rottenItemStack = new ItemStack(Material.ROTTEN_FLESH, 128);
+                        ItemMeta rottenItemMeta = rottenItemStack.getItemMeta();
+                        rottenItemMeta.setLore(itemLore);
+                        rottenItemStack.setItemMeta(rottenItemMeta);
+
+                        //fire 2 ITEM STACK
+                        ItemStack fireItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta fireMeta = (EnchantmentStorageMeta) fireItemStack.getItemMeta();
+                        fireMeta.addStoredEnchant(Enchantment.FIRE_ASPECT, 2, true);
+                        fireMeta.setLore(itemLore);
+                        fireItemStack.setItemMeta(fireMeta);
+
+                        //LOOT 3 ITEM STACK
+                        ItemStack lootingItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta lootingItemMeta = (EnchantmentStorageMeta) lootingItemStack.getItemMeta();
+                        lootingItemMeta.addStoredEnchant(Enchantment.LOOT_BONUS_MOBS, 3, true);
+                        lootingItemMeta.setLore(itemLore);
+                        lootingItemStack.setItemMeta(lootingItemMeta);
 
 
                         for (UUID uuid : capturingClan.getAllUUIDS()) {
                             Player player = Bukkit.getOfflinePlayer(uuid).getPlayer();
 
                             if (player.isOnline()) {
-                                HashMap<Integer, ItemStack> unstoredItems;
-                                if (player.equals(capturingPlayer)) {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack, dragonItemStack);
+                                HashMap<Integer, ItemStack> unstoredItems = new HashMap<>();
 
-                                } else {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack);
-
-                                }
 
                                 player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
                                 player.sendMessage(STANDARD_COLOR + "Your clan has gained the hostility buff!");
-
                                 player.sendMessage(STANDARD_COLOR + "Bonuses: ");
-                                player.sendMessage(STANDARD_COLOR + "- 50 Gold");
-                                if (player.equals(capturingPlayer)) {
-                                    player.sendMessage(STANDARD_COLOR + "Personal Bonus:");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Dragon Egg");
+                                player.sendMessage(STANDARD_COLOR + "- 100 Gold");
+                                player.sendMessage(STANDARD_COLOR + "- 128 Feathers");
+
+                                if (platform.getName().equalsIgnoreCase("Havok") || platform.getName().equalsIgnoreCase("Havoc")) {
+                                    unstoredItems = player.getInventory().addItem(goldItemStack, featherItemStack, rottenItemStack, fireItemStack, lootingItemStack);
+                                    player.sendMessage(STANDARD_COLOR + "- 128 Rotten Flesh");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Fire Aspect II Enchanted Book");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Looting III Enchanted Book");
+
+                                } else if (platform.getName().equalsIgnoreCase("Hostility")) {
+                                    unstoredItems = player.getInventory().addItem(goldItemStack, featherItemStack, melonItemStack, fortuneItemStack);
+                                    player.sendMessage(STANDARD_COLOR + "- 32 Melon Blocks");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Fortune III Enchanted Book");
+
                                 }
+
+
+
+
 
                                 if (unstoredItems.keySet().size() > 0)
                                     player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + " but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
@@ -280,7 +324,7 @@ public class HostilityMatch {
 
                             final Stat stat = Stat.getStatMap().get(uuid);
                             stat.setMaxStamina(125);
-                            stat.setMana(125);
+                            stat.setMaxMana(125);
 
                             new BukkitRunnable() {
                                 @Override

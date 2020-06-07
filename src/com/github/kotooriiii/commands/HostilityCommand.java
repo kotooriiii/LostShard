@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +121,7 @@ public class HostilityCommand implements CommandExecutor {
                                                     hostilityRemoverConfirmation.add(playerUUID);
 
 
-                                                    Bukkit.getScheduler().scheduleSyncDelayedTask(LostShardPlugin.plugin, new Runnable() {
+                                               new BukkitRunnable() {
                                                         public void run() {
                                                             if (!hostilityRemoverConfirmation.contains(playerUUID)) //If he was removed from the confirmation list, don't do anything.
                                                                 return;
@@ -130,7 +131,7 @@ public class HostilityCommand implements CommandExecutor {
                                                                 playerSender.sendMessage(STANDARD_COLOR + "The time to delete a Hostility Platform has expired.");
                                                             hostilityRemoverConfirmation.remove(playerUUID);
                                                         }
-                                                    }, 60 * 20L);
+                                                    }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 60 * 20L);
 
                                                 } else {
                                                     hostilityRemoverConfirmation.remove(playerUUID);

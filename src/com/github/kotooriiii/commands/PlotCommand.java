@@ -144,20 +144,16 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             if (friendPlot.isFriend(friendUUID)) {
-                                friendPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + friendPlayer.getName() + " from being a plot friend.");
-                                friendPlot.removeFriend(friendUUID);
+                                playerSender.sendMessage(ERROR_COLOR + friendPlayer.getName() + " is already a friend. " + "Did you mean to unfriend a player to your plot? /plot unfriend (username)");
                             } else {
                                 friendPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " added " + friendPlayer.getName() + " to your plot as a friend.");
                                 friendPlot.addFriend(friendUUID);
                             }
                             break;
-                        case "co-owner":
-                        case "coowner":
-                        case "coown":
-                        case "co-own":
-                        case "co":
+                        case "unfriend":
+                        case "unf":
                             if (args.length == 1) {
-                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to promote a player as co-owner to your plot? /plot co (username)");
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to unfriend a player to your plot? /plot unfriend (username)");
                                 return false;
                             }
 
@@ -167,14 +163,56 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't co-owner players to staff plots.");
+                                playerSender.sendMessage(ERROR_COLOR + "You can't unfriend players to staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot unfriendPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!unfriendPlot.isOwner(playerUUID) && !unfriendPlot.isJointOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't unfriend players to this plot.");
+                                return false;
+                            }
+
+                            OfflinePlayer unfriendPlayer = Bukkit.getOfflinePlayer(supply);
+                            UUID unfriendUUID = unfriendPlayer.getUniqueId();
+
+                            if (!unfriendPlayer.hasPlayedBefore() && !unfriendPlayer.isOnline()) {
+                                playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
+                                return false;
+                            }
+
+                            if (unfriendPlot.isFriend(unfriendUUID)) {
+                                unfriendPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + unfriendPlayer.getName() + " from being a plot friend.");
+                                unfriendPlot.removeFriend(unfriendUUID);
+                            } else {
+                                playerSender.sendMessage(ERROR_COLOR + unfriendPlayer.getName() + " is not a friend. " + "Did you mean to friend a player to your plot? /plot friend (username)");
+                            }
+                            break;
+                        case "co-owner":
+                        case "coowner":
+                        case "coown":
+                        case "co-own":
+                        case "co":
+                            if (args.length == 1) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to promote a player to co-owner on your plot? /plot co (username)");
+                                return false;
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't co-owner players on staff plots.");
                                 return false;
                             }
 
                             PlayerPlot jointOwnerPlot = (PlayerPlot) standingOnPlot;
 
                             if (!jointOwnerPlot.isOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't co-own players to this plot.");
+                                playerSender.sendMessage(ERROR_COLOR + "You can't co-own players on this plot.");
                                 return false;
                             }
 
@@ -187,11 +225,53 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             if (jointOwnerPlot.isJointOwner(jointOwnerUUID)) {
-                                jointOwnerPlot.removeJointOwner(jointOwnerUUID);
-                                jointOwnerPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + jointPlayer.getName() + " from being a plot co-owner.");
+                                playerSender.sendMessage(ERROR_COLOR + jointPlayer.getName() + " is already a co-owner. " + "Did you mean to demote a player from co-owner on your plot? /plot unco (username)");
+
                             } else {
                                 jointOwnerPlot.addJointOwner(jointOwnerUUID);
                                 jointOwnerPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " added " + jointPlayer.getName() + " to your plot as a co-owner.");
+                            }
+                            break;
+                        case "unco-owner":
+                        case "uncoowner":
+                        case "uncoown":
+                        case "unco-own":
+                        case "unco":
+                            if (args.length == 1) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to demote a player from co-owner on your plot? /plot unco (username)");
+                                return false;
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't unco-owner players on staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot unjointOwnerPlot = (PlayerPlot) standingOnPlot;
+
+                            if (!unjointOwnerPlot.isOwner(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't unco-own players on this plot.");
+                                return false;
+                            }
+
+                            OfflinePlayer unjointPlayer = Bukkit.getOfflinePlayer(supply);
+                            UUID unjointOwnerUUID = unjointPlayer.getUniqueId();
+
+                            if (!unjointPlayer.hasPlayedBefore() && !unjointPlayer.isOnline()) {
+                                playerSender.sendMessage(ERROR_COLOR + "That player does not exist.");
+                                return false;
+                            }
+
+                            if (unjointOwnerPlot.isJointOwner(unjointOwnerUUID)) {
+                                unjointOwnerPlot.removeJointOwner(unjointOwnerUUID);
+                                unjointOwnerPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " removed " + unjointPlayer.getName() + " from being a plot co-owner.");
+                            } else {
+                                playerSender.sendMessage(ERROR_COLOR + unjointPlayer.getName() + " is not a co-owner. " + "Did you mean to promote a player to co-owner on your plot? /plot co (username).");
                             }
                             break;
                         case "expand":
