@@ -464,6 +464,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new DropLostShardBookListener(), this);
         pm.registerEvents(new PlayerFirstJoinEvent(), this);
         pm.registerEvents(new SeedCommandListener(), this);
+        pm.registerEvents(new VoidDamageListener(), this);
         registerCustomEventListener();
 
         //todo to use later -->
