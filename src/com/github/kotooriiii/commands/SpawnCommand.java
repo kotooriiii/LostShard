@@ -68,6 +68,7 @@ public class SpawnCommand implements CommandExecutor {
 
 
                                 this.cancel();
+                                plot.getSpawn().getChunk().load(true);
                                 playerSender.teleport(plot.getSpawn());
                                 stat.setStamina(0);
                                 stat.setMana(0);

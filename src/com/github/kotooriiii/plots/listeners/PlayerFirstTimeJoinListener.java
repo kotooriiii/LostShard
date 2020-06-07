@@ -3,6 +3,7 @@ package com.github.kotooriiii.plots.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.status.StatusPlayer;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,7 +22,10 @@ public class PlayerFirstTimeJoinListener implements Listener {
         SpawnPlot spawnPlot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot("order");
         if(spawnPlot == null || spawnPlot.getSpawn() == null)
             return;
-        player.teleport(spawnPlot.getSpawn());
+
+        Location spawnLocation = spawnPlot.getSpawn();
+        spawnLocation.getChunk().load(true);
+        player.teleport(spawnLocation);
 
     }
 }

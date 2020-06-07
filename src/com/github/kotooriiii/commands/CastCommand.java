@@ -403,6 +403,7 @@ public class CastCommand implements CommandExecutor {
 
 
         MarkPlayer.Mark mark = getCastRecall().get(playerSender.getUniqueId());
+        mark.getLocation().getChunk().load(true);
         playerSender.teleport(mark.getLocation());
 
         UUID playerUUID = playerSender.getUniqueId();
@@ -448,6 +449,7 @@ public class CastCommand implements CommandExecutor {
 
         Player player = offlinePlayer.getPlayer();
 
+        //already loaded
         playerSender.teleport(player.getLocation());
 
         playerSender.sendMessage(ChatColor.GOLD + "You have recalled to \"" + player.getName() + "\".");

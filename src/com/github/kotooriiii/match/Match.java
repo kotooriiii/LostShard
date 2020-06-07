@@ -4,10 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.ArenaPlot;
 import com.github.kotooriiii.plots.listeners.PlayerStatusRespawnListener;
 import com.github.kotooriiii.plots.struct.Plot;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -157,6 +154,8 @@ public class Match {
             return;
 
 
+        arenaPlot.getSpawnA().getChunk().load(true);
+        arenaPlot.getSpawnB().getChunk().load(true);
         playerA.teleport(arenaPlot.getSpawnA());
         playerB.teleport(arenaPlot.getSpawnB());
         hasGameStarted = true;
@@ -359,11 +358,15 @@ public class Match {
 
             if (returnToSpawn) {
                 if (fighterA.isOnline()) {
-                    fighterA.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterA.getPlayer()));
+                    Location loc = PlayerStatusRespawnListener.getSpawnLocation(fighterA.getPlayer());
+                    loc.getChunk().load(true);
+                    fighterA.getPlayer().teleport(loc);
                 }
 
                 if (fighterB.isOnline()) {
-                    fighterB.getPlayer().teleport(PlayerStatusRespawnListener.getSpawnLocation(fighterB.getPlayer()));
+                    Location loc = PlayerStatusRespawnListener.getSpawnLocation(fighterB.getPlayer());
+                    loc.getChunk().load(true);
+                    fighterB.getPlayer().teleport(loc);
                 }
             }
         }
