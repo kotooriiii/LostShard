@@ -111,7 +111,7 @@ public class PlayerPlot extends Plot {
 
         for (UUID uuid : allMembers) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if(!offlinePlayer.isOnline())
+            if (!offlinePlayer.isOnline())
                 continue;
             offlinePlayer.getPlayer().sendMessage(message);
 
@@ -218,7 +218,7 @@ public class PlayerPlot extends Plot {
      */
     public boolean rent() {
 
-        if(!RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
+        if (!RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
             return true;
 
 
@@ -361,7 +361,6 @@ public class PlayerPlot extends Plot {
         OfflinePlayer owner = Bukkit.getOfflinePlayer(ownerUUID);
 
 
-
         ArrayList<OfflinePlayer> friends = new ArrayList<>();
         for (UUID friendUUID : this.getFriends()) {
             friends.add(Bukkit.getOfflinePlayer(friendUUID));
@@ -391,7 +390,7 @@ public class PlayerPlot extends Plot {
 
         String ownerString = ChatColor.YELLOW + "\nOwner: " + ChatColor.WHITE + owner.getName();
 
-        String size = ChatColor.YELLOW + "\nSize: " + ChatColor.WHITE + this.getRadius()*2;
+        String size = ChatColor.YELLOW + "\nSize: " + ChatColor.WHITE + this.getRadius() * 2;
 
         String privacy = "";
         if (!relationshipToPlot.isEmpty())
@@ -399,22 +398,32 @@ public class PlayerPlot extends Plot {
                     + ChatColor.GRAY + "(" + daysLeft() + ")";
         String location = ChatColor.YELLOW + "\nCenter: " + ChatColor.WHITE + "(" + center.getBlockX() + ", " + center.getBlockY() + ", " + center.getBlockZ() + ") " + ChatColor.YELLOW + "Distance from Center: " + ChatColor.WHITE + getRadius();
 
-        String jointOwnerConcat = ChatColor.YELLOW + "\nCo-owners: " + ChatColor.WHITE;
-        for (int i = 0; i < jointOwnersArray.length; i++) {
-            if (i == 0)
-                jointOwnerConcat += jointOwnersArray[i].getName();
-            else
-                jointOwnerConcat += ", " + jointOwnersArray[i].getName();
+        String jointOwnerConcat = ChatColor.YELLOW + "\nYou are not a friend of this plot.";
+        String friendsConcat = "";
 
+
+        //Show coowner and friends
+
+        if (!relationshipToPlot.isEmpty()) {
+            jointOwnerConcat = ChatColor.YELLOW + "\nCo-owners: " + ChatColor.WHITE;
+            for (int i = 0; i < jointOwnersArray.length; i++) {
+                if (i == 0)
+                    jointOwnerConcat += jointOwnersArray[i].getName();
+                else
+                    jointOwnerConcat += ", " + jointOwnersArray[i].getName();
+
+            }
+
+            friendsConcat =  ChatColor.YELLOW + "\nFriends: " + ChatColor.WHITE;
+            for (int i = 0; i < friendsArray.length; i++) {
+                if (i == 0)
+                    friendsConcat += friendsArray[i].getName();
+                else
+                    friendsConcat += ", " + friendsArray[i].getName();
+            }
         }
 
-        String friendsConcat = ChatColor.YELLOW + "\nFriends: " + ChatColor.WHITE;
-        for (int i = 0; i < friendsArray.length; i++) {
-            if (i == 0)
-                friendsConcat += friendsArray[i].getName();
-            else
-                friendsConcat += ", " + friendsArray[i].getName();
-        }
+
 
         return header + relationshipToPlot + ownerString + size + privacy + location + jointOwnerConcat + friendsConcat;
     }

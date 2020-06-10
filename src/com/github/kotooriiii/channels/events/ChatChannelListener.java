@@ -10,6 +10,8 @@ import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,6 +26,8 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class ChatChannelListener implements Listener {
+    public static final Sound PING_SOUND = Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO ;
+
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
@@ -51,8 +55,9 @@ public class ChatChannelListener implements Listener {
     }
 
     public void artificialMessage(AsyncPlayerChatEvent asyncPlayerChatEvent) {
-
-        ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage());
+        //Message Color
+        ChatColor messageColor = ChatColor.WHITE;
+        ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage(), getFormattedPing(asyncPlayerChatEvent.getMessage(), messageColor));
         Bukkit.getPluginManager().callEvent(shardChatEvent);
 
         if (shardChatEvent.isCancelled())
@@ -102,16 +107,14 @@ public class ChatChannelListener implements Listener {
 
         //Color name of player
         String name = color + player.getName();
+
         //Get message
-        String message = asyncPlayerChatEvent.getMessage();
+        String message = getFormattedPing(asyncPlayerChatEvent.getMessage(), messageColor);
+        ArrayList<Player> pingedPlayers = getPingedPlayers(asyncPlayerChatEvent.getMessage());
 
-        //Message Color
-        ChatColor messageColor = ChatColor.WHITE;
 
-        if(LostShardPlugin.getChannelManager().isAdminChat())
-        {
-            if(!player.hasPermission(STAFF_PERMISSION))
-            {
+        if (LostShardPlugin.getChannelManager().isAdminChat()) {
+            if (!player.hasPermission(STAFF_PERMISSION)) {
                 //todo maybe a message saying u cant speak during admin chat ?
                 player.sendMessage(ChatColor.RED + "Chat is muted.");
                 return;
@@ -125,13 +128,91 @@ public class ChatChannelListener implements Listener {
         String builder = HelperMethods.stringBuilder(properties, 0, " ");
 
 
-
         ArrayList<Player> recipients = getRecipients(player);
         if (recipients == null)
             return;
         for (Player recipient : recipients) {
+            if (pingedPlayers.contains(recipient))
+                recipient.playSound(recipient.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
+
             recipient.sendMessage(builder + messageColor + ": " + message);
         }
+    }
+
+    public String getFormattedPing(String message, ChatColor messageColor) {
+        /*
+
+        Message is sent
+        Split into arguments
+        Check each word if it starts with @
+        make sure the length of anything after the @ is not 0
+        check if that string, now named the player name, is online
+
+        if online, gold
+        if offline, gray
+        if doesnt exist, nothing
+
+        ping sound to other player
+         */
+
+
+        String[] args = message.split(" ");
+
+        for (int i = 0; i < args.length; i++) {
+            if (!args[i].startsWith("@"))
+                continue;
+
+            String name = args[i].substring(1);
+
+            Player targetPlayer = Bukkit.getPlayer(name);
+
+            if (targetPlayer != null) {
+                name = ChatColor.GOLD + "@" + targetPlayer.getName() + messageColor;
+            } else {
+                name = ChatColor.GRAY + "@" + name + messageColor;
+            }
+
+            args[i] = name;
+        }
+
+        return HelperMethods.stringBuilder(args, 0, " ");
+    }
+
+    public ArrayList<Player> getPingedPlayers(String message) {
+        /*
+
+        Message is sent
+        Split into arguments
+        Check each word if it starts with @
+        make sure the length of anything after the @ is not 0
+        check if that string, now named the player name, is online
+
+        if online, gold
+        if offline, gray
+        if doesnt exist, nothing
+
+        ping sound to other player
+         */
+
+
+        String[] args = message.split(" ");
+
+        ArrayList<Player> pingedPlayers = new ArrayList<>();
+
+        for (int i = 0; i < args.length; i++) {
+            if (!args[i].startsWith("@"))
+                continue;
+
+            String name = args[i].substring(1);
+
+            Player targetPlayer = Bukkit.getPlayer(name);
+
+            if (targetPlayer != null) {
+                pingedPlayers.add(targetPlayer);
+            }
+        }
+
+        return pingedPlayers;
     }
 
     private ArrayList<Player> getRecipients(Player chattingPlayer) {
@@ -155,6 +236,8 @@ public class ChatChannelListener implements Listener {
                 break;
             case LOCAL:
                 for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+                    if (!onlinePlayers.getWorld().equals(chattingPlayer.getWorld()))
+                        continue;
                     double distance = chattingPlayer.getLocation().distance(onlinePlayers.getLocation());
                     if (distance <= 100) {
                         players.add(onlinePlayers);

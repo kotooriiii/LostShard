@@ -33,9 +33,23 @@ public class SpawnCommand implements CommandExecutor {
                 //No arguments regarding this command
                 if (args.length == 0) {
 
-                    if(notAllowedSpawn.containsKey(playerUUID))
+
+                    Integer seconds = notAllowedSpawn.get(playerUUID);
+                    if(seconds != null && seconds > 0)
                     {
-                        playerSender.sendMessage(ERROR_COLOR + "Your request to visit spawn is in cooldown. Try again in " + ChatColor.YELLOW + notAllowedSpawn.get(playerUUID) + ERROR_COLOR + " minute(s).");
+
+                        int minutesLeft = seconds/60;
+                        int secondsLeft = seconds%60;
+
+                        String minuteString = "minute";
+                        if(minutesLeft>1)
+                            minuteString = "minutes";
+                        String secondString = "second";
+                        if(secondsLeft>1)
+                            secondString = "seconds";
+
+
+                        playerSender.sendMessage(ERROR_COLOR + "Cannot go to spawn. " + minutesLeft + " " + minuteString + " and " + secondsLeft +  " " + secondString + " remaining.");
                         return false;
                     }
 
@@ -64,17 +78,14 @@ public class SpawnCommand implements CommandExecutor {
                                 String organization = statusPlayer.getStatus().getOrganization();
                                 SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
 
-                                //     if(plot.getCenter().getBlock())
-
-
                                 this.cancel();
                                 plot.getSpawn().getChunk().load(true);
                                 playerSender.teleport(plot.getSpawn());
                                 stat.setStamina(0);
                                 stat.setMana(0);
-                                playerSender.sendMessage(ChatColor.GOLD + "You have teleported to spawn.");
+                                playerSender.sendMessage(ChatColor.GRAY + "Teleporting to spawn has exhausted you.");
                                 spawnTimer.remove(playerUUID);
-                                notAllowedSpawn.put(playerUUID, 60);
+                                notAllowedSpawn.put(playerUUID, 60*60);
                                 new BukkitRunnable() {
                                     @Override
                                     public void run() {
@@ -89,7 +100,7 @@ public class SpawnCommand implements CommandExecutor {
 
                                         notAllowedSpawn.put(playerUUID, --timeLeft);
                                     }
-                                }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 20*60); //20->second => 60 -> minute
+                                }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 20); //20->second
                                 return;
                             }
 

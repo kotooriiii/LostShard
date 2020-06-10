@@ -1,7 +1,7 @@
 name: LostShardK
 main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
-depend: [LuckPerms]
+depend: [LuckPerms, PacketListenerApi, Citizens]
 softdepend:
   - WorldBorder
 loadbefore:
@@ -10,6 +10,10 @@ loadbefore:
 version: 1.0
 api-version: 1.15
 commands:
+
+  private:
+  public:
+
   doc:
   wiki:
   youtube:

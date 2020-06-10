@@ -154,6 +154,7 @@ public class MarkCommand implements CommandExecutor {
 
         int size;
         MarkPlayer.Mark[] marks;
+        MarkPlayer.Mark[] premadeMarks;
         if (!MarkPlayer.hasMarks(playerUUID)) {
             size = 0;
             marks = null;
@@ -162,6 +163,7 @@ public class MarkCommand implements CommandExecutor {
             marks = markPlayer.getMarks();
             size = marks.length;
         }
+        premadeMarks = MarkPlayer.wrap(playerUUID).getPremadeMarks();
 
         int pages = (int) Math.ceil((double) size / amtOfMarksPerPage);
         if (pages == 0)
@@ -191,6 +193,20 @@ public class MarkCommand implements CommandExecutor {
 
             markCounter++;
         }
+
+        playerSender.sendMessage(ChatColor.GOLD + "-Premade Marks-");
+        for(MarkPlayer.Mark mark : premadeMarks)
+        {
+            if(mark.getName().equalsIgnoreCase("random"))
+            {
+                playerSender.sendMessage(ChatColor.WHITE + "- " + mark.getName() + " - " + "(?,?,?)");
+                continue;
+            }
+            playerSender.sendMessage(ChatColor.WHITE + "- " + mark.getName() + " - " + "(" + mark.getLocation().getBlockX() + "," + mark.getLocation().getBlockY() + "," + mark.getLocation().getBlockZ() + ")");
+        }
+
+
+
     }
 
 

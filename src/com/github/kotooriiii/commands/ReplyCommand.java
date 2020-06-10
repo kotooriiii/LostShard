@@ -1,5 +1,6 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.channels.events.ChatChannelListener;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,6 +53,7 @@ public class ReplyCommand implements CommandExecutor {
 
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
         receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+        receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
         MsgCommand.updateMap(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
 
         return true;

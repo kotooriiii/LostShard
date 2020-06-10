@@ -26,6 +26,8 @@ import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
+import com.github.kotooriiii.npc.official.guard.GuardNPC;
+import com.github.kotooriiii.npc.reworked.SNPC;
 import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
@@ -38,9 +40,12 @@ import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.listeners.*;
 import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
+import com.github.kotooriiii.sorcery.listeners.MovingWhileCastArgumentListener;
 import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
-import com.github.kotooriiii.sorcery.spells.type.CloneSpell;
+import com.github.kotooriiii.sorcery.spells.type.ClanTPSpell;
+import com.github.kotooriiii.sorcery.spells.type.MarkSpell;
+import com.github.kotooriiii.sorcery.spells.type.RecallSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -53,6 +58,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -78,6 +84,7 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -165,11 +172,23 @@ public class LostShardPlugin extends JavaPlugin {
         return new LSBorder(cX, cZ, rX, rZ);
     }
 
+    private boolean checkDependency() {
+
+        if (getServer().getPluginManager().getPlugin("Citizens") == null || getServer().getPluginManager().getPlugin("Citizens").isEnabled() == false) {
+            getLogger().log(Level.SEVERE, "Citizens 2.0 not found or not enabled");
+            getServer().getPluginManager().disablePlugin(this);
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void onEnable() {
 
         //Console logger, plugin, and description file are all ready for public use
+        if(!checkDependency())
+            return;
+
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
@@ -183,6 +202,7 @@ public class LostShardPlugin extends JavaPlugin {
         channelManager = new ChannelManager();
         weatherManager = new WeatherManager();
         weatherManager.setWeatherFrequency(new WeatherManager.WeatherFrequency(8));
+
 
 
         //Read files (some onto the managers)
@@ -209,6 +229,9 @@ public class LostShardPlugin extends JavaPlugin {
         registerBuff();
         registerCorrupts();
         registerStaff();
+
+        SNPC snpc = new SNPC();
+        snpc.init();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
@@ -255,7 +278,6 @@ public class LostShardPlugin extends JavaPlugin {
         ShardBanker.getActiveShardBankers().clear();
         Bank.getBanks().clear();
         StatusPlayer.getPlayerStatus().clear();
-        Stat.getStatMap().clear();
         getPlotManager().getAllPlots().clear();
         ;
 
@@ -373,6 +395,9 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("youtube").setExecutor(new YoutubeCommand());
         getCommand("doc").setExecutor(new DocCommand());
 
+        getCommand("private").setExecutor(new PrivateCommand());
+        getCommand("public").setExecutor(new PublicCommand());
+
 
         //todo to use later -->
         //getCommand("opt").setExecutor(new LinkListener());
@@ -413,7 +438,6 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlotStaffCreateListener(), this);
         pm.registerEvents(new PlayerSpawnMoveListener(), this);
         pm.registerEvents(new StaffUpdateListener(getLuckPerms()), this);
-        pm.registerEvents(new CastListener(), this);
         pm.registerEvents(new FireballExplodeListener(), this);
 
         pm.registerEvents(new MuteListener(), this);
@@ -447,9 +471,6 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new HelpCommandListener(), this);
         pm.registerEvents(new NoAbuseBlockBreakMaterialListener(), this);
 
-        pm.registerEvents(new PlayerRecallMoveListener(), this);
-        pm.registerEvents(new PlayerClanTPMoveListener(), this);
-
         pm.registerEvents(new PlayerStrengthPotionEffectListener(), this);
 
         pm.registerEvents(new WeatherManagerListener(), this);
@@ -459,12 +480,20 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new ScrollListener(), this);
 
-        pm.registerEvents(new CloneSpell(), this);
+        pm.registerEvents(new ClanTPSpell(), this);
+        pm.registerEvents(new MarkSpell(), this);
+        pm.registerEvents(new RecallSpell(), this);
+
+        pm.registerEvents(new MovingWhileCastArgumentListener(), this);
 
         pm.registerEvents(new DropLostShardBookListener(), this);
         pm.registerEvents(new PlayerFirstJoinEvent(), this);
         pm.registerEvents(new SeedCommandListener(), this);
         pm.registerEvents(new VoidDamageListener(), this);
+        pm.registerEvents(new EnchantmentListener(), this);
+
+        pm.registerEvents(new GuardNPC(), this);
+
         registerCustomEventListener();
 
         //todo to use later -->
@@ -492,25 +521,42 @@ public class LostShardPlugin extends JavaPlugin {
     public void registerBuff() {
         for (Clan clan : clans) {
             if (clan.hasHostilityBuff()) {
-                for (UUID uuid : clan.getAllUUIDS()) {
-                    final Stat stat = Stat.getStatMap().get(uuid);
-                    stat.setMaxStamina(125);
-                    stat.setMaxMana(125);
 
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            stat.setMaxStamina(100);
-                            stat.setMaxMana(100);
+                new BukkitRunnable() {
 
-                            if (stat.getStamina() > stat.getMaxStamina())
-                                stat.setStamina(stat.getMaxStamina());
+                    int counter = clan.getHostilityBuffTimer();
 
-                            if (stat.getMana() > stat.getMaxMana())
-                                stat.setMana(stat.getMana());
+                    @Override
+                    public void run() {
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : clan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+                                Stat stat = Stat.wrap(uuid);
+                                stat.setMaxStamina(100);
+                                stat.setMaxMana(100);
+
+                                if (stat.getStamina() > stat.getMaxStamina())
+                                    stat.setStamina(stat.getMaxStamina());
+
+                                if (stat.getMana() > stat.getMaxMana())
+                                    stat.setMana(stat.getMana());
+                            }
+                            return;
+
                         }
-                    }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 60 * 24);
-                }
+                        counter--;
+                        clan.setHostilityBuffTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+
             }
         }
     }

@@ -9,13 +9,15 @@ public class ShardChatEvent extends Event implements Cancellable {
 
     private Player player;
     private String message;
+    private String formattedMessage;
     private static final HandlerList handlers = new HandlerList();
     boolean cancelled;
 
-    public ShardChatEvent(Player player, String message)
+    public ShardChatEvent(Player player, String message, String formattedMessage)
     {
         this.player = player;
         this.message = message;
+        this.formattedMessage = formattedMessage;
     }
 
     public boolean isCancelled() {
@@ -33,6 +35,8 @@ public class ShardChatEvent extends Event implements Cancellable {
     public static HandlerList getHandlerList() {
         return handlers;
     }
+
+    public String getFormattedMessage() {return  formattedMessage;}
 
     public String getMessage() {return  message;}
 

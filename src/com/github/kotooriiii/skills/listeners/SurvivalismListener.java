@@ -30,8 +30,8 @@ import static com.github.kotooriiii.util.HelperMethods.getPlayerDamagerONLY;
 
 public class SurvivalismListener implements Listener {
 
-    public final static int TRACKING_XP = 75;
-    public final static int CAMP_XP = 50;
+    public final static int TRACKING_XP = 100;
+    public final static int CAMP_XP = 80;
 
     public static class Campfire {
         private Location location;
@@ -573,6 +573,6 @@ public class SurvivalismListener implements Listener {
 
         }
 
-        return 10;
+        return 45;
     }
 }

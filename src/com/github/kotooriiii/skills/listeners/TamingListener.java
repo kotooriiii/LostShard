@@ -117,6 +117,9 @@ public class TamingListener implements Listener {
 
            /*
         If entity is tameable, Entity is tamed.
+
+        OR
+
         Entity is living
         Entity lower than full hp
         Is of our definition 'tameable'
@@ -153,6 +156,12 @@ public class TamingListener implements Listener {
         if (!exists)
             return;
 
+                   /*
+        entity is tameable
+        entity is not tamed
+        is at full hp
+        if is our definition of "tameable"
+*/
         addXP(player, entity);
     }
 
@@ -282,11 +291,11 @@ public class TamingListener implements Listener {
             case MULE:
             case LLAMA:
             case FOX: //fox cant be tamed only bred
-                return new Material[]{Material.AIR};
+                return new Material[]{Material.END_PORTAL};
             case PARROT:
                 return new Material[]{Material.WHEAT_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.MELON_SEEDS};
         }
-        return new Material[]{Material.AIR};
+        return new Material[]{Material.END_PORTAL};
     }
 
     private Material[] getBreedingFoods(Entity entity) {
@@ -328,9 +337,9 @@ public class TamingListener implements Listener {
             case POLAR_BEAR:
             case TRADER_LLAMA:
             case SKELETON_HORSE:
-                return new Material[]{Material.AIR};
+                return new Material[]{Material.END_PORTAL};
         }
-        return new Material[]{Material.AIR};
+        return new Material[]{Material.END_PORTAL};
     }
 
     private boolean isHostile(Entity entity) {

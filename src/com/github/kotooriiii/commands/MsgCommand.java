@@ -1,5 +1,6 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.channels.events.ChatChannelListener;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -49,6 +50,9 @@ public class MsgCommand implements CommandExecutor {
 
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
         receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+
+        receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
+
         lastMessageMap.put(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
         lastMessageMap.put(playerSender.getUniqueId(), receivingPlayer.getUniqueId()); // this is for convo based
 

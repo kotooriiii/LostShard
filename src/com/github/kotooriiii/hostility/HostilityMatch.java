@@ -125,8 +125,8 @@ public class HostilityMatch {
                     capturingClan.broadcast(ChatColor.YELLOW + capturingPlayer.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks));
 
                     init();
-                    checkForCapturer();
                     this.cancel();
+                    checkForCapturer();
                     return;
                 }
 
@@ -162,8 +162,9 @@ public class HostilityMatch {
                         capturingPlayer = players[random];
                         if (lastClan != null && capturingClan.equals(lastClan))
                             winStreak = lastWinStreak;
-                        start();
+
                         this.cancel();
+                        start();
                         return;
                     } else {
                         //contesting
@@ -224,9 +225,10 @@ public class HostilityMatch {
                 } else if (i == timerMinAlert.length - 1) {
                     winStreak++;
                     if (winStreak == 3) {
+                        endGame(false);
                         this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
                         capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
-                        capturingClan.setHostilityBuff(true);
+                        capturingClan.setHostilityBuffTimer(60 * 60 * 24);
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
                         capturingClan.saveFile();
 
@@ -240,27 +242,7 @@ public class HostilityMatch {
                         ItemMeta goldItemMeta = goldItemStack.getItemMeta();
                         goldItemMeta.setLore(itemLore);
                         goldItemStack.setItemMeta(goldItemMeta);
-
-                        //FEATHER ITEM STACK
-                        ItemStack featherItemStack = new ItemStack(Material.FEATHER, 128);
-                        ItemMeta featherItemMeta = featherItemStack.getItemMeta();
-                        featherItemMeta.setLore(itemLore);
-                        featherItemStack.setItemMeta(featherItemMeta);
-
-                        //MELON ITEM STACK
-                        ItemStack melonItemStack = new ItemStack(Material.MELON, 32);
-                        ItemMeta melonItemMeta = melonItemStack.getItemMeta();
-                        melonItemMeta.setLore(itemLore);
-                        melonItemStack.setItemMeta(melonItemMeta);
-
-                        //FORTUNE 3 ITEM STACK
-                        ItemStack fortuneItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
-                        EnchantmentStorageMeta fortuneMeta = (EnchantmentStorageMeta) fortuneItemStack.getItemMeta();
-                        fortuneMeta.addStoredEnchant(Enchantment.LOOT_BONUS_BLOCKS, 3, true);
-                        fortuneMeta.setLore(itemLore);
-                        fortuneItemStack.setItemMeta(fortuneMeta);
-
-                        //HAVOK
+                        //-------------------------------------------------------------------------------------------------
 
                         //ROTTEN FLESH ITEM STACK
                         ItemStack rottenItemStack = new ItemStack(Material.ROTTEN_FLESH, 128);
@@ -268,19 +250,60 @@ public class HostilityMatch {
                         rottenItemMeta.setLore(itemLore);
                         rottenItemStack.setItemMeta(rottenItemMeta);
 
-                        //fire 2 ITEM STACK
-                        ItemStack fireItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
-                        EnchantmentStorageMeta fireMeta = (EnchantmentStorageMeta) fireItemStack.getItemMeta();
-                        fireMeta.addStoredEnchant(Enchantment.FIRE_ASPECT, 2, true);
-                        fireMeta.setLore(itemLore);
-                        fireItemStack.setItemMeta(fireMeta);
+                        //fire aspect ITEM STACK
+                        ItemStack fireAspectItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta fireAspectMeta = (EnchantmentStorageMeta) fireAspectItemStack.getItemMeta();
+                        fireAspectMeta.addStoredEnchant(Enchantment.FIRE_ASPECT, 1, true);
+                        fireAspectMeta.setLore(itemLore);
+                        fireAspectItemStack.setItemMeta(fireAspectMeta);
 
-                        //LOOT 3 ITEM STACK
-                        ItemStack lootingItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
-                        EnchantmentStorageMeta lootingItemMeta = (EnchantmentStorageMeta) lootingItemStack.getItemMeta();
-                        lootingItemMeta.addStoredEnchant(Enchantment.LOOT_BONUS_MOBS, 3, true);
-                        lootingItemMeta.setLore(itemLore);
-                        lootingItemStack.setItemMeta(lootingItemMeta);
+                        //flame ITEM STACK
+                        ItemStack flameItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta flameMeta = (EnchantmentStorageMeta) flameItemStack.getItemMeta();
+                        flameMeta.addStoredEnchant(Enchantment.ARROW_FIRE, 1, true);
+                        flameMeta.setLore(itemLore);
+                        flameItemStack.setItemMeta(flameMeta);
+
+                        //COOKIE ITEM STACK
+                        ItemStack cookiesItemStack = new ItemStack(Material.COOKIE, 64);
+                        ItemMeta cookieMeta = cookiesItemStack.getItemMeta();
+                        cookieMeta.setLore(itemLore);
+                        cookiesItemStack.setItemMeta(cookieMeta);
+
+                        //SPECTRAL ARROW ITEM STACK
+                        ItemStack spectralArrowsItemStack = new ItemStack(Material.SPECTRAL_ARROW, 128);
+                        ItemMeta spectralMeta = spectralArrowsItemStack.getItemMeta();
+                        spectralMeta.setLore(itemLore);
+                        spectralArrowsItemStack.setItemMeta(spectralMeta);
+
+                        //-------------------------------------------------------------------------------------------------
+                        //PROT 4 ITEM STACK
+                        ItemStack protItemStack = new ItemStack(Material.ENCHANTED_BOOK, 2);
+                        EnchantmentStorageMeta protItemStackItemMeta = (EnchantmentStorageMeta) protItemStack.getItemMeta();
+                        protItemStackItemMeta.addStoredEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 4, true);
+                        protItemStackItemMeta.setLore(itemLore);
+                        protItemStack.setItemMeta(protItemStackItemMeta);
+
+                        //UNBREAKING 3 ITEM STACK
+                        ItemStack unbreakingItemStack = new ItemStack(Material.ENCHANTED_BOOK, 2);
+                        EnchantmentStorageMeta unbreakingMeta = (EnchantmentStorageMeta) unbreakingItemStack.getItemMeta();
+                        unbreakingMeta.addStoredEnchant(Enchantment.DURABILITY, 3, true);
+                        unbreakingMeta.setLore(itemLore);
+                        unbreakingItemStack.setItemMeta(unbreakingMeta);
+
+                        //POWER V ITEM STACK
+                        ItemStack powerItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                        EnchantmentStorageMeta powerMeta = (EnchantmentStorageMeta) powerItemStack.getItemMeta();
+                        powerMeta.addStoredEnchant(Enchantment.ARROW_DAMAGE, 5, true);
+                        powerMeta.setLore(itemLore);
+                        powerItemStack.setItemMeta(powerMeta);
+
+                        //DRAGON EGG ITEM STACK
+                        ItemStack dragonEggItemStack = new ItemStack(Material.DRAGON_EGG, 1);
+                        ItemMeta dragonMeta = dragonEggItemStack.getItemMeta();
+                        dragonMeta.setLore(itemLore);
+                        dragonEggItemStack.setItemMeta(dragonMeta);
+
 
 
                         for (UUID uuid : capturingClan.getAllUUIDS()) {
@@ -294,24 +317,24 @@ public class HostilityMatch {
                                 player.sendMessage(STANDARD_COLOR + "Your clan has gained the hostility buff!");
                                 player.sendMessage(STANDARD_COLOR + "Bonuses: ");
                                 player.sendMessage(STANDARD_COLOR + "- 100 Gold");
-                                player.sendMessage(STANDARD_COLOR + "- 128 Feathers");
 
                                 if (platform.getName().equalsIgnoreCase("Havok") || platform.getName().equalsIgnoreCase("Havoc")) {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack, featherItemStack, rottenItemStack, fireItemStack, lootingItemStack);
-                                    player.sendMessage(STANDARD_COLOR + "- 128 Rotten Flesh");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Fire Aspect II Enchanted Book");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Looting III Enchanted Book");
+                                    unstoredItems = player.getInventory().addItem(goldItemStack,fireAspectItemStack, flameItemStack, cookiesItemStack, spectralArrowsItemStack);
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Fire Aspect I Enchanted Book");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Flame I Enchanted Book");
+                                    player.sendMessage(STANDARD_COLOR + "- 64 Cookies");
+                                    player.sendMessage(STANDARD_COLOR + "- 128 Spectral Arrows");
 
                                 } else if (platform.getName().equalsIgnoreCase("Hostility")) {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack, featherItemStack, melonItemStack, fortuneItemStack);
-                                    player.sendMessage(STANDARD_COLOR + "- 32 Melon Blocks");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Fortune III Enchanted Book");
+                                    unstoredItems = player.getInventory().addItem(goldItemStack, protItemStack, unbreakingItemStack, powerItemStack, dragonEggItemStack);
+
+                                    player.sendMessage(STANDARD_COLOR + "- 2 Protection IV Enchanted Books");
+                                    player.sendMessage(STANDARD_COLOR + "- 2 Unbreaking III Enchanted Books");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Power V Enchanted Book");
+                                    player.sendMessage(STANDARD_COLOR + "- 1 Dragon Egg Enchanted Book");
+
 
                                 }
-
-
-
-
 
                                 if (unstoredItems.keySet().size() > 0)
                                     player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + " but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
@@ -322,34 +345,45 @@ public class HostilityMatch {
                                 }
                             }
 
-                            final Stat stat = Stat.getStatMap().get(uuid);
-                            stat.setMaxStamina(125);
-                            stat.setMaxMana(125);
-
-                            new BukkitRunnable() {
-                                @Override
-                                public void run() {
-                                    stat.setMaxStamina(100);
-                                    stat.setMaxMana(100);
-
-                                    if (stat.getStamina() > stat.getMaxStamina())
-                                        stat.setStamina(stat.getMaxStamina());
-
-                                    if (stat.getMana() > stat.getMaxMana())
-                                        stat.setMana(stat.getMana());
-                                }
-                            }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 60 * 24);
-
+                            Stat stat = Stat.wrap(uuid);
+                            stat.setMaxStamina(115);
+                            stat.setMaxMana(115);
                         }
 
+
                         new BukkitRunnable() {
+
+                            int counter = capturingClan.getHostilityBuffTimer();
+
                             @Override
                             public void run() {
-                                capturingClan.setHostilityBuff(false);
-                            }
-                        }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 60 * 24);
 
-                        endGame(false);
+                                if (counter == 0) {
+
+                                    this.cancel();
+
+                                    for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                        if (offlinePlayer.isOnline())
+                                            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+                                        Stat stat = Stat.wrap(uuid);
+                                        stat.setMaxStamina(100);
+                                        stat.setMaxMana(100);
+
+                                        if (stat.getStamina() > stat.getMaxStamina())
+                                            stat.setStamina(stat.getMaxStamina());
+
+                                        if (stat.getMana() > stat.getMaxMana())
+                                            stat.setMana(stat.getMana());
+                                    }
+                                    return;
+
+                                }
+                                counter--;
+                                capturingClan.setHostilityBuffTimer(counter);
+                            }
+                        }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
 
 
                         //win host

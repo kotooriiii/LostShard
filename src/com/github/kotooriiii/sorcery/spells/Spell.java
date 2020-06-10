@@ -31,7 +31,12 @@ public abstract class Spell {
     private boolean isWandable;
     private boolean isScrollable;
 
-    protected static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
+    protected final static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
+    protected final static HashMap<UUID, SpellType> waitingForArgumentMap = new HashMap<>();
+
+    public static HashMap<UUID, SpellType> getWaitingForArgumentMap() {
+        return waitingForArgumentMap;
+    }
 
     public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
         this.type = type;
@@ -40,7 +45,7 @@ public abstract class Spell {
         this.cooldown = cooldown;
         this.manaCost = manaCost;
 
-        this.isCastable  = isCastable;
+        this.isCastable = isCastable;
         this.isWandable = isWandable;
         this.isScrollable = isScrollable;
     }
@@ -60,10 +65,16 @@ public abstract class Spell {
                 return new TeleportSpell();
             case WEB_FIELD:
                 return new WebFieldSpell();
-            case DARKNESS:
-                return new DarknessSpell();
-            case CLONE:
-                return new CloneSpell();
+//            case DARKNESS:
+//                return new DarknessSpell();
+//            case CLONE:
+//                return new CloneSpell();
+            case CLANTP:
+                return new ClanTPSpell();
+            case MARK:
+                return new MarkSpell();
+            case RECALL:
+                return new RecallSpell();
             default:
                 return null;
         }
@@ -221,8 +232,7 @@ public abstract class Spell {
     }
 
 
-
-    public BlockFace getInvertBlockFace(Player player, final int range){
+    public BlockFace getInvertBlockFace(Player player, final int range) {
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
         if (lastTwoTargetBlocks.size() != 2) return null;
         Block targetBlock = lastTwoTargetBlocks.get(1);
@@ -246,7 +256,13 @@ public abstract class Spell {
             return false;
         }
 
-        if(!this.hasIngredients(player))
+        if(waitingForArgumentMap.containsKey(player.getUniqueId()))
+        {
+            player.sendMessage(ERROR_COLOR + "You are currently casting a spell.");
+            return false;
+        }
+
+        if (!this.hasIngredients(player))
             return false;
 
         // Don't execute any action if the player is on cooldown
@@ -259,6 +275,9 @@ public abstract class Spell {
             player.sendMessage(ERROR_COLOR + "You don't have enough mana to cast " + this.getName() + ".");
             return false;
         }
+
+
+
         return true;
     }
 
@@ -280,10 +299,9 @@ public abstract class Spell {
 
     public abstract void updateCooldown(Player player);
 
-    public boolean cast(Player player)
-    {
+    public boolean cast(Player player) {
 
-        if(!hasCastingRequirements(player))
+        if (!hasCastingRequirements(player))
             return false;
 
         // Run the wand action

@@ -349,9 +349,9 @@ public final class FileManager {
         String clanTag = yaml.getString("Tag");
         String clanStringColor = yaml.getString("Color");
         String clanStringFriendlyFireBoolean = yaml.getString("FriendlyFire");
-        String clanStringHostilityBuffBoolean = yaml.getString("HostilityBuff");
+        int hostilityBuffTimer = yaml.getInt("HostilityBuffTimer");
         String clanStringHostilityWinsInt = yaml.getString("HostilityWins");
-        if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null || clanStringHostilityBuffBoolean == null || clanStringHostilityWinsInt == null) {
+        if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null  || clanStringHostilityWinsInt == null) {
             LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
             return null;
         }
@@ -360,7 +360,6 @@ public final class FileManager {
         ChatColor clanColor = ChatColor.getByChar(clanStringColor.substring(1));
 
         boolean clanFriendlyFire = Boolean.valueOf(clanStringFriendlyFireBoolean);
-        boolean clanHostilityBuff = Boolean.valueOf(clanStringHostilityBuffBoolean);
         int clanHostilityWins = Integer.parseInt(clanStringHostilityWinsInt);
 
         Clan clan = new Clan(clanID);
@@ -389,7 +388,7 @@ public final class FileManager {
         }
         clan.setColor(clanColor);
         clan.setFriendlyFire(clanFriendlyFire);
-        clan.setHostilityBuff(clanHostilityBuff);
+        clan.setHostilityBuffTimer(hostilityBuffTimer);
         clan.setHostilityWins(clanHostilityWins);
 
         ClanRank[] ranks = ClanRank.values();
@@ -559,8 +558,17 @@ public final class FileManager {
         String uuidString = statFile.getName().substring(0, statFile.getName().indexOf('.'));
 
         double stamina = yaml.getDouble("Stamina");
+        double maxStamina = yaml.getDouble("MaxStamina");
+        if(maxStamina == 0)
+            maxStamina = 100;
+
         double mana = yaml.getDouble("Mana");
+        double maxMana = yaml.getDouble("MaxMana");
+        if(maxMana==0)
+            maxMana = 100;
+
         String title = yaml.getString("Title");
+        boolean isPrivate = yaml.getBoolean("Private");
 
         UUID playerUUID = UUID.fromString(uuidString);
 
@@ -570,6 +578,9 @@ public final class FileManager {
         Stat stat = new Stat(playerUUID);
         stat.setStamina(stamina);
         stat.setMana(mana);
+        stat.setMaxStamina(maxStamina);
+        stat.setMaxMana(maxMana);
+        stat.setPrivate(isPrivate);
         stat.setTitle(title);
         return stat;
     }
@@ -827,7 +838,7 @@ public final class FileManager {
         yaml.set("Color", clan.getColor().toString().replace(ChatColor.COLOR_CHAR + "", "&") + "");
         yaml.set("FriendlyFire", clan.isFriendlyFire() + "");
         yaml.set("HostilityWins", clan.getHostilityWins() + "");
-        yaml.set("HostilityBuff", clan.hasHostilityBuff() + "");
+        yaml.set("HostilityBuffTimer", clan.getHostilityBuffTimer());
 
 
         ClanRank[] ranks = ClanRank.values();
@@ -1026,8 +1037,11 @@ public final class FileManager {
         }
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statFile);
         yaml.set("Stamina", stat.getStamina());
+        yaml.set("MaxStamina", stat.getMaxStamina());
         yaml.set("Mana", stat.getMana());
+        yaml.set("MaxMana", stat.getMaxMana());
         yaml.set("Title", stat.getTitle());
+        yaml.set("Private", stat.isPrivate());
         try {
             yaml.save(statFile);
         } catch (IOException e) {

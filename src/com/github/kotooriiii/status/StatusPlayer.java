@@ -55,7 +55,7 @@ public class StatusPlayer {
         this.status = status;
         save();
 
-        if(Staff.isStaff(offlinePlayer.getUniqueId()))
+        if (Staff.isStaff(offlinePlayer.getUniqueId()))
             return;
 
         ShardScoreboardManager.add(offlinePlayer, status.getName());
@@ -75,6 +75,10 @@ public class StatusPlayer {
             return false;
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+
+            if (!player.getWorld().equals(offlinePlayer.getPlayer().getWorld()))
+                continue;
+
             if (player.getLocation().distance(offlinePlayer.getPlayer().getLocation()) <= range) {
                 StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
                 if (!statusPlayer.getStatus().equals(Status.WORTHY))

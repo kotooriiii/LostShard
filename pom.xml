@@ -62,7 +62,20 @@
         </plugins>
     </build>
 
+        <!-- ... -->
+        <pluginRepositories>
+            <pluginRepository>
+                <id>{repo.id}</id>
+                <url>{repo.url}</url>
+            </pluginRepository>
+        </pluginRepositories>
+
     <repositories>
+        <repository>
+            <id>everything</id>
+            <url>http://repo.citizensnpcs.co/</url>
+        </repository>
+
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
@@ -124,6 +137,28 @@
                 </exclusion>
             </exclusions>
             <systemPath>${project.basedir}/libs/LuckPerms-Bukkit-5.0.94.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>packetlistener</groupId>
+            <artifactId>packetlistener-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/PacketListenerAPI_v3.7.6-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>net.citizensnpcs</groupId>
+            <artifactId>citizensapi</artifactId>
+            <version>2.0.18-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

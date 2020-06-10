@@ -18,15 +18,12 @@ public class ZombieDeathListener implements Listener {
         if(!(entity instanceof Zombie))
             return;
         double random  = Math.random();
-        final double chance = 0.5;
+        final double chance = 0.75;
 
         if(!(random < chance))
             return;
 
-        int randomInt = new Random().nextInt(4);
-
-        if(randomInt == 0)
-            return;
+        int randomInt = new Random().nextInt(5) + 1;
 
         entity.getLocation().getWorld().dropItemNaturally(entity.getLocation(), new ItemStack(Material.FEATHER, randomInt));
 

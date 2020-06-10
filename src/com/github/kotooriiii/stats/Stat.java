@@ -17,6 +17,8 @@ public class Stat {
 
     private UUID playerUUID;
 
+    private boolean isPrivate;
+
     private static HashMap<UUID, Stat> statMap = new HashMap<>();
 
     private static HashSet<UUID> restingPlayers = new HashSet<>();
@@ -27,6 +29,7 @@ public class Stat {
         this.stamina = maxStamina;
         this.mana = maxMana;
         this.title = "";
+        this.isPrivate = false;
         statMap.put(playerUUID, this);
     }
 
@@ -52,6 +55,10 @@ public class Stat {
 
     public String getTitle() {return  title;}
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
     public void setStamina(double value) {
         stamina = value;
     }
@@ -62,6 +69,10 @@ public class Stat {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
     }
 
     public void setMaxStamina(double maxStamina) {

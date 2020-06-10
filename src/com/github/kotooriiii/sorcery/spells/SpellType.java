@@ -4,7 +4,10 @@ public enum SpellType {
     FIREBALL(new String[]{"Fireball"}), HEAL(new String[]{"Heal Self", "Heal"}),
     ICE(new String[]{"Ice Ball", "Ice"}), LIGHTNING(new String[]{"Lightning"}),
     TELEPORT(new String[]{"Teleport"}), WEB_FIELD(new String[]{"Web Field", "Web"}),
-    DARKNESS(new String[]{"Darkness"}), CLONE(new String[]{"Clone"});
+    /*DARKNESS(new String[]{"Darkness"}), CLONE(new String[]{"Clone"}),*/
+    CLANTP(new String[]{"Clan Teleport", "ClanTP", "Clan TP"}),
+    MARK(new String[]{"Mark"}),
+    RECALL(new String[]{"Recall"});
 
     private String[] names;
 

@@ -43,6 +43,9 @@ public class StatusUpdateListener implements Listener {
         Player damagerPlayer = getPlayerInduced(defender, damager);
         Player defenderPlayer = (Player) defender;
 
+        if(damagerPlayer.equals(defenderPlayer))
+            return;
+
         if (Staff.isStaff(damagerPlayer.getUniqueId()) || Staff.isStaff(defenderPlayer.getUniqueId()))
             return;
 
@@ -93,6 +96,9 @@ public class StatusUpdateListener implements Listener {
         if (!isPlayerInduced(defender, damager))
             return;
         Player damagerPlayer = getPlayerInduced(defender, damager);
+
+        if(defenderPlayer.equals(damagerPlayer))
+            return;
 
         if (Staff.isStaff(damagerPlayer.getUniqueId()) || Staff.isStaff(defenderPlayer.getUniqueId()))
             return;

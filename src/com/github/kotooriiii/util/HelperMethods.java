@@ -257,7 +257,7 @@ public final class HelperMethods {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if(!player.getWorld().equals(localPlayer.getWorld()))
                 continue;
-            if (player.getLocation().distance(localPlayer.getLocation()) <= 100)
+            if (player.getLocation().distance(localPlayer.getLocation()) <= 60)
                 players.add(player);
         }
 
