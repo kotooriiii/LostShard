@@ -58,7 +58,7 @@ public class WhoisCommand implements CommandExecutor {
             tc.addExtra(component);
             tc.addExtra(component2);
             tc.addExtra(component3);
-            playerSender.spigot().sendMessage(tc.duplicate());
+            playerSender.spigot().sendMessage(tc);
         } else {
             playerSender.sendMessage(ERROR_COLOR + "Did you mean to type: " + COMMAND_COLOR + "/whois (username)"+ ERROR_COLOR + ".");
         }

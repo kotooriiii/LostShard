@@ -53,7 +53,8 @@ public class ReplyCommand implements CommandExecutor {
 
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
         receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
-        receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
+        if (NotificationCommand.isPingable(receivingPlayer))
+            receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
         MsgCommand.updateMap(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
 
         return true;

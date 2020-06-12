@@ -409,7 +409,7 @@ public class Clan {
      * @return the properties of the clan
      */
     public String info() {
-        String basic = ChatColor.GOLD + "---------------------\"" + this.getName() + "\"---------------------\n";
+        String basic = ChatColor.GOLD + "--------------\"" + this.getName() + "\"--------------\n";
 
         /**
          String dash = "---------------------";
@@ -827,20 +827,22 @@ public class Clan {
         update(kickedUUID, true);
 
         //REMOVE BUFF
+        if(hasHostilityBuff()) {
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
-        if (offlinePlayer.isOnline())
-            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
 
-        Stat stat = Stat.wrap(kickedUUID);
-        stat.setMaxStamina(100);
-        stat.setMaxMana(100);
+            Stat stat = Stat.wrap(kickedUUID);
+            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+            stat.setMaxMana(Stat.BASE_MAX_MANA);
 
-        if (stat.getStamina() > stat.getMaxStamina())
-            stat.setStamina(stat.getMaxStamina());
+            if (stat.getStamina() > stat.getMaxStamina())
+                stat.setStamina(stat.getMaxStamina());
 
-        if (stat.getMana() > stat.getMaxMana())
-            stat.setMana(stat.getMana());
+            if (stat.getMana() > stat.getMaxMana())
+                stat.setMana(stat.getMana());
+        }
         //END OF REMOVE BUFF
 
         saveFile();
@@ -861,21 +863,23 @@ public class Clan {
         clans.remove(this);
         update(this.getAllUUIDS(), true);
         //REMOVE BUFF
-        for(UUID uuid : this.getAllUUIDS())
-        {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+        if(hasHostilityBuff()) {
 
-            Stat stat = Stat.wrap(uuid);
-            stat.setMaxStamina(100);
-            stat.setMaxMana(100);
+            for (UUID uuid : this.getAllUUIDS()) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                if (offlinePlayer.isOnline())
+                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
 
-            if (stat.getStamina() > stat.getMaxStamina())
-                stat.setStamina(stat.getMaxStamina());
+                Stat stat = Stat.wrap(uuid);
+                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+                stat.setMaxMana(Stat.BASE_MAX_MANA);
 
-            if (stat.getMana() > stat.getMaxMana())
-                stat.setMana(stat.getMana());
+                if (stat.getStamina() > stat.getMaxStamina())
+                    stat.setStamina(stat.getMaxStamina());
+
+                if (stat.getMana() > stat.getMaxMana())
+                    stat.setMana(stat.getMana());
+            }
         }
         //END OF REMOVE BUFF
         removeFile();
@@ -1405,21 +1409,24 @@ saveFile();
         update(this.getAllUUIDS(), true);
 
         //REMOVE BUFF
-        for(UUID uuid : this.getAllUUIDS()) {
+        if(hasHostilityBuff()) {
 
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+            for (UUID uuid : this.getAllUUIDS()) {
 
-            Stat stat = Stat.wrap(uuid);
-            stat.setMaxStamina(100);
-            stat.setMaxMana(100);
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                if (offlinePlayer.isOnline())
+                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
 
-            if (stat.getStamina() > stat.getMaxStamina())
-                stat.setStamina(stat.getMaxStamina());
+                Stat stat = Stat.wrap(uuid);
+                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+                stat.setMaxMana(Stat.BASE_MAX_MANA);
 
-            if (stat.getMana() > stat.getMaxMana())
-                stat.setMana(stat.getMana());
+                if (stat.getStamina() > stat.getMaxStamina())
+                    stat.setStamina(stat.getMaxStamina());
+
+                if (stat.getMana() > stat.getMaxMana())
+                    stat.setMana(stat.getMana());
+            }
         }
         //END OF REMOVE BUFF
         removeFile();
@@ -1468,20 +1475,22 @@ saveFile();
         update(leaverUUID, true);
 
         //REMOVE BUFF
+        if(hasHostilityBuff()) {
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(leaverUUID);
-        if (offlinePlayer.isOnline())
-            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(leaverUUID);
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
 
-        Stat stat = Stat.wrap(leaverUUID);
-        stat.setMaxStamina(100);
-        stat.setMaxMana(100);
+            Stat stat = Stat.wrap(leaverUUID);
+            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+            stat.setMaxMana(Stat.BASE_MAX_MANA);
 
-        if (stat.getStamina() > stat.getMaxStamina())
-            stat.setStamina(stat.getMaxStamina());
+            if (stat.getStamina() > stat.getMaxStamina())
+                stat.setStamina(stat.getMaxStamina());
 
-        if (stat.getMana() > stat.getMaxMana())
-            stat.setMana(stat.getMana());
+            if (stat.getMana() > stat.getMaxMana())
+                stat.setMana(stat.getMana());
+        }
         //END OF REMOVE BUFF
 
         saveFile();
@@ -1532,12 +1541,14 @@ saveFile();
         update(inviteeUUID, false);
 
         //ADD HOSTILITY BUFF
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(inviteeUUID);
-        if (offlinePlayer.isOnline())
-            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the hostility buff.");
-        Stat stat = Stat.wrap(inviteeUUID);
-        stat.setMaxStamina(115);
-        stat.setMaxMana(115);
+        if(hasHostilityBuff()) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(inviteeUUID);
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the hostility buff.");
+            Stat stat = Stat.wrap(inviteeUUID);
+            stat.setMaxStamina(Stat.HOST_MAX_STAMINA);
+            stat.setMaxMana(Stat.HOST_MAX_MANA);
+        }
         //END OF ADD HOSTILITY BUFF
 
         saveFile();
@@ -1676,19 +1687,22 @@ saveFile();
 
         //REMOVE BUFF
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
-        if (offlinePlayer.isOnline())
-            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
+        if(hasHostilityBuff()) {
 
-        Stat stat = Stat.wrap(kickedUUID);
-        stat.setMaxStamina(100);
-        stat.setMaxMana(100);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
 
-        if (stat.getStamina() > stat.getMaxStamina())
-            stat.setStamina(stat.getMaxStamina());
+            Stat stat = Stat.wrap(kickedUUID);
+            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+            stat.setMaxMana(Stat.BASE_MAX_MANA);
 
-        if (stat.getMana() > stat.getMaxMana())
-            stat.setMana(stat.getMana());
+            if (stat.getStamina() > stat.getMaxStamina())
+                stat.setStamina(stat.getMaxStamina());
+
+            if (stat.getMana() > stat.getMaxMana())
+                stat.setMana(stat.getMana());
+        }
         //END OF REMOVE BUFF
 
         saveFile();

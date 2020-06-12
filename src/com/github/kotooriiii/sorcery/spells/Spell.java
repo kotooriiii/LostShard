@@ -67,8 +67,8 @@ public abstract class Spell {
                 return new WebFieldSpell();
 //            case DARKNESS:
 //                return new DarknessSpell();
-//            case CLONE:
-//                return new CloneSpell();
+            case CLONE:
+                return new CloneSpell();
             case CLANTP:
                 return new ClanTPSpell();
             case MARK:
@@ -79,6 +79,51 @@ public abstract class Spell {
                 return null;
         }
     }
+
+    public static Spell[] getWandableSpells() {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell.isWandable()) {
+                spells.add(spell);
+            }
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static Spell[] getCastableSpells() {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell.isCastable()) {
+                spells.add(spell);
+            }
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static Spell[] getScrollableSpells() {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell.isScrollable()) {
+                spells.add(spell);
+            }
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static Spell[] getSpells() {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+
+            spells.add(spell);
+
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
 
     public SpellType getType() {
         return type;
@@ -256,8 +301,7 @@ public abstract class Spell {
             return false;
         }
 
-        if(waitingForArgumentMap.containsKey(player.getUniqueId()))
-        {
+        if (waitingForArgumentMap.containsKey(player.getUniqueId())) {
             player.sendMessage(ERROR_COLOR + "You are currently casting a spell.");
             return false;
         }
@@ -275,7 +319,6 @@ public abstract class Spell {
             player.sendMessage(ERROR_COLOR + "You don't have enough mana to cast " + this.getName() + ".");
             return false;
         }
-
 
 
         return true;

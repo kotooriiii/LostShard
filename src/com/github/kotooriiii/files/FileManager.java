@@ -9,10 +9,7 @@ import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.discord.links.LinkPlayer;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.muted.MutedPlayer;
-import com.github.kotooriiii.npc.ShardBanker;
-import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.struct.*;
@@ -21,13 +18,10 @@ import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_15_R1.util.CraftDamageSource;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -42,8 +36,6 @@ public final class FileManager {
     private static File plugin_folder = LostShardPlugin.plugin.getDataFolder();
     private static File clans_folder = new File(plugin_folder + File.separator + "clans");
     private static File hostility_platform_folder = new File(plugin_folder + File.separator + "hostility" + File.separator + "platforms");
-    private static File guards_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "guards");
-    private static File bankers_folder = new File(plugin_folder + File.separator + "npc" + File.separator + "bankers");
     private static File bank_folder = new File(plugin_folder + File.separator + "bank");
     private static File status_folder = new File(plugin_folder + File.separator + "statuses");
     private static File sales_folder = new File(plugin_folder + File.separator + "sales");
@@ -80,8 +72,6 @@ public final class FileManager {
         plugin_folder.mkdir();
         clans_folder.mkdir();
         hostility_platform_folder.mkdirs();
-        guards_folder.mkdirs();
-        bankers_folder.mkdirs();
         bank_folder.mkdirs();
         status_folder.mkdirs();
         sales_folder.mkdirs();
@@ -100,8 +90,6 @@ public final class FileManager {
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "guardREADME.txt", guards_folder, true);
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankerREADME.txt", bankers_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankREADME.txt", bank_folder, true);
 
         load();
@@ -143,27 +131,6 @@ public final class FileManager {
             platforms.add(platform);
         }
 
-        for (File file : guards_folder.listFiles()) {
-            if (!file.getName().endsWith(".yml"))
-                continue;
-
-            ShardGuard guard = readShardGuardFile(file);
-            if (guard == null) {
-                LostShardPlugin.logger.info("\n\n" + "There was a guard file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
-                continue;
-            }
-        }
-
-        for (File file : bankers_folder.listFiles()) {
-            if (!file.getName().endsWith(".yml"))
-                continue;
-
-            ShardBanker banker = readShardBankerFile(file);
-            if (banker == null) {
-                LostShardPlugin.logger.info("\n\n" + "There was a banker file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
-                continue;
-            }
-        }
 
         for (File file : status_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
@@ -433,45 +400,6 @@ public final class FileManager {
         return clan;
     }
 
-    public static ShardGuard readShardGuardFile(File shardGuardFile) {
-
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardGuardFile);
-        String guardName = shardGuardFile.getName().substring(0, shardGuardFile.getName().indexOf('.'));
-        Location guardPostLocation = yaml.getLocation("GuardPostLocation");
-
-
-        if (guardPostLocation == null) {
-            LostShardPlugin.logger.info("There was an error reading the clan in file \"" + shardGuardFile.getName() + "\". The guard post location in the file might be corrupted or missing.");
-            return null;
-        }
-        ShardGuard guard = new ShardGuard(guardPostLocation.getWorld(), guardName);
-
-
-        guard.spawn(guardPostLocation);
-
-
-        return guard;
-    }
-
-    public static ShardBanker readShardBankerFile(File shardBankerFile) {
-
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shardBankerFile);
-        String bankerName = shardBankerFile.getName().substring(0, shardBankerFile.getName().indexOf('.'));
-        Location guardPostLocation = yaml.getLocation("BankerPostLocation");
-
-
-        if (guardPostLocation == null) {
-            LostShardPlugin.logger.info("There was an error reading the clan in file \"" + shardBankerFile.getName() + "\". The banker post location in the file might be corrupted or missing.");
-            return null;
-        }
-
-        ShardBanker banker = new ShardBanker(guardPostLocation.getWorld(), bankerName);
-
-        banker.spawn(guardPostLocation);
-
-
-        return banker;
-    }
 
     public static Bank readBankFile(File bankFile) {
 
@@ -884,50 +812,6 @@ public final class FileManager {
         }
     }
 
-    public static void write(ShardGuard guard) {
-        String name = guard.getName();
-        String fileName = name + ".yml";
-        File guardFile = new File(guards_folder + File.separator + fileName);
-
-        try {
-            if (!guardFile.exists())
-                guardFile.createNewFile();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(guardFile);
-        yaml.set("GuardPostLocation", guard.getSpawnLocation());
-
-        try {
-            yaml.save(guardFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void write(ShardBanker banker) {
-        String name = banker.getName();
-        String fileName = name + ".yml";
-        File bankerFile = new File(bankers_folder + File.separator + fileName);
-
-        try {
-            if (!bankerFile.exists())
-                bankerFile.createNewFile();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(bankerFile);
-        yaml.set("BankerPostLocation", banker.getSpawnLocation());
-
-        try {
-            yaml.save(bankerFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void write(Bank bank) {
         String fileName = bank.getPlayerUUID() + ".yml";
         File bankFile = new File(bank_folder + File.separator + fileName);
@@ -1281,25 +1165,6 @@ public final class FileManager {
             clanFile.delete();
     }
 
-    public static void removeFile(ShardGuard guard) {
-        String name = guard.getName();
-        String fileName = name + ".yml";
-        File guardFile = new File(guards_folder + File.separator + fileName);
-
-        if (guardFile.exists())
-            guardFile.delete();
-
-    }
-
-    public static void removeFile(ShardBanker banker) {
-        String name = banker.getName();
-        String fileName = name + ".yml";
-        File bankerFile = new File(bankers_folder + File.separator + fileName);
-
-        if (bankerFile.exists())
-            bankerFile.delete();
-
-    }
 
     public static void removeFile(Bank bank) {
         String fileName = bank.getPlayerUUID() + ".yml";

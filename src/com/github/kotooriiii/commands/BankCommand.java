@@ -1,7 +1,9 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.type.banker.BankerNPC;
+import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -61,16 +63,16 @@ public class BankCommand implements CommandExecutor {
                                         playerSender.sendMessage(ERROR_COLOR + "You can't have a name that big! Shrink it or else the game crashes.");
                                         return true;
                                     }
-                                    for (ShardBanker iteratingBanker : ShardBanker.getActiveShardBankers()) {
-                                        if (iteratingBanker.getName().equalsIgnoreCase(nameCreate)) {
+                                    for (NPC createBankerNPC : BankerNPC.getAllBankerNPC()) {
+                                        BankerTrait bankerTrait = createBankerNPC.getTrait(BankerTrait.class);
+                                        if (bankerTrait.getBankerName().equalsIgnoreCase(nameCreate)) {
                                             playerSender.sendMessage(ERROR_COLOR + "The name you chose is already taken by another Banker.");
                                             return true;
                                         }
                                     }
                                     playerSender.sendMessage(STANDARD_COLOR + "You have hired " + BANKER_COLOR + nameCreate + STANDARD_COLOR + " to handle finances in this location.");
-                                    ShardBanker banker = new ShardBanker(playerSender.getLocation().getWorld(), nameCreate);
+                                    BankerNPC banker = new BankerNPC(nameCreate);
                                     banker.spawn(playerSender.getLocation());
-                                    FileManager.write(banker);
                                     break;
                                 case "delete":
                                     if (args.length == 2) {
@@ -79,11 +81,12 @@ public class BankCommand implements CommandExecutor {
                                     }
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String nameDelete = stringBuilder(args, 2, " ");
-                                    for (ShardBanker iteratingBanker : ShardBanker.getActiveShardBankers()) {
-                                        if (iteratingBanker.getName().equalsIgnoreCase(nameDelete)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "You have fired " + BANKER_COLOR + iteratingBanker.getName() + STANDARD_COLOR + " for stealing gold from players' chests.");
-                                            iteratingBanker.destroy();
-                                            FileManager.removeFile(iteratingBanker);
+                                    for (NPC deleteBankerNPC : BankerNPC.getAllBankerNPC()) {
+                                        BankerTrait bankerTrait = deleteBankerNPC.getTrait(BankerTrait.class);
+
+                                        if (bankerTrait.getBankerName().equalsIgnoreCase(nameDelete)) {
+                                            playerSender.sendMessage(STANDARD_COLOR + "You have fired " + BANKER_COLOR + bankerTrait.getBankerName() + STANDARD_COLOR + " for stealing gold from players' chests.");
+                                            CitizensAPI.getNPCRegistry().deregister(deleteBankerNPC);
                                             return true;
                                         }
                                     }
@@ -96,11 +99,12 @@ public class BankCommand implements CommandExecutor {
                                     }
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String nameSetSpawn = stringBuilder(args, 2, " ");
-                                    for (ShardBanker iteratingBanker : ShardBanker.getActiveShardBankers()) {
-                                        if (iteratingBanker.getName().equalsIgnoreCase(nameSetSpawn)) {
-                                            playerSender.sendMessage(STANDARD_COLOR + "You have set a new location for the banker to take transactions. Make some money, " + BANKER_COLOR + iteratingBanker.getName() + STANDARD_COLOR + "!");
-                                            iteratingBanker.setSpawnLocation(playerSender.getLocation());
-                                            FileManager.write(iteratingBanker);
+                                    for (NPC setspawnBankerNPC : BankerNPC.getAllBankerNPC()) {
+                                        BankerTrait bankerTrait = setspawnBankerNPC.getTrait(BankerTrait.class);
+
+                                        if (bankerTrait.getBankerName().equalsIgnoreCase(nameSetSpawn)) {
+                                            playerSender.sendMessage(STANDARD_COLOR + "You have set a new location for the banker to take transactions. Make some money, " + BANKER_COLOR + bankerTrait.getBankerName() + STANDARD_COLOR + "!");
+                                            bankerTrait.setBankerLocation(playerSender.getLocation());
                                             return true;
                                         }
                                     }
@@ -108,12 +112,14 @@ public class BankCommand implements CommandExecutor {
                                     break;
                                 case "show":
                                     playerSender.sendMessage(STANDARD_COLOR + "-=[Bankers Active]=-");
-                                    for (ShardBanker iteratingBanker : ShardBanker.getActiveShardBankers()) {
-                                        int x = iteratingBanker.getCurrentLocation().getBlockX();
-                                        int y = iteratingBanker.getCurrentLocation().getBlockY();
-                                        int z = iteratingBanker.getCurrentLocation().getBlockZ();
-                                        BaseComponent[] tc = new ComponentBuilder(BANKER_COLOR + "" + iteratingBanker.getName() + STANDARD_COLOR + " is positioned at x:" + STANDARD_COLOR + x + ", y:" + y + ", z:" + z + ".")
-                                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + BANKER_COLOR + iteratingBanker.getName() + STANDARD_COLOR + ".").create()))
+                                    for (NPC showBankerNPC : BankerNPC.getAllBankerNPC()) {
+                                        BankerTrait bankerTrait = showBankerNPC.getTrait(BankerTrait.class);
+
+                                        int x = showBankerNPC.getStoredLocation().getBlockX();
+                                        int y = showBankerNPC.getStoredLocation().getBlockY();
+                                        int z = showBankerNPC.getStoredLocation().getBlockZ();
+                                        BaseComponent[] tc = new ComponentBuilder(BANKER_COLOR + "" + bankerTrait.getBankerName() + STANDARD_COLOR + " is positioned at x:" + STANDARD_COLOR + x + ", y:" + y + ", z:" + z + ".")
+                                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + BANKER_COLOR + bankerTrait.getBankerName()+ STANDARD_COLOR + ".").create()))
                                                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
 
                                         playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);

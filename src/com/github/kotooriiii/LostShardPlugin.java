@@ -5,6 +5,7 @@ import com.github.kotooriiii.bannedplayer.BannedJoinListener;
 import com.github.kotooriiii.channels.commands.AdminChatCommand;
 import com.github.kotooriiii.channels.commands.ClearChatCommand;
 import com.github.kotooriiii.channels.commands.ClearChatAllCommand;
+import com.github.kotooriiii.clans.PlayerJoinCheckClanIfBuff;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
@@ -21,13 +22,12 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.crafting.CraftingRecipes;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.npc.ShardBanker;
-import com.github.kotooriiii.npc.ShardGuard;
 import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
-import com.github.kotooriiii.npc.official.guard.GuardNPC;
-import com.github.kotooriiii.npc.reworked.SNPC;
+import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import com.github.kotooriiii.npc.type.guard.GuardTrait;
+import com.github.kotooriiii.npc.reworked.PacketListener;
 import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
@@ -179,7 +179,15 @@ public class LostShardPlugin extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return false;
         }
+registerTrait();
         return true;
+    }
+
+    public void registerTrait()
+    {
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(GuardTrait.class).withName("GuardTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(BankerTrait.class).withName("BankerTrait"));
+
     }
 
     @Override
@@ -230,8 +238,8 @@ public class LostShardPlugin extends JavaPlugin {
         registerCorrupts();
         registerStaff();
 
-        SNPC snpc = new SNPC();
-        snpc.init();
+        PacketListener packetListener = new PacketListener();
+        packetListener.init();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
@@ -247,15 +255,6 @@ public class LostShardPlugin extends JavaPlugin {
         //  LostShardPlugin.getDiscord().getClient().logout().block();
 
         saveData();
-
-        for (int i = 0; i < ShardGuard.getActiveShardGuards().size(); i++) {
-            ShardGuard.getActiveShardGuards().get(i).forceDestroy();
-        }
-        ShardGuard.getActiveShardGuards().clear();
-
-        for (int i = 0; i < ShardBanker.getActiveShardBankers().size(); i++) {
-            ShardBanker.getActiveShardBankers().get(i).forceDestroy();
-        }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             InventoryView inventoryView = player.getOpenInventory();
@@ -275,7 +274,6 @@ public class LostShardPlugin extends JavaPlugin {
         }
 
         Stat.getStatMap().clear();
-        ShardBanker.getActiveShardBankers().clear();
         Bank.getBanks().clear();
         StatusPlayer.getPlayerStatus().clear();
         getPlotManager().getAllPlots().clear();
@@ -398,6 +396,12 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("private").setExecutor(new PrivateCommand());
         getCommand("public").setExecutor(new PublicCommand());
 
+        getCommand("notification").setExecutor(new NotificationCommand());
+        getCommand("removeoldentities").setExecutor(new RemoveOldEntitiesCommand());
+        getCommand("playtime").setExecutor(new PlaytimeCommand());
+
+        getCommand("scroll").setExecutor(new ScrollCommand());
+
 
         //todo to use later -->
         //getCommand("opt").setExecutor(new LinkListener());
@@ -421,8 +425,6 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerFriendlyFireHitListener(), this);
         pm.registerEvents(new HostilityCreateListener(), this);
         pm.registerEvents(new GuardChatMessageListener(), this);
-        pm.registerEvents(new NPCInteractRedirectListener(), this);
-        pm.registerEvents(new UpdatePacketOnJoinListener(), this);
         pm.registerEvents(new PlayerBankUpdateInventory(), this);
         pm.registerEvents(new ChatChannelListener(), this);
         pm.registerEvents(new StatusUpdateListener(), this);
@@ -491,8 +493,10 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new SeedCommandListener(), this);
         pm.registerEvents(new VoidDamageListener(), this);
         pm.registerEvents(new EnchantmentListener(), this);
+        pm.registerEvents(new PlayerJoinCheckClanIfBuff(), this);
 
-        pm.registerEvents(new GuardNPC(), this);
+        pm.registerEvents(new MOTDListener(), this);
+
 
         registerCustomEventListener();
 
@@ -539,8 +543,8 @@ public class LostShardPlugin extends JavaPlugin {
                                 if (offlinePlayer.isOnline())
                                     offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
                                 Stat stat = Stat.wrap(uuid);
-                                stat.setMaxStamina(100);
-                                stat.setMaxMana(100);
+                                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+                                stat.setMaxMana(Stat.BASE_MAX_MANA);
 
                                 if (stat.getStamina() > stat.getMaxStamina())
                                     stat.setStamina(stat.getMaxStamina());
@@ -750,5 +754,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
+    }
+
+    public static String getPatchUpdateVersion(String majorUpdate)
+    {
+        return ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "News -> " + majorUpdate;
     }
 }

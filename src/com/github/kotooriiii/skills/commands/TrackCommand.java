@@ -1,6 +1,7 @@
 package com.github.kotooriiii.skills.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.channels.events.ChatChannelListener;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
@@ -138,9 +139,14 @@ trackedPlayer.setGlowing(true);
 
 
                 String direction = getCompassDirection(playerSender, trackedPlayer.getLocation());
-                direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
-                playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
-                playerSender.sendMessage(ChatColor.GOLD + howClose(trackedPlayer.getLocation().distance(playerSender.getLocation())));
+                if(direction == null)
+                {
+                 playerSender.sendMessage(ChatColor.GOLD + trackedPlayer.getName() + " seems to be in another dimension...");
+                } else {
+                    direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
+                    playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
+                    playerSender.sendMessage(ChatColor.GOLD + howClose(trackedPlayer.getLocation().distance(playerSender.getLocation())));
+                }
 
             } else {
                 if (level < 50) {
@@ -205,6 +211,11 @@ trackedPlayer.setGlowing(true);
     }
 
     public String getCompassDirection(Player player, Location location) {
+
+        if(!player.getLocation().getWorld().equals(location.getWorld()))
+        {
+            return  null;
+        }
 
         Vector playerVector = player.getLocation().toVector();
         Vector targetVector = location.toVector();

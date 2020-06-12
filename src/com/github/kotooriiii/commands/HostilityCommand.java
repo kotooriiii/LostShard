@@ -317,12 +317,12 @@ public class HostilityCommand implements CommandExecutor {
                 TextComponent component = new TextComponent(ChatColor.YELLOW + matches[i].getPlatform().getName() + ChatColor.YELLOW + ", ");
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + matches[i].getPlatform().getName() + STANDARD_COLOR + ".").create()));
                 component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + matches[i].getPlatform().getName()));
-                tc.addExtra(component.duplicate());
+                tc.addExtra(component);
             } else {
                 TextComponent component = new TextComponent(ChatColor.YELLOW + matches[i].getPlatform().getName() + ChatColor.YELLOW + "");
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + matches[i].getPlatform().getName() + STANDARD_COLOR + ".").create()));
                 component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + matches[i].getPlatform().getName()));
-                tc.addExtra(component.duplicate());
+                tc.addExtra(component);
             }
         }
 
@@ -343,14 +343,14 @@ public class HostilityCommand implements CommandExecutor {
                 component.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + platform.getName() + STANDARD_COLOR + ".").create()));
                 component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + platform.getName()));
-                tcInactive.addExtra(component.duplicate());
+                tcInactive.addExtra(component);
 
             } else {
                 TextComponent component = new TextComponent(platform.getName());
                 component.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Show more information about " + ChatColor.YELLOW + platform.getName() + STANDARD_COLOR + ".").create()));
                 component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/host " + platform.getName()));
-                tcInactive.addExtra(component.duplicate());
+                tcInactive.addExtra(component);
             }
 
             hasInactive = true;
@@ -359,9 +359,9 @@ public class HostilityCommand implements CommandExecutor {
 
 
         if (hasActive)
-            playerSender.spigot().sendMessage(tc.duplicate());
+            playerSender.spigot().sendMessage(tc);
         if (hasInactive)
-            playerSender.spigot().sendMessage(tcInactive.duplicate());
+            playerSender.spigot().sendMessage(tcInactive);
 
 
         /*

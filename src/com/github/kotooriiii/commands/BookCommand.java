@@ -70,7 +70,7 @@ public class BookCommand implements CommandExecutor {
         tc.addExtra(wikiComponent);
 
 
-        bookMeta.spigot().addPage(new BaseComponent[]{tc.duplicate()});
+        bookMeta.spigot().addPage(new BaseComponent[]{tc});
         itemStack.setItemMeta(bookMeta);
 
         Player player = (Player) commandSender;

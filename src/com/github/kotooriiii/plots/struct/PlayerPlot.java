@@ -393,9 +393,14 @@ public class PlayerPlot extends Plot {
         String size = ChatColor.YELLOW + "\nSize: " + ChatColor.WHITE + this.getRadius() * 2;
 
         String privacy = "";
-        if (!relationshipToPlot.isEmpty())
+        if (!relationshipToPlot.isEmpty()) {
+
+            if(RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
             privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + df.format(getTax()) + "\n"
                     + ChatColor.GRAY + "(" + daysLeft() + ")";
+            else
+                privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + "EXEMPT";
+        }
         String location = ChatColor.YELLOW + "\nCenter: " + ChatColor.WHITE + "(" + center.getBlockX() + ", " + center.getBlockY() + ", " + center.getBlockZ() + ") " + ChatColor.YELLOW + "Distance from Center: " + ChatColor.WHITE + getRadius();
 
         String jointOwnerConcat = ChatColor.YELLOW + "\nYou are not a friend of this plot.";

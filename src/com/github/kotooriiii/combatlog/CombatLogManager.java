@@ -1,6 +1,10 @@
 package com.github.kotooriiii.combatlog;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.status.StatusPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -33,11 +37,17 @@ public class CombatLogManager {
         combatTaggedPlayersInvolved.remove(playerUUID);
     }
 
-    public void add(UUID playerUUID, UUID attackerUUID) {
+    public void add(UUID defenderUUID, UUID attackerUUID) {
         //Remove old task if there was one
-        BukkitTask oldTask = combatLoggedPlayerTask.get(playerUUID);
+        BukkitTask oldTask = combatLoggedPlayerTask.get(defenderUUID);
+
+        //Combat logged before
         if (oldTask != null) {
             oldTask.cancel();
+        } else {
+            //Just now getting combat logged for the first time
+            sendTagMessage(defenderUUID, attackerUUID);
+
         }
 
         BukkitTask task = new BukkitRunnable() {
@@ -51,24 +61,46 @@ public class CombatLogManager {
                     return;
 
                 if (counter == SECONDS_TAGGED) {
-                    combatLoggedPlayerTask.remove(playerUUID);
-                    combatTaggedPlayersInvolved.remove(playerUUID);
+                    combatLoggedPlayerTask.remove(defenderUUID);
+                    combatTaggedPlayersInvolved.remove(defenderUUID);
                     this.cancel();
+                    sendUntagMessage(defenderUUID, attackerUUID);
                     return;
                 }
                 counter++;
             }
-        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 20, 20);
+        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 20);
 
-        combatLoggedPlayerTask.put(playerUUID, task);
+        combatLoggedPlayerTask.put(defenderUUID, task);
 
-        CombatTaggedPlayer taggedPlayer = combatTaggedPlayersInvolved.get(playerUUID);
+        CombatTaggedPlayer taggedPlayer = combatTaggedPlayersInvolved.get(defenderUUID);
         if (taggedPlayer == null) {
-            taggedPlayer = new CombatTaggedPlayer(playerUUID);
+            taggedPlayer = new CombatTaggedPlayer(defenderUUID);
         }
         if (!taggedPlayer.isAttacker(attackerUUID))
             taggedPlayer.addAttacker(attackerUUID);
-        combatTaggedPlayersInvolved.put(playerUUID, taggedPlayer);
+        combatTaggedPlayersInvolved.put(defenderUUID, taggedPlayer);
+    }
+
+    private void sendTagMessage(UUID defenderUUID, UUID attackerUUID) {
+        ChatColor color = ChatColor.RED;
+
+        Player defenderPlayer = Bukkit.getPlayer(defenderUUID);
+        Player damagerPlayer = Bukkit.getPlayer(attackerUUID);
+
+        if (defenderPlayer != null && damagerPlayer != null)
+            defenderPlayer.sendMessage(color + "You've been combat tagged by " + StatusPlayer.wrap(damagerPlayer.getUniqueId()).getStatus().getChatColor() + damagerPlayer.getName() + color + ".");
+    }
+
+
+    private void sendUntagMessage(UUID defenderUUID, UUID attackerUUID) {
+        ChatColor color = ChatColor.RED;
+
+        Player defenderPlayer = Bukkit.getPlayer(defenderUUID);
+        Player damagerPlayer = Bukkit.getPlayer(attackerUUID);
+
+        if (defenderPlayer != null && damagerPlayer != null)
+            defenderPlayer.sendMessage(color + "You're no longer combat tagged.");
     }
 
     public boolean isTagged(UUID playerUUID) {

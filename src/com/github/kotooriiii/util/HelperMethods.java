@@ -1,5 +1,6 @@
 package com.github.kotooriiii.util;
 
+import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
@@ -36,6 +37,17 @@ public final class HelperMethods {
         return string;
     }
 
+    public static Set getLookingSet() {
+
+        HashSet set = new HashSet<>();
+        set.add(Material.AIR);
+        set.add(Material.CAVE_AIR);
+        set.add(Material.VOID_AIR);
+        set.add(Material.WATER);
+        set.add(Material.LAVA);
+        return set;
+    }
+
     public static String stringBuilder(String[] args, int n, String concat, String lastConcat) {
 
         String string = "";
@@ -56,7 +68,7 @@ public final class HelperMethods {
 
     public static void playSound(Player[] players, Sound sound) {
         for (Player player : players) {
-            player.playSound(player.getLocation(), sound, 10F, 1F);
+                player.playSound(player.getLocation(), sound, 10F, 0F);
         }
     }
 
@@ -255,7 +267,7 @@ public final class HelperMethods {
         ArrayList<Player> players = new ArrayList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if(!player.getWorld().equals(localPlayer.getWorld()))
+            if (!player.getWorld().equals(localPlayer.getWorld()))
                 continue;
             if (player.getLocation().distance(localPlayer.getLocation()) <= 60)
                 players.add(player);
@@ -376,9 +388,8 @@ public final class HelperMethods {
         return nextRun;
     }
 
-    public static ZonedDateTime toZDT(int[] props)
-    {
-        if(props == null)
+    public static ZonedDateTime toZDT(int[] props) {
+        if (props == null)
             return null;
         return toZDT(props[0], props[1], props[2], props[3], props[4], props[5], props[6]);
     }
@@ -460,31 +471,26 @@ public final class HelperMethods {
         }
     }
 
-    public static  String until(ZonedDateTime of)
-    {
+    public static String until(ZonedDateTime of) {
         int hour = of.getHour();
         String ampm = "";
 
-        if(hour == 0)
-        {
-            hour  = 12;
+        if (hour == 0) {
+            hour = 12;
             ampm = "a.m.";
-        } else if (1 <= hour && hour <= 11)
-        {
+        } else if (1 <= hour && hour <= 11) {
             hour = hour;
             ampm = "a.m.";
-        } else if (hour == 12)
-        {
+        } else if (hour == 12) {
             hour = 12;
             ampm = "p.m.";
-        }
-        else if(13 <= hour && hour <= 23) {
-            hour = hour-12;
+        } else if (13 <= hour && hour <= 23) {
+            hour = hour - 12;
             ampm = "p.m.";
         }
 
         String monthName = of.getMonth().name();
-        monthName = monthName.substring(0,1).toUpperCase() + monthName.substring(1).toLowerCase();
+        monthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1).toLowerCase();
 
         String minuteName = new DecimalFormat("#00").format(of.getMinute());
 

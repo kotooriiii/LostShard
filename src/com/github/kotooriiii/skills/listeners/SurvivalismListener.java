@@ -338,9 +338,10 @@ public class SurvivalismListener implements Listener {
                 if (random <= 0.75) {
 
                     int addedBonus = new Random().nextInt(itemStack.getAmount());
-                    int multiplier = 2; // new Random().nextInt(2) + 2; //0 1 , 2 3
+                   // int multiplier = 2; // new Random().nextInt(2) + 2; //0 1 , 2 3
 
-                    ItemStack item = new ItemStack(itemStack.getType(), itemStack.getAmount() + addedBonus);
+                    ItemStack item = itemStack.clone();
+                    item.setAmount(itemStack.getAmount() + addedBonus);
                     defenderEntity.getLocation().getWorld().dropItemNaturally(event.getEntity().getLocation(), item);
                 }
 

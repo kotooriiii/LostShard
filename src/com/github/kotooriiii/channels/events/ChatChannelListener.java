@@ -3,6 +3,7 @@ package com.github.kotooriiii.channels.events;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.ChannelStatus;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
@@ -26,7 +27,8 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class ChatChannelListener implements Listener {
-    public static final Sound PING_SOUND = Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO ;
+    public static final Sound PING_SOUND = Sound.ENTITY_ARROW_HIT_PLAYER;
+    public static final float PING_PITCH = 3;
 
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent playerJoinEvent) {
@@ -133,7 +135,8 @@ public class ChatChannelListener implements Listener {
             return;
         for (Player recipient : recipients) {
             if (pingedPlayers.contains(recipient))
-                recipient.playSound(recipient.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
+                if (NotificationCommand.isPingable(recipient))
+                    recipient.playSound(recipient.getLocation(), ChatChannelListener.PING_SOUND, 10, PING_PITCH);
 
             recipient.sendMessage(builder + messageColor + ": " + message);
         }

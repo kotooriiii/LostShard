@@ -58,6 +58,13 @@ public class CastCommand implements CommandExecutor {
                         return true;
                     }
 
+                    if(args[0].equalsIgnoreCase("help"))
+                    {
+                        playerSender.performCommand("cast 1");
+                        return false;
+                    }
+
+
 
 
                     SpellType type = SpellType.matchSpellType(name.toLowerCase());
@@ -87,8 +94,9 @@ public class CastCommand implements CommandExecutor {
 
         final int amtOfSpellsPerPage = 5;
 
-        SpellType[] spellTypes = SpellType.values();
-        int size = spellTypes.length;
+        Spell[] castableSpells = Spell.getCastableSpells();
+
+        int size = castableSpells.length;
 
 
 
@@ -113,10 +121,10 @@ public class CastCommand implements CommandExecutor {
                 return;
             }
 
-            if (spellTypes == null)
+            if (castableSpells == null)
                 break;
 
-            playerSender.sendMessage(ChatColor.GOLD + "/cast " + spellTypes[i].getName());
+            playerSender.sendMessage(ChatColor.GOLD + "/cast " + castableSpells[i].getName());
 
             spellTypeCounter++;
         }

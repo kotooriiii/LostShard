@@ -3,6 +3,8 @@ package com.github.kotooriiii.sorcery.spells.type;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -163,7 +166,10 @@ public class TeleportSpell extends Spell {
 
     public Location teleportLocation(Player player, final int range) {
 
-        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
+        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(), range);
+
+//        for(int i = 0; i < lastTwoTargetBlocks.size(); i++)
+//        Bukkit.broadcastMessage("i: " + i + " | " + "material: " + lastTwoTargetBlocks.get(i).getType().getKey().getKey());
 
         Block targetBlock;
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
@@ -180,8 +186,8 @@ public class TeleportSpell extends Spell {
     }
 
     public BlockFace getBlockFace(Player player, final int range) {
-        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
-        if (lastTwoTargetBlocks.size() != 2) return null;
+        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(), range);
+        if (lastTwoTargetBlocks.size() != 2) return BlockFace.SELF;
         Block targetBlock = lastTwoTargetBlocks.get(1);
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
         return targetBlock.getFace(adjacentBlock);

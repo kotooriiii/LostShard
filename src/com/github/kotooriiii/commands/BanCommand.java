@@ -88,7 +88,7 @@ public class BanCommand implements CommandExecutor {
                     tc.addExtra(component);
                     tc.addExtra(component2);
                     tc.addExtra(component3);
-                    playerSender.spigot().sendMessage(tc.duplicate());
+                    playerSender.spigot().sendMessage(tc);
                     return false;
                 }
 

@@ -86,13 +86,12 @@ public class MiningListener implements Listener {
             double random = Math.random();
 
             ItemStack item = entry.getKey();
-            double chance = entry.getValue();
+            double chance = entry.getValue()*10/2;
 
             if (random < chance) {
                 rewards.add(item);
             }
         }
-
         return rewards;
     }
 
@@ -108,137 +107,137 @@ public class MiningListener implements Listener {
         HashMap<ItemStack, Double> lootTable = new HashMap<>();
 
         if (level >= 100) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.01);
-            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
+            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0075);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0075);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
         } else if (90 <= level && level < 100) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.01);
-            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
+            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0075);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0075);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
         } else if (80 <= level && level < 90) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.01);
-            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
+            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.005);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.005);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0005);
 
         } else if (70 <= level && level < 80) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.01);
-            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
+            lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.005);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
         } else if (60 <= level && level < 70) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.01);
+            lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
 
 
         } else if (50 <= level && level < 60) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.01);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
         } else if (40 <= level && level < 50) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.02);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.01);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
         } else if (30 <= level && level < 40) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.02);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
         } else if (20 <= level && level < 30) {
-            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.02);
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.03);
+            lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.02);
+            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
         } else if (10 <= level && level < 20) {
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.03);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.005);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
         } else if (0 <= level && level < 10) {
-            lootTable.put(new ItemStack(Material.COAL, 1), 0.05);
+            lootTable.put(new ItemStack(Material.COAL, 1), 0.005);
         }
         return lootTable;
     }

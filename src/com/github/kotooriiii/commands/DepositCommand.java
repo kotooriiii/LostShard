@@ -2,7 +2,9 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.type.banker.BankerNPC;
+import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import net.citizensnpcs.api.npc.NPC;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.*;
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class DepositCommand implements CommandExecutor {
@@ -52,11 +53,13 @@ public class DepositCommand implements CommandExecutor {
                     DecimalFormat df = new DecimalFormat("#.##");
                     deposit = Double.valueOf(df.format(deposit));
                     final Location playerLocation = playerSender.getLocation();
-                    ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
-                    if (banker == null || !banker.isSocialDistance(playerLocation)) {
-                        playerSender.sendMessage(ChatColor.RED + "No banker nearby.");
+                    NPC bankerNPC = BankerNPC.getNearestBanker(playerLocation);
+                    BankerTrait bankerTrait = bankerNPC.getTrait(BankerTrait.class);
+                    if (bankerNPC== null || !bankerTrait.isSocialDistance(playerLocation)) {
+                        playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
                     }
+
 
                     Bank bank = Bank.getBanks().get(playerUUID);
                     double currency = Bank.getBanks().get(playerUUID).getCurrency();

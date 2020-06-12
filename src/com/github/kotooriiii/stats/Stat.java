@@ -7,8 +7,14 @@ import java.util.*;
 
 public class Stat {
 
-    public double maxStamina = 100;
-    public double maxMana = 100;
+    public static final double BASE_MAX_STAMINA = 100;
+    public static final double BASE_MAX_MANA = 100;
+
+    public static final double HOST_MAX_STAMINA = 115;
+    public static final double HOST_MAX_MANA = 115;
+
+    public double maxStamina = BASE_MAX_STAMINA;
+    public double maxMana = BASE_MAX_MANA;
 
     private double stamina;
     private double mana;

@@ -3,7 +3,6 @@ package com.github.kotooriiii.hostility;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -14,10 +13,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.text.DateFormat;
-import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -307,7 +302,14 @@ public class HostilityMatch {
 
 
                         for (UUID uuid : capturingClan.getAllUUIDS()) {
-                            Player player = Bukkit.getOfflinePlayer(uuid).getPlayer();
+                            Stat stat = Stat.wrap(uuid);
+                            stat.setMaxStamina(Stat.HOST_MAX_STAMINA);
+                            stat.setMaxMana(Stat.HOST_MAX_MANA);
+
+                            Player player = Bukkit.getPlayer(uuid);
+
+                            if(player==null)
+                                continue;
 
                             if (player.isOnline()) {
                                 HashMap<Integer, ItemStack> unstoredItems = new HashMap<>();
@@ -344,10 +346,6 @@ public class HostilityMatch {
                                     player.getLocation().getWorld().dropItem(player.getLocation(), unstoredItemStack);
                                 }
                             }
-
-                            Stat stat = Stat.wrap(uuid);
-                            stat.setMaxStamina(115);
-                            stat.setMaxMana(115);
                         }
 
 
@@ -368,8 +366,8 @@ public class HostilityMatch {
                                         if (offlinePlayer.isOnline())
                                             offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
                                         Stat stat = Stat.wrap(uuid);
-                                        stat.setMaxStamina(100);
-                                        stat.setMaxMana(100);
+                                        stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+                                        stat.setMaxMana(Stat.BASE_MAX_MANA);
 
                                         if (stat.getStamina() > stat.getMaxStamina())
                                             stat.setStamina(stat.getMaxStamina());

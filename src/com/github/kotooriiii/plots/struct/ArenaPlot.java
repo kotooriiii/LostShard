@@ -1,17 +1,14 @@
 package com.github.kotooriiii.plots.struct;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.plots.PlotType;
-import com.github.kotooriiii.plots.struct.Plot;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-
-import java.io.Serializable;
 
 public class ArenaPlot extends StaffPlot {
 
@@ -51,8 +48,8 @@ public class ArenaPlot extends StaffPlot {
         if (getSpawn() != null)
             center = ChatColor.YELLOW + "Center: " + ChatColor.WHITE + "(" + getSpawn().getBlockX() + ", " + getSpawn().getBlockY() + ", " + getSpawn().getBlockZ() + ") " + ChatColor.YELLOW + "Distance from center: " + ChatColor.WHITE + 5;
         String bankers = "";
-        for (ShardBanker shardBanker : ShardBanker.getActiveShardBankers()) {
-            Location location = shardBanker.getCurrentLocation();
+        for (NPC bankerNPC : BankerNPC.getAllBankerNPC()) {
+            Location location = bankerNPC.getStoredLocation();
             if (this.contains(location)) {
                 bankers += ChatColor.YELLOW + "Banker location: " + ChatColor.WHITE + "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
             }

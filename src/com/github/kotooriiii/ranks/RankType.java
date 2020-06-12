@@ -4,7 +4,7 @@ import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
 
 public enum RankType {
-    DEFAULT("Default", "def[" , ChatColor.WHITE  + "]", 27, 3, true),SUBSCRIBER("Subscriber",  ChatColor.GOLD + "[" , ChatColor.GOLD  + "]", 27, 6, true),SUBSCRIBER_PLUS("Subscriber+", ChatColor.GOLD + "[" , ChatColor.GOLD  + "]*", 54, 9, true);
+    DEFAULT("Default", "def[" , ChatColor.WHITE  + "]", 27, 3, true),SUBSCRIBER("Subscriber",  ChatColor.GOLD + "[" , ChatColor.GOLD  + "]", 27, 6, true),SUBSCRIBER_PLUS("Subscriber+", ChatColor.GOLD + "[" , ChatColor.GOLD  + "]*", 54, 9, false);
 
 
     private String name;

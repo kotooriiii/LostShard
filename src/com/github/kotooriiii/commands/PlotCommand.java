@@ -639,7 +639,7 @@ public class PlotCommand implements CommandExecutor {
         double currentCurrency = bank.getCurrency();
 
         if (currentCurrency < PlayerPlot.CREATE_COST) {
-            player.sendMessage(ERROR_COLOR + "You do not have enough funds in the plot’s balance to expand your plot any further. You need " + PlayerPlot.CREATE_COST + " gold to expand to the next size.");
+            player.sendMessage(ERROR_COLOR + "You do not have enough funds to create a plot.");
             return false;
         }
 

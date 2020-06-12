@@ -1,8 +1,10 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.npc.ShardBanker;
+import com.github.kotooriiii.npc.type.banker.BankerNPC;
+import com.github.kotooriiii.npc.type.banker.BankerTrait;
 import com.github.kotooriiii.ranks.RankPlayer;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -28,8 +30,9 @@ public class ChestCommand implements CommandExecutor {
                 //No arguments regarding this command
                 if (args.length == 0) {
                     final Location playerLocation = playerSender.getLocation();
-                    ShardBanker banker = ShardBanker.getNearestBanker(playerLocation);
-                    if (banker == null || !banker.isSocialDistance(playerLocation)) {
+                    NPC bankerNPC = BankerNPC.getNearestBanker(playerLocation);
+                    BankerTrait bankerTrait = bankerNPC.getTrait(BankerTrait.class);
+                    if (bankerNPC== null || !bankerTrait.isSocialDistance(playerLocation)) {
                         playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
                     }

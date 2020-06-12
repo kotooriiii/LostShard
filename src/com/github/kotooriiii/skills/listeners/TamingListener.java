@@ -99,8 +99,10 @@ public class TamingListener implements Listener {
         if (!(entity instanceof LivingEntity))
             return;
 
+        LivingEntity livingEntity = (LivingEntity) entity;
+
         //must be lower than max hp
-        if (((LivingEntity) entity).getHealth() == ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+        if (livingEntity.getHealth() == livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
             return;
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
@@ -124,6 +126,14 @@ public class TamingListener implements Listener {
         Entity lower than full hp
         Is of our definition 'tameable'
          */
+        int addedHP = 2;
+        double newHP = livingEntity.getHealth() + addedHP;
+        double maxHP = livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+        if (newHP > maxHP) {
+            livingEntity.setHealth(maxHP);
+        } else {
+            livingEntity.setHealth(newHP);
+        }
 
         addXP(player, entity);
     }

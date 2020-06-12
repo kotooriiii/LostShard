@@ -18,7 +18,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class MsgCommand implements CommandExecutor {
 
-    private static HashMap<UUID,UUID> lastMessageMap = new HashMap<UUID, UUID>();
+    private static HashMap<UUID, UUID> lastMessageMap = new HashMap<UUID, UUID>();
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -51,23 +51,21 @@ public class MsgCommand implements CommandExecutor {
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
         receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
 
-        receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, 0);
+        if (NotificationCommand.isPingable(receivingPlayer))
+            receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
 
         lastMessageMap.put(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
         lastMessageMap.put(playerSender.getUniqueId(), receivingPlayer.getUniqueId()); // this is for convo based
 
 
-
         return true;
     }
 
-    public static UUID getUUIDToReplyTo(UUID personExecutingCommand)
-    {
+    public static UUID getUUIDToReplyTo(UUID personExecutingCommand) {
         return lastMessageMap.get(personExecutingCommand);
     }
 
-    public static void updateMap(UUID receive, UUID sent)
-    {
+    public static void updateMap(UUID receive, UUID sent) {
         lastMessageMap.put(receive, sent); //only for person who messaged you
         lastMessageMap.put(sent, receive); // this is for convo based
     }

@@ -10,6 +10,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -18,6 +19,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -113,8 +115,62 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onBucketfill(PlayerBucketEmptyEvent event)
-    {
+    public void onBlockChangePlot(PlayerInteractEvent playerInteractEvent) {
+
+        final Action action = playerInteractEvent.getAction();
+
+        if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR)
+            return;
+
+        final Block block = playerInteractEvent.getClickedBlock();
+
+        if (block == null)
+            return;
+
+              /*
+        So far it's a LEFT CLICK event
+        It's a block event
+         */
+
+        final Location location = block.getLocation();
+        //Check entity
+        final Player playerBlockBreak = playerInteractEvent.getPlayer();
+        //If entity is not a player then cancel it
+        final UUID playerUUID = playerBlockBreak.getUniqueId();
+
+        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.getType().isStaff()) {
+
+                    //   playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot interact with blocks here, " + plot.getName() + " is protected.");
+                    playerInteractEvent.setCancelled(true);
+                    return;
+                }
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
+                //If don't have permissions
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    playerInteractEvent.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBucketfill(PlayerBucketEmptyEvent event) {
         final Location location = event.getPlayer().getLocation();
         //Check entity
         final Entity entity = event.getPlayer();
@@ -122,7 +178,7 @@ public class BlockChangePlotListener implements Listener {
         Player player = (Player) entity;
         final UUID playerUUID = player.getUniqueId();
 
-        if(player.hasPermission(STAFF_PERMISSION))
+        if (player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -155,8 +211,7 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onBucketfill(PlayerBucketFillEvent event)
-    {
+    public void onBucketfill(PlayerBucketFillEvent event) {
         final Location location = event.getPlayer().getLocation();
         //Check entity
         final Entity entity = event.getPlayer();
@@ -164,7 +219,7 @@ public class BlockChangePlotListener implements Listener {
         Player player = (Player) entity;
         final UUID playerUUID = player.getUniqueId();
 
-        if(player.hasPermission(STAFF_PERMISSION))
+        if (player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -198,31 +253,26 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onItemFrameItemStack(EntityDamageByEntityEvent event)
-    {
+    public void onItemFrameItemStack(EntityDamageByEntityEvent event) {
 
         final Location location = event.getEntity().getLocation();
         //If entity is not a player then cancel it
 
 
-        if(!(event.getEntity()  instanceof ItemFrame))
+        if (!(event.getEntity() instanceof ItemFrame))
             return;
 
-        if(!(event.getDamager() instanceof Player))
-        {
+        if (!(event.getDamager() instanceof Player)) {
             event.setCancelled(true);
             return;
         }
 
 
-
-        final  Player player = (Player) event.getDamager();
+        final Player player = (Player) event.getDamager();
         final UUID playerUUID = player.getUniqueId();
 
 
-
-
-        if(player.hasPermission(STAFF_PERMISSION))
+        if (player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -256,19 +306,18 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onItemFrameItemStack(PlayerInteractEntityEvent event)
-    {
+    public void onItemFrameItemStack(PlayerInteractEntityEvent event) {
         final Location location = event.getRightClicked().getLocation();
         //If entity is not a player then cancel it
 
-        final  Player player = event.getPlayer();
+        final Player player = event.getPlayer();
         final UUID playerUUID = player.getUniqueId();
 
-        if(!(event.getRightClicked() instanceof ItemFrame))
+        if (!(event.getRightClicked() instanceof ItemFrame))
             return;
 
 
-        if(player.hasPermission(STAFF_PERMISSION))
+        if (player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -302,15 +351,13 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onItemBreakEvent(HangingBreakByEntityEvent event)
-    {
+    public void onItemBreakEvent(HangingBreakByEntityEvent event) {
         final Location location = event.getEntity().getLocation();
         //Check entity
         final Entity entity = event.getRemover();
         //If entity is not a player then cancel it
 
-        if(!(entity instanceof Player))
-        {
+        if (!(entity instanceof Player)) {
             event.setCancelled(true);
             return;
         }
@@ -318,7 +365,7 @@ public class BlockChangePlotListener implements Listener {
         Player player = (Player) entity;
         final UUID playerUUID = player.getUniqueId();
 
-        if(player.hasPermission(STAFF_PERMISSION))
+        if (player.hasPermission(STAFF_PERMISSION))
             return;
 
         //Iterate through all plots
@@ -352,20 +399,19 @@ public class BlockChangePlotListener implements Listener {
     }
 
     @EventHandler
-    public void onSpawn(EntitySpawnEvent entitySpawnEvent)
-    {
-        if(entitySpawnEvent.getEntity() instanceof Player)
+    public void onSpawn(EntitySpawnEvent entitySpawnEvent) {
+        if (entitySpawnEvent.getEntity() instanceof Player)
             return;
 
         Location spawnedLocation = entitySpawnEvent.getLocation();
         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(spawnedLocation);
-        if(plot == null)
+        if (plot == null)
             return;
 
-        if(!plot.getType().isStaff())
+        if (!plot.getType().isStaff())
             return;
 
-        if(!isHostile(entitySpawnEvent.getEntity()))
+        if (!isHostile(entitySpawnEvent.getEntity()))
             return;
 
         entitySpawnEvent.setCancelled(true);
@@ -375,11 +421,10 @@ public class BlockChangePlotListener implements Listener {
     @EventHandler
     public void onExplosion(BlockExplodeEvent event) {
         List<Block> blocksExploding = event.blockList();
-        for(Block block : blocksExploding)
-        {
+        for (Block block : blocksExploding) {
             Location loc = block.getLocation();
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
-            if(plot == null)
+            if (plot == null)
                 continue;
 
             event.setCancelled(true);
@@ -389,11 +434,10 @@ public class BlockChangePlotListener implements Listener {
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         List<Block> blocksExploding = event.blockList();
-        for(Block block : blocksExploding)
-        {
+        for (Block block : blocksExploding) {
             Location loc = block.getLocation();
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
-            if(plot == null)
+            if (plot == null)
                 continue;
 
             event.setCancelled(true);

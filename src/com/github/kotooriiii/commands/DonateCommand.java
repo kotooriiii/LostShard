@@ -36,9 +36,9 @@ public class DonateCommand implements CommandExecutor {
         component.setColor(ChatColor.GOLD);
         component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to buycraft site.").color(ChatColor.GOLD).create()));
         component.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://lostshard.buycraft.net/"));
-        tc.addExtra(component.duplicate());
+        tc.addExtra(component);
 
-        player.spigot().sendMessage(tc.duplicate());
+        player.spigot().sendMessage(tc);
 
     return false;
     }

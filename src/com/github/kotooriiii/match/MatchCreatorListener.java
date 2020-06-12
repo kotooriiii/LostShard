@@ -180,7 +180,7 @@ public class MatchCreatorListener implements Listener {
                 tc.addExtra(component);
                 tc.addExtra(component2);
                 tc.addExtra(component3);
-                player.spigot().sendMessage(tc.duplicate());
+                player.spigot().sendMessage(tc);
                 return;
             }
         }
@@ -201,7 +201,7 @@ public class MatchCreatorListener implements Listener {
                     tc.addExtra(component);
                     tc.addExtra(component2);
                     tc.addExtra(component3);
-                    player.spigot().sendMessage(tc.duplicate());
+                    player.spigot().sendMessage(tc);
                     return;
                 }
 
