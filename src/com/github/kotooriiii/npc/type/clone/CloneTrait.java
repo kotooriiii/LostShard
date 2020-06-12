@@ -109,8 +109,8 @@ public class CloneTrait extends Trait {
             getNPC().getStoredLocation().getWorld().spawnParticle(Particle.BLOCK_CRACK, getNPC().getStoredLocation().add(0,1,0), 10,0, 0, 0, getNPC().getStoredLocation().getBlock().getBlockData());
         } else {
             getNPC().getNavigator().getLocalParameters().baseSpeed(1);
-
         }
+
         getNPC().getNavigator().setTarget(moveToNPC);
 
     }
@@ -168,7 +168,8 @@ public class CloneTrait extends Trait {
 
 
         //range
-        getNPC().getNavigator().getLocalParameters().useNewPathfinder();
+        getNPC().getNavigator().getLocalParameters().useNewPathfinder(true);
+        getNPC().getNavigator().getLocalParameters().avoidWater(true);
         getNPC().getNavigator().getLocalParameters().range(150);
 
 
@@ -194,10 +195,5 @@ public class CloneTrait extends Trait {
 
     //END OF BASIC GETTERS/SETTERS
 
-    public boolean isSocialDistance(Location loc) {
-        int xIntDiff = loc.getBlockX() - getNPC().getStoredLocation().getBlockX();
-        int yIntDiff = loc.getBlockY() - getNPC().getStoredLocation().getBlockY();
-        int zIntDiff = loc.getBlockZ() - getNPC().getStoredLocation().getBlockZ();
-        return Math.abs(xIntDiff) <= socialDistance && Math.abs(yIntDiff) <= socialDistance && Math.abs(zIntDiff) <= socialDistance;
-    }
+
 }
