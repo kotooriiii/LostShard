@@ -16,6 +16,7 @@ import org.bukkit.scoreboard.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import static com.github.kotooriiii.data.Maps.hudContainer;
 
@@ -25,8 +26,7 @@ public class ShardScoreboardManager {
 
     public final static HashMap<String, Integer> weightMap = new HashMap<>();
 
-    public static void initDefault()
-    {
+    public static void initDefault() {
         weightMap.put(StaffType.OWNER.getName(), 0);
         weightMap.put(StaffType.COOWNER.getName(), 1);
         weightMap.put(StaffType.ADMIN.getName(), 2);
@@ -34,6 +34,9 @@ public class ShardScoreboardManager {
         weightMap.put(Status.EXILED.getName(), 7);
         weightMap.put(Status.CORRUPT.getName(), 8);
         weightMap.put(Status.WORTHY.getName(), 9);
+
+        for (Map.Entry entry : weightMap.entrySet())
+            LostShardPlugin.logger.log(Level.WARNING, entry.getKey() + " -> " + entry.getValue());
 
     }
 
@@ -55,9 +58,9 @@ public class ShardScoreboardManager {
         owner.setColor(StaffType.OWNER.getChatColor());
         Team coowner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.COOWNER.getName()) + StaffType.COOWNER.getName());
         coowner.setColor(StaffType.COOWNER.getChatColor());
-        Team admin = registerScoreboard.registerNewTeam(weightMap.get(StaffType.ADMIN.getName())  + StaffType.ADMIN.getName());
+        Team admin = registerScoreboard.registerNewTeam(weightMap.get(StaffType.ADMIN.getName()) + StaffType.ADMIN.getName());
         admin.setColor(StaffType.ADMIN.getChatColor());
-        Team moderator = registerScoreboard.registerNewTeam(weightMap.get(StaffType.MODERATOR.getName())  + StaffType.MODERATOR.getName());
+        Team moderator = registerScoreboard.registerNewTeam(weightMap.get(StaffType.MODERATOR.getName()) + StaffType.MODERATOR.getName());
         moderator.setColor(StaffType.MODERATOR.getChatColor());
 
         player.setScoreboard(registerScoreboard);
@@ -75,7 +78,6 @@ public class ShardScoreboardManager {
         objective.setDisplayName(ChatColor.GOLD + "-" + player.getName() + "'s Stats-");
 
 
-
         Score manaScore = objective.getScore(ChatColor.BLUE + "Mana");
         manaScore.setScore(16);
 
@@ -90,14 +92,14 @@ public class ShardScoreboardManager {
         staminaValue.addEntry(ChatColor.BLUE + "" + ChatColor.DARK_BLUE);
         objective.getScore(ChatColor.BLUE + "" + ChatColor.DARK_BLUE).setScore(13);
 
-      Score balanceScore = objective.getScore(ChatColor.GOLD + "Balance");
-       balanceScore.setScore(12);
+        Score balanceScore = objective.getScore(ChatColor.GOLD + "Balance");
+        balanceScore.setScore(12);
 
         Team balanceValue = scoreboard.registerNewTeam("balance");
         balanceValue.addEntry(ChatColor.GREEN + "" + ChatColor.DARK_GREEN);
         objective.getScore(ChatColor.GREEN + "" + ChatColor.DARK_GREEN).setScore(11);
 
-     Score murderCountScore = objective.getScore(ChatColor.DARK_RED + "Murder count");
+        Score murderCountScore = objective.getScore(ChatColor.DARK_RED + "Murder count");
         murderCountScore.setScore(10);
 
         Team murderCountValue = scoreboard.registerNewTeam("murderCount");
@@ -114,13 +116,13 @@ public class ShardScoreboardManager {
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
                     Scoreboard scoreboard = player.getScoreboard();
-                    if(scoreboard == null)
+                    if (scoreboard == null)
                         continue;
 
                     //If player does not want a hud
                     if (hudContainer.contains(player.getUniqueId())) {
                         //If profile is active
-                        if (player.getScoreboard().getObjective("profile").getDisplaySlot()  != null)
+                        if (player.getScoreboard().getObjective("profile").getDisplaySlot() != null)
                             //Remove profile
                             player.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
                         continue;
@@ -130,13 +132,13 @@ public class ShardScoreboardManager {
                         player.getScoreboard().getObjective("profile").setDisplaySlot(DisplaySlot.SIDEBAR);
 
                     Bank bank = Bank.wrap(player.getUniqueId());
-                    if(bank == null)
+                    if (bank == null)
                         continue;
                     Stat stat = Stat.wrap(player);
-                    if(stat == null)
+                    if (stat == null)
                         continue;
                     StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
-                    if(statusPlayer == null)
+                    if (statusPlayer == null)
                         continue;
 
                     scoreboard.getTeam("mana").setPrefix(ChatColor.WHITE + "" + (int) stat.getMana() + "/" + (int) stat.getMaxMana());
@@ -145,7 +147,7 @@ public class ShardScoreboardManager {
                     //scoreboard.getTeam("balance").setPrefix(ChatColor.GOLD + "Balance: ");
                     scoreboard.getTeam("balance").setSuffix(ChatColor.WHITE + "" + bank.getCurrency() + "");
 
-                 //   scoreboard.getTeam("murderCount").setPrefix(ChatColor.RED + "Murder count: ");
+                    //   scoreboard.getTeam("murderCount").setPrefix(ChatColor.RED + "Murder count: ");
                     scoreboard.getTeam("murderCount").setSuffix(ChatColor.WHITE + "" + statusPlayer.getKills() + "");
 
                 }
@@ -169,7 +171,7 @@ public class ShardScoreboardManager {
             Scoreboard scoreboard = onlinePlayer.getScoreboard();
             for (Team team : scoreboard.getTeams()) {
                 if (team.hasEntry(playerName))
-                    scoreboard.getTeam(weightMap.get(team.getName()) + team.getName()).removeEntry(playerName);
+                    team.removeEntry(playerName);
             }
         }
     }
@@ -184,6 +186,7 @@ public class ShardScoreboardManager {
 
     public static void add(String playerName, String teamName) {
         remove(playerName);
+
         map.put(playerName, weightMap.get(teamName) + teamName);
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -193,15 +196,13 @@ public class ShardScoreboardManager {
         }
     }
 
-    public static void updateCache(Player player)
-    {
-        for(Map.Entry<String,String> entry : map.entrySet())
-        {
+    public static void updateCache(Player player) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             String playerName = entry.getKey();
             String teamName = entry.getValue();
 
             Scoreboard scoreboard = player.getScoreboard();
-            scoreboard.getTeam(weightMap.get(teamName) + teamName).addEntry(playerName);
+            scoreboard.getTeam(teamName).addEntry(playerName);
         }
     }
 }

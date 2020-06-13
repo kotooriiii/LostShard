@@ -205,6 +205,7 @@ registerTrait();
         luckPerms = loadLuckPerms();
 
         //Register managers
+        ShardScoreboardManager.initDefault();
         plotManager = new PlotManager();
         combatLogManager = new CombatLogManager();
         channelManager = new ChannelManager();
@@ -245,7 +246,6 @@ registerTrait();
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
 
         loadConfig();
-        ShardScoreboardManager.initDefault();
         ShardScoreboardManager.updateScoreboard();
     }
 
@@ -278,7 +278,6 @@ registerTrait();
         Bank.getBanks().clear();
         StatusPlayer.getPlayerStatus().clear();
         getPlotManager().getAllPlots().clear();
-        ;
 
         //SKILLS
 
@@ -497,6 +496,8 @@ registerTrait();
         pm.registerEvents(new PlayerJoinCheckClanIfBuff(), this);
 
         pm.registerEvents(new MOTDListener(), this);
+        pm.registerEvents(new NotValidReachBlockListener(), this);
+        pm.registerEvents(new NotValidMoveBlockListener(), this);
 
 
         registerCustomEventListener();
