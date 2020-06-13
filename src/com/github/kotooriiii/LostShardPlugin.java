@@ -245,6 +245,7 @@ registerTrait();
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
 
         loadConfig();
+        ShardScoreboardManager.initDefault();
         ShardScoreboardManager.updateScoreboard();
     }
 
@@ -607,6 +608,13 @@ registerTrait();
             @Override
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
+
+                    if(player.hasPotionEffect(PotionEffectType.INVISIBILITY))
+                    {
+                    } else {
+
+                    }
+
                     if (player.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE)) {
                         PlayerStrengthPotionEffectEvent playerStrengthPotionEffectEvent = new PlayerStrengthPotionEffectEvent(player);
                         Bukkit.getPluginManager().callEvent(playerStrengthPotionEffectEvent);

@@ -334,11 +334,20 @@ public class SurvivalismListener implements Listener {
                     return;
 
             for (ItemStack itemStack : event.getDrops()) {
+
+                if(isBlacklisted(itemStack.getType()))
+                    continue;
+
                 double random = Math.random();
                 if (random <= 0.75) {
 
-                    int addedBonus = new Random().nextInt(itemStack.getAmount());
-                   // int multiplier = 2; // new Random().nextInt(2) + 2; //0 1 , 2 3
+                    final int LIMIT = 2;
+                    int originalAmount = itemStack.getAmount();
+                    if (originalAmount > LIMIT)
+                        originalAmount = LIMIT;
+
+                    int addedBonus = new Random().nextInt(originalAmount);
+                    // int multiplier = 2; // new Random().nextInt(2) + 2; //0 1 , 2 3
 
                     ItemStack item = itemStack.clone();
                     item.setAmount(itemStack.getAmount() + addedBonus);
@@ -351,6 +360,22 @@ public class SurvivalismListener implements Listener {
         addXP(damagerPlayer, defenderEntity);
     }
 
+    private final boolean isBlacklisted(Material material) {
+        for (Material m : getBlacklisted()) {
+            if (m.equals(material))
+                return true;
+        }
+        return false;
+    }
+
+    private final Material[] getBlacklisted() {
+        return new Material[]{
+                Material.NETHER_STAR,
+                Material.DRAGON_EGG
+        };
+    }
+
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEat(FoodLevelChangeEvent event) {
         if (!(event.getEntity() instanceof Player))
@@ -358,7 +383,7 @@ public class SurvivalismListener implements Listener {
         Player player = (Player) event.getEntity();
         ItemStack eatenItem = event.getItem();
 
-        if(eatenItem == null)
+        if (eatenItem == null)
             return;
 
         if (!SurvivalistFood.isSurvivalistFood(eatenItem.getType()))

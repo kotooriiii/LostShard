@@ -23,26 +23,41 @@ public class ShardScoreboardManager {
 
     private static HashMap<String, String> map = new HashMap<>();
 
+    public final static HashMap<String, Integer> weightMap = new HashMap<>();
+
+    public static void initDefault()
+    {
+        weightMap.put(StaffType.OWNER.getName(), 0);
+        weightMap.put(StaffType.COOWNER.getName(), 1);
+        weightMap.put(StaffType.ADMIN.getName(), 2);
+        weightMap.put(StaffType.MODERATOR.getName(), 3);
+        weightMap.put(Status.EXILED.getName(), 7);
+        weightMap.put(Status.CORRUPT.getName(), 8);
+        weightMap.put(Status.WORTHY.getName(), 9);
+
+    }
+
+
     public static void registerScoreboard(Player player) {
 
         //Creates a new scoreboard for the player.
         Scoreboard registerScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
 
-        Team worthy = registerScoreboard.registerNewTeam(Status.WORTHY.getName());
+        Team worthy = registerScoreboard.registerNewTeam(weightMap.get(Status.WORTHY.getName()) + Status.WORTHY.getName());
         worthy.setColor(Status.WORTHY.getChatColor());
-        Team corrupt = registerScoreboard.registerNewTeam(Status.CORRUPT.getName());
+        Team corrupt = registerScoreboard.registerNewTeam(weightMap.get(Status.CORRUPT.getName()) + Status.CORRUPT.getName());
         corrupt.setColor(Status.CORRUPT.getChatColor());
-        Team exiled = registerScoreboard.registerNewTeam(Status.EXILED.getName());
+        Team exiled = registerScoreboard.registerNewTeam(weightMap.get(Status.EXILED.getName()) + Status.EXILED.getName());
         exiled.setColor(Status.EXILED.getChatColor());
 
-        Team owner = registerScoreboard.registerNewTeam(StaffType.OWNER.getName());
+        Team owner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.OWNER.getName()) + StaffType.OWNER.getName());
         owner.setColor(StaffType.OWNER.getChatColor());
-        Team coowner = registerScoreboard.registerNewTeam(StaffType.COOWNER.getName());
+        Team coowner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.COOWNER.getName()) + StaffType.COOWNER.getName());
         coowner.setColor(StaffType.COOWNER.getChatColor());
-        Team admin = registerScoreboard.registerNewTeam(StaffType.ADMIN.getName());
+        Team admin = registerScoreboard.registerNewTeam(weightMap.get(StaffType.ADMIN.getName())  + StaffType.ADMIN.getName());
         admin.setColor(StaffType.ADMIN.getChatColor());
-        Team moderator = registerScoreboard.registerNewTeam(StaffType.MODERATOR.getName());
+        Team moderator = registerScoreboard.registerNewTeam(weightMap.get(StaffType.MODERATOR.getName())  + StaffType.MODERATOR.getName());
         moderator.setColor(StaffType.MODERATOR.getChatColor());
 
         player.setScoreboard(registerScoreboard);
@@ -154,7 +169,7 @@ public class ShardScoreboardManager {
             Scoreboard scoreboard = onlinePlayer.getScoreboard();
             for (Team team : scoreboard.getTeams()) {
                 if (team.hasEntry(playerName))
-                    scoreboard.getTeam(team.getName()).removeEntry(playerName);
+                    scoreboard.getTeam(weightMap.get(team.getName()) + team.getName()).removeEntry(playerName);
             }
         }
     }
@@ -169,13 +184,12 @@ public class ShardScoreboardManager {
 
     public static void add(String playerName, String teamName) {
         remove(playerName);
-        map.put(playerName,teamName);
+        map.put(playerName, weightMap.get(teamName) + teamName);
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 
             Scoreboard scoreboard = onlinePlayer.getScoreboard();
-            scoreboard.getTeam(teamName).addEntry(playerName);
-
+            scoreboard.getTeam(weightMap.get(teamName) + teamName).addEntry(playerName);
         }
     }
 
@@ -187,7 +201,7 @@ public class ShardScoreboardManager {
             String teamName = entry.getValue();
 
             Scoreboard scoreboard = player.getScoreboard();
-            scoreboard.getTeam(teamName).addEntry(playerName);
+            scoreboard.getTeam(weightMap.get(teamName) + teamName).addEntry(playerName);
         }
     }
 }

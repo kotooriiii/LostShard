@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class FishingListener implements Listener {
 
-    final int ADDED_XP = 75;
+    final int ADDED_XP = 100;
 
     @EventHandler
     public void fish(PlayerFishEvent event) {
