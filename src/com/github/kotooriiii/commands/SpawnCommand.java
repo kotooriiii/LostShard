@@ -54,6 +54,11 @@ public class SpawnCommand implements CommandExecutor {
                     }
 
                     spawnTimer.add(playerUUID);
+                    StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
+                    Stat stat = Stat.wrap(playerSender);
+                    String organization = statusPlayer.getStatus().getOrganization();
+                    SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
+                    plot.getSpawn().getChunk().load(true);
                     new BukkitRunnable() {
                         private int secondsLeft = 10;
 
@@ -73,13 +78,7 @@ public class SpawnCommand implements CommandExecutor {
 
                             if (secondsLeft == 0) {
 
-                                StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
-                                Stat stat = Stat.wrap(playerSender);
-                                String organization = statusPlayer.getStatus().getOrganization();
-                                SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
-
                                 this.cancel();
-                                plot.getSpawn().getChunk().load(true);
                                 playerSender.teleport(plot.getSpawn());
                                 stat.setStamina(0);
                                 stat.setMana(0);

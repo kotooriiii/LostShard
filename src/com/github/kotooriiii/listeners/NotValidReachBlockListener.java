@@ -2,6 +2,8 @@ package com.github.kotooriiii.listeners;
 
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +18,9 @@ public class NotValidReachBlockListener implements Listener {
         Block eventBlock = event.getClickedBlock();
         if(eventBlock == null)
             return;
+        if (!(eventBlock instanceof Container))
+            return;
+
         Player player = event.getPlayer();
         Block calcBlock = player.getTargetBlockExact(5, FluidCollisionMode.NEVER);
         if(calcBlock == null)
@@ -29,3 +34,4 @@ public class NotValidReachBlockListener implements Listener {
 
     }
 }
+

@@ -154,7 +154,7 @@ public class RecallSpell extends Spell implements Listener {
         final int WAITING_TO_RECALL_PERIOD = 3;
         player.sendMessage(ChatColor.GOLD + "You begin to cast to the mark, \"" + mark.getName() + "\"...");
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
-
+        mark.getLocation().getChunk().load(true);
         new BukkitRunnable() {
             int counter = WAITING_TO_RECALL_PERIOD;
 
@@ -188,13 +188,11 @@ public class RecallSpell extends Spell implements Listener {
      * @return
      */
     private void postCast(Player playerSender, MarkPlayer.Mark mark) {
-        mark.getLocation().getChunk().load(true);
         playerSender.teleport(mark.getLocation());
 
         playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
 
-        if(mark.getName().equalsIgnoreCase("spawn"))
-        {
+        if (mark.getName().equalsIgnoreCase("spawn")) {
             Stat stat = Stat.wrap(playerSender);
             stat.setStamina(0);
             stat.setMana(0);
