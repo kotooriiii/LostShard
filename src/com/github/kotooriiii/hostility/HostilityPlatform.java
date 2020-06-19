@@ -67,7 +67,7 @@ public class HostilityPlatform implements Serializable {
         Player[] players = getPlayers();
         ArrayList<Player> clanlessPlayers = new ArrayList<>();
         for (Player player : players) {
-            if (Clan.getClan(player.getUniqueId()) == null) {
+            if (LostShardPlugin.getClanManager().getClan(player.getUniqueId()) == null) {
                 clanlessPlayers.add(player);
             }
         }
@@ -80,14 +80,14 @@ public class HostilityPlatform implements Serializable {
         Clan uniqueClan = null;
         for (int i = 0; i < players.length; i++) {
             if (uniqueClan == null) {
-                uniqueClan = Clan.getClan(players[i].getUniqueId());
+                uniqueClan = LostShardPlugin.getClanManager().getClan(players[i].getUniqueId());
                 if (uniqueClan == null)
                     continue;
             }
 
 
             if (!uniqueClan.isInThisClan(players[i].getUniqueId())) {
-                Clan clan = Clan.getClan(players[i].getUniqueId());
+                Clan clan = LostShardPlugin.getClanManager().getClan(players[i].getUniqueId());
                 if (clan != null)
                     return null;
             }
@@ -101,13 +101,13 @@ public class HostilityPlatform implements Serializable {
         Clan uniqueClan = null;
         for (int i = 0; i < players.length; i++) {
             if (uniqueClan == null) {
-                uniqueClan = Clan.getClan(players[i].getUniqueId());
+                uniqueClan = LostShardPlugin.getClanManager().getClan(players[i].getUniqueId());
                 if (uniqueClan == null)
                     continue;
             }
 
             if (!uniqueClan.isInThisClan(players[i].getUniqueId())) {
-                Clan clan = Clan.getClan(players[i].getUniqueId());
+                Clan clan = LostShardPlugin.getClanManager().getClan(players[i].getUniqueId());
                 if (clan != null)
                     return null;
             } else {

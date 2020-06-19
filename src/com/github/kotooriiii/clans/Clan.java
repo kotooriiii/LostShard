@@ -1,5 +1,6 @@
 package com.github.kotooriiii.clans;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.stats.Stat;
@@ -92,7 +93,7 @@ public class Clan {
         while (!isUnique) {
             tempID = UUID.randomUUID();
             boolean isFound = false;
-            for (Clan clan : clans) {
+            for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
                 if (clan.getID().equals(tempID)) {
                     isFound = true;
                 }
@@ -113,8 +114,8 @@ public class Clan {
         this.tag = "null";
         this.color = ChatColor.WHITE;
         this.isFriendlyFire = false;
-        this.hostilityBuffTimer=0;
-        this.hostilityWins=0;
+        this.hostilityBuffTimer = 0;
+        this.hostilityWins = 0;
 
         //Assign a leader
         if (leaderUUID == null)
@@ -137,59 +138,6 @@ public class Clan {
         this.id = id;
     }
 
-    //START OF STATIC METHODS
-    /**
-     * Gets the clan of a given Player UUID.
-     * @param uuid The UUID of a Player.
-     * @return the clan of that player, null if not in a clan
-     */
-    public static Clan getClan(UUID uuid) {
-        if (uuid == null)
-            return null;
-
-        return playerUUIDClanMap.get(uuid);
-    }
-
-    /**
-     * Gets the clan of a given clan name.
-     * @param clanName the name of the clan
-     * @return the clan that matches that name, null if not found
-     */
-    public static Clan getClan(String clanName) {
-        if (clanName == null || clanName.isEmpty())
-            return null;
-
-        for (Clan clan : clans) {
-            String iteratingClanName = clan.getName().toUpperCase();
-            if (iteratingClanName.equals(clanName.toUpperCase()))
-                return clan;
-        }
-
-        return null;
-    }
-
-    /**
-     * Checks if there is a clan with that name.
-     * @param clanName the name of the clan
-     * @return true if clan is found, false if no clan matches that name
-     * @see Clan#getClan(String);
-     */
-    public static boolean isClan(String clanName) {
-        return getClan(clanName) != null;
-    }
-
-    /**
-     * Checks whether a player has a clan.
-     * @param uuid the uuid of the player
-     * @return true if the player has a clan, false if no clan was found
-     * @see Clan#getClan(UUID);
-     */
-    public static boolean hasClan(UUID uuid) {
-
-        return getClan(uuid) != null;
-    }
-
-    //END OF STATIC METHODS
     //START OF UTIL
 
     /**
@@ -294,10 +242,8 @@ public class Clan {
     public Player[] getOnlinePlayers() {
         OfflinePlayer[] offlinePlayers = getPlayers();
         ArrayList<Player> players = new ArrayList<>(offlinePlayers.length);
-        for(OfflinePlayer offlinePlayer : offlinePlayers)
-        {
-            if(offlinePlayer.isOnline())
-            {
+        for (OfflinePlayer offlinePlayer : offlinePlayers) {
+            if (offlinePlayer.isOnline()) {
                 players.add(offlinePlayer.getPlayer());
             }
         }
@@ -306,6 +252,7 @@ public class Clan {
 
     /**
      * Gets the players in a given rank.
+     *
      * @param rank the rank you are searching a list players for
      * @return a Player UUID array containing all the players in that rank, null if not a valid rank
      */
@@ -329,6 +276,7 @@ public class Clan {
 
     /**
      * Checks whether a player is in this clan.
+     *
      * @param playerUUID the player being checked for existence
      * @return true if the player is in the clan, false if not in the clan
      */
@@ -406,6 +354,7 @@ public class Clan {
 
     /**
      * Returns a friendly string representation of the clan
+     *
      * @return the properties of the clan
      */
     public String info() {
@@ -460,26 +409,26 @@ public class Clan {
 
         int totalSeconds = hostilityBuffTimer;
 
-        int hoursLeft = totalSeconds/(60*60);
-        int totalMinutesLeft = totalSeconds%(60*60);
-        int minutesLeft = totalMinutesLeft/60;
-        int totalSecondsLeft = totalMinutesLeft%60;
+        int hoursLeft = totalSeconds / (60 * 60);
+        int totalMinutesLeft = totalSeconds % (60 * 60);
+        int minutesLeft = totalMinutesLeft / 60;
+        int totalSecondsLeft = totalMinutesLeft % 60;
 
 
         String hrString = hoursLeft + "hrs";
-        if(hoursLeft == 1)
+        if (hoursLeft == 1)
             hrString = hoursLeft + "hr";
         else if (hoursLeft == 0)
             hrString = "";
 
         String minString = minutesLeft + "min";
-        if(minutesLeft == 1)
+        if (minutesLeft == 1)
             minString = minutesLeft + "min";
         else if (minutesLeft == 0)
             minString = "";
 
         String secString = totalSecondsLeft + "secs";
-        if(totalSecondsLeft == 1)
+        if (totalSecondsLeft == 1)
             secString = totalSecondsLeft + "sec";
         else if (totalSeconds == 0)
             secString = "";
@@ -488,7 +437,7 @@ public class Clan {
         String timeLeft = hrString + " " + minString;
         timeLeft = timeLeft.trim();
 
-        if(timeLeft.isEmpty())
+        if (timeLeft.isEmpty())
             timeLeft = "NONE";
 
 
@@ -528,7 +477,7 @@ public class Clan {
 
         else if (!this.hasEditingPermission(playerSenderUUID)) {
             return 4;
-        } else if (Bank.getBanks().get(playerSenderUUID).getCurrency()<20) {
+        } else if (LostShardPlugin.getBankManager().wrap(playerSenderUUID).getCurrency() < 20) {
             return 79;
         } else if (clanName.length() < 3) {
             return 10;
@@ -538,7 +487,7 @@ public class Clan {
             return 12;
         }
 
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.getName().toLowerCase().equals(clanName.toLowerCase()))
                 return 21;
         }
@@ -571,7 +520,7 @@ public class Clan {
 
         else if (!this.hasEditingPermission(senderPlayerUUID)) {
             return 4;
-        } else if (Bank.getBanks().get(senderPlayerUUID).getCurrency()<5) {
+        } else if (LostShardPlugin.getBankManager().wrap(senderPlayerUUID).getCurrency() < 5) {
             return 79;
         } else if (tag.length() != 3) {
             return 10;
@@ -579,7 +528,7 @@ public class Clan {
             return 12;
         }
 
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.getTag().toLowerCase().equals(tag.toLowerCase()))
                 return 21;
         }
@@ -617,6 +566,7 @@ public class Clan {
 
     /**
      * Returns the unique id of the clan
+     *
      * @return the unique id of the clan
      */
     public UUID getID() {
@@ -667,9 +617,8 @@ public class Clan {
         return hostilityBuffTimer;
     }
 
-    public boolean hasHostilityBuff()
-    {
-        return getHostilityBuffTimer()!=0;
+    public boolean hasHostilityBuff() {
+        return getHostilityBuffTimer() != 0;
     }
 
     //END OF BASIC GETTERS
@@ -690,7 +639,7 @@ public class Clan {
         if (clanName == null || clanName.isEmpty())
             return 30;
 
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.getName().toLowerCase().equals(clanName.toLowerCase()))
                 return 21;
         }
@@ -713,7 +662,7 @@ public class Clan {
     public int forceTag(String tag) {
         if (tag == null || tag.isEmpty())
             return 30;
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.getTag().toLowerCase().equals(tag.toLowerCase()))
                 return 21;
         }
@@ -782,12 +731,12 @@ public class Clan {
         this.leader = candidateLeader;
         updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
-        saveFile();
         return 0;
     }
 
     /**
      * Forcefully kicks a player from the clan. <p>Admistrative purposes.</p>
+     *
      * @param kickedUUID The player being kicked from the clan.
      * @return '0' if successfully removes the player from the clan,
      * <p>ELSE</p>
@@ -798,7 +747,7 @@ public class Clan {
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int forceKick(UUID kickedUUID) {
-        if (kickedUUID == null )
+        if (kickedUUID == null)
             return 30;
         if (!isInThisClan(kickedUUID))
             return 2;
@@ -820,14 +769,14 @@ public class Clan {
             if (kickedUUID.equals(leavingUUIDS[i]))
                 remover++;
 
-            newLeavingUUIDS[i] = leavingUUIDS[i+remover];
+            newLeavingUUIDS[i] = leavingUUIDS[i + remover];
         }
 
         updateRankUUIDS(kickedRank, newLeavingUUIDS);
         update(kickedUUID, true);
 
         //REMOVE BUFF
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
             if (offlinePlayer.isOnline())
@@ -845,25 +794,16 @@ public class Clan {
         }
         //END OF REMOVE BUFF
 
-        saveFile();
         return 0;
-    }
-
-    /**
-     * Forcefully creates the clan. <p>Administrative purposes</p>
-     */
-    public void forceCreate() {
-        clans.add(this);
     }
 
     /**
      * Disbands the clan forcibly. <p>Administrative purposes</p>
      */
     public void forceDisband() {
-        clans.remove(this);
         update(this.getAllUUIDS(), true);
         //REMOVE BUFF
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
 
             for (UUID uuid : this.getAllUUIDS()) {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -882,7 +822,6 @@ public class Clan {
             }
         }
         //END OF REMOVE BUFF
-        removeFile();
     }
 
     //END OF ADMIN CLAN COMMANDS
@@ -961,7 +900,6 @@ public class Clan {
 
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
         this.leader = candidateLeader;
-        saveFile();
         return 0;
     }
 
@@ -1057,7 +995,6 @@ public class Clan {
 
         updateRankUUIDS(demotedCurrRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-saveFile();
         return 0;
     }
 
@@ -1149,7 +1086,6 @@ saveFile();
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-saveFile();
         return 0;
 
     }
@@ -1172,7 +1108,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int promote(UUID senderUUID, UUID promotedUUID, ClanRank promotedRank) {
-        if (senderUUID == null|| promotedUUID == null || promotedRank == null)
+        if (senderUUID == null || promotedUUID == null || promotedRank == null)
             return 30;
         if (!isInThisClan(promotedUUID) || !isInThisClan(senderUUID)) {
             return 1;
@@ -1242,7 +1178,6 @@ saveFile();
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-saveFile();
         return 0;
 
     }
@@ -1265,7 +1200,7 @@ saveFile();
      */
     public int promote(UUID senderUUID, UUID promotedUUID) {
 
-        if (senderUUID == null|| promotedUUID == null)
+        if (senderUUID == null || promotedUUID == null)
             return 30;
 
         if (!isInThisClan(promotedUUID) || !isInThisClan(senderUUID)) {
@@ -1330,7 +1265,6 @@ saveFile();
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
         updateRankUUIDS(newRank, newJoiningUUIDS);
-        saveFile();
         return 0;
 
     }
@@ -1353,13 +1287,13 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int create(UUID playerUUID, String clanName) {
-        if (playerUUID == null )
+        if (playerUUID == null)
             return 30;
-        Clan potentialClan = Clan.getClan(playerUUID);
+        Clan potentialClan = LostShardPlugin.getClanManager().getClan(playerUUID);
 
         if (potentialClan != null) {
             return 1;
-        } else if (Bank.getBanks().get(playerUUID).getCurrency()<50) {
+        } else if (LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency() < 50) {
             return 79;
         } else if (clanName.length() < 3) {
             return 10;
@@ -1369,14 +1303,12 @@ saveFile();
             return 12;
         }
 
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.getName().toLowerCase().equals(clanName.toLowerCase()))
                 return 21;
         }
 
-        clans.add(this);
         update(playerUUID, false);
-        saveFile();
         return 0;
     }
 
@@ -1393,7 +1325,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int disband(UUID playerUUID) {
-        if (playerUUID == null )
+        if (playerUUID == null)
             return 30;
         if (!this.leader.equals(playerUUID)) {
             return 4;
@@ -1405,11 +1337,10 @@ saveFile();
 
         //Remove cache clan
 
-        clans.remove(this);
         update(this.getAllUUIDS(), true);
 
         //REMOVE BUFF
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
 
             for (UUID uuid : this.getAllUUIDS()) {
 
@@ -1429,7 +1360,6 @@ saveFile();
             }
         }
         //END OF REMOVE BUFF
-        removeFile();
         return 0;
     }
 
@@ -1446,7 +1376,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int leave(UUID leaverUUID) {
-        if (leaverUUID == null )
+        if (leaverUUID == null)
             return 30;
         if (!isInThisClan(leaverUUID))
             return 1;
@@ -1468,14 +1398,14 @@ saveFile();
             if (leaverUUID.equals(leavingUUIDS[i]))
                 remover++;
 
-            newLeavingUUIDS[i] = leavingUUIDS[i+remover];
+            newLeavingUUIDS[i] = leavingUUIDS[i + remover];
         }
 
         updateRankUUIDS(leaverRank, newLeavingUUIDS);
         update(leaverUUID, true);
 
         //REMOVE BUFF
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(leaverUUID);
             if (offlinePlayer.isOnline())
@@ -1493,12 +1423,12 @@ saveFile();
         }
         //END OF REMOVE BUFF
 
-        saveFile();
         return 0;
     }
 
     /**
      * Accepts the invitation to the clan.
+     *
      * @param inviteeUUID The player accepting the invitation
      * @return '0' if successfully joins the clan,
      * <p>ELSE</p>
@@ -1520,7 +1450,7 @@ saveFile();
             return 5;
         }
 
-        Clan inviteeClan = Clan.getClan(inviteeUUID);
+        Clan inviteeClan = LostShardPlugin.getClanManager().getClan(inviteeUUID);
         if (inviteeClan != null) {
             if (this.equals(inviteeClan)) {
                 return 3;
@@ -1541,7 +1471,7 @@ saveFile();
         update(inviteeUUID, false);
 
         //ADD HOSTILITY BUFF
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(inviteeUUID);
             if (offlinePlayer.isOnline())
                 offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the hostility buff.");
@@ -1551,12 +1481,12 @@ saveFile();
         }
         //END OF ADD HOSTILITY BUFF
 
-        saveFile();
         return 0;
     }
 
     /**
      * Denies the invitation to the clan.
+     *
      * @param inviteeUUID The player denying the invitation
      * @return '0' if successfully denies the invitation to the clan,
      * <p>ELSE</p>
@@ -1593,7 +1523,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int invite(UUID inviterUUID, UUID inviteeUUID) {
-        if (inviterUUID == null  || inviteeUUID == null )
+        if (inviterUUID == null || inviteeUUID == null)
             return 30;
         if (!isInThisClan(inviterUUID))
             return 1;
@@ -1604,7 +1534,7 @@ saveFile();
         if (this.getAllUUIDS().length == maxCapacity) {
             return 5;
         }
-        Clan inviteeClan = Clan.getClan(inviteeUUID);
+        Clan inviteeClan = LostShardPlugin.getClanManager().getClan(inviteeUUID);
         if (inviteeClan != null) {
             if (this.equals(inviteeClan)) {
                 return 3;
@@ -1637,7 +1567,7 @@ saveFile();
      * Priority of error return codes follows from top to bottom (descending order).
      */
     public int kick(UUID kickerUUID, UUID kickedUUID) {
-        if (kickerUUID == null || kickedUUID == null )
+        if (kickerUUID == null || kickedUUID == null)
             return 30;
         if (!isInThisClan(kickerUUID))
             return 1;
@@ -1679,7 +1609,7 @@ saveFile();
             if (kickedUUID.equals(leavingUUIDS[i]))
                 remover++;
 
-            newLeavingUUIDS[i] = leavingUUIDS[i+remover];
+            newLeavingUUIDS[i] = leavingUUIDS[i + remover];
         }
 
         updateRankUUIDS(kickedRank, newLeavingUUIDS);
@@ -1687,7 +1617,7 @@ saveFile();
 
         //REMOVE BUFF
 
-        if(hasHostilityBuff()) {
+        if (hasHostilityBuff()) {
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
             if (offlinePlayer.isOnline())
@@ -1705,7 +1635,6 @@ saveFile();
         }
         //END OF REMOVE BUFF
 
-        saveFile();
         return 0;
     }
 
@@ -1713,47 +1642,33 @@ saveFile();
 
     //START MAP
 
-    public void update(UUID uuid, boolean isLeaving)
-    {
-        if(isLeaving)
-            playerUUIDClanMap.remove(uuid);
+    public void update(UUID uuid, boolean isLeaving) {
+        if (isLeaving)
+            LostShardPlugin.getClanManager().leaveClan(uuid);
         else
-            playerUUIDClanMap.put(uuid, this);
+            LostShardPlugin.getClanManager().joinClan(uuid, this);
 
     }
 
-    public void update(UUID[] uuids, boolean leaving)
-    {
-        for(UUID uuid : uuids)
+    public void update(UUID[] uuids, boolean leaving) {
+        for (UUID uuid : uuids)
             update(uuid, leaving);
 
     }
 
     //END MAP
 
-    //START OF FILE
-
-    public void saveFile()
-    {
-        FileManager.write(this);
-    }
-
-    public void removeFile()
-    {
-        FileManager.removeFile(this);
-    }
-
-    //END OF FILE
 
     //START OF PERMISSIONS
 
     /**
      * Checks whether a player has rank managing permissions. i.e: (promote/demote)
+     *
      * @param uuid the player in the clan
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasRankManagingPermission(UUID uuid) {
-        if (uuid == null )
+        if (uuid == null)
             return false;
         if (!isInThisClan(uuid))
             return false;
@@ -1769,11 +1684,12 @@ saveFile();
 
     /**
      * Checks whether a player has editing permissions. i.e: (rename clan/edit tag of clan)
+     *
      * @param uuid the player in the clan
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasEditingPermission(UUID uuid) {
-        if (uuid == null )
+        if (uuid == null)
             return false;
         if (!isInThisClan(uuid))
             return false;
@@ -1789,11 +1705,12 @@ saveFile();
 
     /**
      * Checks whether a player has moderating permissions. i.e: (invite/kick)
+     *
      * @param uuid the player in the clan
      * @return true if permissions are found, false if not permission or the player is not in this clan.
      */
     public boolean hasModeratingPermission(UUID uuid) {
-        if (uuid == null )
+        if (uuid == null)
             return false;
 
         if (!isInThisClan(uuid))
@@ -1814,6 +1731,7 @@ saveFile();
 
     /**
      * Checks if an object is equal to this by comparing their unique id.
+     *
      * @param obj the clan you are comparing to
      * @return true if equals, false otherwise
      */
@@ -1831,6 +1749,7 @@ saveFile();
 
     /**
      * Returns the {@link Clan#info()} representation of the clan
+     *
      * @return a friendly readable string of the clan's properties
      */
     @Override

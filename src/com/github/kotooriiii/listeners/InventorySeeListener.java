@@ -35,14 +35,11 @@ public class InventorySeeListener implements Listener {
         if (!inventoryClosePlayer.hasPermission(STAFF_PERMISSION))
             return;
 
-        if (inventoryOwnerPlayer.equals(inventoryClosePlayer))
-            return;
-
         if (!inventoryCloseEvent.getView().getTitle().contains(InvseeCommand.IDENTIFIER))
             return;
 
-        ItemStack[] itemStacks = new ItemStack[27];
-        for (int i = 0; i < 27; i++) {
+        ItemStack[] itemStacks = new ItemStack[27+9];
+        for (int i = 0; i < 27+9; i++) {
             itemStacks[i] = inventory.getItem(i);
         }
         inventoryOwnerPlayer.getInventory().setContents(itemStacks);

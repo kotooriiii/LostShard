@@ -1,4 +1,4 @@
-package com.github.kotooriiii.listeners;
+package com.github.kotooriiii.hostility.listeners;
 
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import org.bukkit.Bukkit;

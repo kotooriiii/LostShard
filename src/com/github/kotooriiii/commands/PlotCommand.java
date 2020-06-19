@@ -54,7 +54,7 @@ public class PlotCommand implements CommandExecutor {
                 } else if (args.length >= 1) {
                     //Sub-commands again however with proper argument.
                      String supply = stringBuilder(args, 1, " ");
-                     Bank bank = Bank.wrap(playerUUID);
+                     Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
                      double currentCurrency = bank.getCurrency();
                      DecimalFormat df = new DecimalFormat("#.##");
 
@@ -618,7 +618,7 @@ public class PlotCommand implements CommandExecutor {
     }
 
     private void disbandPlot(Player playerSender) {
-        Bank bank = Bank.wrap(playerSender.getUniqueId());
+        Bank bank = LostShardPlugin.getBankManager().wrap(playerSender.getUniqueId());
         PlayerPlot plot = (PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(playerSender.getLocation());
 
         double currentCurrency = bank.getCurrency();
@@ -635,7 +635,7 @@ public class PlotCommand implements CommandExecutor {
     }
 
     public boolean hasCreatePlotCost(Player player) {
-        Bank bank = Bank.wrap(player.getUniqueId());
+        Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
         double currentCurrency = bank.getCurrency();
 
         if (currentCurrency < PlayerPlot.CREATE_COST) {
@@ -652,7 +652,7 @@ public class PlotCommand implements CommandExecutor {
     }
 
     public void createPlot(Player player, String name) {
-        Bank bank = Bank.wrap(player.getUniqueId());
+        Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
         ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
 
         bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);

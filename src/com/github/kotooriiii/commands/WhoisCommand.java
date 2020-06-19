@@ -1,5 +1,6 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -43,7 +44,7 @@ public class WhoisCommand implements CommandExecutor {
                 return false;
             }
 
-            Clan clan = Clan.getClan(offlinePlayer.getUniqueId());
+            Clan clan = LostShardPlugin.getClanManager().getClan(offlinePlayer.getUniqueId());
             String clanName = "None";
             StatusPlayer statusPlayer = StatusPlayer.wrap(offlinePlayer.getUniqueId());
             if(clan != null)

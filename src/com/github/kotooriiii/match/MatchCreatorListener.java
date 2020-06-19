@@ -1,6 +1,8 @@
 package com.github.kotooriiii.match;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.bank.BankManager;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.match.moneymatch.Moneymatch;
@@ -18,8 +20,8 @@ import org.bukkit.event.Listener;
 
 import java.time.ZonedDateTime;
 
-import static com.github.kotooriiii.commands.BanCommand.matchesRegex;
-import static com.github.kotooriiii.commands.BanCommand.toProperties;
+import static com.github.kotooriiii.bannedplayer.commands.BanCommand.matchesRegex;
+import static com.github.kotooriiii.bannedplayer.commands.BanCommand.toProperties;
 import static com.github.kotooriiii.data.Maps.*;
 
 public class MatchCreatorListener implements Listener {
@@ -170,7 +172,7 @@ public class MatchCreatorListener implements Listener {
             if(banmatch.getConsequentMessage() == null)
             {
                 banmatch.setConsequentMessage(message);
-                TextComponent tc = new TextComponent(STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25m 30s)");
+                TextComponent tc = new TextComponent(STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25min 30s)");
                 TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
                 component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
                 TextComponent component2 = new TextComponent("\n" + ChatColor.YELLOW + "Example 2: Hover to view another example.");
@@ -191,7 +193,7 @@ public class MatchCreatorListener implements Listener {
 
             if (banmatch.getUnbannedTime() == null) {
                 if (!matchesRegex(message) && !message.equalsIgnoreCase(Banmatch.getIndefiniteBanIdentifier())) {
-                    TextComponent tc = new TextComponent(STANDARD_COLOR + "Not a valid ban date from now.\n" + STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25m 30s)");
+                    TextComponent tc = new TextComponent(STANDARD_COLOR + "Not a valid ban date from now.\n" + STANDARD_COLOR + "How long is the ban? (Quick Example: 1h 25min 30s)");
                     TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
                     component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
                     TextComponent component2 = new TextComponent("\n" + ChatColor.YELLOW + "Example 2: Hover to view another example.");
@@ -222,9 +224,9 @@ public class MatchCreatorListener implements Listener {
                     return;
                 }
                 double wagerAmount = Double.parseDouble(message);
-
-                Bank bankA = Bank.wrap(match.getFighterA());
-                Bank bankB = Bank.wrap(match.getFighterB());
+                BankManager bankManager = LostShardPlugin.getBankManager();
+                Bank bankA = bankManager.wrap(match.getFighterA());
+                Bank bankB = bankManager.wrap(match.getFighterB());
 
                 if (bankA.getCurrency() < wagerAmount && bankB.getCurrency() < wagerAmount) {
                     player.sendMessage(PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterA()).getName() + ERROR_COLOR + " and " + PLAYER_COLOR + Bukkit.getOfflinePlayer(match.getFighterB()).getName() + ERROR_COLOR + " do not have enough to wager. To cancel creating this match do /mm cancel.");

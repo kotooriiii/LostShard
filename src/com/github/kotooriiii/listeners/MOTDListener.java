@@ -10,6 +10,6 @@ public class MOTDListener implements Listener {
     @EventHandler
     public void onMOTD(ServerListPingEvent event) {
 
-        event.setMotd(ChatColor.DARK_PURPLE + "                  LostShard " + ChatColor.GOLD + "[Patch: 1.0.7]\n" +
-                ChatColor.GOLD + "      " + LostShardPlugin.getPatchUpdateVersion("FISHING BUFF!"));
+        event.setMotd(ChatColor.DARK_PURPLE + "                  LostShard " + ChatColor.GOLD + "[Patch: 1.0.9]\n" +
+                ChatColor.GOLD + "  " + LostShardPlugin.getPatchUpdateVersion("PLOT FURNACES & MORE LOOTABLE\n"));
     }}

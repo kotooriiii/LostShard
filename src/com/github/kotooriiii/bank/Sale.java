@@ -1,5 +1,6 @@
 package com.github.kotooriiii.bank;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +20,6 @@ public class Sale implements Comparable, Comparator {
     private int amount;
     private double price;
 
-    private static ArrayList<Sale> sales = new ArrayList<>();
 
     public Sale(UUID id, UUID sellerUUID, ItemStack itemStack, int amount, double individualPrice) {
         this.id = id;
@@ -27,7 +27,6 @@ public class Sale implements Comparable, Comparator {
         this.itemStack = itemStack;
         this.amount = amount;
         this.price = individualPrice;
-        sales.add(this);
     }
 
     public Sale(UUID sellerUUID, ItemStack itemStack, int amount, double individualPrice) {
@@ -39,7 +38,7 @@ public class Sale implements Comparable, Comparator {
             id = UUID.randomUUID();
 
             salesLoop:
-            for (Sale sale : sales) {
+            for (Sale sale : LostShardPlugin.getSaleManager().getSales()) {
                 if (sale.getID().equals(id))
                     continue existsLoop;
             }
@@ -50,8 +49,7 @@ public class Sale implements Comparable, Comparator {
         this.itemStack = itemStack ;
         this.amount = amount;
         this.price = individualPrice;
-        sales.add(this);
-        FileManager.write(this);
+
     }
 
     public UUID getID() {
@@ -75,15 +73,7 @@ public class Sale implements Comparable, Comparator {
     }
 
     public void setAmount(int amount) {
-        if (amount == 0) {
-            getSales().remove(this);
-            FileManager.removeFile(this);
-        }
         this.amount = amount;
-    }
-
-    public static ArrayList<Sale> getSales() {
-        return sales;
     }
 
     @Override

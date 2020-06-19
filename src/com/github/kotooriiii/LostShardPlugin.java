@@ -1,28 +1,37 @@
 package com.github.kotooriiii;
 
-import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.bannedplayer.BannedJoinListener;
-import com.github.kotooriiii.channels.commands.AdminChatCommand;
-import com.github.kotooriiii.channels.commands.ClearChatCommand;
-import com.github.kotooriiii.channels.commands.ClearChatAllCommand;
-import com.github.kotooriiii.clans.PlayerJoinCheckClanIfBuff;
+import com.github.kotooriiii.bank.*;
+import com.github.kotooriiii.bank.commands.*;
+import com.github.kotooriiii.bannedplayer.BanManager;
+import com.github.kotooriiii.bannedplayer.commands.BanCommand;
+import com.github.kotooriiii.bannedplayer.commands.UnbanCommand;
+import com.github.kotooriiii.bannedplayer.listeners.BannedJoinListener;
+import com.github.kotooriiii.channels.commands.*;
+import com.github.kotooriiii.clans.listeners.ClanCreatorListener;
+import com.github.kotooriiii.clans.ClanManager;
+import com.github.kotooriiii.clans.listeners.PlayerJoinCheckClanIfBuffListener;
+import com.github.kotooriiii.clans.commands.ClanCommand;
+import com.github.kotooriiii.clans.commands.FriendlyFireCommand;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
 import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
+import com.github.kotooriiii.hostility.commands.HostilityCommand;
+import com.github.kotooriiii.hostility.listeners.HostilityCreateListener;
+import com.github.kotooriiii.hostility.listeners.HostilityNamePreprocessListener;
 import com.github.kotooriiii.match.MatchCheatingListener;
 import com.github.kotooriiii.match.MatchCreatorListener;
 import com.github.kotooriiii.match.MatchDefeatListener;
 import com.github.kotooriiii.match.banmatch.*;
 import com.github.kotooriiii.channels.ChannelManager;
-import com.github.kotooriiii.channels.events.ChatChannelListener;
+import com.github.kotooriiii.channels.listeners.ChatChannelListener;
 import com.github.kotooriiii.match.moneymatch.MoneymatchCommand;
 import com.github.kotooriiii.muted.listeners.MuteListener;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.*;
 import com.github.kotooriiii.crafting.CraftingRecipes;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.HostilityTimeCreatorListener;
+import com.github.kotooriiii.hostility.listeners.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
@@ -104,6 +113,10 @@ public class LostShardPlugin extends JavaPlugin {
     private static CombatLogManager combatLogManager;
     private static PlotManager plotManager;
     private static WeatherManager weatherManager;
+    private static SaleManager saleManager;
+    private static BankManager bankManager;
+    private static BanManager banManager;
+    private static ClanManager clanManager;
 
     private static int gameTicks = 0;
 
@@ -179,12 +192,11 @@ public class LostShardPlugin extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return false;
         }
-registerTrait();
+        registerTrait();
         return true;
     }
 
-    public void registerTrait()
-    {
+    public void registerTrait() {
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(GuardTrait.class).withName("GuardTrait"));
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(BankerTrait.class).withName("BankerTrait"));
 
@@ -194,7 +206,7 @@ registerTrait();
     public void onEnable() {
 
         //Console logger, plugin, and description file are all ready for public use
-        if(!checkDependency())
+        if (!checkDependency())
             return;
 
         logger = Logger.getLogger("Minecraft");
@@ -211,7 +223,10 @@ registerTrait();
         channelManager = new ChannelManager();
         weatherManager = new WeatherManager();
         weatherManager.setWeatherFrequency(new WeatherManager.WeatherFrequency(8));
-
+        saleManager = new SaleManager();
+        bankManager = new BankManager();
+        banManager = new BanManager();
+        clanManager = new ClanManager();
 
 
         //Read files (some onto the managers)
@@ -255,8 +270,6 @@ registerTrait();
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
 
-        saveData();
-
         for (Player player : Bukkit.getOnlinePlayers()) {
             InventoryView inventoryView = player.getOpenInventory();
             if (inventoryView == null)
@@ -268,16 +281,17 @@ registerTrait();
                 continue;
             if (!inventoryView.getTitle().equalsIgnoreCase(Bank.NAME))
                 continue;
-            Bank bank = Bank.getBanks().get(player.getUniqueId());
-            bank.setInventory(player.getOpenInventory().getTopInventory());
-            FileManager.write(bank);
+            Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
+            InventoryView view = player.getOpenInventory();
+            if(view == null)
+                continue;
+            if(view.getTopInventory() == null)
+                continue;
+            bank.setInventory(view.getTopInventory());
             inventoryView.close();
         }
 
-        Stat.getStatMap().clear();
-        Bank.getBanks().clear();
-        StatusPlayer.getPlayerStatus().clear();
-        getPlotManager().getAllPlots().clear();
+        saveData();
 
         //SKILLS
 
@@ -302,9 +316,13 @@ registerTrait();
     }
 
     private void saveData() {
+        for(Bank bank : LostShardPlugin.getBankManager().getBanks().values())
+        {
+            LostShardPlugin.getBankManager().saveBank(bank);
+        }
 
-        for (Clan clan : clans) {
-            FileManager.write(clan);
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
+            LostShardPlugin.getClanManager().saveClan(clan);
         }
 
         for (Stat stat : Stat.getStatMap().values()) {
@@ -493,11 +511,12 @@ registerTrait();
         pm.registerEvents(new SeedCommandListener(), this);
         pm.registerEvents(new VoidDamageListener(), this);
         pm.registerEvents(new EnchantmentListener(), this);
-        pm.registerEvents(new PlayerJoinCheckClanIfBuff(), this);
+        pm.registerEvents(new PlayerJoinCheckClanIfBuffListener(), this);
 
         pm.registerEvents(new MOTDListener(), this);
         pm.registerEvents(new NotValidReachBlockListener(), this);
         pm.registerEvents(new NotValidMoveBlockListener(), this);
+        pm.registerEvents(new EggListener(), this);
 
 
         registerCustomEventListener();
@@ -525,7 +544,7 @@ registerTrait();
     }
 
     public void registerBuff() {
-        for (Clan clan : clans) {
+        for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             if (clan.hasHostilityBuff()) {
 
                 new BukkitRunnable() {
@@ -610,8 +629,7 @@ registerTrait();
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
-                    if(player.hasPotionEffect(PotionEffectType.INVISIBILITY))
-                    {
+                    if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                     } else {
 
                     }
@@ -761,12 +779,26 @@ registerTrait();
         return weatherManager;
     }
 
+    public static SaleManager getSaleManager() {
+        return saleManager;
+    }
+
+    public static BankManager getBankManager()
+    {
+        return bankManager;
+    }
+
+    public static BanManager getBanManager() { return banManager;}
+
+    public static ClanManager getClanManager() {return clanManager;}
+
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
     }
 
-    public static String getPatchUpdateVersion(String majorUpdate)
-    {
+    public static String getPatchUpdateVersion(String majorUpdate) {
         return ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "News -> " + majorUpdate;
     }
+
+
 }

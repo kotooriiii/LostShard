@@ -2,18 +2,19 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.spells.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -25,21 +26,22 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class ClanTPSpell extends Spell implements Listener {
+public class PermanentGateTravelSpell extends Spell implements Listener {
 
-    private final static HashMap<UUID, Double> clanTpSpellCooldownMap = new HashMap<>();
+    private final static HashMap<UUID, Double> cooldownMap = new HashMap<>();
+
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
+    private final static HashMap<UUID, Gate> activeGate = new HashMap<>();
 
-    public ClanTPSpell() {
-        super(SpellType.CLANTP, ChatColor.GREEN,  new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f , 15, true,  true, false);
+
+    public PermanentGateTravelSpell() {
+        super(SpellType.RECALL, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 15.0f, 30, true, true, false);
     }
 
     @EventHandler
-    public void onChatArg(ShardChatEvent event)
-    {
+    public void onChatArg(ShardChatEvent event) {
         Player player = event.getPlayer();
-
         SpellType type = waitingForArgumentMap.get(player.getUniqueId());
         if (type == null)
             return;
@@ -49,7 +51,6 @@ public class ClanTPSpell extends Spell implements Listener {
         waitingForArgumentMap.remove(player.getUniqueId());
         receiveArgument(player, event.getMessage());
         event.setCancelled(true);
-
     }
 
     @EventHandler
@@ -78,10 +79,19 @@ public class ClanTPSpell extends Spell implements Listener {
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
+    @EventHandler
+    public void onPortalUse(PlayerPortalEvent event) {
+
+    }
+
+    @EventHandler
+    public void onCancelPortal(PlayerInteractEvent event) {
+
+    }
+
     @Override
-    public void updateCooldown(Player player)
-    {
-        clanTpSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
+    public void updateCooldown(Player player) {
+        cooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
             final double cooldown = getCooldown() * 20;
@@ -91,23 +101,23 @@ public class ClanTPSpell extends Spell implements Listener {
             public void run() {
 
                 if (counter >= cooldown) {
-                    clanTpSpellCooldownMap.remove(player.getUniqueId());
+                    cooldownMap.remove(player.getUniqueId());
                     this.cancel();
                     return;
                 }
 
                 counter += 1;
                 Double newCooldown = new Double(cooldown - counter);
-                clanTpSpellCooldownMap.put(player.getUniqueId(), newCooldown);
+                cooldownMap.put(player.getUniqueId(), newCooldown);
             }
         };
         runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public boolean isCooldown(Player player) {
-        if (clanTpSpellCooldownMap.containsKey(player.getUniqueId())) {
+        if (cooldownMap.containsKey(player.getUniqueId())) {
 
-            Double cooldownTimeTicks = clanTpSpellCooldownMap.get(player.getUniqueId());
+            Double cooldownTimeTicks = cooldownMap.get(player.getUniqueId());
             DecimalFormat df = new DecimalFormat("##.##");
             double cooldownTimeSeconds = cooldownTimeTicks / 20;
             BigDecimal bd = new BigDecimal(cooldownTimeSeconds).setScale(0, RoundingMode.UP);
@@ -128,34 +138,10 @@ public class ClanTPSpell extends Spell implements Listener {
 
     @Override
     public boolean executeSpell(Player player) {
+
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.AQUA + "Who would you like to teleport to?");
+        player.sendMessage(ChatColor.YELLOW + "What mark would you like to open a permanent gate to?");
         return true;
-    }
-
-
-    /**
-     * after the successful tp
-     * @return
-     */
-    private void postCast(Player playerSender, UUID clanMemberPlayerUUID, String justInCaseNameTheyLogOut)
-    {
-
-        Player clanMemberPlayer = Bukkit.getPlayer(clanMemberPlayerUUID);
-
-        if(clanMemberPlayer == null || !clanMemberPlayer.isOnline())
-        {
-            playerSender.sendMessage(ERROR_COLOR + "Player has logged out, can not clan teleport to " + justInCaseNameTheyLogOut);
-            return;
-        }
-
-        playerSender.teleport(clanMemberPlayer.getLocation());
-        playerSender.sendMessage(ChatColor.GOLD + "You have recalled to \"" + clanMemberPlayer.getName() + "\".");
-        clanMemberPlayer.getLocation().getWorld().strikeLightningEffect(clanMemberPlayer.getLocation());
-        Stat stat = Stat.wrap(playerSender.getUniqueId());
-        stat.setMana(0);
-        stat.setStamina(0);
-
     }
 
     /**
@@ -165,25 +151,29 @@ public class ClanTPSpell extends Spell implements Listener {
         if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
             return;
 
-        if (!hasClanTPRequirements(playerSender, message))
+        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getAnyMark(message);
+
+        if (!hasGateRequirements(playerSender, message))
             return;
 
-        Player clanMemberPlayer = Bukkit.getPlayer(message);
+        Gate gate = new Gate(playerSender, mark, playerSender.getLocation(), mark.getLocation());
 
-        //success
-        clantp(playerSender, clanMemberPlayer);
+
+        //wait for time to tp
+        gateTravel(playerSender, gate);
     }
 
 
     /**
      *
      */
-    private void clantp(Player player, Player clanMemberPlayer) {
+    private void gateTravel(Player player, Gate gate) {
 
         final int WAITING_TO_RECALL_PERIOD = 3;
-        player.sendMessage(ChatColor.GOLD + "You begin to clan teleport to \"" + clanMemberPlayer.getName() + "\"...");
+        player.sendMessage(ChatColor.GOLD + "You begin to cast Permanent Gate Travel to  \"" + gate.getMark().getName() + "\"...")
+        ;
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
-
+        gate.getMark().getLocation().getChunk().load(true);
         new BukkitRunnable() {
             int counter = WAITING_TO_RECALL_PERIOD;
 
@@ -200,7 +190,7 @@ public class ClanTPSpell extends Spell implements Listener {
                 if (counter == 0) {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
-                    postCast(player, clanMemberPlayer.getUniqueId(), clanMemberPlayer.getName());
+                    postCast(player, gate);
                     return;
                 }
 
@@ -212,41 +202,57 @@ public class ClanTPSpell extends Spell implements Listener {
 
 
     /**
-     * checks if you are able to teleport to this supposed player
+     * after the successful tp
+     *
+     * @return
+     */
+    private void postCast(Player playerSender, Gate gate) {
+
+        activeGate.put(playerSender.getUniqueId(), gate);
+
+        if (!gate.isBuildable()) {
+            playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
+            return;
+        }
+
+        gate.build();
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                activeGate.remove(playerSender.getUniqueId(), gate);
+                gate.remove();
+            };
+        }.runTaskLater(LostShardPlugin.plugin, 20*30);
+    }
+
+
+    /**
+     * checks if you are able to create a mark with said name
+     *
      * @param playerSender
      * @return
      */
-    private boolean hasClanTPRequirements(Player playerSender, String name) {
+    private boolean hasGateRequirements(Player playerSender, String name) {
+        UUID playerUUID = playerSender.getUniqueId();
 
-        final UUID playerUUID = playerSender.getUniqueId();
+        MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
 
-        Clan clan = LostShardPlugin.getClanManager().getClan(playerUUID);
-
-        Player clanMemberPlayer = Bukkit.getPlayer(name);
-
-        if (clan == null) {
-            playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
+        if (!markPlayer.hasMark(name) && !markPlayer.isPremadeMark(name)) {
+            playerSender.sendMessage(ERROR_COLOR + "You don't have a mark by this name.");
             return false;
         }
 
-
-        if (clanMemberPlayer == null || !clanMemberPlayer.isOnline()) {
-            playerSender.sendMessage(ERROR_COLOR + "The player is not online.");
-            return false;
-        }
-
-        if (!clan.isInThisClan(clanMemberPlayer.getUniqueId())) {
-            playerSender.sendMessage(ERROR_COLOR + "The player is not in your clan.");
-            return false;
-        }
-
-        if(Stat.wrap(clanMemberPlayer.getUniqueId()).isPrivate())
-        {
-            playerSender.sendMessage(ChatColor.GOLD + "Can't teleport to that player, they are set to private");
+        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getAnyMark(name);
+        Gate gate = new Gate(playerSender, mark, playerSender.getLocation(), mark.getLocation());
+        //if the from location has a block OR the to location has a block -> stop
+        if (!gate.isBuildable()) {
+            playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
             return false;
         }
 
         return true;
     }
 
+
 }
+

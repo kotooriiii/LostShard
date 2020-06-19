@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
@@ -105,6 +106,7 @@ public class SellCommand implements CommandExecutor {
 
                 playerSender.sendMessage(ChatColor.GRAY + "You have put " + amount + " " + name + "on the market for " + totalPriceRaw + " gold.");// In simpler terms, you're selling 1 " + name + "for " + individualRawPrice + ".");
                 Sale sale = new Sale(playerUUID, ingredient, amount, individualRawPrice);
+                LostShardPlugin.getSaleManager().addSale(sale, true);
 
             }
         }

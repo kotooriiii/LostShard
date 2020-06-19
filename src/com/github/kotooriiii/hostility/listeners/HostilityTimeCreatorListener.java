@@ -1,7 +1,8 @@
-package com.github.kotooriiii.hostility;
+package com.github.kotooriiii.hostility.listeners;
 
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.commands.HostilityCommand;
+import com.github.kotooriiii.hostility.HostilityPlatform;
+import com.github.kotooriiii.hostility.commands.HostilityCommand;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

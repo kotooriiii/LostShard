@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -308,6 +309,9 @@ public class SurvivalismListener implements Listener {
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
 
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
+            return;
+
+        if(defenderEntity instanceof ArmorStand)
             return;
 
         EntityDamageByEntityEvent betterDamagerCause = (EntityDamageByEntityEvent) damagerCause;

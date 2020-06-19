@@ -1,13 +1,11 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.Sale;
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,10 +16,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.*;
-
-import static com.github.kotooriiii.data.Maps.*;
 
 public class BuyCommand implements CommandExecutor {
     @Override
@@ -72,7 +67,7 @@ public class BuyCommand implements CommandExecutor {
                     return false;
                 }
                 double limit = new BigDecimal(args[2]).setScale(2, RoundingMode.HALF_UP).doubleValue();
-                Bank buyerBank = Bank.wrap(playerUUID);
+                Bank buyerBank = LostShardPlugin.getBankManager().wrap(playerUUID);
 
                 //The limit is higher than what you have in your bank
                 if (limit > buyerBank.getCurrency()) {
@@ -82,7 +77,7 @@ public class BuyCommand implements CommandExecutor {
 
 
                 List<Sale> sortedSales = new ArrayList<>();
-                for (Sale sale : Sale.getSales()) {
+                for (Sale sale : LostShardPlugin.getSaleManager().getSales()) {
                     if (sale.getItemStack().getType().equals(ingredient.getType())) {
                         if (ingredient.getItemMeta() instanceof PotionMeta) {
                             if (!(sale.getItemStack().getItemMeta() instanceof PotionMeta))
@@ -224,7 +219,7 @@ public class BuyCommand implements CommandExecutor {
                     Sale sale = entry.getKey();
                     int leftoverAmount = entry.getValue();
 
-                    Bank seller = Bank.wrap(sale.getSellerUUID());
+                    Bank seller = LostShardPlugin.getBankManager().wrap(sale.getSellerUUID());
 
                     double addedCurrencyRaw = ((sale.getAmount() - leftoverAmount) * sale.getPrice());
                     BigDecimal addedCurrency = new BigDecimal(addedCurrencyRaw).setScale(2, RoundingMode.HALF_UP);
@@ -237,6 +232,8 @@ public class BuyCommand implements CommandExecutor {
                     if (sellerPlayer.isOnline())
                         sellerPlayer.getPlayer().sendMessage(ChatColor.GOLD + "A player has bought " + (sale.getAmount() - leftoverAmount) + " " + name + "from you for " + addedCurrencyRaw + " gold. Your new balance is " + seller.getCurrency() + ".");
                     sale.setAmount(leftoverAmount);
+                    if(sale.getAmount() == 0)
+                        LostShardPlugin.getSaleManager().removeSale(sale);
                 }
 
                 //Update

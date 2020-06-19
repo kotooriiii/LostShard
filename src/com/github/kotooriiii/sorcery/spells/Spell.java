@@ -65,6 +65,7 @@ public abstract class Spell {
                 return new TeleportSpell();
             case WEB_FIELD:
                 return new WebFieldSpell();
+
 //            case DARKNESS:
 //                return new DarknessSpell();
             case CLONE:
@@ -75,6 +76,8 @@ public abstract class Spell {
                 return new MarkSpell();
             case RECALL:
                 return new RecallSpell();
+            case PERMANENT_GATE_TRAVEL:
+                return new PermanentGateTravelSpell();
             default:
                 return null;
         }

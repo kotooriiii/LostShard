@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
@@ -32,8 +33,8 @@ public class PlayerFriendlyFireHitListener implements Listener {
         Player attacker = getPlayerInduced(defender, event.getDamager());
         UUID attackerUUID = attacker.getUniqueId();
 
-        Clan attackerClan = Clan.getClan(attackerUUID);
-        Clan defenderClan = Clan.getClan(defenderUUID);
+        Clan attackerClan = LostShardPlugin.getClanManager().getClan(attackerUUID);
+        Clan defenderClan = LostShardPlugin.getClanManager().getClan(defenderUUID);
 
 
         if (attackerClan != null && defenderClan != null) {

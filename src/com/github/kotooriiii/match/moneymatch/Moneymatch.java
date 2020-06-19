@@ -1,6 +1,8 @@
 package com.github.kotooriiii.match.moneymatch;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.bank.BankManager;
 import com.github.kotooriiii.match.Match;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,8 +30,9 @@ public class Moneymatch extends Match {
     @Override
     public void initializer()
     {
-        Bank withdrawalA = Bank.wrap(getFighterA());
-        Bank withdrawalB = Bank.wrap(getFighterB());
+        BankManager bankManager = LostShardPlugin.getBankManager();
+        Bank withdrawalA = bankManager.wrap(getFighterA());
+        Bank withdrawalB = bankManager.wrap(getFighterB());
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
         if(fighterA.isOnline())
@@ -43,8 +46,9 @@ public class Moneymatch extends Match {
     @Override
     public void deinitializer()
     {
-        Bank depositA = Bank.wrap(getFighterA());
-        Bank depositB = Bank.wrap(getFighterB());
+        BankManager bankManager = LostShardPlugin.getBankManager();
+        Bank depositA = bankManager.wrap(getFighterA());
+        Bank depositB = bankManager.wrap(getFighterB());
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
         if(fighterA.isOnline())
@@ -58,7 +62,8 @@ public class Moneymatch extends Match {
     @Override
     public void win(OfflinePlayer offlinePlayer) {
         sendToAll(PLAYER_COLOR + offlinePlayer.getName() + ChatColor.GREEN + " has won the money match.");
-        Bank winnerBank = Bank.wrap(offlinePlayer.getUniqueId());
+        BankManager bankManager = LostShardPlugin.getBankManager();
+        Bank winnerBank = bankManager.wrap(offlinePlayer.getUniqueId());
         winnerBank.addCurrency(wagerAmount*2);
         if(offlinePlayer.isOnline())
         {

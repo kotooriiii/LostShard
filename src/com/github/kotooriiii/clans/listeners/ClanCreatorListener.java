@@ -1,5 +1,6 @@
-package com.github.kotooriiii.listeners;
+package com.github.kotooriiii.clans.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +45,7 @@ public class ClanCreatorListener implements Listener {
                 return;
             }
 
-            for (Clan iclan : clans) {
+            for (Clan iclan : LostShardPlugin.getClanManager().getAllClans()) {
                 if (iclan.getTag().toLowerCase().equals(tag.toLowerCase())) {
                     player.sendMessage(ERROR_COLOR + "There is already a clan with that tag.");
                     return;
@@ -58,7 +59,6 @@ public class ClanCreatorListener implements Listener {
             // player.sendMessage("Now choose a color! like &6 etc");
 
             clan.forceTag(tag);
-            clan.saveFile();
             clanTagCreators.remove(uuid);
             //+   clanColorCreators.put(uuid, clan);
         } else if (clanColorCreators.containsKey(uuid)) {
@@ -80,7 +80,6 @@ public class ClanCreatorListener implements Listener {
 
             ChatColor color = ChatColor.getByChar(message.replace('&', ChatColor.COLOR_CHAR));
             clan.setColor(color);
-            clan.saveFile();
             clanColorCreators.remove(uuid);
             player.sendMessage(STANDARD_COLOR + "The customization of your clan is complete!");
 

@@ -19,8 +19,6 @@ public final class Maps {
     //This hash map targets the clan creators who are making a clan and need to specify a color. they will not be able to chat until the message they send is an acceptable tag.
     public static HashMap<UUID, Clan> clanColorCreators = new HashMap<>();
 
-    //The array list targets the active clans on the server. ID OF CLAN
-    public static ArrayList<Clan> clans = new ArrayList<>();
 
     //The array list targets the clan leader attempting to disbanding the clan. They have a set timer in order to confirm their request.
     public static ArrayList<UUID> clanDisbandTimer = new ArrayList<>();
@@ -30,9 +28,6 @@ public final class Maps {
 
     //The array list targets the non-clan user deciding if they'd like to join a clan. They have a set timer in order to confirm their request.
     public static HashMap<UUID, ArrayList<Clan>> invitationConfirmation = new HashMap<>();
-
-    //The most ESSENTIAL HASHMAP!! This makes an organized pair between player and clan. It updates too! More efficient than checking by iterating all clans.
-    public static HashMap<UUID, Clan> playerUUIDClanMap = new HashMap<>(199);
 
     //END CLANS //
     //START HOST//

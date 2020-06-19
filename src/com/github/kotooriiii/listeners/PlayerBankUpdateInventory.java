@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.ranks.RankPlayer;
@@ -22,7 +23,7 @@ public class PlayerBankUpdateInventory implements Listener {
             HumanEntity player = inventoryCloseEvent.getPlayer();
             if(player instanceof Player) {
                 Inventory inventory = inventoryCloseEvent.getInventory();
-                Bank bank = Bank.getBanks().get(player.getUniqueId());
+                Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
                 bank.setInventory(inventory);
                 FileManager.write(bank);
             }

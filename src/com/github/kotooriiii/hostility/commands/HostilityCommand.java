@@ -1,4 +1,4 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.hostility.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;

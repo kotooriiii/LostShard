@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
@@ -61,8 +62,8 @@ public class DepositCommand implements CommandExecutor {
                     }
 
 
-                    Bank bank = Bank.getBanks().get(playerUUID);
-                    double currency = Bank.getBanks().get(playerUUID).getCurrency();
+                    Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
+                    double currency = bank.getCurrency();
                     double leftover = currency + deposit;
                     leftover = Double.valueOf(df.format(leftover));
 
@@ -100,7 +101,6 @@ public class DepositCommand implements CommandExecutor {
                                 currentInventory.setItem(key, new ItemStack(Material.GOLD_INGOT, value));
                         }
                         bank.setCurrency(leftover);
-                        FileManager.write(bank);
                         playerSender.sendMessage(ChatColor.GRAY + "You have deposited " + df.format(deposit) + " gold into your bank account.");
                     }
                 } else {

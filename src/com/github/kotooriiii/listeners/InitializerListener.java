@@ -57,11 +57,10 @@ public class InitializerListener implements Listener {
     }
 
     public void registerBank(Player player) {
-        Bank bank = Bank.wrap(player.getUniqueId());
+        Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
         if (bank == null) {
             bank = new Bank(player.getUniqueId(), Bukkit.createInventory(player, RankPlayer.wrap(player.getUniqueId()).getRankType().getBankInventorySize(), Bank.NAME), 0);
-            bank.add();
-            bank.save();
+            LostShardPlugin.getBankManager().addBank(bank, true);
             return;
         }
     }

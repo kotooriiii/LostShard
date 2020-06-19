@@ -131,7 +131,7 @@ public class ShardScoreboardManager {
                     if (player.getScoreboard().getObjective("profile").getDisplaySlot() == null)
                         player.getScoreboard().getObjective("profile").setDisplaySlot(DisplaySlot.SIDEBAR);
 
-                    Bank bank = Bank.wrap(player.getUniqueId());
+                    Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
                     if (bank == null)
                         continue;
                     Stat stat = Stat.wrap(player);

@@ -24,15 +24,6 @@ public class BannedPlayer implements Serializable {
         this.bannedMessage = bannedMessage;
     }
 
-    public void save()
-    {
-        FileManager.write(this);
-    }
-
-    public void remove()
-    {
-        FileManager.removeFile(this);
-    }
 
     public UUID getPlayerUUID() {
         return playerUUID;

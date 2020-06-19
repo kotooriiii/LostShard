@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,7 +33,7 @@ public class BalanceCommand implements CommandExecutor {
 //                    }
 
                     DecimalFormat df = new DecimalFormat("#.##");
-                    Bank bank = Bank.getBanks().get(playerUUID);
+                    Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
                     playerSender.sendMessage(ChatColor.GRAY + "You have " + df.format(bank.getCurrency()) + ChatColor.GRAY + " in your bank account.");
 
                 } else {

@@ -1,5 +1,6 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -26,7 +27,7 @@ public class StatCommand implements CommandExecutor {
                 Stat stat = Stat.getStatMap().get(playerUUID);
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    Bank bank = Bank.getBanks().get(playerUUID);
+                    Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
                     StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
                     playerSender.sendMessage(
                             ChatColor.GOLD + "-" + playerSender.getName() + "-" + "\n" +

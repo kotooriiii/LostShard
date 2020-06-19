@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.clans.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -24,7 +25,7 @@ public class FriendlyFireCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("ff")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    Clan clan = Clan.getClan(playerUUID);
+                    Clan clan = LostShardPlugin.getClanManager().getClan(playerUUID);
                     if (clan == null) {
                         playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
                         return true;
@@ -36,8 +37,6 @@ public class FriendlyFireCommand implements CommandExecutor {
                         clan.broadcast(STANDARD_COLOR + "Clan friendly fire has been enabled.");
                     }
                     clan.setFriendlyFire(!clan.isFriendlyFire());
-                    clan.saveFile();
-
                 } else {
                     playerSender.sendMessage(ERROR_COLOR + "You provided too many arguments: " + COMMAND_COLOR + "/ff" + ERROR_COLOR + ".");
                 }

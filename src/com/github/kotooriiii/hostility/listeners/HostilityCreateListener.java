@@ -1,4 +1,4 @@
-package com.github.kotooriiii.listeners;
+package com.github.kotooriiii.hostility.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;

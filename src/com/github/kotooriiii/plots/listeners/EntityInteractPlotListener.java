@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.EnderChest;
 import org.bukkit.entity.Entity;
@@ -87,11 +88,9 @@ public class EntityInteractPlotListener implements Listener {
         if(playerInteracting.hasPermission(STAFF_PERMISSION))
             return;
 
+        if(block.getState() instanceof Container)
+            return;
 
-        if(block instanceof Container)
-            return;
-        if(block.getType().equals(Material.CHEST))
-            return;
 
         //Iterate through all plots
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {

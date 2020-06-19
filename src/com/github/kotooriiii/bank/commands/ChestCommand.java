@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
@@ -41,7 +42,7 @@ public class ChestCommand implements CommandExecutor {
                     //get rank player
                     int rankSize = rankPlayer.getRankType().getBankInventorySize();
 
-                    Inventory inventory = Bank.getBanks().get(playerUUID).getInventory();
+                    Inventory inventory = LostShardPlugin.getBankManager().wrap(playerUUID).getInventory();
 
                     ItemStack[] itemStacks = inventory.getContents();
                     inventory = Bukkit.createInventory(playerSender, rankSize, Bank.NAME);

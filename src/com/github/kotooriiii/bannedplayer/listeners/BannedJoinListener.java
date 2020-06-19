@@ -1,5 +1,7 @@
-package com.github.kotooriiii.bannedplayer;
+package com.github.kotooriiii.bannedplayer.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.util.HelperMethods;
@@ -17,15 +19,12 @@ public class BannedJoinListener  implements Listener {
     public void joinOnBan(PlayerLoginEvent event)
     {
 
-        debug(event.getPlayer().getName() + " trying to log in.");
         Player player = event.getPlayer();
-        for(BannedPlayer bannedPlayer : FileManager.getBanned())
+        for(BannedPlayer bannedPlayer : LostShardPlugin.getBanManager().getBannedPlayers())
         {
-            debug("LOOPING: " + event.getPlayer().getName());
 
             if(player.getUniqueId().equals(bannedPlayer.getPlayerUUID()))
             {
-                debug(event.getPlayer() + " is banned.");
 
                 String banMessage = bannedPlayer.getBannedMessage();
                 ZonedDateTime unbanZDT = bannedPlayer.getUnbanDate();
@@ -33,15 +32,11 @@ public class BannedJoinListener  implements Listener {
 
                 if(unbanZDT.getYear() == 0)
                 {
-                    debug(event.getPlayer() + " has an indefinite ban.");
 
                     unbanDate += Banmatch.getIndefiniteBanIdentifier() + " ban";
                 } else {
                     if(ZonedDateTime.now().compareTo(unbanZDT) >= 0)
                     {
-                        debug(event.getPlayer() + " was able to log in because date has expired.");
-                        debug(ZonedDateTime.now() + "\nVERSUS\n" + unbanZDT);
-
                         FileManager.removeFile(bannedPlayer);
                         event.allow();
                         return;
@@ -54,10 +49,5 @@ public class BannedJoinListener  implements Listener {
                 event.disallow(PlayerLoginEvent.Result.KICK_BANNED, banMessage + "\n\n" + unbanDate);
             }
         }
-    }
-
-    public void debug(String message)
-    {
-        //Bukkit.broadcastMessage(message);
     }
 }

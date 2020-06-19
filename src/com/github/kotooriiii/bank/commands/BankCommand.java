@@ -1,4 +1,4 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;

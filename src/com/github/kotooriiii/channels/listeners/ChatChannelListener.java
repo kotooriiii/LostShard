@@ -1,7 +1,8 @@
-package com.github.kotooriiii.channels.events;
+package com.github.kotooriiii.channels.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.ChannelStatus;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.ranks.RankPlayer;
@@ -11,7 +12,6 @@ import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -77,7 +77,7 @@ public class ChatChannelListener implements Listener {
         String title = stat.getTitle();
 
         //Clan
-        Clan clan = Clan.getClan(player.getUniqueId());
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
         String clanTag = "";
         if (clan != null)
             clanTag = ChatColor.GREEN + clan.getTag().toUpperCase();
@@ -226,7 +226,7 @@ public class ChatChannelListener implements Listener {
                 players.addAll(Bukkit.getOnlinePlayers());
                 break;
             case CLAN:
-                Clan clan = Clan.getClan(chattingPlayer.getUniqueId());
+                Clan clan = LostShardPlugin.getClanManager().getClan(chattingPlayer.getUniqueId());
                 if (clan == null) {
                     chattingPlayer.sendMessage(ERROR_COLOR + "You can't chat without belonging to a clan. You are forcibly being moved to global chat.");
                     LostShardPlugin.getChannelManager().joinChannel(chattingPlayer, ChannelStatus.GLOBAL);

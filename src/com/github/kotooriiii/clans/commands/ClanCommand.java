@@ -1,4 +1,4 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.clans.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
@@ -17,6 +17,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import javax.tools.Diagnostic;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class ClanCommand implements CommandExecutor {
                 if (args.length == 0) {
 
                     //Send the help page and return.
-                    Clan clan = Clan.getClan(playerUUID);
+                    Clan clan = LostShardPlugin.getClanManager().getClan(playerUUID);
                     if (clan == null)
                         playerSender.sendMessage(ERROR_COLOR + "You must be in a clan to enter clan chat.");
                     else {
@@ -286,7 +287,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         Clan clan = null;
-        for (Clan iclan : clans) {
+        for (Clan iclan : LostShardPlugin.getClanManager().getAllClans()) {
             if (iclan.getName().toLowerCase().equals(clanName.toLowerCase())) {
                 clan = iclan;
             }
@@ -333,7 +334,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         Clan clan = null;
-        for (Clan iclan : clans) {
+        for (Clan iclan : LostShardPlugin.getClanManager().getAllClans()) {
             if (iclan.getName().toLowerCase().equals(clanName.toLowerCase())) {
                 clan = iclan;
             }
@@ -348,6 +349,7 @@ public class ClanCommand implements CommandExecutor {
         clan.broadcast(STANDARD_COLOR + "Your clan has been forcibly disbanded.");
         playerSender.sendMessage(STANDARD_COLOR + "You have forcibly disbanded " + STANDARD_COLOR + "\"" + clan.getName() + "\"" + STANDARD_COLOR + ".");
         clan.forceDisband();
+        LostShardPlugin.getClanManager().removeClan(clan);
         return;
     }
 
@@ -358,7 +360,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         Clan clan = null;
-        for (Clan iclan : clans) {
+        for (Clan iclan : LostShardPlugin.getClanManager().getAllClans()) {
             if (iclan.getName().toLowerCase().equals(clanName.toLowerCase())) {
                 clan = iclan;
             }
@@ -414,7 +416,7 @@ public class ClanCommand implements CommandExecutor {
         }
 
         final UUID targetUUID = targetPlayer.getUniqueId();
-        final Clan targetClan = Clan.getClan(targetUUID);
+        final Clan targetClan = LostShardPlugin.getClanManager().getClan(targetUUID);
         if (targetClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "That player is not in a clan.");
             return;
@@ -424,7 +426,7 @@ public class ClanCommand implements CommandExecutor {
     }
 
     private void clanInfo(final Player playerSender, final UUID playerUUID) {
-        final Clan senderClan = Clan.getClan(playerUUID);
+        final Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
@@ -435,7 +437,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void clanLeave(final Player playerSender, final UUID playerUUID) {
 
-        final Clan senderClan = Clan.getClan(playerUUID);
+        final Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         if (senderClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
@@ -472,7 +474,7 @@ public class ClanCommand implements CommandExecutor {
         }
         final UUID targetPlayerUUID = targetPlayer.getUniqueId();
 
-        Clan clan = Clan.getClan(targetPlayerUUID);
+        Clan clan = LostShardPlugin.getClanManager().getClan(targetPlayerUUID);
         if (clan == null) {
             playerSender.sendMessage(ERROR_COLOR + "The player is not in a clan.");
             return;
@@ -516,7 +518,7 @@ public class ClanCommand implements CommandExecutor {
     }
 
     private void clanKick(final Player playerSender, final UUID playerUUID, String targetPlayerName) {
-        final Clan senderClan = Clan.getClan(playerUUID);
+        final Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 
         /*
@@ -578,7 +580,7 @@ public class ClanCommand implements CommandExecutor {
     }
 
     private void clanInvite(final Player playerSender, final UUID playerUUID, String targetPlayerName) {
-        final Clan senderClan = Clan.getClan(playerUUID);
+        final Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 
 
@@ -740,7 +742,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void clanDeny(Player playerSender, UUID playerUUID, String clanName) {
 
-        Clan potentialClan = Clan.getClan(clanName);
+        Clan potentialClan = LostShardPlugin.getClanManager().getClan(clanName);
         if (potentialClan == null) {
             playerSender.sendMessage(ERROR_COLOR + clanName + ERROR_COLOR + " does not exist.");
             return;
@@ -768,7 +770,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void clanAccept(Player playerSender, UUID playerUUID, String clanName) {
 
-        Clan potentialClan = Clan.getClan(clanName);
+        Clan potentialClan = LostShardPlugin.getClanManager().getClan(clanName);
         if (potentialClan == null) {
             playerSender.sendMessage(STANDARD_COLOR + clanName + STANDARD_COLOR + " does not exist.");
             return;
@@ -805,7 +807,7 @@ public class ClanCommand implements CommandExecutor {
     }
 
     private void clanLeader(final Player playerSender, final UUID playerUUID, String targetPlayerName) {
-        Clan senderClan = Clan.getClan(playerUUID);
+        Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         OfflinePlayer newLeaderPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 
 
@@ -877,7 +879,7 @@ public class ClanCommand implements CommandExecutor {
      * @param targetPlayerName
      */
     private void clanDemote(Player playerSender, UUID playerUUID, String targetPlayerName) {
-        Clan senderClan = Clan.getClan(playerUUID);
+        Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         OfflinePlayer playerDemoted = Bukkit.getOfflinePlayer(targetPlayerName);
 
 
@@ -934,7 +936,7 @@ public class ClanCommand implements CommandExecutor {
      * @param targetPlayerName
      */
     private void clanDemote(Player playerSender, UUID playerUUID, String targetPlayerName, String rankName) {
-        Clan senderClan = Clan.getClan(playerUUID);
+        Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         OfflinePlayer playerDemoted = Bukkit.getOfflinePlayer(targetPlayerName);
 
         /*
@@ -1000,7 +1002,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void clanPromote(Player playerSender, UUID playerUUID, String targetPlayerName) {
 
-        Clan senderClan = Clan.getClan(playerUUID);
+        Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         OfflinePlayer playerPromoted = Bukkit.getOfflinePlayer(targetPlayerName);
 
 
@@ -1049,7 +1051,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void clanPromote(Player playerSender, UUID playerUUID, String targetPlayerName, String rankName) {
 
-        Clan senderClan = Clan.getClan(playerUUID);
+        Clan senderClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         OfflinePlayer playerPromoted = Bukkit.getOfflinePlayer(targetPlayerName);
 
         /*
@@ -1114,15 +1116,14 @@ public class ClanCommand implements CommandExecutor {
 
     private void editName(Player playerSender, UUID playerUUID, String clanName) {
 
-        Clan potentialClan = Clan.getClan(playerUUID);
+        Clan potentialClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         if (potentialClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
         }
         switch (potentialClan.setName(playerUUID, clanName)) {
             case 0:
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 20);
-                potentialClan.saveFile();
+                LostShardPlugin.getBankManager().wrap(playerUUID).removeCurrency(20);
                 potentialClan.broadcast(STANDARD_COLOR + "Clan name has been changed to \"" + clanName + "\".");
                 break;
             case 30:
@@ -1134,7 +1135,7 @@ public class ClanCommand implements CommandExecutor {
                 break;
             case 79:
                 DecimalFormat df = new DecimalFormat("#.##");
-                playerSender.sendMessage(ERROR_COLOR + "You need 20 gold to rename your clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You need 20 gold to rename your clan. You currently have " + MONEY_COLOR + df.format(LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency()) + ".");
                 break;
             case 10:
                 playerSender.sendMessage(ERROR_COLOR + "Your clan name can not be less than 3 characters.");
@@ -1153,7 +1154,7 @@ public class ClanCommand implements CommandExecutor {
 
     private void editTag(Player playerSender, UUID playerUUID, String tag) {
 
-        Clan potentialClan = Clan.getClan(playerUUID);
+        Clan potentialClan = LostShardPlugin.getClanManager().getClan(playerUUID);
         if (potentialClan == null) {
             playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return;
@@ -1165,8 +1166,7 @@ public class ClanCommand implements CommandExecutor {
 
         switch (potentialClan.setTag(playerUUID, tag)) {
             case 0:
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 5);
-                potentialClan.saveFile();
+                LostShardPlugin.getBankManager().wrap(playerUUID).removeCurrency(5);
                 potentialClan.broadcast(STANDARD_COLOR + "Clan tag has been set to \"" + tag + STANDARD_COLOR + "\".");
                 break;
             case 1:
@@ -1187,7 +1187,7 @@ public class ClanCommand implements CommandExecutor {
                 break;
             case 79:
                 DecimalFormat df = new DecimalFormat("#.##");
-                playerSender.sendMessage(ERROR_COLOR + "You need 5 gold to rename your clan's tag. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You need 5 gold to rename your clan's tag. You currently have " + MONEY_COLOR + df.format(LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency()) + ERROR_COLOR + ".");
                 break;
 
         }
@@ -1199,8 +1199,8 @@ public class ClanCommand implements CommandExecutor {
 
         switch (clan.create(playerUUID, clanName)) {
             case 0:
-
-                Bank.getBanks().get(playerUUID).setCurrency(Bank.getBanks().get(playerUUID).getCurrency() - 50);
+                LostShardPlugin.getClanManager().addClan(clan, true);
+                LostShardPlugin.getBankManager().wrap(playerUUID).removeCurrency(50);
                 clanTagCreators.put(playerUUID, clan);
                 playerSender.sendMessage(STANDARD_COLOR + "Your clan has been created.");
                 playerSender.sendMessage(STANDARD_COLOR + "What would you like your clan tag to be? It must be 3 characters long.");
@@ -1221,7 +1221,7 @@ public class ClanCommand implements CommandExecutor {
                 break;
             case 79:
                 DecimalFormat df = new DecimalFormat("#.##");
-                playerSender.sendMessage(ERROR_COLOR + "You need 50 gold to create a clan. You currently have " + MONEY_COLOR + df.format(Bank.getBanks().get(playerUUID).getCurrency()) + ERROR_COLOR + ".");
+                playerSender.sendMessage(ERROR_COLOR + "You need 50 gold to create a clan. You currently have " + MONEY_COLOR + df.format(LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency()) + ERROR_COLOR + ".");
                 break;
             case 21:
                 playerSender.sendMessage(ERROR_COLOR + "There is already a clan with that name.");
@@ -1274,7 +1274,7 @@ public class ClanCommand implements CommandExecutor {
 
     public void disbandClan(final Player playerSender, final UUID playerUUID) {
 
-        Clan clan = Clan.getClan(playerUUID);
+        Clan clan = LostShardPlugin.getClanManager().getClan(playerUUID);
 
         //The clan does not exist
         if (clan == null) {
@@ -1286,6 +1286,7 @@ public class ClanCommand implements CommandExecutor {
         switch (clan.disband(playerUUID)) {
             case 0:
                 //If the player has already typed this command before. Confirms disbanding
+                LostShardPlugin.getClanManager().removeClan(clan);
                 clanDisbandTimer.remove(playerUUID);
                 //Message
                 //Loop every clan user uuid

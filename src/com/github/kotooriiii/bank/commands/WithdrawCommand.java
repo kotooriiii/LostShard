@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
@@ -52,13 +53,13 @@ public class WithdrawCommand implements CommandExecutor {
                     final Location playerLocation = playerSender.getLocation();
                     NPC bankerNPC = BankerNPC.getNearestBanker(playerLocation);
                     BankerTrait bankerTrait = bankerNPC.getTrait(BankerTrait.class);
-                    if (bankerNPC== null || !bankerTrait.isSocialDistance(playerLocation)) {
+                    if (bankerNPC == null || !bankerTrait.isSocialDistance(playerLocation)) {
                         playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
                     }
 
-                    Bank bank = Bank.getBanks().get(playerUUID);
-                    double currency = Bank.getBanks().get(playerUUID).getCurrency();
+                    Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
+                    double currency = bank.getCurrency();
                     double leftover = currency - withdraw;
                     leftover = Double.valueOf(df.format(leftover));
 

@@ -1,14 +1,9 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bank.commands;
 
-import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Sale;
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,11 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
-
-import static com.github.kotooriiii.data.Maps.*;
 
 public class PriceCommand implements CommandExecutor {
     @Override
@@ -64,7 +55,7 @@ public class PriceCommand implements CommandExecutor {
                 }
 
                 List<Sale> sortedSales = new ArrayList<>();
-                for (Sale sale : Sale.getSales()) {
+                for (Sale sale : LostShardPlugin.getSaleManager().getSales()) {
                     if (sale.getItemStack().getType().equals(ingredient.getType())) {
                         if (ingredient.getItemMeta() instanceof PotionMeta) {
                             if (!(sale.getItemStack().getItemMeta() instanceof PotionMeta))

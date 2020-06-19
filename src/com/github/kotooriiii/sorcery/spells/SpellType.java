@@ -8,7 +8,8 @@ public enum SpellType {
      CLONE(new String[]{"Clone"}),
     CLANTP(new String[]{"Clan Teleport", "ClanTP", "Clan TP"}),
     MARK(new String[]{"Mark"}),
-    RECALL(new String[]{"Recall"});
+    RECALL(new String[]{"Recall"}),
+    PERMANENT_GATE_TRAVEL(new String[]{"Permanent Gate Travel", "Gate Travel", "Gate", "PGT"});
 
     private String[] names;
 

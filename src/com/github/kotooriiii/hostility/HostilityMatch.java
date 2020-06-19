@@ -225,7 +225,6 @@ public class HostilityMatch {
                         capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
                         capturingClan.setHostilityBuffTimer(60 * 60 * 24);
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
-                        capturingClan.saveFile();
 
 
                         //Universal LORE

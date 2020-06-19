@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bannedplayer.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.match.banmatch.Banmatch;
@@ -65,7 +66,7 @@ public class BanCommand implements CommandExecutor {
 
             }
 
-            boolean isBanned = FileManager.isBanned(offlinePlayer.getUniqueId());
+            boolean isBanned = LostShardPlugin.getBanManager().isBanned(offlinePlayer.getUniqueId());
 
             if (isBanned) {
                 playerSender.sendMessage(ERROR_COLOR + "That player is already banned.");
@@ -74,11 +75,11 @@ public class BanCommand implements CommandExecutor {
 
             if (args.length == 1) {
                 BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), ZonedDateTime.now().withYear(0), "You are banned.");
-                bannedPlayer.save();
+                LostShardPlugin.getBanManager().ban(bannedPlayer, true, true);
             } else {
                 String timeProps = HelperMethods.stringBuilder(args, 1, " ");
                 if (!matchesRegex(timeProps)) {
-                    TextComponent tc = new TextComponent(STANDARD_COLOR + "Could not parse the time. Try using the ban command again (Quick Example: 1h 25m 30s)");
+                    TextComponent tc = new TextComponent(STANDARD_COLOR + "Could not parse the time. Try using the ban command again (Quick Example: 1h 25min 30s)");
                     TextComponent component = new TextComponent("\n" + ChatColor.YELLOW + "Example 1: Hover to view another example.");
                     component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Full arguments: " + COMMAND_COLOR + "'/ban <player> 1y 5mo 2w 0d 0h 0min 0s'\n" + STANDARD_COLOR + "Equivalent to: " + COMMAND_COLOR + "1 year, 5 months, 2 weeks, 0 days, 0 hours, 0 minutes, 0 seconds" + STANDARD_COLOR + ".\n\nFully uses all arguments provided.").create()));
                     TextComponent component2 = new TextComponent("\n" + ChatColor.YELLOW + "Example 2: Hover to view another example.");
@@ -94,12 +95,9 @@ public class BanCommand implements CommandExecutor {
 
                 ZonedDateTime bannedZDT = HelperMethods.toZDT(toProperties(timeProps));
                 BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), bannedZDT, "You are banned.");
-
-                bannedPlayer.save();
+                LostShardPlugin.getBanManager().ban(bannedPlayer, true, true);
             }
             sendToAll(ChatColor.GREEN + offlinePlayer.getName() + " has been banned.");
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().kickPlayer("You are banned.");
 
         }
 

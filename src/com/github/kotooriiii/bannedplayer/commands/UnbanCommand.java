@@ -1,5 +1,6 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.bannedplayer.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.status.Staff;
@@ -14,6 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.time.ZonedDateTime;
@@ -25,9 +27,6 @@ public class UnbanCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
-
-        if (!(commandSender instanceof Player))
-            return false;
 
         if (!command.getName().equalsIgnoreCase("unban"))
             return false;
@@ -57,15 +56,14 @@ public class UnbanCommand implements CommandExecutor {
             return false;
         }
 
-        boolean isBanned = FileManager.isBanned(offlinePlayer.getUniqueId());
+        boolean isBanned = LostShardPlugin.getBanManager().isBanned(offlinePlayer.getUniqueId());
 
         if (!isBanned) {
             playerSender.sendMessage(ERROR_COLOR + "That player is not banned.");
             return false;
         }
 
-
-        FileManager.unban(offlinePlayer.getUniqueId());
+        LostShardPlugin.getBanManager().unban(offlinePlayer.getUniqueId());
         playerSender.sendMessage(ChatColor.RED + "You have unbanned " + PLAYER_COLOR + offlinePlayer.getName() + ChatColor.RED + ".");
 
 

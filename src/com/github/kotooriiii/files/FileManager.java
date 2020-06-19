@@ -60,8 +60,7 @@ public final class FileManager {
     private FileManager() {
     }
 
-    public static void reset()
-    {
+    public static void reset() {
         Bukkit.broadcastMessage(ChatColor.DARK_RED + "* * * \nThe server has been ordered to reset all LostShard content.\nShutting down server to finalize deleting content.\n* * *");
         LostShardPlugin.setReset(true);
         Bukkit.getServer().shutdown();
@@ -108,9 +107,9 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a clan file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            clan.forceCreate();
+            LostShardPlugin.getClanManager().addClan(clan, false);
             for (UUID playerUUID : clan.getAllUUIDS()) {
-                playerUUIDClanMap.put(playerUUID, clan);
+                LostShardPlugin.getClanManager().joinClan(playerUUID, clan);
             }
 
         }
@@ -165,7 +164,7 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a bank file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            bank.add();
+            LostShardPlugin.getBankManager().addBank(bank, false);
         }
 
 
@@ -245,36 +244,7 @@ public final class FileManager {
             linkPlayer.addToMap();
         }
 
-    }
-
-    public static void ban(UUID uuid, ZonedDateTime zdt, String banMessage) {
-        if (isBanned(uuid))
-            return;
-        FileManager.write(new BannedPlayer(uuid, zdt, banMessage));
-    }
-
-
-    public static void ban(UUID uuid) {
-        ban(uuid, ZonedDateTime.now().withYear(0), "You are banned.");
-    }
-
-    public static void unban(UUID uuid) {
-        for (BannedPlayer bannedPlayer : getBanned()) {
-            if (bannedPlayer.getPlayerUUID().equals(uuid))
-                removeFile(bannedPlayer);
-        }
-    }
-
-    public static boolean isBanned(UUID uuid) {
-        for (BannedPlayer bannedPlayer : getBanned()) {
-            if (bannedPlayer.getPlayerUUID().equals(uuid))
-                return true;
-        }
-        return false;
-    }
-
-    public static BannedPlayer[] getBanned() {
-        ArrayList<BannedPlayer> bannedPlayers = new ArrayList<>();
+        HashMap<UUID, BannedPlayer> bannedPlayers = new HashMap<>();
         for (File file : banned_folder.listFiles()) {
             if (!file.getName().endsWith(".obj"))
                 continue;
@@ -284,10 +254,11 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a banned player file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            bannedPlayers.add(bannedPlayer);
+            bannedPlayers.put(bannedPlayer.getPlayerUUID(), bannedPlayer);
         }
-        return bannedPlayers.toArray(new BannedPlayer[bannedPlayers.size()]);
+        LostShardPlugin.getBanManager().setBannedPlayers(bannedPlayers);
     }
+
 
     public static HostilityPlatform readPlatformFile(File platformFile) {
         try {
@@ -318,7 +289,7 @@ public final class FileManager {
         String clanStringFriendlyFireBoolean = yaml.getString("FriendlyFire");
         int hostilityBuffTimer = yaml.getInt("HostilityBuffTimer");
         String clanStringHostilityWinsInt = yaml.getString("HostilityWins");
-        if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null  || clanStringHostilityWinsInt == null) {
+        if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null || clanStringHostilityWinsInt == null) {
             LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
             return null;
         }
@@ -478,6 +449,7 @@ public final class FileManager {
             return null;
 
         Sale sale = new Sale(id, UUID.fromString(uuidString), item, amount, price);
+        LostShardPlugin.getSaleManager().addSale(sale, false);
         return sale;
     }
 
@@ -487,12 +459,12 @@ public final class FileManager {
 
         double stamina = yaml.getDouble("Stamina");
         double maxStamina = yaml.getDouble("MaxStamina");
-        if(maxStamina == 0)
+        if (maxStamina == 0)
             maxStamina = 100;
 
         double mana = yaml.getDouble("Mana");
         double maxMana = yaml.getDouble("MaxMana");
-        if(maxMana==0)
+        if (maxMana == 0)
             maxMana = 100;
 
         String title = yaml.getString("Title");

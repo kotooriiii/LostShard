@@ -1,5 +1,6 @@
 package com.github.kotooriiii.ranks;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
@@ -76,7 +77,7 @@ public class RankPlayer {
             markPlayer.setMarks(leftoverMarks);
         }
 
-       Bank bank =  Bank.wrap(getPlayerUUID());
+       Bank bank =  LostShardPlugin.getBankManager().wrap(getPlayerUUID());
         if(bank == null || bank.getInventory() == null)
         {
             //Don't worry about this
