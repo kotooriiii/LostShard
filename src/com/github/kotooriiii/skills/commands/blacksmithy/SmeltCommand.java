@@ -1,5 +1,7 @@
 package com.github.kotooriiii.skills.commands.blacksmithy;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -59,7 +61,7 @@ public class SmeltCommand implements CommandExecutor {
         }
 
         //Get the skill object
-        SkillPlayer.Skill blacksmithy = SkillPlayer.wrap(playerUUID).getBlacksmithy();
+        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();

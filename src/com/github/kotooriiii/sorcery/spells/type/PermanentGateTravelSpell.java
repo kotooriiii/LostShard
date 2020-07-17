@@ -2,16 +2,20 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
+import com.github.kotooriiii.sorcery.GateBlock;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
-import com.github.kotooriiii.sorcery.spells.Gate;
+import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
@@ -25,6 +29,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.platforms;
 
 public class PermanentGateTravelSpell extends Spell implements Listener {
 
@@ -32,11 +37,9 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
-    private final static HashMap<UUID, Gate> activeGate = new HashMap<>();
-
 
     public PermanentGateTravelSpell() {
-        super(SpellType.RECALL, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 15.0f, 30, true, true, false);
+        super(SpellType.PERMANENT_GATE_TRAVEL, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 1.0f /*15.0f*/, 30, true, true, false);
     }
 
     @EventHandler
@@ -81,11 +84,46 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
     @EventHandler
     public void onPortalUse(PlayerPortalEvent event) {
+        Location location = event.getFrom();
+        location = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(location);
+        if (location == null)
+            return;
+        Gate gate = LostShardPlugin.getGateManager().getGate(location);
+        if (gate == null)
+            return;
 
+        Location teleportingTo = gate.getTeleportTo(new GateBlock(location));
+
+        if (teleportingTo != null)
+            event.getPlayer().teleport(teleportingTo);
+        event.setCancelled(true);
     }
 
     @EventHandler
     public void onCancelPortal(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
+        if (block == null)
+            return;
+
+        if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == event.getAction().RIGHT_CLICK_BLOCK))
+            return;
+
+        Gate gate = LostShardPlugin.getGateManager().getGate(block.getLocation());
+        if (gate == null)
+            return;
+
+        if (!gate.getSource().equals(event.getPlayer().getUniqueId()))
+            return;
+
+        /*
+        Is a block
+        Is right click
+        is a gate
+        is owner of gate
+         */
+
+        LostShardPlugin.getGateManager().removeGate(gate);
+
 
     }
 
@@ -151,29 +189,29 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
         if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
             return;
 
-        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getAnyMark(message);
+        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getMark(message);
 
         if (!hasGateRequirements(playerSender, message))
             return;
 
-        Gate gate = new Gate(playerSender, mark, playerSender.getLocation(), mark.getLocation());
+        Gate gate = new Gate(playerSender.getUniqueId(), playerSender.getLocation(), mark.getLocation());
 
 
         //wait for time to tp
-        gateTravel(playerSender, gate);
+        gateTravel(playerSender, gate, mark.getName());
     }
 
 
     /**
      *
      */
-    private void gateTravel(Player player, Gate gate) {
+    private void gateTravel(Player player, Gate gate, String name) {
 
         final int WAITING_TO_RECALL_PERIOD = 3;
-        player.sendMessage(ChatColor.GOLD + "You begin to cast Permanent Gate Travel to  \"" + gate.getMark().getName() + "\"...")
+        player.sendMessage(ChatColor.GOLD + "You begin to cast Permanent Gate Travel to \"" + name + "\"...")
         ;
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
-        gate.getMark().getLocation().getChunk().load(true);
+
         new BukkitRunnable() {
             int counter = WAITING_TO_RECALL_PERIOD;
 
@@ -208,21 +246,33 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
      */
     private void postCast(Player playerSender, Gate gate) {
 
-        activeGate.put(playerSender.getUniqueId(), gate);
+        boolean existingGateFrom = LostShardPlugin.getGateManager().isGate(gate.getFrom());
+        boolean existingGateTo = LostShardPlugin.getGateManager().isGate(gate.getTo());
 
-        if (!gate.isBuildable()) {
+        boolean existingGate = existingGateFrom || existingGateTo;
+
+
+        if (!LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+            playerSender.sendMessage(ERROR_COLOR + "A portal has already been set up here by another player.");
+            return;
+        } else if (LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+            playerSender.sendMessage(ERROR_COLOR + "You've removed your previous gate to this location.");
+            LostShardPlugin.getGateManager().addGate(gate, true);
+            return;
+        } else if (!gate.isBuildable()) {
             playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
+            return;
+        } else if (LostShardPlugin.getGateManager().hasGateNearby(gate.getFrom()) || LostShardPlugin.getGateManager().hasGateNearby(gate.getTo())) {
+            playerSender.sendMessage(ERROR_COLOR + "There's another gate too close to this one.");
+            return;
+        } else if (gate.getFrom().distance(gate.getTo()) <= Gate.PORTAL_DISTANCE) {
+            playerSender.sendMessage(ERROR_COLOR + "The gates must be farther than " + Gate.PORTAL_DISTANCE + " blocks away.");
             return;
         }
 
-        gate.build();
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                activeGate.remove(playerSender.getUniqueId(), gate);
-                gate.remove();
-            };
-        }.runTaskLater(LostShardPlugin.plugin, 20*30);
+        if (gate.isBuildable() && !existingGate) {
+            LostShardPlugin.getGateManager().addGate(gate, true);
+        }
     }
 
 
@@ -237,16 +287,8 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
         MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
 
-        if (!markPlayer.hasMark(name) && !markPlayer.isPremadeMark(name)) {
+        if (!markPlayer.hasMark(name)) {
             playerSender.sendMessage(ERROR_COLOR + "You don't have a mark by this name.");
-            return false;
-        }
-
-        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getAnyMark(name);
-        Gate gate = new Gate(playerSender, mark, playerSender.getLocation(), mark.getLocation());
-        //if the from location has a block OR the to location has a block -> stop
-        if (!gate.isBuildable()) {
-            playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
             return false;
         }
 

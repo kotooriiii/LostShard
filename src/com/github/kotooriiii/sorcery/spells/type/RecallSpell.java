@@ -8,9 +8,11 @@ import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.platforms;
 
 public class RecallSpell extends Spell implements Listener {
 
@@ -71,6 +74,26 @@ public class RecallSpell extends Spell implements Listener {
         //Is casting a spell and moved a block
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
+        waitingToRecallMap.remove(player.getUniqueId());
+    }
+
+    @EventHandler
+    public void onWaitToRecall(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if(!(entity instanceof Player))
+            return;
+        Player player = (Player) entity;
+
+
+
+        //not casting spell
+        if (!waitingToRecallMap.containsKey(player.getUniqueId()))
+            return;
+
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
         waitingToRecallMap.remove(player.getUniqueId());
     }
 

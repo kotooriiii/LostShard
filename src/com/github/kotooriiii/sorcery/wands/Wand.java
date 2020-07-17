@@ -1,44 +1,14 @@
 package com.github.kotooriiii.sorcery.wands;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.hostility.HostilityMatch;
-import com.github.kotooriiii.hostility.HostilityPlatform;
-import com.github.kotooriiii.skills.listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.Status;
-import com.github.kotooriiii.status.StatusPlayer;
-import com.google.common.base.Function;
-import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Bed;
-import org.bukkit.block.data.type.Door;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.*;
-
-import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.data.Maps.activeHostilityGames;
-import static com.github.kotooriiii.util.HelperMethods.localBroadcast;
 
 public class Wand {
 

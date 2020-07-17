@@ -4,7 +4,9 @@ import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
 
 public enum RankType {
-    DEFAULT("Default", "def[" , ChatColor.WHITE  + "]", 27, 3, true),SUBSCRIBER("Subscriber",  ChatColor.GOLD + "[" , ChatColor.GOLD  + "]", 27, 6, true),SUBSCRIBER_PLUS("Subscriber+", ChatColor.GOLD + "[" , ChatColor.GOLD  + "]*", 54, 9, false);
+    DEFAULT("Default", "def[" , ChatColor.WHITE  + "]", 27, 5, 1, true),
+    SUBSCRIBER("Subscriber",  ChatColor.GOLD + "[" , ChatColor.GOLD  + "]", 27, 8, 1,true),
+    SUBSCRIBER_PLUS("Subscriber+", ChatColor.GOLD + "[" , ChatColor.GOLD  + "]*", 54, 15, 2,false);
 
 
     private String name;
@@ -12,15 +14,17 @@ public enum RankType {
     private String suffixContent;
     private int bankInventorySize;
     private int warpsNum;
+    private int dungeonsNum;
     private boolean obligatedRent;
 
-    private RankType(String name, String prefixContent, String suffixContent, int bankInventorySize, int warpsNum, boolean obligatedRent)
+    private RankType(String name, String prefixContent, String suffixContent, int bankInventorySize, int warpsNum, int dungeonsNum, boolean obligatedRent)
     {
         this.name = name;
         this.prefixContent = prefixContent;
         this.suffixContent = suffixContent;
         this.bankInventorySize = bankInventorySize;
         this.warpsNum = warpsNum;
+        this.dungeonsNum = dungeonsNum;
         this.obligatedRent = obligatedRent;
     }
 
@@ -51,6 +55,10 @@ public enum RankType {
 
     public int getMaxMarksNum() {
         return warpsNum;
+    }
+
+    public int getDungeonsNum() {
+        return dungeonsNum;
     }
 
     public boolean isObligatedRent() {

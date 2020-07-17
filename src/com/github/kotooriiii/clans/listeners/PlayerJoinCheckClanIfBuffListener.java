@@ -18,11 +18,5 @@ public class PlayerJoinCheckClanIfBuffListener implements Listener {
         if (clan == null) {
             return;
         }
-
-        if (!clan.hasHostilityBuff()) {
-            Stat stat = Stat.wrap(player.getUniqueId());
-            stat.setMaxMana(Stat.BASE_MAX_MANA);
-            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-        }
     }
 }

@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -53,6 +54,8 @@ public class PlayerPlot extends Plot {
      * The plot's co-owners.
      */
     private ArrayList<UUID> jointOwners;
+    private boolean isTown;
+    private boolean isDungeon;
 
     /**
      * The cost to create a plot
@@ -77,6 +80,9 @@ public class PlayerPlot extends Plot {
         this.balance = 0;
         this.friends = new ArrayList<>();
         this.jointOwners = new ArrayList<>();
+
+        isTown = false;
+        isDungeon = false;
     }
 
     @Override
@@ -145,7 +151,6 @@ public class PlayerPlot extends Plot {
         int minZ = centerZ - radius - distance - leeway;
         int maxZ = centerZ + radius + distance + leeway;
 
-        Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
 
         for (Plot plot : allPlots) {
 
@@ -154,6 +159,16 @@ public class PlayerPlot extends Plot {
 
             if (plot.equals(this))
                 continue;
+
+            if(plot.getType().isStaff())
+            {
+                minX += 100;
+                maxX += 100;
+                minZ += 100;
+                maxZ += 100;
+            }
+            Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
+
             if (expandedZone.overlaps(plot.getZone()))
                 return false;
 
@@ -354,6 +369,14 @@ public class PlayerPlot extends Plot {
         return ownerUUID.equals(playerUUID);
     }
 
+    public boolean isTown() {
+        return this.isTown;
+    }
+
+    public boolean isDungeon() {
+        return this.isDungeon;
+    }
+
 
     @Override
     public String info(Player perspectivePlayer) {
@@ -395,9 +418,9 @@ public class PlayerPlot extends Plot {
         String privacy = "";
         if (!relationshipToPlot.isEmpty()) {
 
-            if(RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
-            privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + df.format(getTax()) + "\n"
-                    + ChatColor.GRAY + "(" + daysLeft() + ")";
+            if (RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
+                privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + df.format(getTax()) + "\n"
+                        + ChatColor.GRAY + "(" + daysLeft() + ")";
             else
                 privacy = ChatColor.YELLOW + ", Funds: " + ChatColor.WHITE + df.format(getBalance()) + ChatColor.YELLOW + ", Tax: " + ChatColor.WHITE + "EXEMPT";
         }
@@ -405,11 +428,23 @@ public class PlayerPlot extends Plot {
 
         String jointOwnerConcat = ChatColor.YELLOW + "\nYou are not a friend of this plot.";
         String friendsConcat = "";
+        String signBuilder = "";
+        String statuses = "";
 
 
         //Show coowner and friends
 
         if (!relationshipToPlot.isEmpty()) {
+            statuses = ChatColor.YELLOW + "\nTown Status: " + ChatColor.WHITE + this.isTown();
+            statuses += ChatColor.YELLOW + "\nDungeon Status: " + ChatColor.WHITE + this.isDungeon();
+
+            Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
+            if (signBuildLoc != null)
+                signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
+            else
+                signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "NONE";
+
+
             jointOwnerConcat = ChatColor.YELLOW + "\nCo-owners: " + ChatColor.WHITE;
             for (int i = 0; i < jointOwnersArray.length; i++) {
                 if (i == 0)
@@ -419,7 +454,7 @@ public class PlayerPlot extends Plot {
 
             }
 
-            friendsConcat =  ChatColor.YELLOW + "\nFriends: " + ChatColor.WHITE;
+            friendsConcat = ChatColor.YELLOW + "\nFriends: " + ChatColor.WHITE;
             for (int i = 0; i < friendsArray.length; i++) {
                 if (i == 0)
                     friendsConcat += friendsArray[i].getName();
@@ -429,8 +464,7 @@ public class PlayerPlot extends Plot {
         }
 
 
-
-        return header + relationshipToPlot + ownerString + size + privacy + location + jointOwnerConcat + friendsConcat;
+        return header + relationshipToPlot + ownerString + size + statuses + privacy + location + signBuilder + jointOwnerConcat + friendsConcat;
     }
 
     private String daysLeft() {
@@ -562,5 +596,14 @@ public class PlayerPlot extends Plot {
 
     public void setJointOwners(ArrayList<UUID> jointOwners) {
         this.jointOwners = jointOwners;
+    }
+
+
+    public void setTown(boolean b) {
+        this.isTown = b;
+    }
+
+    public void setDungeon(boolean b) {
+        this.isDungeon = b;
     }
 }

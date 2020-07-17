@@ -1,8 +1,8 @@
 package com.github.kotooriiii.skills.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
-import com.github.kotooriiii.skills.listeners.SurvivalismListener;
+import com.github.kotooriiii.skills.Skill;
+import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
@@ -60,7 +60,7 @@ public class TrackCommand implements CommandExecutor {
                 }
             }
 
-            SkillPlayer.Skill survivalism = SkillPlayer.wrap(playerUUID).getSurvivalism();
+            Skill survivalism = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSurvivalism();
             int level = (int) survivalism.getLevel();
 
 
@@ -83,7 +83,7 @@ public class TrackCommand implements CommandExecutor {
                 //Random chance
                 double playerSuccessfullyTracksRandom = Math.random();
                 //Get tracked player's level
-                int trackedPlayerLevel = (int) SkillPlayer.wrap(trackedPlayer.getUniqueId()).getSurvivalism().getLevel();
+                int trackedPlayerLevel = (int) LostShardPlugin.getSkillManager().getSkillPlayer(trackedPlayer.getUniqueId()).getActiveBuild().getSurvivalism().getLevel();
                 //Chance from level
                 double requirementChance = -1;
                 if (trackedPlayerLevel >= 100)

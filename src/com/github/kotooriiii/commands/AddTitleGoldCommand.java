@@ -1,8 +1,8 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
+import net.minecraft.server.v1_15_R1.CommandGamemode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -11,12 +11,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.text.DecimalFormat;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
 
-public class AddTitleCommand implements CommandExecutor {
+public class AddTitleGoldCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -25,7 +24,7 @@ public class AddTitleCommand implements CommandExecutor {
             final Player playerSender = (Player) sender;
             final UUID playerUUID = playerSender.getUniqueId();
             //If the command is the "guards" command
-            if (cmd.getName().equalsIgnoreCase("addtitle")) {
+            if (cmd.getName().equalsIgnoreCase("addtitlegold")) {
                 //No arguments regarding this command
 
                 if (!playerSender.hasPermission(STAFF_PERMISSION)) {
@@ -34,7 +33,7 @@ public class AddTitleCommand implements CommandExecutor {
                 }
 
                 if (args.length < 2) {
-                    playerSender.sendMessage(ERROR_COLOR + "Did you mean to add a title to a player? /addtitle (username) (title)");
+                    playerSender.sendMessage(ERROR_COLOR + "Did you mean to add a title to a player? /addtitlegold (username) (title)");
                     return false;
                 }
 
@@ -50,9 +49,9 @@ public class AddTitleCommand implements CommandExecutor {
                 String title = HelperMethods.stringBuilder(args, 1, " ");
                 Stat stat = Stat.wrap(offlinePlayer.getUniqueId());
                 if(!title.equalsIgnoreCase("null")) {
-                    stat.setGold(false);
+                    stat.setGold(true);
                     stat.setTitle(title);
-                    playerSender.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " will now be referred to " + ChatColor.WHITE + title + STANDARD_COLOR + ".");
+                    playerSender.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " will now be referred to " + ChatColor.GOLD +  title +  STANDARD_COLOR + ".");
                 } else {
                     stat.setTitle("");
                     playerSender.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + "'s title has been removed.");

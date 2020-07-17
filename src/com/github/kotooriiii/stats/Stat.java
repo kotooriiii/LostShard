@@ -1,5 +1,7 @@
 package com.github.kotooriiii.stats;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
@@ -20,10 +22,12 @@ public class Stat {
     private double mana;
 
     private String title;
+    private boolean isGold;
 
     private UUID playerUUID;
 
     private boolean isPrivate;
+    private Location spawn;
 
     private static HashMap<UUID, Stat> statMap = new HashMap<>();
 
@@ -34,7 +38,9 @@ public class Stat {
         this.playerUUID = playerUUID;
         this.stamina = maxStamina;
         this.mana = maxMana;
+        this.spawn = null;
         this.title = "";
+        this.isGold = false;
         this.isPrivate = false;
         statMap.put(playerUUID, this);
     }
@@ -59,7 +65,9 @@ public class Stat {
         return mana;
     }
 
-    public String getTitle() {return  title;}
+    public String getTitle() {
+        return isGold ? ChatColor.GOLD + title : title;
+    }
 
     public boolean isPrivate() {
         return isPrivate;
@@ -73,12 +81,25 @@ public class Stat {
         mana = value;
     }
 
+    public void setSpawn(Location spawn) {
+        this.spawn = spawn;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
 
     public void setPrivate(boolean aPrivate) {
         isPrivate = aPrivate;
+    }
+
+    public Location getSpawn() {
+        return spawn;
+    }
+
+    public boolean hasSpawn()
+    {
+        return  spawn != null;
     }
 
     public void setMaxStamina(double maxStamina) {
@@ -91,7 +112,7 @@ public class Stat {
 
     public String getStaminaString() {
         DecimalFormat df = new DecimalFormat("##.#");
-    //    return df.format(this.getStamina()) + "/" + df.format(this.getMaxStamina());
+        //    return df.format(this.getStamina()) + "/" + df.format(this.getMaxStamina());
         return String.valueOf((int) this.getStamina() + "/" + (int) this.getMaxStamina());
 
     }
@@ -109,6 +130,7 @@ public class Stat {
     public static Stat wrap(Player player) {
         return statMap.get(player.getUniqueId());
     }
+
     public static Stat wrap(UUID playerUUID) {
         return statMap.get(playerUUID);
     }
@@ -123,5 +145,13 @@ public class Stat {
 
     public void add() {
         statMap.put(this.getPlayerUUID(), this);
+    }
+
+    public void setGold(boolean b) {
+        isGold = b;
+    }
+
+    public boolean isGold() {
+        return isGold;
     }
 }

@@ -1,8 +1,6 @@
 package com.github.kotooriiii.clans;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.stats.Stat;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -58,7 +56,10 @@ public class Clan {
     /**
      * Whether the clan members have the hostility buff from a recent hostility victory
      */
-    private int hostilityBuffTimer;
+    private int manaTimer;
+    private int staminaTimer;
+    private int enhanceTimer;
+    private int igniteTimer;
 
     /**
      * The leader of the clan
@@ -114,7 +115,10 @@ public class Clan {
         this.tag = "null";
         this.color = ChatColor.WHITE;
         this.isFriendlyFire = false;
-        this.hostilityBuffTimer = 0;
+        this.manaTimer = 0;
+        this.enhanceTimer = 0;
+        this.staminaTimer = 0;
+        this.staminaTimer = 0;
         this.hostilityWins = 0;
 
         //Assign a leader
@@ -352,6 +356,121 @@ public class Clan {
         }
     }
 
+
+    private String getTimerLeft(int totalSeconds) {
+        int hoursLeft = totalSeconds / (60 * 60);
+        int totalMinutesLeft = totalSeconds % (60 * 60);
+        int minutesLeft = totalMinutesLeft / 60;
+        int totalSecondsLeft = totalMinutesLeft % 60;
+
+
+        String hrString = hoursLeft + "hrs";
+        if (hoursLeft == 1)
+            hrString = hoursLeft + "hr";
+        else if (hoursLeft == 0)
+            hrString = "";
+
+        String minString = minutesLeft + "min";
+        if (minutesLeft == 1)
+            minString = minutesLeft + "min";
+        else if (minutesLeft == 0)
+            minString = "";
+
+        String secString = totalSecondsLeft + "secs";
+        if (totalSecondsLeft == 1)
+            secString = totalSecondsLeft + "sec";
+        else if (totalSeconds == 0)
+            secString = "";
+
+
+        String timeLeft = hrString + " " + minString;
+        timeLeft = timeLeft.trim();
+
+        if (timeLeft.isEmpty())
+            timeLeft = "NONE";
+
+
+        return timeLeft;
+    }
+
+    private void addBuff(UUID uuid) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        Stat stat = Stat.wrap(uuid);
+
+        if(hasManaBuff())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the mana buff.");
+            stat.setMaxMana(Stat.HOST_MAX_MANA);
+        }
+
+        if(hasStaminaBuff())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the stamina buff.");
+            stat.setMaxStamina(Stat.HOST_MAX_STAMINA);
+        }
+
+        if(hasEnhanceTimer())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the enhance buff.");
+        }
+
+        if(hasIgniteTimer())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the ignite buff.");
+        }
+    }
+
+    private void cleanBuff(UUID[] uuids) {
+        for (UUID uuid : uuids) {
+            cleanBuff(uuid);
+        }
+    }
+
+    private void cleanBuff(UUID uuid) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+
+        if (hasManaBuff()) {
+
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your mana buff has run its glory.");
+
+            Stat stat = Stat.wrap(uuid);
+            stat.setMaxMana(Stat.BASE_MAX_MANA);
+
+            if (stat.getMana() > stat.getMaxMana())
+                stat.setMana(stat.getMana());
+        }
+
+        if (hasStaminaBuff()) {
+
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your stamina buff has run its glory.");
+
+            Stat stat = Stat.wrap(uuid);
+            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+
+            if (stat.getStamina() > stat.getMaxStamina())
+                stat.setStamina(stat.getMaxStamina());
+        }
+
+        if(hasEnhanceTimer())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your enhance buff has run its glory.");
+        }
+
+        if(hasIgniteTimer())
+        {
+            if (offlinePlayer.isOnline())
+                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your ignite buff has run its glory.");
+        }
+    }
+
+
     /**
      * Returns a friendly string representation of the clan
      *
@@ -407,42 +526,12 @@ public class Clan {
         }
         /** end of rank lists */
 
-        int totalSeconds = hostilityBuffTimer;
-
-        int hoursLeft = totalSeconds / (60 * 60);
-        int totalMinutesLeft = totalSeconds % (60 * 60);
-        int minutesLeft = totalMinutesLeft / 60;
-        int totalSecondsLeft = totalMinutesLeft % 60;
-
-
-        String hrString = hoursLeft + "hrs";
-        if (hoursLeft == 1)
-            hrString = hoursLeft + "hr";
-        else if (hoursLeft == 0)
-            hrString = "";
-
-        String minString = minutesLeft + "min";
-        if (minutesLeft == 1)
-            minString = minutesLeft + "min";
-        else if (minutesLeft == 0)
-            minString = "";
-
-        String secString = totalSecondsLeft + "secs";
-        if (totalSecondsLeft == 1)
-            secString = totalSecondsLeft + "sec";
-        else if (totalSeconds == 0)
-            secString = "";
-
-
-        String timeLeft = hrString + " " + minString;
-        timeLeft = timeLeft.trim();
-
-        if (timeLeft.isEmpty())
-            timeLeft = "NONE";
-
 
         result += ChatColor.GOLD + "Number of Hostility’s captured: " + ChatColor.YELLOW + "" + getHostilityWins() + "\n" +
-                ChatColor.GOLD + "Current Host buff: " + ChatColor.YELLOW + timeLeft + "\n" +
+                ChatColor.GOLD + "Mana buff: " + ChatColor.YELLOW + getTimerLeft(this.manaTimer) + "\n" +
+                ChatColor.GOLD + "Stamina buff: " + ChatColor.YELLOW + getTimerLeft(this.staminaTimer) + "\n" +
+                ChatColor.GOLD + "Enhance buff: " + ChatColor.YELLOW + getTimerLeft(this.enhanceTimer) + "\n" +
+                ChatColor.GOLD + "Ignite buff: " + ChatColor.YELLOW + getTimerLeft(this.igniteTimer) + "\n" +
                 ChatColor.GOLD + "Clan Tag: " + ChatColor.YELLOW + this.getTag();
         return basic + result;
     }
@@ -558,8 +647,20 @@ public class Clan {
         this.hostilityWins = hostilityWins;
     }
 
-    public void setHostilityBuffTimer(int hostilityBuffTimer) {
-        this.hostilityBuffTimer = hostilityBuffTimer;
+    public void setManaBuffTimer(int timer) {
+        this.manaTimer = timer;
+    }
+
+    public void setStaminaBuffTimer(int timer) {
+        this.staminaTimer = timer;
+    }
+
+    public void setEnhanceTimer(int timer) {
+        this.enhanceTimer = timer;
+    }
+
+    public void setIgniteTimer(int timer) {
+        this.igniteTimer = timer;
     }
 //END OF BASIC SETTERS
     //START OF BASIC GETTERS
@@ -613,12 +714,36 @@ public class Clan {
         return hostilityWins;
     }
 
-    public int getHostilityBuffTimer() {
-        return hostilityBuffTimer;
+    public int getManaTimer() {
+        return manaTimer;
     }
 
-    public boolean hasHostilityBuff() {
-        return getHostilityBuffTimer() != 0;
+    public boolean hasManaBuff() {
+        return getManaTimer() != 0;
+    }
+
+    public int getStaminaTimer() {
+        return staminaTimer;
+    }
+
+    public boolean hasStaminaBuff() {
+        return getStaminaTimer() != 0;
+    }
+
+    public int getEnhanceTimer() {
+        return enhanceTimer;
+    }
+
+    public boolean hasEnhanceTimer() {
+        return getEnhanceTimer() != 0;
+    }
+
+    public int getIgniteTimer() {
+        return igniteTimer;
+    }
+
+    public boolean hasIgniteTimer() {
+        return getIgniteTimer() != 0;
     }
 
     //END OF BASIC GETTERS
@@ -776,22 +901,7 @@ public class Clan {
         update(kickedUUID, true);
 
         //REMOVE BUFF
-        if (hasHostilityBuff()) {
-
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-
-            Stat stat = Stat.wrap(kickedUUID);
-            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-            stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-            if (stat.getStamina() > stat.getMaxStamina())
-                stat.setStamina(stat.getMaxStamina());
-
-            if (stat.getMana() > stat.getMaxMana())
-                stat.setMana(stat.getMana());
-        }
+        cleanBuff(kickedUUID);
         //END OF REMOVE BUFF
 
         return 0;
@@ -802,25 +912,9 @@ public class Clan {
      */
     public void forceDisband() {
         update(this.getAllUUIDS(), true);
+
         //REMOVE BUFF
-        if (hasHostilityBuff()) {
-
-            for (UUID uuid : this.getAllUUIDS()) {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                if (offlinePlayer.isOnline())
-                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-
-                Stat stat = Stat.wrap(uuid);
-                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-                stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-                if (stat.getStamina() > stat.getMaxStamina())
-                    stat.setStamina(stat.getMaxStamina());
-
-                if (stat.getMana() > stat.getMaxMana())
-                    stat.setMana(stat.getMana());
-            }
-        }
+        cleanBuff(this.getAllUUIDS());
         //END OF REMOVE BUFF
     }
 
@@ -1340,25 +1434,7 @@ public class Clan {
         update(this.getAllUUIDS(), true);
 
         //REMOVE BUFF
-        if (hasHostilityBuff()) {
-
-            for (UUID uuid : this.getAllUUIDS()) {
-
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                if (offlinePlayer.isOnline())
-                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-
-                Stat stat = Stat.wrap(uuid);
-                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-                stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-                if (stat.getStamina() > stat.getMaxStamina())
-                    stat.setStamina(stat.getMaxStamina());
-
-                if (stat.getMana() > stat.getMaxMana())
-                    stat.setMana(stat.getMana());
-            }
-        }
+        cleanBuff(this.getAllUUIDS());
         //END OF REMOVE BUFF
         return 0;
     }
@@ -1405,22 +1481,7 @@ public class Clan {
         update(leaverUUID, true);
 
         //REMOVE BUFF
-        if (hasHostilityBuff()) {
-
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(leaverUUID);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-
-            Stat stat = Stat.wrap(leaverUUID);
-            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-            stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-            if (stat.getStamina() > stat.getMaxStamina())
-                stat.setStamina(stat.getMaxStamina());
-
-            if (stat.getMana() > stat.getMaxMana())
-                stat.setMana(stat.getMana());
-        }
+        cleanBuff(leaverUUID);
         //END OF REMOVE BUFF
 
         return 0;
@@ -1471,14 +1532,7 @@ public class Clan {
         update(inviteeUUID, false);
 
         //ADD HOSTILITY BUFF
-        if (hasHostilityBuff()) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(inviteeUUID);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your clan awards your entry with the hostility buff.");
-            Stat stat = Stat.wrap(inviteeUUID);
-            stat.setMaxStamina(Stat.HOST_MAX_STAMINA);
-            stat.setMaxMana(Stat.HOST_MAX_MANA);
-        }
+        addBuff(inviteeUUID);
         //END OF ADD HOSTILITY BUFF
 
         return 0;
@@ -1616,23 +1670,8 @@ public class Clan {
         update(kickedUUID, true);
 
         //REMOVE BUFF
+        cleanBuff(kickedUUID);
 
-        if (hasHostilityBuff()) {
-
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(kickedUUID);
-            if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-
-            Stat stat = Stat.wrap(kickedUUID);
-            stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-            stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-            if (stat.getStamina() > stat.getMaxStamina())
-                stat.setStamina(stat.getMaxStamina());
-
-            if (stat.getMana() > stat.getMaxMana())
-                stat.setMana(stat.getMana());
-        }
         //END OF REMOVE BUFF
 
         return 0;

@@ -15,7 +15,11 @@ import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
+import com.github.kotooriiii.skills.Skill;
+import com.github.kotooriiii.skills.SkillBuild;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.SkillType;
+import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
@@ -46,6 +50,8 @@ public final class FileManager {
 
     private static File skills_folder = new File(plugin_folder + File.separator + "skills");
     private static File marks_folder = new File(plugin_folder + File.separator + "marks");
+    private static File gates_folder = new File(plugin_folder + File.separator + "gates");
+
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
     private static File ranks_folder = new File(plugin_folder + File.separator + "ranks");
     private static File discord_folder = new File(plugin_folder + File.separator + "discord");
@@ -78,6 +84,7 @@ public final class FileManager {
         plots_folder.mkdirs();
         plots_staff_folder.mkdirs();
         plots_players_folder.mkdirs();
+        gates_folder.mkdirs();
 
         skills_folder.mkdirs();
         marks_folder.mkdirs();
@@ -205,7 +212,8 @@ public final class FileManager {
                 LostShardPlugin.logger.info("\n\n" + "There was a skill file that was not able to be read!\nFile name: " + file.getName() + "\n\n");
                 continue;
             }
-            SkillPlayer.add(skillPlayer);
+
+            LostShardPlugin.getSkillManager().addSkillPlayer(skillPlayer, false);
         }
 
         for (File file : marks_folder.listFiles()) {
@@ -242,6 +250,13 @@ public final class FileManager {
                 continue;
             }
             linkPlayer.addToMap();
+        }
+
+        for (File file : gates_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            readGate(file);
         }
 
         HashMap<UUID, BannedPlayer> bannedPlayers = new HashMap<>();
@@ -287,7 +302,11 @@ public final class FileManager {
         String clanTag = yaml.getString("Tag");
         String clanStringColor = yaml.getString("Color");
         String clanStringFriendlyFireBoolean = yaml.getString("FriendlyFire");
-        int hostilityBuffTimer = yaml.getInt("HostilityBuffTimer");
+        int manaTimer = yaml.getInt("ManaTimer");
+        int staminaTimer = yaml.getInt("StaminaTimer");
+        int enhanceTimer = yaml.getInt("EnhanceTimer");
+        int igniteTimer = yaml.getInt("IgniteTimer");
+
         String clanStringHostilityWinsInt = yaml.getString("HostilityWins");
         if (clanName == null || clanTag == null || clanStringColor == null || clanStringFriendlyFireBoolean == null || clanID == null || clanStringHostilityWinsInt == null) {
             LostShardPlugin.logger.info("There was an error reading the clan in file \"" + clanFile.getName() + "\". The name, tag, color, friendlyfire, hostilitybuff, hostilitywins or id of the clan is corrupted/missing.");
@@ -326,7 +345,10 @@ public final class FileManager {
         }
         clan.setColor(clanColor);
         clan.setFriendlyFire(clanFriendlyFire);
-        clan.setHostilityBuffTimer(hostilityBuffTimer);
+        clan.setManaBuffTimer(manaTimer);
+        clan.setStaminaBuffTimer(staminaTimer);
+        clan.setEnhanceTimer(enhanceTimer);
+        clan.setIgniteTimer(igniteTimer);
         clan.setHostilityWins(clanHostilityWins);
 
         ClanRank[] ranks = ClanRank.values();
@@ -468,7 +490,9 @@ public final class FileManager {
             maxMana = 100;
 
         String title = yaml.getString("Title");
+        boolean isGold = yaml.getBoolean("isGold");
         boolean isPrivate = yaml.getBoolean("Private");
+        Location spawn = yaml.getLocation("Spawn");
 
         UUID playerUUID = UUID.fromString(uuidString);
 
@@ -476,12 +500,14 @@ public final class FileManager {
             return null;
 
         Stat stat = new Stat(playerUUID);
+        stat.setGold(isGold);
         stat.setStamina(stamina);
         stat.setMana(mana);
         stat.setMaxStamina(maxStamina);
         stat.setMaxMana(maxMana);
         stat.setPrivate(isPrivate);
         stat.setTitle(title);
+        stat.setSpawn(spawn);
         return stat;
     }
 
@@ -543,6 +569,8 @@ public final class FileManager {
         int radius = yaml.getInt("Radius");
         double balance = yaml.getDouble("Balance");
         Location center = yaml.getLocation("Center");
+        boolean isTown = yaml.getBoolean("Town");
+        boolean isDungeon = yaml.getBoolean("Dungeon");
 
         List<String> friendsList = yaml.getStringList("Friends");
         ArrayList<UUID> friendsUUIDList = new ArrayList<UUID>();
@@ -569,6 +597,8 @@ public final class FileManager {
         playerPlot.setBalance(balance);
         playerPlot.setFriends(friendsUUIDList);
         playerPlot.setJointOwners(jointOwnerUUIDList);
+        playerPlot.setTown(isTown);
+        playerPlot.setDungeon(isDungeon);
 
 
         return playerPlot;
@@ -638,22 +668,41 @@ public final class FileManager {
         return null;
     }
 
-    public static SkillPlayer readSkill(File skillFile) {
-        try {
-            FileInputStream fis = new FileInputStream(skillFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            SkillPlayer skillPlayer = (SkillPlayer) ois.readObject();
-            return skillPlayer;
+    public static SkillPlayer readSkill(File file) {
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        String uuidString = file.getName().substring(0, file.getName().indexOf('.'));
+        if (uuidString == null)
+            return null;
+
+        UUID uuid = UUID.fromString(uuidString);
+        SkillPlayer skillPlayer = new SkillPlayer(uuid);
+        int buildIndex = yaml.getInt("ActiveBuildIndex");
+
+
+        ArrayList<SkillBuild> list = new ArrayList();
+        for (int i = 0; i < SkillPlayer.MAX_BUILDS; i++) {
+
+            SkillBuild skillBuild = new SkillBuild(skillPlayer);
+            Skill[] skills = new Skill[SkillType.values().length];
+            for (SkillType type : SkillType.values()) {
+                float level = yaml.getFloatList(i + "." + type.name() + ".Level").get(0);
+                float xp = yaml.getFloatList(i + "." + type.name() + ".XP").get(0);
+                Skill skill = new Skill(skillBuild, type);
+                skill.setLevel(level, xp);
+                skills[i] = skill;
+            }
+            skillBuild.setSkills(skills);
+            list.add(skillBuild);
         }
-        return null;
+
+        SkillBuild[] builds = list.toArray(new SkillBuild[0]);
+        skillPlayer.setSkillBuilds(builds);
+        skillPlayer.setActiveBuild(buildIndex);
+        return skillPlayer;
+
     }
+
 
     public static MarkPlayer readMarks(File markFile) {
 
@@ -720,6 +769,29 @@ public final class FileManager {
         return null;
     }
 
+    public static void readGate(File gateFile) {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(gateFile);
+        String uuidString = gateFile.getName().substring(0, gateFile.getName().indexOf('.'));
+        UUID playerUUID = UUID.fromString(uuidString);
+
+        LinkedList<Gate> gateLinkedList = new LinkedList<>();
+
+
+        for (int i = 0; true; i++) {
+            Location fromLocation = yaml.getLocation("Gates." + i + ".From");
+            Location toLocation = yaml.getLocation("Gates." + i + ".To");
+
+            if (fromLocation == null && toLocation == null)
+                break;
+
+            gateLinkedList.offer(new Gate(playerUUID, fromLocation, toLocation));
+        }
+
+
+        LostShardPlugin.getGateManager().setGatesOf(playerUUID, gateLinkedList);
+    }
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -738,7 +810,10 @@ public final class FileManager {
         yaml.set("Color", clan.getColor().toString().replace(ChatColor.COLOR_CHAR + "", "&") + "");
         yaml.set("FriendlyFire", clan.isFriendlyFire() + "");
         yaml.set("HostilityWins", clan.getHostilityWins() + "");
-        yaml.set("HostilityBuffTimer", clan.getHostilityBuffTimer());
+        yaml.set("ManaTimer", clan.getManaTimer());
+        yaml.set("StaminaTimer", clan.getStaminaTimer());
+        yaml.set("EnhanceTimer", clan.getEnhanceTimer());
+        yaml.set("IgniteTimer", clan.getIgniteTimer());
 
 
         ClanRank[] ranks = ClanRank.values();
@@ -897,7 +972,9 @@ public final class FileManager {
         yaml.set("Mana", stat.getMana());
         yaml.set("MaxMana", stat.getMaxMana());
         yaml.set("Title", stat.getTitle());
+        yaml.set("isGold", stat.isGold());
         yaml.set("Private", stat.isPrivate());
+        yaml.set("Spawn", stat.getSpawn());
         try {
             yaml.save(statFile);
         } catch (IOException e) {
@@ -946,6 +1023,8 @@ public final class FileManager {
         yaml.set("Radius", radius);
         yaml.set("Balance", balance);
         yaml.set("Center", center);
+        yaml.set("Town", playerPlot.isTown());
+        yaml.set("Dungeon", playerPlot.isDungeon());
 
         ArrayList<String> friendsList = new ArrayList<>(friends.length);
         for (UUID uuid : friends)
@@ -1006,17 +1085,54 @@ public final class FileManager {
         }
     }
 
+    public static void write(Gate gate) {
+
+        File file;
+        file = new File(gates_folder + File.separator + gate.getSource() + ".yml");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        LinkedList<Gate> gates = LostShardPlugin.getGateManager().getGatesOf(gate.getSource());
+
+        for (int i = 0; i < gates.size(); i++) {
+            yaml.set("Gates." + i + ".From", gates.get(i).getFrom());
+            yaml.set("Gates." + i + ".To", gates.get(i).getTo());
+        }
+
+        try {
+            yaml.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static void write(SkillPlayer skillPlayer) {
         try {
-            File file = new File(skills_folder + File.separator + skillPlayer.getPlayerUUID() + ".obj");
+            File file = new File(skills_folder + File.separator + skillPlayer.getPlayerUUID() + ".yml");
             if (file.exists()) {
                 file.delete();
             }
             file.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-            oos.writeObject(skillPlayer);
-            oos.close();
+
+
+            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+            yaml.set("ActiveBuildIndex", skillPlayer.getActiveIndex());
+
+            SkillBuild[] skillBuilds = skillPlayer.getSkillBuilds();
+            for (int i = 0; i < skillBuilds.length; i++) {
+                SkillBuild skillBuild = skillBuilds[i];
+                Skill[] skills = skillBuild.getSkills();
+                for (int j = 0; j < skills.length; j++) {
+                    Skill skill = skills[j];
+                    yaml.set(i + "." + skill.getType().name() + ".Level", skill.getLevel());
+                    yaml.set(i + "." + skill.getType().name() + ".XP", skill.getXP());
+                }
+            }
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

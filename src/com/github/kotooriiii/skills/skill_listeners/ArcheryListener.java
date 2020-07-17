@@ -1,9 +1,8 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
-import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.ChatColor;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -11,9 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.util.Vector;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import static com.github.kotooriiii.util.HelperMethods.*;
 
@@ -178,7 +174,7 @@ public class ArcheryListener implements Listener {
     }
 
     private void applyLevelBonus(Player damager, Player defender, EntityDamageByEntityEvent event) {
-        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getArchery().getLevel();
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(damager.getUniqueId()).getActiveBuild().getArchery().getLevel();
 
         AbstractArrow arrow = (AbstractArrow) event.getDamager();
         String[] properties = arrow.getCustomName().split(":");
@@ -242,7 +238,7 @@ public class ArcheryListener implements Listener {
 
     private boolean addXP(Player player, Entity entity) {
 
-        return SkillPlayer.wrap(player.getUniqueId()).getArchery().addXP(getXP(entity));
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getArchery().addXP(getXP(entity));
     }
 
     private float getXP(Entity entity) {

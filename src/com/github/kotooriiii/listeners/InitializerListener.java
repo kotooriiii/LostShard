@@ -99,9 +99,10 @@ public class InitializerListener implements Listener {
 
     public void registerSkill(Player player) {
         UUID uuid = player.getUniqueId();
-        if (SkillPlayer.getPlayerSkills().get(uuid) == null) {
-            SkillPlayer skillPlayer = new SkillPlayer(uuid);
-            skillPlayer.save();
+        SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(uuid);
+        if (skillPlayer == null) {
+            skillPlayer = new SkillPlayer(uuid);
+            LostShardPlugin.getSkillManager().addSkillPlayer(skillPlayer, true);
         }
     }
 

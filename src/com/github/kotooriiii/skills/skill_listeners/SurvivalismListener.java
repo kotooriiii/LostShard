@@ -1,7 +1,6 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -16,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -331,7 +329,7 @@ public class SurvivalismListener implements Listener {
         //
         //The code for each skill will follow on the bottom
         //
-        if (SkillPlayer.wrap(damagerPlayer.getUniqueId()).getSurvivalism().getLevel() >= 75) {
+        if (LostShardPlugin.getSkillManager().getSkillPlayer(damagerPlayer.getUniqueId()).getActiveBuild().getSurvivalism().getLevel() >= 75) {
 
             if (false)//todo for config options in the future
                 if (damagerPlayer.getInventory().getItemInMainHand() != null && damagerPlayer.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS) > 0)
@@ -393,7 +391,7 @@ public class SurvivalismListener implements Listener {
         if (!SurvivalistFood.isSurvivalistFood(eatenItem.getType()))
             return;
 
-        int level = (int) SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().getLevel();
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel();
 
         if (level < 50)
             return;
@@ -416,11 +414,11 @@ public class SurvivalismListener implements Listener {
 
 
     private static boolean addXP(Player player, float XP) {
-        return SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().addXP(XP);
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().addXP(XP);
     }
 
     private static boolean addXP(Player player, Entity entity) {
-        return SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().addXP(getXP(entity));
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().addXP(getXP(entity));
     }
 
     private static float getXP(Entity entity) {

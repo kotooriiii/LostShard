@@ -1,7 +1,7 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.skills.listeners.BrawlingListener;
+import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

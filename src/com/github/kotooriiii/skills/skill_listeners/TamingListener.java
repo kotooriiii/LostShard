@@ -1,8 +1,6 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
-import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,19 +14,13 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Mushroom;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
-import static com.github.kotooriiii.util.HelperMethods.*;
 
 public class TamingListener implements Listener {
 
@@ -51,7 +43,7 @@ public class TamingListener implements Listener {
         //The code for each skill will follow on the bottom
         //
 
-        if (SkillPlayer.wrap(breederPlayer.getUniqueId()).getTaming().getLevel() >= 25) {
+        if (LostShardPlugin.getSkillManager().getSkillPlayer(breederPlayer.getUniqueId()).getActiveBuild().getTaming().getLevel() >= 25) {
             LivingEntity entity = event.getEntity();
             if (entity instanceof Wolf)
                 if (!addWolf(breederPlayer))
@@ -220,7 +212,7 @@ public class TamingListener implements Listener {
         if (shooter.getLevel() < 30)
             return;
 
-        if (SkillPlayer.wrap(shooter.getUniqueId()).getTaming().getLevel() < 50)
+        if (LostShardPlugin.getSkillManager().getSkillPlayer(shooter.getUniqueId()).getActiveBuild().getTaming().getLevel() < 50)
             return;
 
 
@@ -234,7 +226,7 @@ public class TamingListener implements Listener {
         if (!isHostile(livingEntity) && !isPassive(livingEntity))
             return; //Not living :( remove in case
 
-        int level = (int) SkillPlayer.wrap(shooter.getUniqueId()).getTaming().getLevel();
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(shooter.getUniqueId()).getActiveBuild().getTaming().getLevel();
 
         int levelRatio = level - 49;
 
@@ -260,7 +252,7 @@ public class TamingListener implements Listener {
 
 
         //lvl100
-        if (SkillPlayer.wrap(shooter.getUniqueId()).getTaming().getLevel() >= 100) {
+        if (LostShardPlugin.getSkillManager().getSkillPlayer(shooter.getUniqueId()).getActiveBuild().getTaming().getLevel() >= 100) {
             if (entity instanceof Cow) {
                 if (random <= 0.05) {
                     type = EntityType.MUSHROOM_COW;
@@ -840,7 +832,7 @@ public class TamingListener implements Listener {
 
     public static boolean addWolf(Player player) {
         Wolf[] wolves = getWolves(player);
-        int level = (int) SkillPlayer.wrap(player.getUniqueId()).getTaming().getLevel();
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getTaming().getLevel();
 
         int maxSize = 0;
         if (level < 25)
@@ -894,7 +886,7 @@ public class TamingListener implements Listener {
     }
 
     private boolean addXP(Player player, Entity entity, float bonusXP) {
-        return SkillPlayer.wrap(player.getUniqueId()).getTaming().addXP(getXP(entity) + bonusXP);
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getTaming().addXP(getXP(entity) + bonusXP);
     }
 
     private float getXP(Entity entity) {

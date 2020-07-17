@@ -53,13 +53,13 @@ public class PlotCommand implements CommandExecutor {
                     return false;
                 } else if (args.length >= 1) {
                     //Sub-commands again however with proper argument.
-                     String supply = stringBuilder(args, 1, " ");
-                     Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
-                     double currentCurrency = bank.getCurrency();
-                     DecimalFormat df = new DecimalFormat("#.##");
+                    String supply = stringBuilder(args, 1, " ");
+                    Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
+                    double currentCurrency = bank.getCurrency();
+                    DecimalFormat df = new DecimalFormat("#.##");
 
-                     PlotManager plotManager = LostShardPlugin.getPlotManager();
-                     Plot standingOnPlot = plotManager.getStandingOnPlot(playerSender.getLocation());
+                    PlotManager plotManager = LostShardPlugin.getPlotManager();
+                    Plot standingOnPlot = plotManager.getStandingOnPlot(playerSender.getLocation());
 
                     switch (args[0].toLowerCase()) {
                         case "help":
@@ -409,6 +409,73 @@ public class PlotCommand implements CommandExecutor {
                             playerSender.sendMessage(info);
 
                             break;
+                        case "upgrade":
+                            if (args.length != 2) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to upgrade the plot you're standing on? /plot upgrade [town/dungeon]");
+                                return false;
+                            }
+
+                            if (standingOnPlot == null) {
+                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                return false;
+                            }
+
+                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You can't upgrade staff plots.");
+                                return false;
+                            }
+
+                            PlayerPlot upgradePlot = (PlayerPlot) standingOnPlot;
+
+                            if (!upgradePlot.getOwnerUUID().equals(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You must be the owner of the plot in order to upgrade.");
+                                return false;
+                            }
+
+                            if (args[1].equalsIgnoreCase("town")) {
+                                if (plotSenderPlayer.hasTownPlot()) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You may only own up to 1 town.");
+                                    return false;
+                                }
+
+                                if(upgradePlot.getRadius() < 50)
+                                {       playerSender.sendMessage(ERROR_COLOR + "Your plot must be at least size 50 to upgrade to a town.");
+                                    return false;
+
+                                }
+
+
+                                if(upgradePlot.getBalance() < 1000)
+                                {
+                                    playerSender.sendMessage(ERROR_COLOR + "You need 1,000 gold to upgrade your plot to a Town.”.");
+                                    return false;
+                                }
+                                upgradePlot.withdraw(1000);
+                                upgradePlot.setTown(true);
+                                playerSender.sendMessage(ChatColor.GOLD + "Your plot is now a Town.");
+                            } else if (args[1].equalsIgnoreCase("dungeon")) {
+                                RankPlayer rank = RankPlayer.wrap(playerUUID);
+                                int dungeonsNum = rank.getRankType().getDungeonsNum();
+                                if (plotSenderPlayer.getDungeonPlots().length == dungeonsNum) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You may only own up to " + dungeonsNum + " dungeon(s).");
+                                    return false;
+                                }
+
+                                if(upgradePlot.getBalance() < 200)
+                                {
+                                    playerSender.sendMessage(ERROR_COLOR + "You need 200 gold to upgrade your plot to a Dungeon.”");
+                                    return false;
+                                }
+                                upgradePlot.withdraw(200);
+                                upgradePlot.setDungeon(true);
+                                playerSender.sendMessage(ChatColor.GOLD + "Your plot is now a Dungeon. Mob spawners are now enabled on your plot.");
+                            } else {
+                                playerSender.sendMessage(ERROR_COLOR + args[1] + " is not a valid upgrade option.");
+                                return false;
+                            }
+
+
+                            break;
                         case "staff":
 
                             if (!playerSender.hasPermission(STAFF_PERMISSION)) {
@@ -458,6 +525,7 @@ public class PlotCommand implements CommandExecutor {
                                     }
                                     plotManager.removePlot(disbandingPlot);
                                     break;
+
                                 case "setspawn":
                                     if (args.length != 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You didn't provide enough arguments. /plot staff setspawn");
@@ -671,12 +739,13 @@ public class PlotCommand implements CommandExecutor {
         player.sendMessage(ChatColor.GOLD + prefix + " " + "disband");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "friend" + " " + ChatColor.YELLOW + "(username)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "co" + " " + ChatColor.YELLOW + "(username)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit" + " " + ChatColor.YELLOW  + "(amount)");
-        player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw" + " " + ChatColor.YELLOW+ "(amount)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit" + " " + ChatColor.YELLOW + "(amount)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw" + " " + ChatColor.YELLOW + "(amount)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "upgrade" + " " + ChatColor.YELLOW + "town");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "upgrade" + " " + ChatColor.YELLOW + "dungeon");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "info");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "help");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "[page]");
-
 
 
     }

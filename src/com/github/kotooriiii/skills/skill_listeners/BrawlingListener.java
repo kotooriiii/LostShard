@@ -1,21 +1,17 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.event.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -24,8 +20,9 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.util.HelperMethods.*;
 
-public class SwordsmanshipListener implements Listener {
-    private static HashMap<UUID, Object[]> bleedingMap = new HashMap<>();
+public class BrawlingListener implements Listener {
+
+    private static HashMap<UUID, Object[]> stunMap = new HashMap<>();
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPHurtPlayer(EntityDamageByEntityEvent event) {
@@ -49,7 +46,7 @@ public class SwordsmanshipListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if (!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -79,9 +76,10 @@ public class SwordsmanshipListener implements Listener {
 
         if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if (!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
         addXP(damagerPlayer, defenderEntity);
+        applyLevelBonus(damagerPlayer, defenderEntity, event);
 
     }
 
@@ -95,6 +93,7 @@ public class SwordsmanshipListener implements Listener {
             return;
 
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
+
         Entity damager = betterDamageCause.getEntity();
 
         if (damager == null)
@@ -111,7 +110,7 @@ public class SwordsmanshipListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damager instanceof Player))
             return;
-        if (!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
 
         addXP(damagerPlayer, defenderPlayer);
@@ -124,14 +123,12 @@ public class SwordsmanshipListener implements Listener {
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
-
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
         Entity damagerEntity = betterDamageCause.getEntity();
 
         if (damagerEntity == null)
             return;
-
 
         if (!isPlayerDamagerONLY(defenderEntity, damagerEntity))
             return;
@@ -144,36 +141,37 @@ public class SwordsmanshipListener implements Listener {
         //
         if (!damagerCause.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || !(damagerEntity instanceof Player))
             return;
-        if (!HelperMethods.isCarryingSword(damagerPlayer))
+        if (!damagerPlayer.getInventory().getItemInMainHand().getType().equals(Material.AIR))
             return;
         addXP(damagerPlayer, defenderEntity);
 
     }
 
 
-    private void applyBleed(Player damager, Entity defender, double chance) {
+    private void applyStun(Player damager, Entity defender, double chance) {
         if (!(defender instanceof Player))
             return;
         double randomValue = Math.random();
 
         if (randomValue <= chance) {
 
-            damager.sendMessage(ChatColor.GREEN + defender.getName() + " is bleeding!");
-            ((Player) defender).sendMessage(ChatColor.GREEN + "You are bleeding!");
+            damager.sendMessage(ChatColor.GREEN + defender.getName() + " has been stunned!");
+            ((Player) defender).sendMessage(ChatColor.GREEN + "You have been stunned!");
 
             //Remove in case old entry
-            if (getBleedingMap().containsKey(defender.getUniqueId())) {
-                Object[] props = getBleedingMap().get(defender.getUniqueId());
+            if (getStunMap().containsKey(defender.getUniqueId())) {
+                Object[] props = getStunMap().get(defender.getUniqueId());
                 ((BukkitTask) props[0]).cancel();
-                getBleedingMap().remove(defender.getUniqueId());
+                getStunMap().remove(defender.getUniqueId());
 
             }
 
             //Stun timer
-            final int stunTimer = 20 * 5;
+            final int stunTimer = 15;
 
             //Properties of object
             Object[] properties = new Object[]{null, new Double(stunTimer)};
+            stunMap.put(defender.getUniqueId(), properties);
 
             //Cancel timer
             properties[0] = new BukkitRunnable() {
@@ -188,93 +186,58 @@ public class SwordsmanshipListener implements Listener {
                         return;
 
                     if (counter >= timer) {
-                        getBleedingMap().remove(playerUUID);
-                        ((Player) defender).sendMessage(ChatColor.GRAY + "Your bleeding has stopped.");
+                        getStunMap().remove(playerUUID);
                         this.cancel();
                         return;
                     }
 
-                    if (!isBleeding(playerUUID)) {
+                    if (!isStunned(playerUUID)) {
                         this.cancel();
                         return;
                     }
 
-                    //Damage by half-heart
-
-                    double newHP = ((Player) defender).getHealth() - 1;
-
-                    if (newHP <= 0) {
-                        if (!defender.isDead())
-                            ((Player) defender).setHealth(0);
-                        getBleedingMap().remove(playerUUID);
-                        this.cancel();
-                        return;
-
-                    } else {
-                        ((Player) defender).setHealth(newHP);
-                    }
-
-                    counter += 20;
-                    Object[] properties = getBleedingMap().get(playerUUID);
+                    counter += 1;
+                    Object[] properties = getStunMap().get(playerUUID);
                     int left = timer - counter;
                     if (left < 0) left = 0;
 
                     properties[1] = new Double(left);
                 }
-            }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
-
-            bleedingMap.put(defender.getUniqueId(), properties);
-
+            }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
         }
-    }
-
-    private boolean isCrit(Player damager) {
-        return damager.getFallDistance() > 0.0f && !damager.isOnGround() && !damager.getLocation().getBlock().isLiquid() && !damager.isSprinting()  &&!damager.isInsideVehicle() && !damager.hasPotionEffect(PotionEffectType.BLINDNESS);
     }
 
     private void applyLevelBonus(Player damager, Entity defender, EntityDamageByEntityEvent event) {
-        int level = (int) SkillPlayer.wrap(damager.getUniqueId()).getSwordsmanship().getLevel();
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(damager.getUniqueId()).getActiveBuild().getBrawling().getLevel();
 
-        double damage = (int) event.getDamage();
+        int damage = 1;
 
-        boolean isCrit = isCrit(damager);
-
-        if (isCrit) {
-            damage/=1.5f;
-        }
-
-        damage -= 4;
-
+        boolean isFriendlyKill = false;
         if (level >= 100) {
             damage += 4;
-            applyBleed(damager, defender, 0.225);
+            if(killFriendly(damager, defender, event))
+                isFriendlyKill =true;
+
+            applyStun(damager, defender, 0.15);
         } else if (75 <= level && level < 100) {
             damage += 3;
-            applyBleed(damager, defender, 0.15);
+            applyStun(damager, defender, 0.125);
         } else if (50 <= level && level < 75) {
             damage += 2;
-            applyBleed(damager, defender, 0.1);
+            applyStun(damager, defender, 0.1);
         } else if (25 <= level && level < 50) {
             damage += 1;
-            applyBleed(damager, defender, 0.05);
+            applyStun(damager, defender, 0.05);
         } else if (0 <= level && level < 25) {
 
         }
 
-
-        if(isCrit)
-            damage*=1.5f;
-
-        double sharpnessLevel = damager.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.DAMAGE_ALL);
-        double sharpnessDamage = 0.5 * sharpnessLevel + 0.5;
-
-        double totalDamage = damage + sharpnessDamage;
-
-        event.setDamage(totalDamage);
+        if(!isFriendlyKill)
+        event.setDamage(damage);
     }
 
     private boolean addXP(Player player, Entity entity) {
-        return SkillPlayer.wrap(player.getUniqueId()).getSwordsmanship().addXP(getXP(entity));
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getBrawling().addXP(getXP(entity));
     }
 
     private float getXP(Entity entity) {
@@ -460,11 +423,142 @@ public class SwordsmanshipListener implements Listener {
         return 10;
     }
 
-    public static HashMap<UUID, Object[]> getBleedingMap() {
-        return bleedingMap;
+    private boolean killFriendly(Player killer, Entity entity, EntityDamageByEntityEvent event) {
+        switch (entity.getType()) {
+
+            case DROPPED_ITEM:
+            case EXPERIENCE_ORB:
+            case AREA_EFFECT_CLOUD:
+            case EGG:
+            case LEASH_HITCH:
+            case PAINTING:
+            case ARROW:
+            case SNOWBALL:
+            case FIREBALL:
+            case SMALL_FIREBALL:
+            case ENDER_PEARL:
+            case ENDER_SIGNAL:
+            case SPLASH_POTION:
+            case THROWN_EXP_BOTTLE:
+            case ITEM_FRAME:
+            case WITHER_SKULL:
+            case PRIMED_TNT:
+            case FALLING_BLOCK:
+            case FIREWORK:
+            case SPECTRAL_ARROW:
+            case SHULKER_BULLET:
+            case DRAGON_FIREBALL:
+            case ARMOR_STAND:
+            case UNKNOWN:
+            case MINECART_COMMAND:
+            case MINECART:
+            case MINECART_CHEST:
+            case MINECART_FURNACE:
+            case MINECART_TNT:
+            case MINECART_HOPPER:
+            case MINECART_MOB_SPAWNER:
+            case EVOKER_FANGS:
+            case BOAT:
+            case FISHING_HOOK:
+            case TRIDENT:
+            case ENDER_CRYSTAL:
+            case LLAMA_SPIT:
+            case LIGHTNING:
+            default:
+                break;
+
+            case ELDER_GUARDIAN:
+            case WITHER_SKELETON:
+            case STRAY:
+            case HUSK:
+            case ZOMBIE_VILLAGER:
+            case SKELETON_HORSE:
+            case ZOMBIE_HORSE:
+            case EVOKER:
+            case VEX:
+            case VINDICATOR:
+            case ILLUSIONER:
+            case CREEPER:
+            case SKELETON:
+            case SPIDER:
+            case GIANT:
+            case ZOMBIE:
+            case SLIME:
+            case GHAST:
+            case PIG_ZOMBIE:
+            case ENDERMAN:
+            case CAVE_SPIDER:
+            case SILVERFISH:
+            case BLAZE:
+            case MAGMA_CUBE:
+            case ENDER_DRAGON:
+            case WITHER:
+            case WITCH:
+            case ENDERMITE:
+            case GUARDIAN:
+            case SHULKER:
+            case IRON_GOLEM:
+            case VILLAGER:
+            case PHANTOM:
+            case DROWNED:
+            case PILLAGER:
+            case RAVAGER:
+            case PLAYER:
+                break;
+
+            case DONKEY:
+            case MULE:
+            case BAT:
+            case PIG:
+            case SHEEP:
+            case COW:
+            case CHICKEN:
+            case SQUID:
+            case WOLF:
+            case MUSHROOM_COW:
+            case SNOWMAN:
+            case OCELOT:
+            case HORSE:
+            case RABBIT:
+            case POLAR_BEAR:
+            case LLAMA:
+            case PARROT:
+            case TURTLE:
+            case COD:
+            case SALMON:
+            case PUFFERFISH:
+            case TROPICAL_FISH:
+            case DOLPHIN:
+            case CAT:
+            case PANDA:
+            case TRADER_LLAMA:
+            case FOX:
+            case BEE:
+                double hp = ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+                event.setDamage(hp);
+                return true;
+        }
+        return false;
     }
 
-    public static boolean isBleeding(UUID uuid) {
-        return bleedingMap.get(uuid) != null;
+    public static HashMap<UUID, Object[]> getStunMap() {
+        return stunMap;
     }
+
+    public static boolean isStunned(UUID uuid) {
+        return stunMap.get(uuid) != null;
+    }
+
+    public static String getStunMessage(UUID uuid) {
+        Object[] props = stunMap.get(uuid);
+        Double timeLeft = (Double) props[1];
+        int timeNum = (int) Math.ceil(timeLeft.doubleValue() / 20);
+        if (timeNum == 0)
+            timeNum = 1;
+        String timeSecond = "seconds";
+        if (timeNum == 1)
+            timeSecond = "second";
+        return ChatColor.DARK_RED + "You can't do this while stunned. You have " + timeNum + " " + timeSecond + " left.";
+    }
+
 }

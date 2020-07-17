@@ -1,6 +1,7 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
-import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.skills.Skill;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -28,7 +29,7 @@ public class MiningListener implements Listener {
             return;
 
 
-        SkillPlayer.Skill miningSkill = SkillPlayer.wrap(player.getUniqueId()).getMining();
+        Skill miningSkill = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getMining();
 
         ArrayList<ItemStack> rewards = getRewards(miningSkill.getLevel());
 

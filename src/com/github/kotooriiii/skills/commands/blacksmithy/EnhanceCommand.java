@@ -1,5 +1,8 @@
 package com.github.kotooriiii.skills.commands.blacksmithy;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -15,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.*;
 
 public class EnhanceCommand implements CommandExecutor {
 
@@ -69,14 +72,14 @@ public class EnhanceCommand implements CommandExecutor {
         }
 
         //Check if already maxed out
-        if (!hasMoreEnchants(mainHand) || getBlacksmithyLevelNeeded(mainHand) == -1) {
+        if (!hasMoreEnchants(mainHand, playerSender) || getBlacksmithyLevelNeeded(mainHand) == -1) {
             playerSender.sendMessage(ERROR_COLOR + "The item has reached the highest level to be enhanced.");
             return false;
         }
 
 
         //Get the skill object
-        SkillPlayer.Skill blacksmithy = SkillPlayer.wrap(playerUUID).getBlacksmithy();
+        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
@@ -88,7 +91,7 @@ public class EnhanceCommand implements CommandExecutor {
 
 
         //Harden
-        enchant(mainHand);
+        enchant(mainHand,playerSender);
         playerSender.sendMessage(ChatColor.GOLD + "You enhance the item.");
 
 
@@ -129,6 +132,8 @@ public class EnhanceCommand implements CommandExecutor {
                     return 70;
                 else if(nextLevel == 4)
                     return 80;
+                else if(nextLevel == 5)
+                    return 100;
                 else
                     return -1;
                 //IRON
@@ -204,14 +209,19 @@ public class EnhanceCommand implements CommandExecutor {
         return false;
     }
 
-    private boolean hasMoreEnchants(ItemStack itemStack) {
+    private boolean hasMoreEnchants(ItemStack itemStack, Player player) {
+
+        int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
+        if(LostShardPlugin.getClanManager().getClan(player.getUniqueId()).hasEnhanceTimer())
+            MAXIMUM_ENHANCE_FINAL = 5;
+
         int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
         int unbreakingLevel = itemStack.getEnchantmentLevel(Enchantment.DURABILITY);
 
         int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
-        if ((efficiencyLevel < MAXIMUM_ENHANCE && efficiencyLevel < efficiencyMaxLevel) || (unbreakingLevel < MAXIMUM_ENHANCE && unbreakingLevel < unbreakingMaxLevel))
+        if ((efficiencyLevel < MAXIMUM_ENHANCE_FINAL && efficiencyLevel < efficiencyMaxLevel) || (unbreakingLevel < MAXIMUM_ENHANCE_FINAL && unbreakingLevel < unbreakingMaxLevel))
             return true;
         return false;
     }
@@ -235,7 +245,13 @@ public class EnhanceCommand implements CommandExecutor {
         return efficiencyLevel < unbreakingLevel ? efficiencyLevel : unbreakingLevel;
     }
 
-    private void enchant(ItemStack itemStack) {
+    private void enchant(ItemStack itemStack, Player player) {
+
+        int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
+        Clan clan =LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if (clan != null && clan.hasEnhanceTimer())
+            MAXIMUM_ENHANCE_FINAL = 5;
+
         int nextLevel = getEnhanceLevel(itemStack) + 1;
 
         int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
@@ -244,15 +260,24 @@ public class EnhanceCommand implements CommandExecutor {
         int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
-        if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= efficiencyMaxLevel) {
+        if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= efficiencyMaxLevel) {
             itemStack.removeEnchantment(Enchantment.DIG_SPEED);
             itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
+            if(nextLevel == 4)
+                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
+            if(nextLevel == 5)
+            {
+                clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
+                clan.setEnhanceTimer(0);
+            }
         }
 
-        if (unbreakingLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE && nextLevel <= unbreakingMaxLevel) {
+        if (unbreakingLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= unbreakingMaxLevel) {
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
         }
+
+
 
     }
 
@@ -273,6 +298,9 @@ public class EnhanceCommand implements CommandExecutor {
                 break;
             case 4:
                 cost = 10;
+                break;
+            case 5:
+                cost = 32;
                 break;
         }
 

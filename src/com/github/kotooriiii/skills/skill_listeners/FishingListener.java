@@ -1,17 +1,14 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
-import org.bukkit.Bukkit;
+import com.github.kotooriiii.skills.Skill;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -40,7 +37,7 @@ public class FishingListener implements Listener {
         if (!isFishingRod(player.getInventory().getItemInMainHand()))
             return;
 
-        SkillPlayer.Skill fishingSkill = SkillPlayer.wrap(player.getUniqueId()).getFishing();
+        Skill fishingSkill = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getFishing();
 
         ArrayList<ItemStack> rewards = getRewards(fishingSkill.getLevel());
 

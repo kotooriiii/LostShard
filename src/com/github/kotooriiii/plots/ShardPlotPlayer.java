@@ -4,6 +4,7 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.ranks.RankPlayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -15,8 +16,7 @@ public class ShardPlotPlayer {
     private static HashMap<UUID, ShardPlotPlayer> shardPlotPlayer = new HashMap<>();
     private static int MAX_PLOTS = 3;
 
-    public ShardPlotPlayer(UUID ownerUUID)
-    {
+    public ShardPlotPlayer(UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
         plotsOwned = new HashSet<>();
     }
@@ -25,48 +25,68 @@ public class ShardPlotPlayer {
         return ownerUUID;
     }
 
-    public void addPlot(PlayerPlot playerPlot)
-    {
+    public void addPlot(PlayerPlot playerPlot) {
         plotsOwned.add(playerPlot);
     }
 
-    public void removePlot(PlayerPlot playerPlot)
-    {
+    public void removePlot(PlayerPlot playerPlot) {
         plotsOwned.remove(playerPlot);
     }
 
-    public PlayerPlot[] getPlotsOwned()
-    {
+    public PlayerPlot[] getPlotsOwned() {
         return plotsOwned.toArray(new PlayerPlot[plotsOwned.size()]);
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return plotsOwned.size() == 0;
     }
 
-    public boolean hasReachedMaxPlots()
-    {
+    public boolean hasReachedMaxPlots() {
         return plotsOwned.size() >= getMaxPlots();
     }
 
-    public int getMaxPlots()
-    {
+    public int getMaxPlots() {
         return MAX_PLOTS;
     }
 
-    public boolean hasPlot(PlayerPlot playerPlot)
-    {
+    public boolean hasPlot(PlayerPlot playerPlot) {
         return plotsOwned.contains(playerPlot);
     }
 
-    public void add()
-    {
+    public boolean hasDungeonPlot() {
+
+        for (PlayerPlot playerPlot : plotsOwned) {
+            if (playerPlot.isDungeon()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PlayerPlot[] getDungeonPlots() {
+
+        ArrayList<PlayerPlot> dungeons = new ArrayList<>();
+        for (PlayerPlot playerPlot : plotsOwned) {
+            if (playerPlot.isDungeon()) {
+                dungeons.add(playerPlot);
+            }
+        }
+        return dungeons.toArray(new PlayerPlot[0]);
+    }
+    public boolean hasTownPlot() {
+
+        for (PlayerPlot playerPlot : plotsOwned) {
+            if (playerPlot.isTown()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public void add() {
         shardPlotPlayer.put(ownerUUID, this);
     }
 
-    public void save()
-    {
+    public void save() {
         FileManager.write(this);
     }
 
@@ -74,8 +94,7 @@ public class ShardPlotPlayer {
         return shardPlotPlayer;
     }
 
-    public static ShardPlotPlayer wrap(UUID ownerUUID)
-    {
+    public static ShardPlotPlayer wrap(UUID ownerUUID) {
         return shardPlotPlayer.get(ownerUUID);
     }
 }

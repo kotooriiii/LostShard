@@ -223,9 +223,13 @@ public class HostilityMatch {
                         endGame(false);
                         this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
                         capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
-                        capturingClan.setHostilityBuffTimer(60 * 60 * 24);
+
+
+                        win();
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
 
+
+                        /*
 
                         //Universal LORE
                         List<String> itemLore = new ArrayList<>();
@@ -257,130 +261,54 @@ public class HostilityMatch {
                         flameMeta.addStoredEnchant(Enchantment.ARROW_FIRE, 1, true);
                         flameMeta.setLore(itemLore);
                         flameItemStack.setItemMeta(flameMeta);
-
-                        //COOKIE ITEM STACK
-                        ItemStack cookiesItemStack = new ItemStack(Material.COOKIE, 64);
-                        ItemMeta cookieMeta = cookiesItemStack.getItemMeta();
-                        cookieMeta.setLore(itemLore);
-                        cookiesItemStack.setItemMeta(cookieMeta);
-
-                        //SPECTRAL ARROW ITEM STACK
-                        ItemStack spectralArrowsItemStack = new ItemStack(Material.SPECTRAL_ARROW, 128);
-                        ItemMeta spectralMeta = spectralArrowsItemStack.getItemMeta();
-                        spectralMeta.setLore(itemLore);
-                        spectralArrowsItemStack.setItemMeta(spectralMeta);
-
-                        //-------------------------------------------------------------------------------------------------
-                        //PROT 4 ITEM STACK
-                        ItemStack protItemStack = new ItemStack(Material.ENCHANTED_BOOK, 2);
-                        EnchantmentStorageMeta protItemStackItemMeta = (EnchantmentStorageMeta) protItemStack.getItemMeta();
-                        protItemStackItemMeta.addStoredEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 4, true);
-                        protItemStackItemMeta.setLore(itemLore);
-                        protItemStack.setItemMeta(protItemStackItemMeta);
-
-                        //UNBREAKING 3 ITEM STACK
-                        ItemStack unbreakingItemStack = new ItemStack(Material.ENCHANTED_BOOK, 2);
-                        EnchantmentStorageMeta unbreakingMeta = (EnchantmentStorageMeta) unbreakingItemStack.getItemMeta();
-                        unbreakingMeta.addStoredEnchant(Enchantment.DURABILITY, 3, true);
-                        unbreakingMeta.setLore(itemLore);
-                        unbreakingItemStack.setItemMeta(unbreakingMeta);
-
-                        //POWER V ITEM STACK
-                        ItemStack powerItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
-                        EnchantmentStorageMeta powerMeta = (EnchantmentStorageMeta) powerItemStack.getItemMeta();
-                        powerMeta.addStoredEnchant(Enchantment.ARROW_DAMAGE, 5, true);
-                        powerMeta.setLore(itemLore);
-                        powerItemStack.setItemMeta(powerMeta);
-
-                        //DRAGON EGG ITEM STACK
-                        ItemStack dragonEggItemStack = new ItemStack(Material.DRAGON_EGG, 1);
-                        ItemMeta dragonMeta = dragonEggItemStack.getItemMeta();
-                        dragonMeta.setLore(itemLore);
-                        dragonEggItemStack.setItemMeta(dragonMeta);
+                        */
 
 
 
-                        for (UUID uuid : capturingClan.getAllUUIDS()) {
-                            Stat stat = Stat.wrap(uuid);
-                            stat.setMaxStamina(Stat.HOST_MAX_STAMINA);
-                            stat.setMaxMana(Stat.HOST_MAX_MANA);
 
-                            Player player = Bukkit.getPlayer(uuid);
-
-                            if(player==null)
-                                continue;
-
-                            if (player.isOnline()) {
-                                HashMap<Integer, ItemStack> unstoredItems = new HashMap<>();
-
-
-                                player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
-                                player.sendMessage(STANDARD_COLOR + "Your clan has gained the hostility buff!");
-                                player.sendMessage(STANDARD_COLOR + "Bonuses: ");
-                                player.sendMessage(STANDARD_COLOR + "- 100 Gold");
-
-                                if (platform.getName().equalsIgnoreCase("Havok") || platform.getName().equalsIgnoreCase("Havoc")) {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack,fireAspectItemStack, flameItemStack, cookiesItemStack, spectralArrowsItemStack);
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Fire Aspect I Enchanted Book");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Flame I Enchanted Book");
-                                    player.sendMessage(STANDARD_COLOR + "- 64 Cookies");
-                                    player.sendMessage(STANDARD_COLOR + "- 128 Spectral Arrows");
-
-                                } else if (platform.getName().equalsIgnoreCase("Hostility")) {
-                                    unstoredItems = player.getInventory().addItem(goldItemStack, protItemStack, unbreakingItemStack, powerItemStack, dragonEggItemStack);
-
-                                    player.sendMessage(STANDARD_COLOR + "- 2 Protection IV Enchanted Books");
-                                    player.sendMessage(STANDARD_COLOR + "- 2 Unbreaking III Enchanted Books");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Power V Enchanted Book");
-                                    player.sendMessage(STANDARD_COLOR + "- 1 Dragon Egg Enchanted Book");
-
-
-                                }
-
-                                if (unstoredItems.keySet().size() > 0)
-                                    player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + " but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
-
-                                for (Integer integer : unstoredItems.keySet()) {
-                                    ItemStack unstoredItemStack = unstoredItems.get(integer);
-                                    player.getLocation().getWorld().dropItem(player.getLocation(), unstoredItemStack);
-                                }
-                            }
-                        }
-
-
-                        new BukkitRunnable() {
-
-                            int counter = capturingClan.getHostilityBuffTimer();
-
-                            @Override
-                            public void run() {
-
-                                if (counter == 0) {
-
-                                    this.cancel();
-
-                                    for (UUID uuid : capturingClan.getAllUUIDS()) {
-
-                                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                        if (offlinePlayer.isOnline())
-                                            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-                                        Stat stat = Stat.wrap(uuid);
-                                        stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-                                        stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-                                        if (stat.getStamina() > stat.getMaxStamina())
-                                            stat.setStamina(stat.getMaxStamina());
-
-                                        if (stat.getMana() > stat.getMaxMana())
-                                            stat.setMana(stat.getMana());
-                                    }
-                                    return;
-
-                                }
-                                counter--;
-                                capturingClan.setHostilityBuffTimer(counter);
-                            }
-                        }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+//                        for (UUID uuid : capturingClan.getAllUUIDS()) {
+//
+//                            Player player = Bukkit.getPlayer(uuid);
+//
+//                            if(player==null)
+//                                continue;
+//
+//                            if (player.isOnline()) {
+//                                HashMap<Integer, ItemStack> unstoredItems = new HashMap<>();
+//
+//
+//                                player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
+//                                player.sendMessage(STANDARD_COLOR + "Your clan has gained the hostility buff!");
+//                                player.sendMessage(STANDARD_COLOR + "Bonuses: ");
+//                                player.sendMessage(STANDARD_COLOR + "- 100 Gold");
+//
+//                                if (platform.getName().equalsIgnoreCase("Havok") || platform.getName().equalsIgnoreCase("Havoc")) {
+//                                    unstoredItems = player.getInventory().addItem(goldItemStack,fireAspectItemStack, flameItemStack, cookiesItemStack, spectralArrowsItemStack);
+//                                    player.sendMessage(STANDARD_COLOR + "- 1 Fire Aspect I Enchanted Book");
+//                                    player.sendMessage(STANDARD_COLOR + "- 1 Flame I Enchanted Book");
+//                                    player.sendMessage(STANDARD_COLOR + "- 64 Cookies");
+//                                    player.sendMessage(STANDARD_COLOR + "- 128 Spectral Arrows");
+//
+//                                } else if (platform.getName().equalsIgnoreCase("Hostility")) {
+//                                    unstoredItems = player.getInventory().addItem(goldItemStack, protItemStack, unbreakingItemStack, powerItemStack, dragonEggItemStack);
+//
+//                                    player.sendMessage(STANDARD_COLOR + "- 2 Protection IV Enchanted Books");
+//                                    player.sendMessage(STANDARD_COLOR + "- 2 Unbreaking III Enchanted Books");
+//                                    player.sendMessage(STANDARD_COLOR + "- 1 Power V Enchanted Book");
+//                                    player.sendMessage(STANDARD_COLOR + "- 1 Dragon Egg Enchanted Book");
+//
+//
+//                                }
+//
+//                                if (unstoredItems.keySet().size() > 0)
+//                                    player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + " but some of the item(s) rewarded to you were not able to fit in your inventory. The item(s) have been dropped at your location.");
+//
+//                                for (Integer integer : unstoredItems.keySet()) {
+//                                    ItemStack unstoredItemStack = unstoredItems.get(integer);
+//                                    player.getLocation().getWorld().dropItem(player.getLocation(), unstoredItemStack);
+//                                }
+//                            }
+//                        }
 
 
                         //win host
@@ -410,6 +338,182 @@ public class HostilityMatch {
             }
         }
 
+    }
+
+    private void win()
+    {
+
+        String buff = "";
+
+        switch (this.platform.getName().toLowerCase())
+        {
+            case "bunts":
+                capturingClan.setManaBuffTimer(60 * 60 * 24);
+buff = "mana";
+                new BukkitRunnable() {
+
+                    int counter = capturingClan.getManaTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your mana buff has run its glory.");
+                                Stat stat = Stat.wrap(uuid);
+                                stat.setMaxMana(Stat.BASE_MAX_MANA);
+
+                                if (stat.getMana() > stat.getMaxMana())
+                                    stat.setMana(stat.getMana());
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        capturingClan.setManaBuffTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+
+                break;
+            case "gorps":
+                capturingClan.setStaminaBuffTimer(60 * 60 * 24);
+                buff = "stamina";
+                new BukkitRunnable() {
+
+                    int counter = capturingClan.getStaminaTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your stamina buff has run its glory.");
+
+                                Stat stat = Stat.wrap(uuid);
+
+                                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+                                if (stat.getStamina() > stat.getMaxStamina())
+                                    stat.setStamina(stat.getMaxStamina());
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        capturingClan.setStaminaBuffTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+                break;
+            case "hostility":
+            case "host":
+                capturingClan.setEnhanceTimer(60*60);
+                buff = "enhance";
+                if(capturingClan.hasEnhanceTimer())
+                {
+                    new BukkitRunnable() {
+
+                        int counter = capturingClan.getEnhanceTimer();
+
+                        @Override
+                        public void run() {
+
+
+                            if(capturingClan.getEnhanceTimer() == 0 && counter > 0)
+                            {
+                                this.cancel();
+                                return;
+                            }
+
+
+                            if (counter == 0) {
+
+                                this.cancel();
+
+                                for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                    if (offlinePlayer.isOnline())
+                                        offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your enhance buff has run its glory.");
+
+                                }
+                                return;
+
+                            }
+                            counter--;
+                            capturingClan.setEnhanceTimer(counter);
+
+                        }
+                    }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+                }
+                break;
+            case "havok":
+            case "havoc":
+                capturingClan.setIgniteTimer(60*60);
+                buff = "ignite";
+                new BukkitRunnable() {
+
+                    int counter = capturingClan.getIgniteTimer();
+
+                    @Override
+                    public void run() {
+
+                        if(capturingClan.getIgniteTimer() == 0 && counter > 0)
+                        {
+                            this.cancel();
+                            return;
+                        }
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your ignite buff has run its glory.");
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        capturingClan.setIgniteTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+                break;
+            default:
+                buff = "null";
+        }
+
+        for(UUID uuid : capturingClan.getAllUUIDS())
+        {
+            Player player = Bukkit.getPlayer(uuid);
+            if(player==null)
+                continue;
+
+            if(!player.isOnline())
+                continue;
+
+            player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
+            player.sendMessage(STANDARD_COLOR + "Your clan has gained the " + buff + "!");
+
+        }
     }
 
     private String tryingToPlace(int winStreak) {

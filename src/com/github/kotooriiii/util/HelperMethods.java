@@ -276,7 +276,7 @@ public final class HelperMethods {
         Status status = StatusPlayer.wrap(localPlayer.getUniqueId()).getStatus();
 
         for (Player lp : players) {
-            lp.sendMessage(ChatColor.AQUA + localPlayer.getName() + ChatColor.AQUA + " has cast \"" + name + "\".");
+            lp.sendMessage(ChatColor.AQUA + localPlayer.getName() + ChatColor.AQUA + " chants \"" + name + "\".");
         }
     }
 

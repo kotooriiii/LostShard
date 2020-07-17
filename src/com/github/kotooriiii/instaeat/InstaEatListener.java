@@ -1,11 +1,8 @@
 package com.github.kotooriiii.instaeat;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.SkillPlayer;
-import com.github.kotooriiii.skills.listeners.SurvivalismListener;
+import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -91,7 +88,7 @@ public class InstaEatListener implements Listener {
         double newFoodLevel = currentFoodLevel + replenishedFoodLevel;
 
         //if has perk
-        if((int) SkillPlayer.wrap(player.getUniqueId()).getSurvivalism().getLevel() >= 50)
+        if((int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel() >= 50)
         {
             //if its a survivalist food
             if(SurvivalismListener.SurvivalistFood.isSurvivalistFood(instaEatType.getMaterial()))

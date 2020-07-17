@@ -3,8 +3,7 @@ package com.github.kotooriiii.skills.commands;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
-import com.github.kotooriiii.skills.SkillPlayer;
-import com.github.kotooriiii.skills.listeners.SurvivalismListener;
+import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -29,7 +28,7 @@ public class CampCommand implements CommandExecutor {
             final UUID playerUUID = playerSender.getUniqueId();
             if (cmd.getName().equalsIgnoreCase("camp")) {
 
-                int level = (int) SkillPlayer.wrap(playerUUID).getSurvivalism().getLevel();
+                int level = (int)  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSurvivalism().getLevel();
                 if (level < SurvivalismListener.Campfire.LEVEL) {
                     playerSender.sendMessage(ERROR_COLOR + "You must be at least level 25 to place a camp.");
                     return false;

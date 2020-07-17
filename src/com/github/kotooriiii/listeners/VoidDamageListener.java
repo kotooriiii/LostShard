@@ -28,6 +28,9 @@ public class VoidDamageListener implements Listener {
         if(!cause.equals(EntityDamageEvent.DamageCause.VOID))
             return;
 
+        if(damagedEntity.getLocation().getY() >= 0)
+            return;
+
         if(damagedEntity.getWorld().getName().contains("_the_end"))
             return;
 

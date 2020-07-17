@@ -1,4 +1,4 @@
-package com.github.kotooriiii.skills.listeners;
+package com.github.kotooriiii.skills.skill_listeners;
 
 import org.bukkit.event.Listener;
 

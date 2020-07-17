@@ -1,6 +1,9 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.skills.Skill;
+import com.github.kotooriiii.skills.SkillBuild;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.SkillType;
 import org.apache.commons.lang.math.NumberUtils;
@@ -33,11 +36,11 @@ public class SkillCommand implements CommandExecutor {
                 if (args.length == 0) {
                     playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Skills-");
 
-                    SkillPlayer skillPlayer = SkillPlayer.wrap(playerUUID);
+                    SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID);
                     float skillNum = 0;
                     float maxSkillNum = 0;
 
-                    for(SkillPlayer.Skill skill : skillPlayer.getSkills())
+                    for(Skill skill : skillPlayer.getActiveBuild().getSkills())
                     {
                         skillNum += skill.getLevel();
                         maxSkillNum += 100;
@@ -47,7 +50,7 @@ public class SkillCommand implements CommandExecutor {
 
                     playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + new BigDecimal(skillNum).setScale(1, RoundingMode.HALF_UP).toString() + "/" + new BigDecimal(maxSkillNum).setScale(1, RoundingMode.HALF_UP).toString() + " skill points.");
 
-                    for(SkillPlayer.Skill skill : skillPlayer.getSkills())
+                    for(Skill skill : skillPlayer.getActiveBuild().getSkills())
                     {
                         playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + ": " + ChatColor.WHITE + new BigDecimal(skill.getLevel()).setScale(1, RoundingMode.HALF_UP).toString());
                     }
@@ -96,8 +99,17 @@ public class SkillCommand implements CommandExecutor {
                         }
 
                         float level = Float.valueOf(levelString);
-
-                        SkillPlayer.wrap(offlinePlayer.getUniqueId()).get(type.getID()).setLevel(level);
+                        SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(offlinePlayer.getUniqueId());
+                        SkillBuild build = skillPlayer.getActiveBuild();
+                        Skill skill=null;
+                        for(Skill iskill : build.getSkills())
+                        {
+                            if(iskill.getType().equals(type))
+                                skill = iskill;
+                        }
+                        if(skill==null)
+                            return false;
+                        skill.setLevel(level);
                         playerSender.sendMessage(STANDARD_COLOR + "You have set " + offlinePlayer.getName() + "'s " +  type.getName() + " level to " + level + ".");
                         break;
                     default:

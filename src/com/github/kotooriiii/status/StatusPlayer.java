@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -22,11 +23,13 @@ public class StatusPlayer {
     private UUID uuid;
     private Status status;
     private int kills;
+    private ZonedDateTime lastAtoneDate;
 
     public StatusPlayer(UUID playerUUID, Status status, int kills) {
         this.uuid = playerUUID;
         this.status = status;
         this.kills = kills;
+        this.lastAtoneDate = null;
         playerStatus.put(playerUUID, this);
 
         ShardScoreboardManager.add(Bukkit.getOfflinePlayer(playerUUID), status.getName());

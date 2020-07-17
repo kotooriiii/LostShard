@@ -42,24 +42,26 @@ import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
+import com.github.kotooriiii.skills.SkillManager;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.plots.listeners.MobSpawnerCancelListener;
+import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.skills.commands.CampCommand;
 import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.commands.blacksmithy.*;
-import com.github.kotooriiii.skills.listeners.*;
-import com.github.kotooriiii.sorcery.listeners.FireballExplodeListener;
-import com.github.kotooriiii.sorcery.listeners.MovingWhileCastArgumentListener;
-import com.github.kotooriiii.sorcery.listeners.NoAbuseBlockBreakMaterialListener;
+import com.github.kotooriiii.skills.skill_listeners.*;
+import com.github.kotooriiii.sorcery.GateManager;
+import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
 import com.github.kotooriiii.sorcery.spells.type.ClanTPSpell;
 import com.github.kotooriiii.sorcery.spells.type.MarkSpell;
+import com.github.kotooriiii.sorcery.spells.type.PermanentGateTravelSpell;
 import com.github.kotooriiii.sorcery.spells.type.RecallSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
-import com.github.kotooriiii.sorcery.listeners.MedAndRestCancelListener;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
@@ -117,6 +119,8 @@ public class LostShardPlugin extends JavaPlugin {
     private static BankManager bankManager;
     private static BanManager banManager;
     private static ClanManager clanManager;
+    private static GateManager gateManager;
+    private static SkillManager skillManager;
 
     private static int gameTicks = 0;
 
@@ -227,6 +231,8 @@ public class LostShardPlugin extends JavaPlugin {
         bankManager = new BankManager();
         banManager = new BanManager();
         clanManager = new ClanManager();
+        gateManager = new GateManager();
+        skillManager = new SkillManager();
 
 
         //Read files (some onto the managers)
@@ -283,9 +289,9 @@ public class LostShardPlugin extends JavaPlugin {
                 continue;
             Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
             InventoryView view = player.getOpenInventory();
-            if(view == null)
+            if (view == null)
                 continue;
-            if(view.getTopInventory() == null)
+            if (view.getTopInventory() == null)
                 continue;
             bank.setInventory(view.getTopInventory());
             inventoryView.close();
@@ -316,8 +322,7 @@ public class LostShardPlugin extends JavaPlugin {
     }
 
     private void saveData() {
-        for(Bank bank : LostShardPlugin.getBankManager().getBanks().values())
-        {
+        for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
             LostShardPlugin.getBankManager().saveBank(bank);
         }
 
@@ -334,8 +339,8 @@ public class LostShardPlugin extends JavaPlugin {
         }
 
         //Save all skills
-        for (SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values()) {
-            skillPlayer.save();
+        for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
+            getSkillManager().saveSkillPlayer(skillPlayer);
         }
     }
 
@@ -363,6 +368,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("plot").setExecutor(new PlotCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
         getCommand("addtitle").setExecutor(new AddTitleCommand());
+        getCommand("addtitlegold").setExecutor(new AddTitleGoldCommand());
         getCommand("addrank").setExecutor(new AddRankCommand());
 
         getCommand("hud").setExecutor(new HUDCommand());
@@ -380,6 +386,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("enhance").setExecutor(new EnhanceCommand());
         getCommand("sharpen").setExecutor(new SharpenCommand());
         getCommand("power").setExecutor(new PowerCommand());
+        getCommand("ignite").setExecutor(new IgniteCommand());
 
         getCommand("banmatch").setExecutor(new BanmatchCommand());
         getCommand("moneymatch").setExecutor(new MoneymatchCommand());
@@ -517,7 +524,13 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new NotValidReachBlockListener(), this);
         pm.registerEvents(new NotValidMoveBlockListener(), this);
         pm.registerEvents(new EggListener(), this);
+        pm.registerEvents(new PermanentGateTravelSpell(), this);
+        pm.registerEvents(new NoMoreOldEnchantsListener(), this);
 
+        pm.registerEvents(new SignChangeListener(), this);
+        pm.registerEvents(new BedChangeListener(), this);
+
+        pm.registerEvents(new MobSpawnerCancelListener(), this);
 
         registerCustomEventListener();
 
@@ -545,11 +558,11 @@ public class LostShardPlugin extends JavaPlugin {
 
     public void registerBuff() {
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
-            if (clan.hasHostilityBuff()) {
 
+            if (clan.hasStaminaBuff()) {
                 new BukkitRunnable() {
 
-                    int counter = clan.getHostilityBuffTimer();
+                    int counter = clan.getStaminaTimer();
 
                     @Override
                     public void run() {
@@ -562,13 +575,44 @@ public class LostShardPlugin extends JavaPlugin {
 
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                                 if (offlinePlayer.isOnline())
-                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your hostility buff has run its glory.");
-                                Stat stat = Stat.wrap(uuid);
-                                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
-                                stat.setMaxMana(Stat.BASE_MAX_MANA);
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your stamina buff has run its glory.");
 
+                                Stat stat = Stat.wrap(uuid);
+
+                                stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
                                 if (stat.getStamina() > stat.getMaxStamina())
                                     stat.setStamina(stat.getMaxStamina());
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        clan.setStaminaBuffTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+            }
+
+            if (clan.hasManaBuff()) {
+                new BukkitRunnable() {
+
+                    int counter = clan.getManaTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : clan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your mana buff has run its glory.");
+                                Stat stat = Stat.wrap(uuid);
+                                stat.setMaxMana(Stat.BASE_MAX_MANA);
 
                                 if (stat.getMana() > stat.getMaxMana())
                                     stat.setMana(stat.getMana());
@@ -577,12 +621,81 @@ public class LostShardPlugin extends JavaPlugin {
 
                         }
                         counter--;
-                        clan.setHostilityBuffTimer(counter);
+                        clan.setManaBuffTimer(counter);
 
                     }
                 }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
-
             }
+
+            if (clan.hasEnhanceTimer()) {
+                new BukkitRunnable() {
+
+                    int counter = clan.getEnhanceTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (clan.getEnhanceTimer() == 0 && counter > 0) {
+                            this.cancel();
+                            return;
+                        }
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : clan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your enhance buff has run its glory.");
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        clan.setEnhanceTimer(counter);
+
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+            }
+
+            if (clan.hasIgniteTimer()) {
+                new BukkitRunnable() {
+
+                    int counter = clan.getIgniteTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (clan.getIgniteTimer() == 0 && counter > 0) {
+                            this.cancel();
+                            return;
+                        }
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : clan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your ignite buff has run its glory.");
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        clan.setIgniteTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+            }
+
+
         }
     }
 
@@ -696,8 +809,8 @@ public class LostShardPlugin extends JavaPlugin {
                 }
 
                 //Save all skills
-                for (SkillPlayer skillPlayer : SkillPlayer.getPlayerSkills().values()) {
-                    skillPlayer.save();
+                for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
+                    LostShardPlugin.getSkillManager().saveSkillPlayer(skillPlayer);
                 }
 
                 new BukkitRunnable() {
@@ -783,14 +896,25 @@ public class LostShardPlugin extends JavaPlugin {
         return saleManager;
     }
 
-    public static BankManager getBankManager()
-    {
+    public static BankManager getBankManager() {
         return bankManager;
     }
 
-    public static BanManager getBanManager() { return banManager;}
+    public static BanManager getBanManager() {
+        return banManager;
+    }
 
-    public static ClanManager getClanManager() {return clanManager;}
+    public static GateManager getGateManager() {
+        return gateManager;
+    }
+
+    public static ClanManager getClanManager() {
+        return clanManager;
+    }
+
+    public static SkillManager getSkillManager() {
+        return skillManager;
+    }
 
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);

@@ -1,9 +1,11 @@
 package com.github.kotooriiii.listeners;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import static com.github.kotooriiii.data.Maps.spawnTimer;
@@ -35,4 +37,25 @@ public class PlayerSpawnMoveListener implements Listener {
             return;
         }
     }
+
+    @EventHandler
+    public void onWaitToRecall(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if(!(entity instanceof Player))
+            return;
+        Player player = (Player) entity;
+
+
+
+        //not casting spell
+        if (!spawnTimer.contains(player.getUniqueId()))
+            return;
+
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "The teleportation request to spawn has been canceled due to damage.");
+        spawnTimer.remove(player.getUniqueId());
+    }
+
 }

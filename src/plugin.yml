@@ -102,6 +102,7 @@ commands:
   meditate:
   rest:
   addtitle:
+  addtitlegold:
   addrank:
 
   #skill stuff
@@ -118,6 +119,7 @@ commands:
   power:
   sharpen:
   repair:
+  ignite:
 
   taming:
   pets:

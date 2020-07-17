@@ -87,7 +87,9 @@ public abstract class Plot implements Serializable {
      */
     public boolean isMinimumDistancePlotCreate(Player player) {
 
-        final int distance = MINIMUM_PLOT_CREATE_RANGE;
+        int distance = MINIMUM_PLOT_CREATE_RANGE;
+        if(plotType.isStaff())
+            distance += 50;
 
 
         int minX = getZone().getX1() - distance;

@@ -1,7 +1,6 @@
 package com.github.kotooriiii.sorcery.spells;
 
-import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.skills.listeners.BrawlingListener;
+import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.type.*;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -12,7 +11,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -78,6 +76,8 @@ public abstract class Spell {
                 return new RecallSpell();
             case PERMANENT_GATE_TRAVEL:
                 return new PermanentGateTravelSpell();
+            case CHRONOPORT:
+                return new ChronoportSpell();
             default:
                 return null;
         }
@@ -138,6 +138,10 @@ public abstract class Spell {
 
     public String getName() {
         return type.getNames()[0];
+    }
+
+    public String getLatin() {
+        return type.getLatin();
     }
 
     public ChatColor getColor() {
@@ -358,7 +362,7 @@ public abstract class Spell {
         stat.setMana(stat.getMana() - this.getManaCost());
         removeIngredients(player);
 
-        localBroadcast(player, this.getName());
+        localBroadcast(player, this.getLatin());
         updateCooldown(player);
         return true;
     }

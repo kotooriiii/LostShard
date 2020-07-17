@@ -10,9 +10,11 @@ import com.github.kotooriiii.stats.Stat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -77,6 +79,27 @@ public class ClanTPSpell extends Spell implements Listener {
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
         waitingToRecallMap.remove(player.getUniqueId());
     }
+
+    @EventHandler
+    public void onWaitToRecall(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if(!(entity instanceof Player))
+            return;
+        Player player = (Player) entity;
+
+
+
+        //not casting spell
+        if (!waitingToRecallMap.containsKey(player.getUniqueId()))
+            return;
+
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
+        waitingToRecallMap.remove(player.getUniqueId());
+    }
+
 
     @Override
     public void updateCooldown(Player player)

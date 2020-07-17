@@ -1,24 +1,20 @@
 package com.github.kotooriiii.skills;
 
 public enum SkillType {
-    ARCHERY("Archery", 1),
-    SWORDSMANSHIP("Swordsmanship", 2),
-    MINING("Mining", 3),
-    FISHING("Fishing", 4),
-    LUMBERJACKING("Lumberjacking", 5),
-    TAMING("Taming", 6),
-    SURVIVALISM("Survivalism", 7),
-    BRAWLING("Brawling", 8),
-    BLACKSMITHY("Blacksmithy", 9),
-    SORCERY("Sorcery", 10);
+    ARCHERY("Archery"),
+    BLACKSMITHY("Blacksmithy"),
+    BRAWLING("Brawling"),
+    FISHING("Fishing"),
+    MINING("Mining"),
+    SURVIVALISM("Survivalism"),
+    SWORDSMANSHIP("Swordsmanship"),
+    TAMING("Taming");
 
     private String name;
-    private int id;
 
-    private SkillType(String name, int id)
+    private SkillType(String name)
     {
         this.name = name;
-        this.id = id;
     }
 
     public static boolean isSkill(String skillString) {
@@ -34,8 +30,4 @@ public enum SkillType {
         return name;
     }
 
-    public int getID()
-    {
-        return id;
-    }
 }

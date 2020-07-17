@@ -1,5 +1,8 @@
 package com.github.kotooriiii.skills.commands.blacksmithy;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -16,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 
 public class SharpenCommand implements CommandExecutor {
 
@@ -69,14 +73,14 @@ public class SharpenCommand implements CommandExecutor {
         }
 
         //Check if already maxed out
-        if (!hasMoreEnchants(mainHand) || getBlacksmithyLevelNeeded(mainHand) == -1) {
+        if (!hasMoreEnchants(mainHand, playerSender) || getBlacksmithyLevelNeeded(mainHand) == -1) {
             playerSender.sendMessage(ERROR_COLOR + "The item has reached the highest level to be sharpened.");
             return false;
         }
 
 
         //Get the skill object
-        SkillPlayer.Skill blacksmithy = SkillPlayer.wrap(playerUUID).getBlacksmithy();
+        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
@@ -88,7 +92,7 @@ public class SharpenCommand implements CommandExecutor {
 
 
         //Harden
-        enchant(mainHand);
+        enchant(mainHand, playerSender);
         playerSender.sendMessage(ChatColor.GOLD + "You sharpen the item.");
 
 
@@ -115,29 +119,31 @@ public class SharpenCommand implements CommandExecutor {
             case DIAMOND_SWORD:
                 //GOLD
             case GOLDEN_SWORD:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 50;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 60;
-                else if(nextLevel == 3)
+                else if (nextLevel == 3)
                     return 70;
-                else if(nextLevel == 4)
+                else if (nextLevel == 4)
                     return 80;
+                else if(nextLevel == 5)
+                    return 100;
                 else
                     return -1;
                 //IRON
             case IRON_SWORD:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 25;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 30;
                 else
                     return -1;
                 //STONE
             case STONE_SWORD:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 10;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 15;
                 else
                     return -1;
@@ -172,12 +178,16 @@ public class SharpenCommand implements CommandExecutor {
         return false;
     }
 
-    private boolean hasMoreEnchants(ItemStack itemStack) {
+    private boolean hasMoreEnchants(ItemStack itemStack, Player player) {
+
+        int MAXIMUM_SHARPEN_FINAL = MAXIMUM_SHARPEN;
+        if (LostShardPlugin.getClanManager().getClan(player.getUniqueId()).hasEnhanceTimer())
+            MAXIMUM_SHARPEN_FINAL = 5;
         int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
 
         int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
 
-        if ((sharpnessLevel < MAXIMUM_SHARPEN && sharpnessLevel < sharpnessMaxLevel))
+        if ((sharpnessLevel < MAXIMUM_SHARPEN_FINAL && sharpnessLevel < sharpnessMaxLevel))
             return true;
         return false;
     }
@@ -185,20 +195,29 @@ public class SharpenCommand implements CommandExecutor {
     private int getSharpenLevel(ItemStack itemStack) {
 
         int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
-        int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
-
         return sharpnessLevel;
     }
 
-    private void enchant(ItemStack itemStack) {
+    private void enchant(ItemStack itemStack, Player player) {
+
+        int MAXIMUM_SHARPEN_LEVEL = MAXIMUM_SHARPEN;
+        Clan clan =LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if (clan != null && clan.hasEnhanceTimer())
+            MAXIMUM_SHARPEN_LEVEL = 5;
+
         int nextLevel = getSharpenLevel(itemStack) + 1;
 
         int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
         int sharpnessMaxLevel = Enchantment.DAMAGE_ALL.getMaxLevel();
 
-        if (sharpnessLevel < nextLevel && nextLevel <= MAXIMUM_SHARPEN && nextLevel <= sharpnessMaxLevel) {
+        if (sharpnessLevel < nextLevel && nextLevel <= MAXIMUM_SHARPEN_LEVEL && nextLevel <= sharpnessMaxLevel) {
             itemStack.removeEnchantment(Enchantment.DAMAGE_ALL);
             itemStack.addEnchantment(Enchantment.DAMAGE_ALL, nextLevel);
+            if(nextLevel == 5)
+            {
+                clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
+                clan.setEnhanceTimer(0);
+            }
         }
     }
 
@@ -219,6 +238,9 @@ public class SharpenCommand implements CommandExecutor {
                 break;
             case 4:
                 cost = 10;
+                break;
+            case 5:
+                cost = 32;
                 break;
         }
 
