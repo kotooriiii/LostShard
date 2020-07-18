@@ -30,6 +30,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
@@ -439,8 +441,14 @@ public final class FileManager {
 
         String name = yaml.getString("Status");
         int kills = yaml.getInt("MurderCount");
+        long atoneMillis = yaml.getLong("Atone");
+
+        Instant instant =  Instant.ofEpochMilli(atoneMillis);
+       ZonedDateTime lastAtoneDate = ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
+
         Status status = Status.matchStatus(name);
         StatusPlayer statusPlayer = new StatusPlayer(UUID.fromString(uuid), status, kills);
+        statusPlayer.setLastAtoneDate(lastAtoneDate);
         return statusPlayer;
     }
 
@@ -905,6 +913,8 @@ public final class FileManager {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statusFile);
         yaml.set("Status", statusPlayer.getStatus().getName());
         yaml.set("MurderCount", statusPlayer.getKills());
+        yaml.set("Atone", statusPlayer.getLastAtoneDate().toInstant().toEpochMilli());
+
         try {
             yaml.save(statusFile);
         } catch (IOException e) {

@@ -32,7 +32,7 @@ public class StatusPlayer {
         this.uuid = playerUUID;
         this.status = status;
         this.kills = kills;
-        this.lastAtoneDate = null;
+        this.lastAtoneDate = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("America/New_York"));
         playerStatus.put(playerUUID, this);
 
         ShardScoreboardManager.add(Bukkit.getOfflinePlayer(playerUUID), status.getName());
@@ -53,13 +53,6 @@ public class StatusPlayer {
     public ZonedDateTime getLastAtoneDate()
     {
         return lastAtoneDate;
-        lastAtoneDate.toInstant();
-
-       Instant instant =  Instant.ofEpochMilli(lastAtoneDate.toInstant().toEpochMilli());
-
-
-        new Instant()
-        ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
     }
 
     public boolean isAbleToAtone()
@@ -69,6 +62,11 @@ public class StatusPlayer {
         Instant instantDaysSubtracted = days.toInstant();
         Instant instantLastAtone = lastAtoneDate.toInstant();
         return instantLastAtone.toEpochMilli() <= instantDaysSubtracted.toEpochMilli();
+    }
+
+    public boolean hasAtonedBefore()
+    {
+        return lastAtoneDate.toInstant().equals(Instant.EPOCH);
     }
     public void setKills(int kills) {
         this.kills = kills;
