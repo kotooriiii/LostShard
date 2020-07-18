@@ -2,6 +2,7 @@ package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import org.bukkit.Bukkit;
@@ -10,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,8 +50,33 @@ public class StatusPlayer {
         return kills;
     }
 
+    public ZonedDateTime getLastAtoneDate()
+    {
+        return lastAtoneDate;
+        lastAtoneDate.toInstant();
+
+       Instant instant =  Instant.ofEpochMilli(lastAtoneDate.toInstant().toEpochMilli());
+
+
+        new Instant()
+        ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
+    }
+
+    public boolean isAbleToAtone()
+    {
+        ZonedDateTime days = ZonedDateTime.now().minusDays(7);
+
+        Instant instantDaysSubtracted = days.toInstant();
+        Instant instantLastAtone = lastAtoneDate.toInstant();
+        return instantLastAtone.toEpochMilli() <= instantDaysSubtracted.toEpochMilli();
+    }
     public void setKills(int kills) {
         this.kills = kills;
+        save();
+    }
+
+    public void setLastAtoneDate(ZonedDateTime lastAtoneDate) {
+        this.lastAtoneDate = lastAtoneDate;
         save();
     }
 
