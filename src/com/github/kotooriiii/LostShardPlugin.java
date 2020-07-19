@@ -63,6 +63,7 @@ import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
+import com.github.kotooriiii.status.shrine.ShrineManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.luckperms.api.LuckPerms;
@@ -121,6 +122,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static ClanManager clanManager;
     private static GateManager gateManager;
     private static SkillManager skillManager;
+    private static ShrineManager shrineManager;
 
     private static int gameTicks = 0;
 
@@ -233,7 +235,7 @@ public class LostShardPlugin extends JavaPlugin {
         clanManager = new ClanManager();
         gateManager = new GateManager();
         skillManager = new SkillManager();
-
+        shrineManager = new ShrineManager();
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -915,6 +917,8 @@ public class LostShardPlugin extends JavaPlugin {
     public static SkillManager getSkillManager() {
         return skillManager;
     }
+
+    public static ShrineManager getShrineManager() {return  shrineManager;}
 
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);

@@ -4,22 +4,21 @@ import com.github.kotooriiii.files.FileManager;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
 public class ShrineManager {
-    private HashSet<Shrine> map;
+    private ArrayList<Shrine> list;
 
     public ShrineManager() {
-        map = new HashSet<>();
+        list = new ArrayList<>();
     }
 
     public boolean addShrine(Shrine shrine) {
         if(isShrine(shrine.getLocation()))
             return false;
-        return map.add(shrine);
+        return list.add(shrine);
     }
 
     public void saveShrine(Shrine shrine)
@@ -28,7 +27,7 @@ public class ShrineManager {
     }
 
     public boolean removeShrine(Location testingLocation) {
-        Iterator<Shrine> iterator = map.iterator();
+        Iterator<Shrine> iterator = list.iterator();
         while (iterator.hasNext()) {
             Shrine shrineIterator = iterator.next();
 
@@ -50,7 +49,7 @@ public class ShrineManager {
     }
 
     public boolean isShrine(Location testingLocation) {
-        Iterator<Shrine> iterator = map.iterator();
+        Iterator<Shrine> iterator = list.iterator();
         while (iterator.hasNext()) {
             Shrine shrineIterator = iterator.next();
 
@@ -70,7 +69,7 @@ public class ShrineManager {
 
     public Shrine getShrine(Location testingLocation)
     {
-        Iterator<Shrine> iterator = map.iterator();
+        Iterator<Shrine> iterator = list.iterator();
 
         while (iterator.hasNext()) {
             Shrine shrineIterator = iterator.next();
@@ -90,6 +89,6 @@ public class ShrineManager {
     }
 
     public Shrine[] getShrines() {
-        return map.toArray(new Shrine[0]);
+        return list.toArray(new Shrine[0]);
     }
 }

@@ -7,11 +7,13 @@ public class AtoneShrine extends Shrine {
     final int NEARBY_DISTANCE = 5;
 
     public AtoneShrine() {
-        super();
+        super(ShrineType.ATONE);
     }
 
     public boolean isNearby(Location testingLocation)
     {
-        return getLocation().distance(testingLocation) <= 5;
+        if(this.getLocation().getWorld().equals(testingLocation.getWorld()))
+            return false;
+        return getLocation().distance(testingLocation) <= NEARBY_DISTANCE;
     }
 }
