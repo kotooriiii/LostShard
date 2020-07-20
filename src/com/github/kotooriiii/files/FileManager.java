@@ -24,6 +24,7 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import com.github.kotooriiii.status.shrine.Shrine;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
@@ -1244,6 +1245,13 @@ public final class FileManager {
             write(playerPlot);
         }
 
+    }
+
+    public static void write(Shrine shrine)
+    {
+        String fileName = shrine.getType().name() + ".yml";
+        File shrineFile = new File(shrine_folder + File.separator + fileName);
+        if(shrineFile.exists())
     }
 
     public static void removeFile(Clan clan) {

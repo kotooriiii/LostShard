@@ -3,7 +3,7 @@ package com.github.kotooriiii.status.shrine;
 
 import org.bukkit.Location;
 
-public  abstract class Shrine {
+public abstract class Shrine {
     private Location location;
     private ShrineType type;
 
