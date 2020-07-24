@@ -55,6 +55,11 @@ public class StatusPlayer {
         return lastAtoneDate;
     }
 
+    public ZonedDateTime getNextAtoneDate()
+    {
+        return lastAtoneDate.plusDays(5);
+    }
+
     public boolean isAbleToAtone()
     {
         ZonedDateTime days = ZonedDateTime.now().minusDays(7);

@@ -16,9 +16,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -83,14 +85,32 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
     }
 
     @EventHandler
+    public void onPortalTP(PlayerTeleportEvent event) {
+        if (event.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)
+            return;
+    }
+
+
+    @EventHandler
     public void onPortalUse(PlayerPortalEvent event) {
         Location location = event.getFrom();
+        location = event.getPlayer().getLocation();
         location = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(location);
-        if (location == null)
+
+        if (location == null) {
             return;
+        }
         Gate gate = LostShardPlugin.getGateManager().getGate(location);
-        if (gate == null)
+        if (gate == null) {
             return;
+        }
+
+        if (!gate.isBuilt()) {
+            event.getPlayer().sendMessage(ERROR_COLOR + "The gate was obstructed.");
+            LostShardPlugin.getGateManager().removeGate(gate);
+            event.setCancelled(true);
+            return;
+        }
 
         Location teleportingTo = gate.getTeleportTo(new GateBlock(location));
 
@@ -251,26 +271,27 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
         boolean existingGate = existingGateFrom || existingGateTo;
 
-
-        if (!LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+        if (LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+            playerSender.sendMessage(ERROR_COLOR + "You've removed your previous gate to this location.");
+            LostShardPlugin.getGateManager().deleteExistingGateIfAny(gate);
+        } else if (!LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
             playerSender.sendMessage(ERROR_COLOR + "A portal has already been set up here by another player.");
             return;
-        } else if (LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
-            playerSender.sendMessage(ERROR_COLOR + "You've removed your previous gate to this location.");
-            LostShardPlugin.getGateManager().addGate(gate, true);
-            return;
-        } else if (!gate.isBuildable()) {
+        }
+
+
+        if (!gate.isBuildable()) {
             playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
             return;
         } else if (LostShardPlugin.getGateManager().hasGateNearby(gate.getFrom()) || LostShardPlugin.getGateManager().hasGateNearby(gate.getTo())) {
             playerSender.sendMessage(ERROR_COLOR + "There's another gate too close to this one.");
             return;
-        } else if (gate.getFrom().distance(gate.getTo()) <= Gate.PORTAL_DISTANCE) {
+        } else if (gate.getFrom().getWorld().equals(gate.getTo().getWorld()) && gate.getFrom().distance(gate.getTo()) <= Gate.PORTAL_DISTANCE) {
             playerSender.sendMessage(ERROR_COLOR + "The gates must be farther than " + Gate.PORTAL_DISTANCE + " blocks away.");
             return;
         }
 
-        if (gate.isBuildable() && !existingGate) {
+        if (gate.isBuildable()) {
             LostShardPlugin.getGateManager().addGate(gate, true);
         }
     }

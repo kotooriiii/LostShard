@@ -68,7 +68,7 @@ public class HostilityMatch {
 
     public HostilityMatch(HostilityPlatform platform) {
         this.platform = platform;
-        this.maxTicks = toTicks(3);//toTicks(0, 5);
+        this.maxTicks = toTicks(3);
         this.lastClan = null;
         this.lastWinStreak = 0;
         init();
@@ -264,8 +264,6 @@ public class HostilityMatch {
                         */
 
 
-
-
 //                        for (UUID uuid : capturingClan.getAllUUIDS()) {
 //
 //                            Player player = Bukkit.getPlayer(uuid);
@@ -340,16 +338,20 @@ public class HostilityMatch {
 
     }
 
-    private void win()
-    {
+    private void win() {
 
         String buff = "";
 
-        switch (this.platform.getName().toLowerCase())
-        {
+        switch (this.platform.getName().toLowerCase()) {
             case "bunts":
                 capturingClan.setManaBuffTimer(60 * 60 * 24);
-buff = "mana";
+                buff = "mana";
+
+                for(UUID uuid : capturingClan.getAllUUIDS())
+                {
+                    Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_MANA);
+                }
+
                 new BukkitRunnable() {
 
                     int counter = capturingClan.getManaTimer();
@@ -385,6 +387,13 @@ buff = "mana";
             case "gorps":
                 capturingClan.setStaminaBuffTimer(60 * 60 * 24);
                 buff = "stamina";
+
+                for(UUID uuid : capturingClan.getAllUUIDS())
+                {
+                    Stat.wrap(uuid).setMaxStamina(Stat.HOST_MAX_STAMINA);
+                }
+
+
                 new BukkitRunnable() {
 
                     int counter = capturingClan.getStaminaTimer();
@@ -420,10 +429,9 @@ buff = "mana";
                 break;
             case "hostility":
             case "host":
-                capturingClan.setEnhanceTimer(60*60);
+                capturingClan.setEnhanceTimer(60 * 60);
                 buff = "enhance";
-                if(capturingClan.hasEnhanceTimer())
-                {
+                if (capturingClan.hasEnhanceTimer()) {
                     new BukkitRunnable() {
 
                         int counter = capturingClan.getEnhanceTimer();
@@ -432,8 +440,7 @@ buff = "mana";
                         public void run() {
 
 
-                            if(capturingClan.getEnhanceTimer() == 0 && counter > 0)
-                            {
+                            if (capturingClan.getEnhanceTimer() == 0 && counter > 0) {
                                 this.cancel();
                                 return;
                             }
@@ -462,7 +469,7 @@ buff = "mana";
                 break;
             case "havok":
             case "havoc":
-                capturingClan.setIgniteTimer(60*60);
+                capturingClan.setIgniteTimer(60 * 60);
                 buff = "ignite";
                 new BukkitRunnable() {
 
@@ -471,8 +478,7 @@ buff = "mana";
                     @Override
                     public void run() {
 
-                        if(capturingClan.getIgniteTimer() == 0 && counter > 0)
-                        {
+                        if (capturingClan.getIgniteTimer() == 0 && counter > 0) {
                             this.cancel();
                             return;
                         }
@@ -501,17 +507,16 @@ buff = "mana";
                 buff = "null";
         }
 
-        for(UUID uuid : capturingClan.getAllUUIDS())
-        {
+        for (UUID uuid : capturingClan.getAllUUIDS()) {
             Player player = Bukkit.getPlayer(uuid);
-            if(player==null)
+            if (player == null)
                 continue;
 
-            if(!player.isOnline())
+            if (!player.isOnline())
                 continue;
 
             player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
-            player.sendMessage(STANDARD_COLOR + "Your clan has gained the " + buff + "!");
+            player.sendMessage(STANDARD_COLOR + "Your clan has gained the " + buff + " buff!");
 
         }
     }

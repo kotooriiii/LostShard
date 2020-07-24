@@ -100,8 +100,8 @@ public class HostilityCreateListener implements Listener {
                     int blockPos2Y = Integer.parseInt(coordsPos2[1]);
                     int blockPos2Z = Integer.parseInt(coordsPos2[2]);
 
-                    Location loc1 = new Location(LostShardPlugin.plugin.getServer().getWorld("world"), blockPos1X, blockPos1Y, blockPos1Z);
-                    Location loc2 = new Location(LostShardPlugin.plugin.getServer().getWorld("world"), blockPos2X, blockPos2Y, blockPos2Z);
+                    Location loc1 = new Location(player.getWorld(), blockPos1X, blockPos1Y, blockPos1Z);
+                    Location loc2 = new Location(player.getWorld(), blockPos2X, blockPos2Y, blockPos2Z);
 
                     //set area
                     Zone zone = new Zone(loc1, loc2);

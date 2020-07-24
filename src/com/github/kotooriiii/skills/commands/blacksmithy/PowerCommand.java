@@ -146,7 +146,9 @@ public class PowerCommand implements CommandExecutor {
     private boolean hasMoreEnchants(ItemStack itemStack, Player player) {
 
         int MAXIMUM_POWER_FINAL = MAXIMUM_POWER;
-        if (LostShardPlugin.getClanManager().getClan(player.getUniqueId()).hasEnhanceTimer())
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+
+        if (clan != null && clan.hasEnhanceTimer())
             MAXIMUM_POWER_FINAL = 5;
 
         int powerLevel = itemStack.getEnchantmentLevel(Enchantment.ARROW_DAMAGE);

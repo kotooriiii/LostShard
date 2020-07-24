@@ -181,7 +181,8 @@ public class SharpenCommand implements CommandExecutor {
     private boolean hasMoreEnchants(ItemStack itemStack, Player player) {
 
         int MAXIMUM_SHARPEN_FINAL = MAXIMUM_SHARPEN;
-        if (LostShardPlugin.getClanManager().getClan(player.getUniqueId()).hasEnhanceTimer())
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if (clan != null && clan.hasEnhanceTimer())
             MAXIMUM_SHARPEN_FINAL = 5;
         int sharpnessLevel = itemStack.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
 

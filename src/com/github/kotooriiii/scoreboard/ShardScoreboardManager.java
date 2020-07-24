@@ -197,6 +197,7 @@ public class ShardScoreboardManager {
     }
 
     public static void updateCache(Player player) {
+        map.remove(null);
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String playerName = entry.getKey();
             String teamName = entry.getValue();

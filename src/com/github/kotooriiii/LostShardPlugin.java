@@ -38,9 +38,16 @@ import com.github.kotooriiii.npc.type.banker.BankerTrait;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
 import com.github.kotooriiii.npc.reworked.PacketListener;
 import com.github.kotooriiii.plots.*;
+import com.github.kotooriiii.plots.commands.BuildCommand;
 import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.register_system.GatheringManager;
+import com.github.kotooriiii.register_system.JoinCommand;
+import com.github.kotooriiii.register_system.LeaveCommand;
+import com.github.kotooriiii.register_system.ffa.FFA;
+import com.github.kotooriiii.register_system.ffa.FFACommand;
+import com.github.kotooriiii.register_system.ffa.FFAListener;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.SkillManager;
 import com.github.kotooriiii.skills.SkillPlayer;
@@ -63,6 +70,7 @@ import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
+import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
@@ -123,6 +131,8 @@ public class LostShardPlugin extends JavaPlugin {
     private static GateManager gateManager;
     private static SkillManager skillManager;
     private static ShrineManager shrineManager;
+    private static GatheringManager gatheringManager;
+    private final static FFACommand FFA_COMMAND = new FFACommand();
 
     private static int gameTicks = 0;
 
@@ -198,6 +208,13 @@ public class LostShardPlugin extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return false;
         }
+        if (!Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+            getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
+            getLogger().severe("*** This plugin will be disabled. ***");
+            this.setEnabled(false);
+            return false;
+        }
+
         registerTrait();
         return true;
     }
@@ -236,6 +253,7 @@ public class LostShardPlugin extends JavaPlugin {
         gateManager = new GateManager();
         skillManager = new SkillManager();
         shrineManager = new ShrineManager();
+        gatheringManager = new GatheringManager();
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -312,7 +330,33 @@ public class LostShardPlugin extends JavaPlugin {
 
         if (isResetting) {
             try {
-                FileUtils.deleteDirectory(LostShardPlugin.plugin.getDataFolder());
+                for (File file : LostShardPlugin.plugin.getDataFolder().listFiles()) {
+                    if (file.isDirectory()) {
+
+                        if (!file.getName().equals("stats")) {
+                            FileUtils.deleteDirectory(file);
+                            continue;
+                        } else {
+                            for (File statFile : file.listFiles()) {
+                                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(statFile);
+                                if (yaml.getBoolean("isGold")) {
+                                    yaml.set("Stamina", 100.0f);
+                                    yaml.set("Mana", 100.0f);
+                                    yaml.set("MaxMana", 100.0f);
+                                    yaml.set("MaxStamina", 100.0f);
+                                    yaml.set("Private", false);
+                                    yaml.set("Spawn", null);
+                                    yaml.save(statFile);
+                                    continue;
+                                }
+                                statFile.delete();
+                            }
+                        }
+                    }
+
+                    if (!file.isDirectory())
+                        file.delete();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -344,6 +388,8 @@ public class LostShardPlugin extends JavaPlugin {
         for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
             getSkillManager().saveSkillPlayer(skillPlayer);
         }
+
+        SignChangeListener.save();
     }
 
 
@@ -358,6 +404,9 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("withdraw").setExecutor(new WithdrawCommand());
         getCommand("balance").setExecutor(new BalanceCommand());
         getCommand("local").setExecutor(new LocalCommand());
+        getCommand("shout").setExecutor(new ShoutCommand());
+        getCommand("whisper").setExecutor(new WhisperCommand());
+
         getCommand("global").setExecutor(new GlobalCommand());
         getCommand("meditate").setExecutor(new MeditateCommand());
         getCommand("rest").setExecutor(new RestCommand());
@@ -428,6 +477,12 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("playtime").setExecutor(new PlaytimeCommand());
 
         getCommand("scroll").setExecutor(new ScrollCommand());
+        getCommand("atone").setExecutor(new AtoneCommand());
+        getCommand("ffa").setExecutor(FFA_COMMAND);
+        getCommand("join").setExecutor(new JoinCommand());
+        getCommand("leave").setExecutor(new LeaveCommand());
+
+        getCommand("build").setExecutor(new BuildCommand());
 
 
         //todo to use later -->
@@ -534,6 +589,11 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new MobSpawnerCancelListener(), this);
 
+        pm.registerEvents(FFA_COMMAND, this);
+        pm.registerEvents(new FFAListener(), this);
+
+        pm.registerEvents(new PlayerConnectServerEvent(), this);
+
         registerCustomEventListener();
 
         //todo to use later -->
@@ -562,9 +622,15 @@ public class LostShardPlugin extends JavaPlugin {
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
 
             if (clan.hasStaminaBuff()) {
+
+                for (UUID uuid : clan.getAllUUIDS()) {
+                    Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_STAMINA);
+                }
+
                 new BukkitRunnable() {
 
                     int counter = clan.getStaminaTimer();
+
 
                     @Override
                     public void run() {
@@ -597,6 +663,13 @@ public class LostShardPlugin extends JavaPlugin {
             }
 
             if (clan.hasManaBuff()) {
+
+
+                for (UUID uuid : clan.getAllUUIDS()) {
+                    Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_MANA);
+                }
+
+
                 new BukkitRunnable() {
 
                     int counter = clan.getManaTimer();
@@ -918,7 +991,13 @@ public class LostShardPlugin extends JavaPlugin {
         return skillManager;
     }
 
-    public static ShrineManager getShrineManager() {return  shrineManager;}
+    public static ShrineManager getShrineManager() {
+        return shrineManager;
+    }
+
+    public static GatheringManager getGatheringManager() {
+        return gatheringManager;
+    }
 
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);

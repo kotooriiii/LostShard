@@ -80,7 +80,6 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
-
     </repositories>
 
     <dependencies>
@@ -175,6 +174,19 @@
             <systemPath>${project.basedir}/libs/WorldBorder.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>holographicdisplays</groupId>
+            <artifactId>hd-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/HolographicDisplays.jar</systemPath>
+        </dependency>
 
     </dependencies>
 

@@ -111,11 +111,14 @@ public class StatusUpdateListener implements Listener {
         if (damagerStatus.equals(Status.WORTHY) && (defenderStatus.equals(Status.EXILED) || defenderStatus.equals(Status.CORRUPT)))
             return;
 
-        damagerStatusPlayer.setKills(damagerStatusPlayer.getKills() + 1);
-        if (damagerStatusPlayer.getKills() == 5) {
+        int newKills = damagerStatusPlayer.getKills() + 1;
+
+        if (newKills == 5) {
             damagerStatusPlayer.setStatus(Status.EXILED);
             playersCorrupt.remove(damagerPlayer.getUniqueId());
         }
+        damagerStatusPlayer.setKills(newKills);
+
     }
 
     public static HashMap<UUID, BukkitTask> getPlayersCorrupt() {

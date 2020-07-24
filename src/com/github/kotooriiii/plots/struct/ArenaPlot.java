@@ -51,12 +51,14 @@ public class ArenaPlot extends StaffPlot {
         Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
         String signBuilder = "";
         if (signBuildLoc != null)
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
         else
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "NONE";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "NONE";
         String bankers = "";
         for (NPC bankerNPC : BankerNPC.getAllBankerNPC()) {
             Location location = bankerNPC.getStoredLocation();
+            if(location==null)
+                continue;
             if (this.contains(location)) {
                 bankers += ChatColor.YELLOW + "Banker: " + ChatColor.WHITE + "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
             }

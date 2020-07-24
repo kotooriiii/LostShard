@@ -28,12 +28,16 @@ public class SpawnPlot extends StaffPlot {
         Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
         String signBuilder = "";
         if (signBuildLoc != null)
-            signBuilder = ChatColor.YELLOW + "\nSign Builder: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
+            signBuilder = ChatColor.YELLOW + "Sign Builder: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
         else
-            signBuilder = ChatColor.YELLOW + "\nSign Builder: " + ChatColor.WHITE + "NONE";
+            signBuilder = ChatColor.YELLOW + "Sign Builder: " + ChatColor.WHITE + "NONE";
         String bankers = "";
         for (NPC shardBanker : BankerNPC.getAllBankerNPC()) {
             Location location = shardBanker.getStoredLocation();
+
+            if(location==null)
+                continue;
+
             if (this.contains(location)) {
                 bankers += ChatColor.YELLOW + "Banker: " + ChatColor.WHITE + "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
             }

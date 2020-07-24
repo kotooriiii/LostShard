@@ -212,7 +212,8 @@ public class EnhanceCommand implements CommandExecutor {
     private boolean hasMoreEnchants(ItemStack itemStack, Player player) {
 
         int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
-        if(LostShardPlugin.getClanManager().getClan(player.getUniqueId()).hasEnhanceTimer())
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if(clan != null && clan.hasEnhanceTimer())
             MAXIMUM_ENHANCE_FINAL = 5;
 
         int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);

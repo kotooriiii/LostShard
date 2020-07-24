@@ -2,6 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.Bukkit;
@@ -34,7 +35,8 @@ public class StatCommand implements CommandExecutor {
                                     ChatColor.YELLOW + "Mana: " + ChatColor.WHITE + stat.getManaString() + "\n" +
                                     ChatColor.YELLOW + "Stamina: " + ChatColor.WHITE + stat.getStaminaString() + "\n" +
                                     ChatColor.YELLOW + "Gold: " + ChatColor.WHITE + bank.getCurrency() + "\n" +
-                                    ChatColor.YELLOW + "Murder Count: " + ChatColor.WHITE + statusPlayer.getKills()
+                                    ChatColor.YELLOW + "Murder Count: " + ChatColor.WHITE + statusPlayer.getKills() + "\n" +
+                                    ChatColor.YELLOW + "Build: " + ChatColor.WHITE + LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveIndex()
                     );
 
                 } else if (args.length >= 1) {

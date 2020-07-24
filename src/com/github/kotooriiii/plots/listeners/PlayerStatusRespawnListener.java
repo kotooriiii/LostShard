@@ -29,15 +29,25 @@ public class PlayerStatusRespawnListener implements Listener {
     {
         StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
         Stat stat = Stat.wrap(statusPlayer.getPlayerUUID());
+
         stat.setMana(stat.getMaxMana());
         stat.setStamina(stat.getMaxStamina());
-        String organization = statusPlayer.getStatus().getOrganization();
-        SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
-        if(plot == null || plot.getSpawn() == null) {
-            Bukkit.broadcastMessage(ERROR_COLOR + "The spawn is not created for " + organization + ".") ;
-            return null;
+
+        Location possibleSpawn = stat.getSpawn();
+        if(possibleSpawn!=null)
+        {
+            return possibleSpawn;
+
+        } else {
+            String organization = statusPlayer.getStatus().getOrganization();
+            SpawnPlot plot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot(organization);
+            if(plot == null || plot.getSpawn() == null) {
+                Bukkit.broadcastMessage(ERROR_COLOR + "The spawn is not created for " + organization + ".") ;
+                return null;
+            }
+
+            return plot.getSpawn();
         }
 
-        return plot.getSpawn();
     }
 }

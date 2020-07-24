@@ -15,10 +15,6 @@ public class BanManager {
         map = new HashMap<>();
     }
 
-    public BanManager(HashMap<UUID, BannedPlayer> bannedPlayers) {
-        map = bannedPlayers;
-    }
-
     public void ban(BannedPlayer bannedPlayer, boolean isKick, boolean saveToFile) {
 
         if (isBanned(bannedPlayer.getPlayerUUID()))
@@ -26,7 +22,7 @@ public class BanManager {
 
         Player player = Bukkit.getPlayer(bannedPlayer.getPlayerUUID());
         if (isKick)
-            if (player == null || !player.isOnline())
+            if (player != null && player.isOnline())
                 player.kickPlayer(bannedPlayer.getBannedMessage());
 
         map.put(bannedPlayer.getPlayerUUID(), bannedPlayer);
@@ -35,7 +31,7 @@ public class BanManager {
     }
 
     public void unban(BannedPlayer bannedPlayer) {
-        map.remove(bannedPlayer);
+        map.remove(bannedPlayer.getPlayerUUID());
         FileManager.removeFile(bannedPlayer);
     }
 

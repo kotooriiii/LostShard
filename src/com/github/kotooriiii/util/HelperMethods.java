@@ -394,6 +394,7 @@ public final class HelperMethods {
         return toZDT(props[0], props[1], props[2], props[3], props[4], props[5], props[6]);
     }
 
+
     public static String getTimeLeft(ZonedDateTime zonedDateTime) {
 
         ZonedDateTime now = ZonedDateTime.now();
@@ -402,7 +403,7 @@ public final class HelperMethods {
         String[] splitTime = getTimeLeft(left).split(", ");
         if (splitTime.length == 1)
             return splitTime[0];
-        return splitTime[0] + " and " + splitTime[1];
+        return splitTime[0] + " " + splitTime[1];
 
     }
 

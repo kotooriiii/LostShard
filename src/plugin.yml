@@ -4,12 +4,17 @@ author: kotooriiii
 depend: [LuckPerms, PacketListenerApi, Citizens]
 softdepend:
   - WorldBorder
+  - HolographicDisplays
 loadbefore:
   - BuycraftX
-
 version: 1.0
 api-version: 1.15
 commands:
+  build:
+  ffa:
+  join:
+  leave:
+  atone:
   scroll:
     aliases:
       - scrolls
@@ -20,14 +25,12 @@ commands:
       - notif
   private:
   public:
-
   doc:
   wiki:
   youtube:
     aliases:
       - yt
   book:
-
   adminchat:
   clearchat:
   clearchatall:
@@ -120,24 +123,17 @@ commands:
   sharpen:
   repair:
   ignite:
-
   taming:
   pets:
-
   brawling:
-
   survivalism:
   camp:
   track:
-
-
-
   skills:
     description:
     usage:
     aliases:
       - skill
-
   #plot stuff
   plot:
     aliases:
@@ -145,16 +141,18 @@ commands:
   spawn:
 
   #chat, also clan is chat
+  local:
   global:
     description:
     usage:
     aliases:
       - g
-  local:
-    description:
-    usage:
+  shout:
     aliases:
-      - l
+      - s
+  whisper:
+    aliases:
+      - w
   msg:
     description:
     usage:

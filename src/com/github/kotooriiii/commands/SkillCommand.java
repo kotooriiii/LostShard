@@ -38,12 +38,11 @@ public class SkillCommand implements CommandExecutor {
 
                     SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID);
                     float skillNum = 0;
-                    float maxSkillNum = 0;
+                    float maxSkillNum = skillPlayer.getActiveBuild().getMaxPoints();
 
                     for(Skill skill : skillPlayer.getActiveBuild().getSkills())
                     {
                         skillNum += skill.getLevel();
-                        maxSkillNum += 100;
                     }
 
 

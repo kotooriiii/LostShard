@@ -10,16 +10,15 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-public class HostilityPlot extends StaffPlot {
-
-    public HostilityPlot(World world, Zone zone, String name) {
+public class BracketPlot extends StaffPlot {
+    public BracketPlot(World world, Zone zone, String name) {
         super(world, zone, name);
-        this.plotType = PlotType.STAFF_HOSTILITY;
+        this.plotType = PlotType.STAFF_BRACKET;
     }
 
     @Override
     public String info(Player perspectivePlayer) {
-        String header = ChatColor.GOLD + "-" +getName() + "'s Plot Info-";
+        String header = ChatColor.GOLD + "-" + getName() + "'s Plot Info-";
         String owner = ChatColor.YELLOW + "Owner: " + ChatColor.WHITE + "Nickolov";
         String size = ChatColor.YELLOW + "Size: " + ChatColor.WHITE + 10;
         String center = "The spawn has not been created yet.";
@@ -28,9 +27,9 @@ public class HostilityPlot extends StaffPlot {
         Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
         String signBuilder = "";
         if (signBuildLoc != null)
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
         else
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "NONE";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "NONE";
         String bankers = "";
         for (NPC banker : BankerNPC.getAllBankerNPC()) {
             Location location = banker.getStoredLocation();
@@ -49,4 +48,5 @@ public class HostilityPlot extends StaffPlot {
         result += "\n" + bankers;
         return result;
     }
+
 }

@@ -6,18 +6,17 @@ import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
+import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.plots.struct.ArenaPlot;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.plots.struct.StaffPlot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
 import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -72,7 +71,7 @@ public class PlotCommand implements CommandExecutor {
                             else if (plotSenderPlayer.hasReachedMaxPlots())
                                 playerSender.sendMessage(ERROR_COLOR + "You've reached the max amount of plots you can own.");
                             else if (plotManager.hasNearbyPlots(playerSender))
-                                playerSender.sendMessage(ERROR_COLOR + "There are other plot(s) nearby. You must be a minimum of " + Plot.MINIMUM_PLOT_CREATE_RANGE + " block(s) away to create your own plot.");
+                                playerSender.sendMessage(ERROR_COLOR + "There are other plot(s) nearby. \nYou must be a minimum of " + Plot.MINIMUM_PLOT_CREATE_RANGE + " block(s) away from player plots and " + Plot.MINIMUM_PLOT_STAFF_CREATE_RANGE + " block(s) away from staff plots.");
                             else if (supply.length() > 16)
                                 playerSender.sendMessage(ERROR_COLOR + "The name can not exceed 16 characters.");
                             else if (plotManager.isStaffPlotName(supply))
@@ -298,7 +297,7 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             if (!expandPlot.isExpandable()) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't expand onto other plots.");
+                                playerSender.sendMessage(ERROR_COLOR + "You can't expand onto other plots or be too close to staff plots.");
                                 return false;
                             }
 
@@ -438,15 +437,14 @@ public class PlotCommand implements CommandExecutor {
                                     return false;
                                 }
 
-                                if(upgradePlot.getRadius() < 50)
-                                {       playerSender.sendMessage(ERROR_COLOR + "Your plot must be at least size 50 to upgrade to a town.");
+                                if (upgradePlot.getRadius() < 50) {
+                                    playerSender.sendMessage(ERROR_COLOR + "Your plot must be at least size 50 to upgrade to a town.");
                                     return false;
 
                                 }
 
 
-                                if(upgradePlot.getBalance() < 1000)
-                                {
+                                if (upgradePlot.getBalance() < 1000) {
                                     playerSender.sendMessage(ERROR_COLOR + "You need 1,000 gold to upgrade your plot to a Town.”.");
                                     return false;
                                 }
@@ -461,9 +459,8 @@ public class PlotCommand implements CommandExecutor {
                                     return false;
                                 }
 
-                                if(upgradePlot.getBalance() < 200)
-                                {
-                                    playerSender.sendMessage(ERROR_COLOR + "You need 200 gold to upgrade your plot to a Dungeon.”");
+                                if (upgradePlot.getBalance() < 200) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You need 200 gold to upgrade your plot to a Dungeon.");
                                     return false;
                                 }
                                 upgradePlot.withdraw(200);
@@ -537,8 +534,8 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_SPAWN)) {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot with the name(s): Order or Chaos. (For the banmatch/moneymatch spawns refer to: setspawnA and setspawnB)");
+                                    if (!standingOnPlot.getType().isStaff()) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot. (For the banmatch/moneymatch spawns refer to: setspawnA and setspawnB)");
                                         return false;
                                     }
 
@@ -688,6 +685,32 @@ public class PlotCommand implements CommandExecutor {
     private void disbandPlot(Player playerSender) {
         Bank bank = LostShardPlugin.getBankManager().wrap(playerSender.getUniqueId());
         PlayerPlot plot = (PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(playerSender.getLocation());
+
+        for (Stat stat : Stat.getStatMap().values()) {
+            Location loc = stat.getSpawn();
+            if (loc == null)
+                continue;
+
+            if (plot.contains(loc)) {
+
+                stat.setSpawn(null);
+                Player player = Bukkit.getPlayer(stat.getPlayerUUID());
+                if (player == null)
+                    continue;
+                player.sendMessage(ERROR_COLOR + "Your spawnpoint has been reset because your bed has been broken.");
+            }
+        }
+
+        for(Location loc : SignChangeListener.getBuildChangeLocations())
+        {
+            if(loc==null)
+                continue;
+
+            if(plot.contains(loc))
+            {
+                SignChangeListener.remove(loc);
+            }
+        }
 
         double currentCurrency = bank.getCurrency();
 

@@ -1,11 +1,13 @@
 package com.github.kotooriiii.match.banmatch;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.match.Match;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -39,7 +41,15 @@ public class Banmatch extends Match {
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
         if (offlinePlayer.isOnline()) {
-            offlinePlayer.getPlayer().kickPlayer(BAN_MESSAGE);
+
+            new BukkitRunnable()
+            {
+                @Override
+                public void run() {
+                    offlinePlayer.getPlayer().kickPlayer(BAN_MESSAGE);
+
+                }
+            }.runTaskLater(LostShardPlugin.plugin, 20*5);
         }
         BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), BAN_MESSAGE);
         FileManager.write(bannedPlayer);

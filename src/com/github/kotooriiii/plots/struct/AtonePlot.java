@@ -4,17 +4,18 @@ import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.listeners.SignChangeListener;
+import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-public class HostilityPlot extends StaffPlot {
+public class AtonePlot extends StaffPlot {
 
-    public HostilityPlot(World world, Zone zone, String name) {
+    public AtonePlot(World world, Zone zone, String name) {
         super(world, zone, name);
-        this.plotType = PlotType.STAFF_HOSTILITY;
+        this.plotType = PlotType.STAFF_ATONE;
     }
 
     @Override
@@ -28,9 +29,9 @@ public class HostilityPlot extends StaffPlot {
         Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
         String signBuilder = "";
         if (signBuildLoc != null)
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "(" + signBuildLoc.getBlockX() + ", " + signBuildLoc.getBlockY() + ", " + signBuildLoc.getBlockZ() + ")";
         else
-            signBuilder = ChatColor.YELLOW + "\nBuild Changer: " + ChatColor.WHITE + "NONE";
+            signBuilder = ChatColor.YELLOW + "Build Changer: " + ChatColor.WHITE + "NONE";
         String bankers = "";
         for (NPC banker : BankerNPC.getAllBankerNPC()) {
             Location location = banker.getStoredLocation();

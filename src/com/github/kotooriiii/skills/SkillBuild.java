@@ -77,6 +77,11 @@ public class SkillBuild {
         return counter >= this.MAX_POINTS;
     }
 
+    public int getMaxPoints()
+    {
+        return MAX_POINTS;
+    }
+
     public Skill[] getSkills() {
         Skill[] skillsClone = new Skill[this.skills.length];
         for(int i = 0; i < skills.length; i++)

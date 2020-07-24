@@ -162,10 +162,10 @@ public class PlayerPlot extends Plot {
 
             if(plot.getType().isStaff())
             {
-                minX += 100;
-                maxX += 100;
-                minZ += 100;
-                maxZ += 100;
+                minX -= MINIMUM_PLOT_STAFF_CREATE_RANGE;
+                maxX += MINIMUM_PLOT_STAFF_CREATE_RANGE;
+                minZ -= MINIMUM_PLOT_STAFF_CREATE_RANGE;
+                maxZ += MINIMUM_PLOT_STAFF_CREATE_RANGE;
             }
             Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
 
@@ -464,7 +464,7 @@ public class PlayerPlot extends Plot {
         }
 
 
-        return header + relationshipToPlot + ownerString + size + statuses + privacy + location + signBuilder + jointOwnerConcat + friendsConcat;
+        return header + relationshipToPlot + ownerString + size  + privacy + location +  statuses + signBuilder + jointOwnerConcat + friendsConcat;
     }
 
     private String daysLeft() {

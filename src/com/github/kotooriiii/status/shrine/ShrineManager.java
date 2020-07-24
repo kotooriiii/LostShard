@@ -4,9 +4,7 @@ import com.github.kotooriiii.files.FileManager;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 public class ShrineManager {
     private ArrayList<Shrine> list;
@@ -15,14 +13,18 @@ public class ShrineManager {
         list = new ArrayList<>();
     }
 
-    public boolean addShrine(Shrine shrine) {
-        if(isShrine(shrine.getLocation()))
+    public boolean addShrine(Shrine shrine, boolean saveToFile) {
+        if (isShrine(shrine.getLocation()))
             return false;
-        return list.add(shrine);
+
+        boolean hasSaved = list.add(shrine);
+
+        if (saveToFile && hasSaved)
+            saveShrine(shrine);
+        return hasSaved && hasSaved;
     }
 
-    public void saveShrine(Shrine shrine)
-    {
+    public void saveShrine(Shrine shrine) {
         FileManager.write(shrine);
     }
 
@@ -48,6 +50,11 @@ public class ShrineManager {
 
     }
 
+    public boolean removeShrine(Shrine shrine) {
+        return list.remove(shrine);
+
+    }
+
     public boolean isShrine(Location testingLocation) {
         Iterator<Shrine> iterator = list.iterator();
         while (iterator.hasNext()) {
@@ -67,8 +74,7 @@ public class ShrineManager {
         return false;
     }
 
-    public Shrine getShrine(Location testingLocation)
-    {
+    public Shrine getShrine(Location testingLocation) {
         Iterator<Shrine> iterator = list.iterator();
 
         while (iterator.hasNext()) {
@@ -88,7 +94,26 @@ public class ShrineManager {
         return null;
     }
 
+    public Shrine getShrine(UUID uuid) {
+        Iterator<Shrine> iterator = list.iterator();
+
+        while (iterator.hasNext()) {
+            Shrine shrineIterator = iterator.next();
+            if(shrineIterator.getUUID().equals(uuid))
+                return shrineIterator;
+        }
+        return null;
+    }
+
     public Shrine[] getShrines() {
         return list.toArray(new Shrine[0]);
     }
+
+    public TreeMap<String, Shrine> getMap() {
+        TreeMap<String, Shrine> map = new TreeMap<>();
+        for (Shrine shrine : getShrines())
+            map.put(shrine.getType().name(), shrine);
+        return map;
+    }
+
 }

@@ -355,14 +355,14 @@ public abstract class Spell {
             return false;
 
         // Run the wand action
+        localBroadcast(player, this.getLatin());
+
         if (!executeSpell(player))
             return false;
 
         Stat stat = Stat.wrap(player.getUniqueId());
         stat.setMana(stat.getMana() - this.getManaCost());
         removeIngredients(player);
-
-        localBroadcast(player, this.getLatin());
         updateCooldown(player);
         return true;
     }

@@ -11,6 +11,7 @@ import java.util.*;
 
 public abstract class Plot implements Serializable {
 
+    public static final int MINIMUM_PLOT_STAFF_CREATE_RANGE = 100;
     private static final long serialVersionUID = 1L;
     public static final int MINIMUM_PLOT_CREATE_RANGE = 10;
 
@@ -89,7 +90,7 @@ public abstract class Plot implements Serializable {
 
         int distance = MINIMUM_PLOT_CREATE_RANGE;
         if(plotType.isStaff())
-            distance += 50;
+            distance = MINIMUM_PLOT_STAFF_CREATE_RANGE;
 
 
         int minX = getZone().getX1() - distance;

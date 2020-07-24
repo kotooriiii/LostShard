@@ -2,10 +2,7 @@ package com.github.kotooriiii.plots.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.plots.struct.ArenaPlot;
-import com.github.kotooriiii.plots.struct.HostilityPlot;
-import com.github.kotooriiii.plots.struct.Plot;
-import com.github.kotooriiii.plots.struct.SpawnPlot;
+import com.github.kotooriiii.plots.struct.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -157,6 +154,18 @@ public class PlotStaffCreateListener implements Listener {
                     switch (name.toLowerCase()) {
                         case "arena":
                             plot = new ArenaPlot(player.getWorld(), zoneFinish, name);
+                            break;
+                        case "ffa":
+                            plot = new FFAPlot(player.getWorld(), zoneFinish, name);
+                            break;
+                        case "bracket":
+                        case "brackets":
+                            plot = new BracketPlot(player.getWorld(), zoneFinish, name);
+                            break;
+                        case "atone":
+                        case "shrine of atonement":
+                        case "shrine":
+                            plot = new AtonePlot(player.getWorld(), zoneFinish, name);
                             break;
                         case "order":
                         case "chaos":

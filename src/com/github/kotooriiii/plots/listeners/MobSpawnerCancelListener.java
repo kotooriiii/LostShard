@@ -23,7 +23,7 @@ public class MobSpawnerCancelListener implements Listener {
         if(plot instanceof PlayerPlot)
         {
             PlayerPlot playerPlot = (PlayerPlot) plot;
-            if(!playerPlot.isTown()) {
+            if(!playerPlot.isDungeon()) {
                 event.setCancelled(true);
                 return;
             }

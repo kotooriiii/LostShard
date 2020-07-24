@@ -1,7 +1,9 @@
 package com.github.kotooriiii.sorcery;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.sorcery.spells.type.PermanentGateTravelSpell;
+import com.github.kotooriiii.status.Staff;
 import org.bukkit.Location;
 import sun.awt.image.ImageWatched;
 
@@ -27,10 +29,20 @@ public class GateManager {
 
         LinkedList<Gate> gateLinkedList = playerGateHashMap.get(uuid);
 
-        //already in place
-        deleteExistingGateIfAny(gate);
+        ArrayList<Gate> removal = new ArrayList<>();
+        for(Gate igate : gateLinkedList)
+        {
+            if(!igate.isBuilt()) {
+                removal.add(igate);
+            }
+        }
 
-        if (gateLinkedList.size() == maxGate) {
+        for(Gate igate : removal)
+        {
+            removeGate(igate);
+        }
+
+        if (gateLinkedList.size() == maxGate && !Staff.isStaff(gate.getSource())) {
             Gate removedGate = gateLinkedList.peek(); //does not remove, only peeks
             removeGate(removedGate);
         }
@@ -104,12 +116,13 @@ public class GateManager {
 
     public boolean hasGateNearby(Location location) {
         final int blocksRange = Gate.PORTAL_DISTANCE;
-        for (int i = 0; i < blocksRange * 2; i++) {
-            for (int j = 0; j < blocksRange * 2; j++) {
-                for (int k = 0; k < blocksRange * 2; k++) {
-                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() - blocksRange + i, location.getBlockY() - blocksRange + j, location.getBlockZ() - blocksRange + k);
-                    if (isGate(tempLocation))
+        for (int i = 0; i < blocksRange * 2 + 1; i++) {
+            for (int j = 0; j < blocksRange * 2 + 2; j++) {
+                for (int k = 0; k < blocksRange * 2 + 1; k++) {
+                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() + 0.5 - blocksRange + i, location.getBlockY() + 0.5 - blocksRange + j, location.getBlockZ() + 0.5 - blocksRange + k);
+                    if (isGate(tempLocation)) {
                         return true;
+                    }
                 }
             }
         }
@@ -118,32 +131,63 @@ public class GateManager {
 
     public Gate getGateNearby(Location location) {
         final int blocksRange = Gate.PORTAL_DISTANCE;
-        for (int i = 0; i < blocksRange * 2; i++) {
-            for (int j = 0; j < blocksRange * 2; j++) {
-                for (int k = 0; k < blocksRange * 2; k++) {
-                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() - blocksRange + i, location.getBlockY() - blocksRange + j, location.getBlockZ() - blocksRange + k);
+
+        Location nearbyLocation = null;
+        double d = Double.MAX_VALUE;
+
+        for (int i = 0; i < blocksRange * 2 + 1; i++) {
+            for (int j = 0; j < blocksRange * 2 + 2; j++) {
+                for (int k = 0; k < blocksRange * 2 + 1; k++) {
+                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() + 0.5 - blocksRange + i, location.getBlockY() + 0.5 - blocksRange + j, location.getBlockZ() + 0.5 - blocksRange + k);
                     Gate gate = getGate(tempLocation);
-                    if (gate != null)
-                        return gate;
+
+                    if (gate != null) {
+
+
+                        if (nearbyLocation == null) {
+                            nearbyLocation = tempLocation;
+                            d = nearbyLocation.distance(location);
+                        } else {
+                            if (tempLocation.distance(location) < d) {
+                                nearbyLocation = tempLocation;
+                                d = tempLocation.distance(location);
+                            }
+                        }
+                    }
                 }
             }
         }
-        return null;
+        return getGate(nearbyLocation);
     }
 
     public Location getGateNearbyUpdatedLocation(Location location) {
+
+        Location nearbyLocation = null;
+        double d = Double.MAX_VALUE;
+
         final int blocksRange = Gate.PORTAL_DISTANCE;
-        for (int i = 0; i < blocksRange * 2; i++) {
-            for (int j = 0; j < blocksRange * 2; j++) {
-                for (int k = 0; k < blocksRange * 2; k++) {
-                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() - blocksRange + i, location.getBlockY() - blocksRange + j, location.getBlockZ() - blocksRange + k);
+        for (int i = 0; i < blocksRange * 2 + 1; i++) {
+            for (int j = 0; j < blocksRange * 2 + 2; j++) {
+                for (int k = 0; k < blocksRange * 2 + 1; k++) {
+                    Location tempLocation = new Location(location.getWorld(), location.getBlockX() + 0.5 - blocksRange + i, location.getBlockY() + 0.5 - blocksRange + j, location.getBlockZ() + 0.5 - blocksRange + k);
                     Gate gate = getGate(tempLocation);
-                    if (gate != null)
-                        return tempLocation;
+
+                    if (gate != null) {
+
+                        if (nearbyLocation == null) {
+                            nearbyLocation = tempLocation;
+                            d = nearbyLocation.distance(location);
+                        } else {
+                            if (tempLocation.distance(location) < d) {
+                                nearbyLocation = tempLocation;
+                                d = tempLocation.distance(location);
+                            }
+                        }
+                    }
                 }
             }
         }
-        return null;
+        return nearbyLocation;
     }
 
 

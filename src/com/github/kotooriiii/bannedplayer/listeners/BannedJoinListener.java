@@ -37,7 +37,7 @@ public class BannedJoinListener  implements Listener {
                 } else {
                     if(ZonedDateTime.now().compareTo(unbanZDT) >= 0)
                     {
-                        FileManager.removeFile(bannedPlayer);
+                        LostShardPlugin.getBanManager().unban(bannedPlayer);
                         event.allow();
                         return;
                     }
@@ -47,6 +47,7 @@ public class BannedJoinListener  implements Listener {
 
 
                 event.disallow(PlayerLoginEvent.Result.KICK_BANNED, banMessage + "\n\n" + unbanDate);
+                break;
             }
         }
     }

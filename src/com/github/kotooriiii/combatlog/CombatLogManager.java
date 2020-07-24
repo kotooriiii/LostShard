@@ -104,7 +104,7 @@ public class CombatLogManager {
     }
 
     public boolean isTagged(UUID playerUUID) {
-        return combatLoggedPlayerTask.containsKey(playerUUID);
+        return combatLoggedPlayerTask.containsKey(playerUUID) && combatTaggedPlayersInvolved.containsKey(playerUUID);
     }
 
     public CombatTaggedPlayer wrap(UUID playerUUID) {

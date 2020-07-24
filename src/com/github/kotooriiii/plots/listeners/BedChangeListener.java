@@ -128,6 +128,7 @@ public class BedChangeListener implements Listener {
     }
 
     private void saveSpawn(Player player, Location location) {
+        location = getHeadOfBed(location.getBlock()).getLocation();
         location = transform(location);
         Stat stat = Stat.wrap(player.getUniqueId());
         stat.setSpawn(location);
@@ -141,6 +142,7 @@ public class BedChangeListener implements Listener {
                 continue;
 
             if (loc.equals(location)) {
+
                 stat.setSpawn(null);
                 Player player = Bukkit.getPlayer(stat.getPlayerUUID());
                 if (player == null)

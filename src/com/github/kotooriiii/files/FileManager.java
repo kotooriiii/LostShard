@@ -12,6 +12,7 @@ import com.github.kotooriiii.muted.MutedPlayer;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
+import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
@@ -25,7 +26,9 @@ import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.status.shrine.Shrine;
+import com.github.kotooriiii.status.shrine.ShrineType;
 import org.bukkit.*;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -59,6 +62,9 @@ public final class FileManager {
     private static File ranks_folder = new File(plugin_folder + File.separator + "ranks");
     private static File discord_folder = new File(plugin_folder + File.separator + "discord");
     private static File links_folder = new File(discord_folder + File.separator + "links");
+    private static File shrines_folder = new File(plugin_folder + File.separator + "shrines");
+    private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
+
 
     private static File config = new File(plugin_folder + File.separator + "config.yml");
 
@@ -96,6 +102,8 @@ public final class FileManager {
         ranks_folder.mkdirs();
         discord_folder.mkdirs();
         links_folder.mkdirs();
+        shrines_folder.mkdirs();
+        buildchanger_folder.mkdirs();
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -125,6 +133,15 @@ public final class FileManager {
         }
 
         //DONE loading all clans to arraylist! We should now map players!!
+
+        HashSet<Location> locations = new HashSet<>();
+        for (File file : buildchanger_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+            locations = readBuildChangers(file);
+            break;
+        }
+        SignChangeListener.setBuildChangers(locations);
 
 
         for (File file : hostility_platform_folder.listFiles()) {
@@ -207,7 +224,7 @@ public final class FileManager {
         readPlots();
 
         for (File file : skills_folder.listFiles()) {
-            if (!file.getName().endsWith(".obj"))
+            if (!file.getName().endsWith(".yml"))
                 continue;
 
             SkillPlayer skillPlayer = readSkill(file);
@@ -255,6 +272,14 @@ public final class FileManager {
             linkPlayer.addToMap();
         }
 
+        for (File file : shrines_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
+                continue;
+
+            readShrine(file);
+        }
+
+
         for (File file : gates_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
                 continue;
@@ -274,7 +299,8 @@ public final class FileManager {
             }
             bannedPlayers.put(bannedPlayer.getPlayerUUID(), bannedPlayer);
         }
-        LostShardPlugin.getBanManager().setBannedPlayers(bannedPlayers);
+        LostShardPlugin.getBanManager().
+                setBannedPlayers(bannedPlayers);
     }
 
 
@@ -444,8 +470,8 @@ public final class FileManager {
         int kills = yaml.getInt("MurderCount");
         long atoneMillis = yaml.getLong("Atone");
 
-        Instant instant =  Instant.ofEpochMilli(atoneMillis);
-       ZonedDateTime lastAtoneDate = ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
+        Instant instant = Instant.ofEpochMilli(atoneMillis);
+        ZonedDateTime lastAtoneDate = ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
 
         Status status = Status.matchStatus(name);
         StatusPlayer statusPlayer = new StatusPlayer(UUID.fromString(uuid), status, kills);
@@ -673,6 +699,25 @@ public final class FileManager {
                 if (spawn != null)
                     spawnPlot.setSpawn(spawn);
                 return spawnPlot;
+
+            case STAFF_ATONE:
+                AtonePlot atonePlot = new AtonePlot(Bukkit.getWorld(worldUID), zone, plotName);
+                atonePlot.setID(plotID);
+                if (spawn != null)
+                    atonePlot.setSpawn(spawn);
+                return atonePlot;
+            case STAFF_FFA:
+                FFAPlot ffaPlot = new FFAPlot(Bukkit.getWorld(worldUID), zone, plotName);
+                ffaPlot.setID(plotID);
+                if (spawn != null)
+                    ffaPlot.setSpawn(spawn);
+                return ffaPlot;
+            case STAFF_BRACKET:
+                BracketPlot bracketPlot = new BracketPlot(Bukkit.getWorld(worldUID), zone, plotName);
+                bracketPlot.setID(plotID);
+                if (spawn != null)
+                    bracketPlot.setSpawn(spawn);
+                return bracketPlot;
         }
         return null;
     }
@@ -694,12 +739,13 @@ public final class FileManager {
 
             SkillBuild skillBuild = new SkillBuild(skillPlayer);
             Skill[] skills = new Skill[SkillType.values().length];
+            int skillIndex = 0;
             for (SkillType type : SkillType.values()) {
-                float level = yaml.getFloatList(i + "." + type.name() + ".Level").get(0);
-                float xp = yaml.getFloatList(i + "." + type.name() + ".XP").get(0);
+                float level = (float) yaml.getDouble(i + "." + type.name() + ".Level");
+                float xp = (float) yaml.getDouble(i + "." + type.name() + ".XP");
                 Skill skill = new Skill(skillBuild, type);
                 skill.setLevel(level, xp);
-                skills[i] = skill;
+                skills[skillIndex++] = skill;
             }
             skillBuild.setSkills(skills);
             list.add(skillBuild);
@@ -710,6 +756,23 @@ public final class FileManager {
         skillPlayer.setActiveBuild(buildIndex);
         return skillPlayer;
 
+    }
+
+    public static HashSet<Location> readBuildChangers(File file)
+    {
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        HashSet<Location> locations = new HashSet<>();
+
+        ConfigurationSection section = yaml.getConfigurationSection("locations");
+        if(section==null)
+            return locations;
+
+       for(String path : section.getKeys(false)) {
+           Location location = yaml.getLocation("locations." + path);
+           locations.add(location);
+       }
+       return locations;
     }
 
 
@@ -799,6 +862,23 @@ public final class FileManager {
 
 
         LostShardPlugin.getGateManager().setGatesOf(playerUUID, gateLinkedList);
+    }
+
+    public static void readShrine(File file) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        String typeName = file.getName().substring(0, file.getName().indexOf('.'));
+        ShrineType shrineType = ShrineType.valueOf(typeName);
+
+        Set<String> paths = yaml.getConfigurationSection("shrines").getKeys(false);
+
+
+        for (String path : paths) {
+            Shrine shrine = Shrine.of(shrineType);
+            shrine.setLocation(yaml.getLocation("shrines." + path));
+            shrine.setUUID(UUID.fromString(path));
+            LostShardPlugin.getShrineManager().addShrine(shrine, false);
+        }
     }
 
 
@@ -993,6 +1073,32 @@ public final class FileManager {
         }
     }
 
+    public static void write(HashSet<Location> buildChangersLocation) {
+
+        String fileName = buildchanger_folder.getName() + ".yml";
+        File locations = new File(buildchanger_folder + File.separator + fileName);
+
+        try {
+            if (!locations.exists())
+                locations.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(locations);
+        Iterator<Location> locationIterator = buildChangersLocation.iterator();
+        for (int i = 0; locationIterator.hasNext(); i++) {
+            yaml.set("locations." + i, locationIterator.next());
+        }
+
+        try {
+            yaml.save(locations);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void write(Plot plot) {
         if (!plot.getType().isStaff()) {
@@ -1138,10 +1244,12 @@ public final class FileManager {
                 Skill[] skills = skillBuild.getSkills();
                 for (int j = 0; j < skills.length; j++) {
                     Skill skill = skills[j];
-                    yaml.set(i + "." + skill.getType().name() + ".Level", skill.getLevel());
-                    yaml.set(i + "." + skill.getType().name() + ".XP", skill.getXP());
+                    yaml.set(i + "." + skill.getType().name() + ".Level", (double) skill.getLevel());
+                    yaml.set(i + "." + skill.getType().name() + ".XP", (double) skill.getXP());
                 }
             }
+
+            yaml.save(file);
 
 
         } catch (FileNotFoundException e) {
@@ -1247,11 +1355,40 @@ public final class FileManager {
 
     }
 
-    public static void write(Shrine shrine)
-    {
+    public static void write(Shrine shrine) {
         String fileName = shrine.getType().name() + ".yml";
-        File shrineFile = new File(shrine_folder + File.separator + fileName);
-        if(shrineFile.exists())
+        File shrineFile = new File(shrines_folder + File.separator + fileName);
+        if (!shrineFile.exists()) {
+            try {
+                shrineFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shrineFile);
+        yaml.set("shrines." + shrine.getUUID().toString(), shrine.getLocation());
+
+        try {
+            yaml.save(shrineFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void removeFile(Shrine shrine) {
+        String fileName = shrine.getType().name() + ".yml";
+        File shrineFile = new File(shrines_folder + File.separator + fileName);
+        if (!shrineFile.exists())
+            return;
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(shrineFile);
+        yaml.set("shrines." + shrine.getUUID().toString(), null);
+        try {
+            yaml.save(shrineFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void removeFile(Clan clan) {

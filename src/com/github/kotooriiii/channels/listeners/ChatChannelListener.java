@@ -126,19 +126,51 @@ public class ChatChannelListener implements Listener {
         }
 
 
-        String[] properties = new String[]{prefix, clanTag, title, name};
+        String[] properties;
+
+        switch (LostShardPlugin.getChannelManager().getChannel(player)) {
+
+            case GLOBAL:
+            case CLAN:
+                properties = new String[]{prefix, clanTag, title, name};
+                break;
+            case SHOUT:
+                properties = new String[]{name, ChatColor.WHITE + "shouts"};
+                break;
+            case WHISPER:
+                properties = new String[]{name, ChatColor.WHITE + "whispers"};
+                break;
+            default:
+                properties = new String[]{"nullChannel"};
+                break;
+
+        }
+
+
         String builder = HelperMethods.stringBuilder(properties, 0, " ");
 
 
         ArrayList<Player> recipients = getRecipients(player);
         if (recipients == null)
             return;
+
+
+
         for (Player recipient : recipients) {
             if (pingedPlayers.contains(recipient))
                 if (NotificationCommand.isPingable(recipient))
                     recipient.playSound(recipient.getLocation(), ChatChannelListener.PING_SOUND, 10, PING_PITCH);
 
             recipient.sendMessage(builder + messageColor + ": " + message);
+        }
+
+        if (recipients.size() == 1) {
+            switch (LostShardPlugin.getChannelManager().getChannel(player)) {
+                case SHOUT:
+                case WHISPER:
+                    player.sendMessage(ChatColor.GRAY + "No one hears you...");
+                    break;
+            }
         }
     }
 
@@ -237,12 +269,33 @@ public class ChatChannelListener implements Listener {
                     }
                 }
                 break;
-            case LOCAL:
+
+//            case LOCAL:
+//                for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+//                    if (!onlinePlayers.getWorld().equals(chattingPlayer.getWorld()))
+//                        continue;
+//                    double distance = chattingPlayer.getLocation().distance(onlinePlayers.getLocation());
+//                    if (distance <= 100) {
+//                        players.add(onlinePlayers);
+//                    }
+//                }
+//                break;
+            case WHISPER:
                 for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
                     if (!onlinePlayers.getWorld().equals(chattingPlayer.getWorld()))
                         continue;
                     double distance = chattingPlayer.getLocation().distance(onlinePlayers.getLocation());
-                    if (distance <= 100) {
+                    if (distance <= 5) {
+                        players.add(onlinePlayers);
+                    }
+                }
+                break;
+            case SHOUT:
+                for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+                    if (!onlinePlayers.getWorld().equals(chattingPlayer.getWorld()))
+                        continue;
+                    double distance = chattingPlayer.getLocation().distance(onlinePlayers.getLocation());
+                    if (distance <= 50) {
                         players.add(onlinePlayers);
                     }
                 }

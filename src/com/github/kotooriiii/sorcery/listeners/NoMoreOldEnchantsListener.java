@@ -6,16 +6,14 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.awt.event.KeyEvent;
+import java.util.Iterator;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
@@ -30,17 +28,39 @@ public class NoMoreOldEnchantsListener implements Listener {
     }
 
     @EventHandler
-    public void onEnchant(InventoryMoveItemEvent event) {
+    public void onNPC(InventoryOpenEvent event) {
+        if (!event.getView().getType().equals(InventoryType.MERCHANT))
+            return;
 
-        Inventory source = event.getSource();
+        event.getPlayer().sendMessage(ERROR_COLOR + "Trading with villagers is disabled.");
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEnchant(InventoryClickEvent event) {
+
+        Inventory source = event.getClickedInventory();
+
+        if(source == null)
+            return;
+
         if (!source.getType().equals(InventoryType.ANVIL))
             return;
 
         if (!hasTwoItems(source))
             return;
 
-        for (HumanEntity humanEntity : event.getInitiator().getViewers())
-            humanEntity.sendMessage(ERROR_COLOR + "You must use the Blacksmithy skill to combine your items.");
+        if(event.getSlot() != 2)
+            return;
+
+
+         HumanEntity[] humanEntities = source.getViewers().toArray(new HumanEntity[0]);
+         for(HumanEntity humanEntity : humanEntities)
+         {
+             humanEntity.closeInventory();
+             humanEntity.sendMessage(ERROR_COLOR + "You must use the Blacksmithy skill to combine your items.");
+         }
+
         event.setCancelled(true);
 
     }

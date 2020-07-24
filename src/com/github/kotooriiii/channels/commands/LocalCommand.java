@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.ChannelStatus;
 import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,24 +21,28 @@ public class LocalCommand implements CommandExecutor {
         //If the player is sending this message
         if (sender instanceof Player) {
             final Player playerSender = (Player) sender;
-            final UUID playerUUID = playerSender.getUniqueId();
-            //If the command is the "guards" command
-            if (cmd.getName().equalsIgnoreCase("local")) {
-                ChannelManager channelManager = LostShardPlugin.getChannelManager();
-                //No arguments regarding this command
-                if (args.length == 0) {
-                    channelManager.joinChannel(playerSender, ChannelStatus.LOCAL);
-                    playerSender.sendMessage(STANDARD_COLOR + "You have switched to local chat.");
 
-                } else {
-                    String message = HelperMethods.stringBuilder(args, 0, " ");
+            playerSender.sendMessage(STANDARD_COLOR + "The local chat channel has been superseded on map 2.\nThe new emerging local channels \"" + ChatColor.YELLOW + "/shout" + STANDARD_COLOR + "\" and \"" + ChatColor.YELLOW + "/whisper" + STANDARD_COLOR + "\" use your relative location.");
+            return false;
 
-                    ChannelStatus status = channelManager.getChannel(playerSender);
-                    channelManager.joinChannel(playerSender, ChannelStatus.LOCAL);
-                    playerSender.chat(message);
-                    channelManager.joinChannel(playerSender, status);
-                }
-            }
+//            final UUID playerUUID = playerSender.getUniqueId();
+//            //If the command is the "guards" command
+//            if (cmd.getName().equalsIgnoreCase("local")) {
+//                ChannelManager channelManager = LostShardPlugin.getChannelManager();
+//                //No arguments regarding this command
+//                if (args.length == 0) {
+//                    channelManager.joinChannel(playerSender, ChannelStatus.LOCAL);
+//                    playerSender.sendMessage(STANDARD_COLOR + "You have switched to local chat.");
+//
+//                } else {
+//                    String message = HelperMethods.stringBuilder(args, 0, " ");
+//
+//                    ChannelStatus status = channelManager.getChannel(playerSender);
+//                    channelManager.joinChannel(playerSender, ChannelStatus.LOCAL);
+//                    playerSender.chat(message);
+//                    channelManager.joinChannel(playerSender, status);
+//                }
+//            }
         }
         return true;
     }

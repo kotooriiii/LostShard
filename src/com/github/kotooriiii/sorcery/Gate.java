@@ -9,7 +9,10 @@ import org.bukkit.Material;
 import org.bukkit.PortalType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
+import sun.java2d.DisposerTarget;
 
 import java.util.UUID;
 
@@ -17,7 +20,7 @@ public class Gate {
     private UUID source;
     private Location from;
     private Location to;
-    public final static int PORTAL_DISTANCE = 2;
+    public final static int PORTAL_DISTANCE = 1;
 
     public Gate(UUID source, Location from, Location to) {
         this.source = source;
@@ -39,15 +42,24 @@ public class Gate {
     }
 
 
-    public Location getTeleportTo(GateBlock fromLocation) {
+    public Location getTeleportTo(GateBlock atLocation) {
 
-
-        if (fromLocation.toLocation().distance(from) < 1.25f) {
-
+        boolean isFromWorld = atLocation.getWorld().equals(from.getWorld());
+        if(!isFromWorld)
+            return from;
+        boolean isToWorld = atLocation.getWorld().equals(to.getWorld());
+        if(!isToWorld)
             return to;
 
-        } else if (fromLocation.toLocation().distance(to) < 1.25f) {
-            return from;
+        double distanceFrom = atLocation.toLocation().distance(new Location(from.getWorld(), from.getBlockX() + 0.5, from.getBlockY() + 0.5, from.getBlockZ() + 0.5));
+        double distanceTo = atLocation.toLocation().distance(new Location(to.getWorld(), to.getBlockX() + 0.5, to.getBlockY() + 0.5, to.getBlockZ() + 0.5));
+
+
+        if (isFromWorld && isToWorld) {
+            if (distanceFrom < distanceTo)
+                return to;
+            else
+                return from;
         } else {
             return null;
         }
@@ -64,6 +76,18 @@ public class Gate {
         fromHead.setType(Material.NETHER_PORTAL);
         toFeet.setType(Material.NETHER_PORTAL);
         toHead.setType(Material.NETHER_PORTAL);
+
+
+    }
+
+    public boolean isBuilt() {
+        Block fromFeet = from.getBlock();
+        Block fromHead = fromFeet.getRelative(BlockFace.UP);
+
+        Block toFeet = to.getBlock();
+        Block toHead = toFeet.getRelative(BlockFace.UP);
+
+        return fromFeet.getType() == fromHead.getType() && fromHead.getType() == toFeet.getType() && toFeet.getType() == toHead.getType() && toHead.getType() == Material.NETHER_PORTAL;
     }
 
     public boolean isBuildable() {
@@ -75,8 +99,9 @@ public class Gate {
         return isAir(fromFeet) && isAir(fromHead) && isAir(toFeet) && isAir(toHead);
     }
 
-    public boolean isAir(Block b)
-    {return b.getType().isAir();}
+    public boolean isAir(Block b) {
+        return b.getType().isAir();
+    }
 
 
     public void destroy() {
@@ -92,6 +117,12 @@ public class Gate {
         Block toHead = toFeet.getRelative(BlockFace.UP);
         if (toHead.getType() == Material.NETHER_PORTAL)
             toHead.setType(Material.AIR);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "From: " + "\n" +from + "\nTo: " + "\n" + to;
     }
 
 
