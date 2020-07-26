@@ -307,7 +307,7 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
                         Vector vector = entity.getVelocity();
                         Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
-                        entity.teleport(teleportingTo);
+                        entity.teleport(teleportingTo.clone().add(0,1,0));
                         entity.setVelocity(vector);
                     }
 
@@ -322,7 +322,7 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
             }
         }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 4);
     }
-    
+
 
     @EventHandler
     public void onCancelPortal(PlayerInteractEvent event) {
@@ -332,6 +332,9 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
         if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == event.getAction().RIGHT_CLICK_BLOCK))
             return;
+        ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
+        if(mainHand != null && !mainHand.getType().equals(Material.AIR))
+        return;
 
         Gate gate = LostShardPlugin.getGateManager().getGate(block.getLocation());
         if (gate == null)
