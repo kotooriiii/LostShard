@@ -154,6 +154,11 @@ public class PlayerPlot extends Plot {
 
         for (Plot plot : allPlots) {
 
+            int minStaffX = 0;
+            int maxStaffX = 0;
+            int minStaffZ = 0;
+            int maxStaffZ = 0;
+
             if (!world.equals(plot.getWorld()))
                 continue;
 
@@ -162,12 +167,12 @@ public class PlayerPlot extends Plot {
 
             if(plot.getType().isStaff())
             {
-                minX -= MINIMUM_PLOT_STAFF_CREATE_RANGE;
-                maxX += MINIMUM_PLOT_STAFF_CREATE_RANGE;
-                minZ -= MINIMUM_PLOT_STAFF_CREATE_RANGE;
-                maxZ += MINIMUM_PLOT_STAFF_CREATE_RANGE;
+                minStaffX = MINIMUM_PLOT_EXPAND_RANGE;
+                maxStaffX = MINIMUM_PLOT_EXPAND_RANGE;
+                minStaffZ = MINIMUM_PLOT_EXPAND_RANGE;
+                maxStaffZ = MINIMUM_PLOT_EXPAND_RANGE;
             }
-            Zone expandedZone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
+            Zone expandedZone = new Zone(minX + minStaffX, maxX + maxStaffX, minY, maxY, minZ +minStaffZ, maxZ+maxStaffZ);
 
             if (expandedZone.overlaps(plot.getZone()))
                 return false;

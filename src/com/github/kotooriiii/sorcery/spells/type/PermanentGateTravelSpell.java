@@ -7,27 +7,28 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -84,40 +85,244 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
-    @EventHandler
-    public void onPortalTP(PlayerTeleportEvent event) {
-        if (event.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)
-            return;
+    HashSet<UUID> map = new HashSet<>();
+
+    private boolean isBrokenGate(Player player) {
+        Location entityLocation = player.getLocation();
+        Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+
+        if (gateLocation == null) {
+            return false;
+        }
+
+        Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
+        if (gate == null) {
+            return false;
+        }
+
+        if (!gate.isBuilt()) {
+            player.sendMessage(ERROR_COLOR + "The gate was obstructed.");
+            LostShardPlugin.getGateManager().removeGate(gate);
+            return true;
+        }
+        return false;
     }
 
+    @EventHandler
+    public void onPlayerEnterPortal(PlayerMoveEvent event) {
+
+        if (!(event.getPlayer() instanceof Player))
+            return;
+        if (event.getPlayer().getGameMode() == GameMode.CREATIVE)
+            return;
+        if (map.contains(event.getPlayer().getUniqueId()))
+            return;
+        if (!event.getTo().getBlock().getType().equals(Material.NETHER_PORTAL))
+            return;
+
+        if (isBrokenGate(event.getPlayer()))
+            return;
+
+        map.add(event.getPlayer().getUniqueId());
+        Bukkit.getPluginManager().callEvent(new PlayerPortalEvent((Player) event.getPlayer(), event.getTo(), event.getTo()));
+    }
 
     @EventHandler
-    public void onPortalUse(PlayerPortalEvent event) {
-        Location location = event.getFrom();
-        location = event.getPlayer().getLocation();
-        location = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(location);
+    public void onPlayerExitPortal(PlayerMoveEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.CREATIVE)
+            return;
+        if (event.getFrom().getBlock().getType().equals(Material.NETHER_PORTAL) && !event.getTo().getBlock().getType().equals(Material.NETHER_PORTAL)) {
+            map.remove(event.getPlayer().getUniqueId());
 
-        if (location == null) {
+        }
+    }
+
+    @EventHandler
+    public void onPlayerPortal(PlayerTeleportEvent event) {
+
+        if (!(event.getPlayer() instanceof Player))
+            return;
+        if (event.getPlayer().getGameMode() == GameMode.CREATIVE)
+            return;
+        if (map.contains(event.getPlayer().getUniqueId()))
+            return;
+        if (!event.getTo().getBlock().getType().equals(Material.NETHER_PORTAL))
+            return;
+
+        if (isBrokenGate(event.getPlayer()))
+            return;
+        map.add(event.getPlayer().getUniqueId());
+        Bukkit.getPluginManager().callEvent(new PlayerPortalEvent((Player) event.getPlayer(), event.getTo(), event.getTo()));
+    }
+
+    @EventHandler
+    public void onPlayerPortalR(PlayerTeleportEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.CREATIVE)
+            return;
+        if (event.getFrom().getBlock().getType().equals(Material.NETHER_PORTAL) && !event.getTo().getBlock().getType().equals(Material.NETHER_PORTAL)) {
+            map.remove(event.getPlayer().getUniqueId());
+
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        map.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerGameModeChangeEvent event) {
+        map.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerPortal(PlayerPortalEvent event) {
+
+        event.setSearchRadius(3);
+
+        Player player = (Player) event.getPlayer();
+
+        Location entityLocation = player.getLocation();
+        Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+
+        if (gateLocation == null) {
             return;
         }
-        Gate gate = LostShardPlugin.getGateManager().getGate(location);
+
+        Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
         if (gate == null) {
             return;
         }
 
         if (!gate.isBuilt()) {
-            event.getPlayer().sendMessage(ERROR_COLOR + "The gate was obstructed.");
+            player.sendMessage(ERROR_COLOR + "The gate was obstructed.");
             LostShardPlugin.getGateManager().removeGate(gate);
             event.setCancelled(true);
             return;
         }
 
-        Location teleportingTo = gate.getTeleportTo(new GateBlock(location));
-
-        if (teleportingTo != null)
-            event.getPlayer().teleport(teleportingTo);
+        Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+        if (teleportingTo == null)
+            player.sendMessage(ERROR_COLOR + "The gate encountered a critical error.");
+        else {
+            player.teleport(teleportingTo);
+        }
         event.setCancelled(true);
     }
+
+
+    /**
+     * This event appears to only affect entities othen than players.
+     *
+     * @param event
+     */
+    @EventHandler
+    public void onPortalUse(EntityPortalEvent event) {
+
+        Entity entity = event.getEntity();
+        if (entity instanceof Player)
+            return;
+        if (entity instanceof Projectile)
+            return;
+
+        Location entityLocation = event.getEntity().getLocation();
+        Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+
+        if (gateLocation == null) {
+            return;
+        }
+
+        Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
+        if (gate == null) {
+            return;
+        }
+
+        if (!gate.isBuilt()) {
+            LostShardPlugin.getGateManager().removeGate(gate);
+            event.setCancelled(true);
+            return;
+        }
+        Vector vector = entity.getVelocity();
+        Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+
+        if (teleportingTo != null) {
+            entity.teleport(new Location(teleportingTo.getWorld(), teleportingTo.getBlockX(), teleportingTo.getBlockY(), teleportingTo.getBlockZ(), entity.getLocation().getYaw(), entity.getLocation().getPitch()));
+            entity.setVelocity(vector);
+        }
+
+        event.setCancelled(true);
+    }
+
+    HashMap<UUID, Boolean> projectileSet = new HashMap<>();
+
+    /**
+     * This event appears to only affect projectile  othen than players.
+     **/
+
+
+    private boolean isHittingPortal(Location location) {
+        final int radius = 1;
+        for (int x = 0; x < radius * 2 + 1; x++) {
+            for (int y = 0; y < radius * 2 + 1; y++) {
+                for (int z = 0; z < radius * 2 + 1; z++) {
+                    Location testers = new Location(location.getWorld(), location.getBlockX() - radius + x, location.getBlockY() - radius + y, location.getBlockZ() - radius + z);
+                    if (testers.getBlock().getType().equals(Material.NETHER_PORTAL))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @EventHandler
+    public void onEntitySpawn(EntitySpawnEvent event) {
+        Entity entity = event.getEntity();
+        if (!(entity instanceof Projectile))
+            return;
+        projectileSet.put(entity.getUniqueId(), false);
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (isHittingPortal(entity.getLocation())) {
+                    Boolean objectBool = projectileSet.get(entity.getUniqueId());
+                    if (objectBool != null &&  !objectBool.booleanValue()) {
+                        projectileSet.put(entity.getUniqueId(), true);
+
+                        Location entityLocation = event.getEntity().getLocation();
+                        Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+
+                        if (gateLocation == null) {
+                            return;
+                        }
+
+                        Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
+                        if (gate == null) {
+                            return;
+                        }
+
+                        if (!gate.isBuilt()) {
+                            LostShardPlugin.getGateManager().removeGate(gate);
+                            return;
+                        }
+
+                        Vector vector = entity.getVelocity();
+                        Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+                        entity.teleport(teleportingTo);
+                        entity.setVelocity(vector);
+                    }
+
+                }
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                projectileSet.remove(entity.getUniqueId());
+                task.cancel();
+            }
+        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 4);
+    }
+    
 
     @EventHandler
     public void onCancelPortal(PlayerInteractEvent event) {

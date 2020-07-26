@@ -12,6 +12,7 @@ import java.util.*;
 public abstract class Plot implements Serializable {
 
     public static final int MINIMUM_PLOT_STAFF_CREATE_RANGE = 100;
+    public static final int MINIMUM_PLOT_EXPAND_RANGE = 75;
     private static final long serialVersionUID = 1L;
     public static final int MINIMUM_PLOT_CREATE_RANGE = 10;
 

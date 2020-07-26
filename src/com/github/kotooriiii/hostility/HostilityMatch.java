@@ -344,47 +344,6 @@ public class HostilityMatch {
 
         switch (this.platform.getName().toLowerCase()) {
             case "bunts":
-                capturingClan.setManaBuffTimer(60 * 60 * 24);
-                buff = "mana";
-
-                for(UUID uuid : capturingClan.getAllUUIDS())
-                {
-                    Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_MANA);
-                }
-
-                new BukkitRunnable() {
-
-                    int counter = capturingClan.getManaTimer();
-
-                    @Override
-                    public void run() {
-
-                        if (counter == 0) {
-
-                            this.cancel();
-
-                            for (UUID uuid : capturingClan.getAllUUIDS()) {
-
-                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                if (offlinePlayer.isOnline())
-                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your mana buff has run its glory.");
-                                Stat stat = Stat.wrap(uuid);
-                                stat.setMaxMana(Stat.BASE_MAX_MANA);
-
-                                if (stat.getMana() > stat.getMaxMana())
-                                    stat.setMana(stat.getMana());
-                            }
-                            return;
-
-                        }
-                        counter--;
-                        capturingClan.setManaBuffTimer(counter);
-
-                    }
-                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
-
-                break;
-            case "gorps":
                 capturingClan.setStaminaBuffTimer(60 * 60 * 24);
                 buff = "stamina";
 
@@ -392,7 +351,6 @@ public class HostilityMatch {
                 {
                     Stat.wrap(uuid).setMaxStamina(Stat.HOST_MAX_STAMINA);
                 }
-
 
                 new BukkitRunnable() {
 
@@ -410,19 +368,61 @@ public class HostilityMatch {
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                                 if (offlinePlayer.isOnline())
                                     offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your stamina buff has run its glory.");
-
                                 Stat stat = Stat.wrap(uuid);
-
                                 stat.setMaxStamina(Stat.BASE_MAX_STAMINA);
+
                                 if (stat.getStamina() > stat.getMaxStamina())
                                     stat.setStamina(stat.getMaxStamina());
-
                             }
                             return;
 
                         }
                         counter--;
                         capturingClan.setStaminaBuffTimer(counter);
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+
+                break;
+            case "gorps":
+                capturingClan.setManaBuffTimer(60 * 60 * 24);
+                buff = "mana";
+
+                for(UUID uuid : capturingClan.getAllUUIDS())
+                {
+                    Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_MANA);
+                }
+
+
+                new BukkitRunnable() {
+
+                    int counter = capturingClan.getManaTimer();
+
+                    @Override
+                    public void run() {
+
+                        if (counter == 0) {
+
+                            this.cancel();
+
+                            for (UUID uuid : capturingClan.getAllUUIDS()) {
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline())
+                                    offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your mana buff has run its glory.");
+
+                                Stat stat = Stat.wrap(uuid);
+
+                                stat.setMaxMana(Stat.BASE_MAX_MANA);
+                                if (stat.getMana() > stat.getMaxMana())
+                                    stat.setMana(stat.getMaxMana());
+
+                            }
+                            return;
+
+                        }
+                        counter--;
+                        capturingClan.setManaBuffTimer(counter);
 
                     }
                 }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
