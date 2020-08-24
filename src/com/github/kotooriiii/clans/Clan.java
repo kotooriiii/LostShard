@@ -269,10 +269,10 @@ public class Clan {
                 clanRanks = new UUID[]{this.leader};
                 break;
             case COLEADER:
-                clanRanks = this.coleaders;
+                clanRanks = this.coleaders.clone();
                 break;
             case MEMBER:
-                clanRanks = this.members;
+                clanRanks = this.members.clone();
                 break;
         }
         return clanRanks;
@@ -820,6 +820,7 @@ public class Clan {
             return 6;
         }
 
+        UUID currLeader = this.leader;
 
         //Get the current rank of the candidate leader.
         ClanRank candidateRank = this.getClanRank(candidateLeader);
@@ -829,17 +830,11 @@ public class Clan {
         //Create an array of that rank minus the player who is leaving
         UUID[] newCandidateLeaderLeaving = new UUID[candidateLeaderLeaving.length - 1];
 
-        ClanRank currLeaderNextRank = ClanRank.values()[ClanRank.values().length - 2];
-        //Get all the players in the second to last rank. LEADER being last.
-        UUID[] currentLeaderJoining = this.getPlayerUUIDSBy(currLeaderNextRank);
-        //The current leader will be joining this group so add an element.
-        UUID[] newCurrentLeaderJoining = new UUID[currentLeaderJoining.length + 1];
+        int remover = 0;
 
         //Looping the length of the small array because we could get IndexOutOfBounds exception
         for (int i = 0; i < newCandidateLeaderLeaving.length; i++) {
             //This remover is in charge of adding one to the element so we can skip!
-            int remover = 0;
-
             //If the leader is found in the array then add the remover.
             if (candidateLeader.equals(candidateLeaderLeaving[i]))
                 remover++; //
@@ -848,13 +843,23 @@ public class Clan {
             newCandidateLeaderLeaving[i] = candidateLeaderLeaving[i + remover];
         }
 
+        this.leader = candidateLeader;
+
+        updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
+
+        ClanRank currLeaderNextRank = ClanRank.values()[ClanRank.values().length - 2];
+        //Get all the players in the second to last rank. LEADER being last.
+        UUID[] currentLeaderJoining = this.getPlayerUUIDSBy(currLeaderNextRank);
+        //The current leader will be joining this group so add an element.
+        UUID[] newCurrentLeaderJoining = new UUID[currentLeaderJoining.length + 1];
+
+
         for (int i = 0; i < currentLeaderJoining.length; i++) {
+
             newCurrentLeaderJoining[i] = currentLeaderJoining[i];
         }
-        newCurrentLeaderJoining[newCurrentLeaderJoining.length - 1] = this.leader;
+        newCurrentLeaderJoining[newCurrentLeaderJoining.length - 1] = currLeader;
 
-        this.leader = candidateLeader;
-        updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
         return 0;
     }
@@ -889,8 +894,9 @@ public class Clan {
         UUID[] leavingUUIDS = this.getPlayerUUIDSBy(kickedRank);
         UUID[] newLeavingUUIDS = new UUID[leavingUUIDS.length - 1];
 
+        int remover = 0;
+
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             if (kickedUUID.equals(leavingUUIDS[i]))
                 remover++;
 
@@ -963,11 +969,11 @@ public class Clan {
         //Create an array of that rank minus the player who is leaving
         UUID[] newCandidateLeaderLeaving = new UUID[candidateLeaderLeaving.length - 1];
 
+        int remover = 0;
+
         //Looping the length of the small array because we could get IndexOutOfBounds exception
         for (int i = 0; i < newCandidateLeaderLeaving.length; i++) {
             //This remover is in charge of adding one to the element so we can skip!
-            int remover = 0;
-
             //If the leader is found in the array then add the remover.
             if (candidateLeader.equals(candidateLeaderLeaving[i]))
                 remover++; //
@@ -976,6 +982,7 @@ public class Clan {
             newCandidateLeaderLeaving[i] = candidateLeaderLeaving[i + remover];
         }
 
+        this.leader = candidateLeader;
 
         updateRankUUIDS(candidateRank, newCandidateLeaderLeaving);
 
@@ -990,10 +997,9 @@ public class Clan {
 
             newCurrentLeaderJoining[i] = currentLeaderJoining[i];
         }
-        newCurrentLeaderJoining[newCurrentLeaderJoining.length - 1] = this.leader;
+        newCurrentLeaderJoining[newCurrentLeaderJoining.length - 1] = currLeader;
 
         updateRankUUIDS(currLeaderNextRank, newCurrentLeaderJoining);
-        this.leader = candidateLeader;
         return 0;
     }
 
@@ -1071,9 +1077,10 @@ public class Clan {
         //Since joining, wer add one
         UUID[] newJoiningUUIDS = new UUID[joiningUUIDS.length + 1];
 
+        int remover = 0;
+
         //Loop the new list which is leaving
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             //If demoted is equal to leaving list skip and add one to index.
             if (demotedUUID.equals(leavingUUIDS[i]))
                 remover++;
@@ -1162,9 +1169,10 @@ public class Clan {
         //Since joining, wer add one
         UUID[] newJoiningUUIDS = new UUID[joiningUUIDS.length + 1];
 
+        int remover = 0;
+
         //Loop the new list which is leaving
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             //If demoted is equal to leaving list skip and add one to index.
             if (demotedUUID.equals(leavingUUIDS[i]))
                 remover++;
@@ -1257,8 +1265,8 @@ public class Clan {
         UUID[] newLeavingUUIDS = new UUID[leavingUUIDS.length - 1];
         UUID[] newJoiningUUIDS = new UUID[joiningUUIDS.length + 1];
 
+        int remover = 0;
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             if (promotedUUID.equals(leavingUUIDS[i]))
                 remover++;
 
@@ -1346,15 +1354,18 @@ public class Clan {
         UUID[] newLeavingUUIDS = new UUID[leavingUUIDS.length - 1];
         UUID[] newJoiningUUIDS = new UUID[joiningUUIDS.length + 1];
 
+        int remover = 0;
+
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             if (promotedUUID.equals(leavingUUIDS[i]))
                 remover++;
             newLeavingUUIDS[i] = leavingUUIDS[i + remover];
         }
+
         for (int i = 0; i < joiningUUIDS.length; i++) {
             newJoiningUUIDS[i] = joiningUUIDS[i];
         }
+
         newJoiningUUIDS[newJoiningUUIDS.length - 1] = promotedUUID;
 
         updateRankUUIDS(currRank, newLeavingUUIDS);
@@ -1469,8 +1480,9 @@ public class Clan {
         UUID[] leavingUUIDS = this.getPlayerUUIDSBy(leaverRank);
         UUID[] newLeavingUUIDS = new UUID[leavingUUIDS.length - 1];
 
+        int remover = 0;
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
+
             if (leaverUUID.equals(leavingUUIDS[i]))
                 remover++;
 
@@ -1527,6 +1539,7 @@ public class Clan {
         for (int i = 0; i < lowestRankUUIDS.length; i++) {
             tempLowestRank[i] = lowestRankUUIDS[i];
         }
+
         tempLowestRank[tempLowestRank.length - 1] = inviteeUUID;
         updateRankUUIDS(lowestRank, tempLowestRank);
         update(inviteeUUID, false);
@@ -1658,8 +1671,9 @@ public class Clan {
         UUID[] leavingUUIDS = this.getPlayerUUIDSBy(kickedRank);
         UUID[] newLeavingUUIDS = new UUID[leavingUUIDS.length - 1];
 
+        int remover = 0;
+
         for (int i = 0; i < newLeavingUUIDS.length; i++) {
-            int remover = 0;
             if (kickedUUID.equals(leavingUUIDS[i]))
                 remover++;
 

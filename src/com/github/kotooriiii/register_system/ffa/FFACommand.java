@@ -4,8 +4,6 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.register_system.Gathering;
 import com.github.kotooriiii.register_system.GatheringType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,7 +18,7 @@ import static com.github.kotooriiii.data.Maps.*;
 
 public class FFACommand implements CommandExecutor, Listener {
 
-    final HashMap<UUID, FFA> map = new HashMap<>();
+    final HashMap<UUID, FFAMode> map = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -59,7 +57,7 @@ public class FFACommand implements CommandExecutor, Listener {
                             playerSender.sendMessage(ERROR_COLOR + "The FFA plot has not been created.");
                             return false;
                         }
-                        map.put(playerSender.getUniqueId(), new FFA());
+                        map.put(playerSender.getUniqueId(), new FFAMode());
                         playerSender.sendMessage(STANDARD_COLOR + "What is the armor loadout? Type anything.");
                         break arg0;
                     case "end":
@@ -94,7 +92,7 @@ public class FFACommand implements CommandExecutor, Listener {
         Player player = event.getPlayer();
 
 
-        FFA ffa = map.get(player.getUniqueId());
+        FFAMode ffa = map.get(player.getUniqueId());
 
         if (ffa == null)
             return;

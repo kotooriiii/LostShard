@@ -3,15 +3,14 @@ package com.github.kotooriiii.sorcery;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.PortalType;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.bukkit.scheduler.BukkitTask;
 import sun.java2d.DisposerTarget;
 
 import java.util.UUID;
@@ -45,10 +44,10 @@ public class Gate {
     public Location getTeleportTo(GateBlock atLocation) {
 
         boolean isFromWorld = atLocation.getWorld().equals(from.getWorld());
-        if(!isFromWorld)
+        if (!isFromWorld)
             return from;
         boolean isToWorld = atLocation.getWorld().equals(to.getWorld());
-        if(!isToWorld)
+        if (!isToWorld)
             return to;
 
         double distanceFrom = atLocation.toLocation().distance(new Location(from.getWorld(), from.getBlockX() + 0.5, from.getBlockY() + 0.5, from.getBlockZ() + 0.5));
@@ -120,10 +119,38 @@ public class Gate {
     }
 
     @Override
-    public String toString()
-    {
-        return "From: " + "\n" +from + "\nTo: " + "\n" + to;
+    public String toString() {
+        return "From: " + "\n" + from + "\nTo: " + "\n" + to;
     }
 
 
+    public void rotate(Block block) {
+        Location testingLoc = block.getLocation();
+        Location sourceLoc = getTeleportTo(new GateBlock(getTeleportTo(new GateBlock(testingLoc))));
+
+        if (sourceLoc.getBlock().getType() != Material.NETHER_PORTAL)
+            return;
+
+        Block bottom = sourceLoc.getBlock();
+        Block top = bottom.getRelative(BlockFace.UP);
+
+
+        Orientable orientableBottom = (Orientable) bottom.getBlockData();
+        Orientable orientableTop = (Orientable) top.getBlockData();
+
+        Axis currentAxis = orientableBottom.getAxis();
+        Axis switchTo;
+
+
+        if (currentAxis == Axis.X)
+            switchTo = Axis.Z;
+        else
+            switchTo = Axis.X;
+
+        orientableBottom.setAxis(switchTo);
+        orientableTop.setAxis(switchTo);
+        bottom.setBlockData(orientableBottom);
+        top.setBlockData(orientableTop);
+
+    }
 }

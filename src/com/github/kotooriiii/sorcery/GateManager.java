@@ -5,6 +5,7 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.sorcery.spells.type.PermanentGateTravelSpell;
 import com.github.kotooriiii.status.Staff;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import sun.awt.image.ImageWatched;
 
 import java.util.*;
@@ -218,6 +219,10 @@ public class GateManager {
             locationGateHashMap.put(new GateBlock(gate.getFrom()), gate);
             locationGateHashMap.put(new GateBlock(gate.getTo()), gate);
         }
+    }
+
+    public void rotateGate(Gate gate, Block block) {
+        gate.rotate(block);
     }
 }
 

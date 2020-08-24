@@ -1,5 +1,6 @@
 package com.github.kotooriiii.channels.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.listeners.ChatChannelListener;
 import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.util.HelperMethods;
@@ -52,9 +53,12 @@ public class ReplyCommand implements CommandExecutor {
         Player receivingPlayer = offlinePlayer.getPlayer();
 
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
-        receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
-        if (NotificationCommand.isPingable(receivingPlayer))
-            receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
+        if (!LostShardPlugin.getIgnoreManager().wrap(receivingPlayer.getUniqueId()).isIgnoring(playerSender.getUniqueId())) {
+            receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+            if (NotificationCommand.isPingable(receivingPlayer))
+                receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
+        }
+
         MsgCommand.updateMap(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
 
         return true;

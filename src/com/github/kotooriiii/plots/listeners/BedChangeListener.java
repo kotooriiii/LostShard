@@ -60,11 +60,11 @@ public class BedChangeListener implements Listener {
 
         for (Block block : event.blockList()) {
             if (block == null)
-                return;
+                continue;
             if (isBed(block)) {
                 Block head = getHeadOfBed(block);
                 if (head == null)
-                    return;
+                    continue;
                 removeSpawn(head.getLocation());
             }
         }

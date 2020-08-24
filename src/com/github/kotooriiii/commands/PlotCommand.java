@@ -7,10 +7,7 @@ import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.listeners.SignChangeListener;
-import com.github.kotooriiii.plots.struct.ArenaPlot;
-import com.github.kotooriiii.plots.struct.PlayerPlot;
-import com.github.kotooriiii.plots.struct.Plot;
-import com.github.kotooriiii.plots.struct.StaffPlot;
+import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
@@ -535,7 +532,7 @@ public class PlotCommand implements CommandExecutor {
                                     }
 
                                     if (!standingOnPlot.getType().isStaff()) {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot. (For the banmatch/moneymatch spawns refer to: setspawnA and setspawnB)");
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned plot. (For the banmatch/moneymatch/bracket spawns refer to: setspawnA and setspawnB)");
                                         return false;
                                     }
 
@@ -561,15 +558,23 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order spawn refer to: setspawn)");
+                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA) && standingOnPlot.getType().equals(PlotType.STAFF_BRACKET)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena/Bracket. (For the chaos/order/ffa spawn refer to: setspawn)");
                                         return false;
                                     }
 
-                                    ArenaPlot arenaPlotA = (ArenaPlot) standingOnPlot;
+                                    if(standingOnPlot.getType().equals(PlotType.STAFF_BRACKET))
+                                    {
+                                        BracketPlot bracketPlotA = (BracketPlot) standingOnPlot;
+                                        bracketPlotA.setSpawnA(playerSender.getLocation());
+                                        playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + bracketPlotA.getName() + " has been set to where you are standing.");
+                                    } else if(standingOnPlot.getType().equals(PlotType.STAFF_ARENA))
+                                    {
+                                        ArenaPlot arenaPlotA = (ArenaPlot) standingOnPlot;
+                                        arenaPlotA.setSpawnA(playerSender.getLocation());
+                                        playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + arenaPlotA.getName() + " has been set to where you are standing.");
+                                    }
 
-                                    arenaPlotA.setSpawnA(playerSender.getLocation());
-                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + arenaPlotA.getName() + " has been set to where you are standing.");
                                     break;
                                 case "setspawnb":
                                     if (args.length != 2) {
@@ -582,14 +587,22 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
-                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena. (For the chaos/order spawn refer to: setspawn)");
+                                    if (!standingOnPlot.getType().equals(PlotType.STAFF_ARENA) && standingOnPlot.getType().equals(PlotType.STAFF_BRACKET)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "This must be a staff-owned arena plot with the name(s): Arena/Bracket. (For the chaos/order/ffa spawn refer to: setspawn)");
                                         return false;
                                     }
-                                    ArenaPlot arenaPlotB = (ArenaPlot) standingOnPlot;
 
-                                    arenaPlotB.setSpawnB(playerSender.getLocation());
-                                    playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + arenaPlotB.getName() + " has been set to where you are standing.");
+                                    if(standingOnPlot.getType().equals(PlotType.STAFF_BRACKET))
+                                    {
+                                        BracketPlot bracketPlotB = (BracketPlot) standingOnPlot;
+                                        bracketPlotB.setSpawnB(playerSender.getLocation());
+                                        playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + bracketPlotB.getName() + " has been set to where you are standing.");
+                                    } else if(standingOnPlot.getType().equals(PlotType.STAFF_ARENA))
+                                    {
+                                        ArenaPlot arenaPlotB= (ArenaPlot) standingOnPlot;
+                                        arenaPlotB.setSpawnB(playerSender.getLocation());
+                                        playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + arenaPlotB.getName() + " has been set to where you are standing.");
+                                    }
                                     break;
                                 case "tools":
                                     if (staffPlotCreator.containsKey(playerUUID))

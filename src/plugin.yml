@@ -10,6 +10,10 @@ loadbefore:
 version: 1.0
 api-version: 1.15
 commands:
+  ignore:
+  staff:
+    aliases:
+      - st
   build:
   ffa:
   join:

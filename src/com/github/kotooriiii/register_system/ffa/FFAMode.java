@@ -14,12 +14,12 @@ import javax.xml.stream.Location;
 
 import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 
-public class FFA extends Gathering {
+public class FFAMode extends Gathering {
 
     private Location spawn;
     private final int GOLD_REWARDED = 100;
 
-    public FFA() {
+    public FFAMode() {
         super(GatheringType.FFA);
     }
 
@@ -30,9 +30,10 @@ public class FFA extends Gathering {
         for (Player player : getRegisterManager().getRegisteredPlayers()) {
             player.teleport(ffaPlot.getSpawn());
         }
-
         if(getRegisterManager().getRegisteredPlayers().length == 1)
             endGame(getRegisterManager().getRegisteredPlayers()[0]);
+        if(getRegisterManager().getRegisteredPlayers().length == 0)
+            endGame();
     }
 
     @Override

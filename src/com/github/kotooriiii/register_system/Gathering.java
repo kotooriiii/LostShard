@@ -28,6 +28,7 @@ public abstract class Gathering {
         this.type = type;
     }
 
+
     public abstract void startGame();
 
     public abstract void endGame();

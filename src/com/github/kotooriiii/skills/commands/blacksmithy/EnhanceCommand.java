@@ -268,6 +268,7 @@ public class EnhanceCommand implements CommandExecutor {
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
             if(nextLevel == 5)
             {
+                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
                 clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
                 clan.setEnhanceTimer(0);
             }

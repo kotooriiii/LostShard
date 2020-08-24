@@ -6,6 +6,8 @@ import com.github.kotooriiii.bannedplayer.BanManager;
 import com.github.kotooriiii.bannedplayer.commands.BanCommand;
 import com.github.kotooriiii.bannedplayer.commands.UnbanCommand;
 import com.github.kotooriiii.bannedplayer.listeners.BannedJoinListener;
+import com.github.kotooriiii.channels.IgnoreManager;
+import com.github.kotooriiii.channels.IgnorePlayer;
 import com.github.kotooriiii.channels.commands.*;
 import com.github.kotooriiii.clans.listeners.ClanCreatorListener;
 import com.github.kotooriiii.clans.ClanManager;
@@ -45,7 +47,6 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.register_system.GatheringManager;
 import com.github.kotooriiii.register_system.JoinCommand;
 import com.github.kotooriiii.register_system.LeaveCommand;
-import com.github.kotooriiii.register_system.ffa.FFA;
 import com.github.kotooriiii.register_system.ffa.FFACommand;
 import com.github.kotooriiii.register_system.ffa.FFAListener;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
@@ -61,10 +62,7 @@ import com.github.kotooriiii.skills.skill_listeners.*;
 import com.github.kotooriiii.sorcery.GateManager;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
-import com.github.kotooriiii.sorcery.spells.type.ClanTPSpell;
-import com.github.kotooriiii.sorcery.spells.type.MarkSpell;
-import com.github.kotooriiii.sorcery.spells.type.PermanentGateTravelSpell;
-import com.github.kotooriiii.sorcery.spells.type.RecallSpell;
+import com.github.kotooriiii.sorcery.spells.type.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -114,6 +112,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
+    public static boolean isTutorial;
 
     public static LuckPerms luckPerms;
 
@@ -132,6 +131,8 @@ public class LostShardPlugin extends JavaPlugin {
     private static SkillManager skillManager;
     private static ShrineManager shrineManager;
     private static GatheringManager gatheringManager;
+    private static IgnoreManager ignoreManager;
+
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
     private static int gameTicks = 0;
@@ -232,6 +233,8 @@ public class LostShardPlugin extends JavaPlugin {
         if (!checkDependency())
             return;
 
+        isTutorial=false;
+
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
@@ -254,6 +257,7 @@ public class LostShardPlugin extends JavaPlugin {
         skillManager = new SkillManager();
         shrineManager = new ShrineManager();
         gatheringManager = new GatheringManager();
+        ignoreManager = new IgnoreManager();
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -389,6 +393,9 @@ public class LostShardPlugin extends JavaPlugin {
             getSkillManager().saveSkillPlayer(skillPlayer);
         }
 
+        for(IgnorePlayer ignorePlayer :LostShardPlugin.getIgnoreManager().getIgnorePlayers())
+            getIgnoreManager().save(ignorePlayer);
+
         SignChangeListener.save();
     }
 
@@ -463,6 +470,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("clearchat").setExecutor(new ClearChatCommand());
         getCommand("clearchatall").setExecutor(new ClearChatAllCommand());
         getCommand("adminchat").setExecutor(new AdminChatCommand());
+        getCommand("staff").setExecutor(new StaffCommand());
 
         getCommand("book").setExecutor(new BookCommand());
         getCommand("wiki").setExecutor(new WikiCommand());
@@ -483,6 +491,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("leave").setExecutor(new LeaveCommand());
 
         getCommand("build").setExecutor(new BuildCommand());
+        getCommand("ignore").setExecutor(new IgnoreCommand());
 
 
         //todo to use later -->
@@ -582,6 +591,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new NotValidMoveBlockListener(), this);
         pm.registerEvents(new EggListener(), this);
         pm.registerEvents(new PermanentGateTravelSpell(), this);
+        pm.registerEvents(new PGTListener(), this);
+
         pm.registerEvents(new NoMoreOldEnchantsListener(), this);
 
         pm.registerEvents(new SignChangeListener(), this);
@@ -999,12 +1010,19 @@ public class LostShardPlugin extends JavaPlugin {
         return gatheringManager;
     }
 
+    public static IgnoreManager getIgnoreManager() {return ignoreManager;}
+
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
     }
 
     public static String getPatchUpdateVersion(String majorUpdate) {
         return ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "News -> " + majorUpdate;
+    }
+
+    public static boolean isTutorial()
+    {
+        return isTutorial;
     }
 
 

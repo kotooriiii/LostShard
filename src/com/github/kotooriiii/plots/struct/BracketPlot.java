@@ -1,5 +1,6 @@
 package com.github.kotooriiii.plots.struct;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.plots.PlotType;
@@ -11,9 +12,31 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class BracketPlot extends StaffPlot {
+    private Location spawnA;
+    private Location spawnB;
+
     public BracketPlot(World world, Zone zone, String name) {
         super(world, zone, name);
         this.plotType = PlotType.STAFF_BRACKET;
+    }
+
+    public Location getSpawnA() {
+        return spawnA;
+    }
+
+    public void setSpawnA(Location spawnA) {
+        this.spawnA = spawnA;
+
+        LostShardPlugin.getPlotManager().savePlot(this);
+    }
+
+    public Location getSpawnB() {
+        return spawnB;
+    }
+
+    public void setSpawnB(Location spawnB) {
+        this.spawnB = spawnB;
+        LostShardPlugin.getPlotManager().savePlot(this);
     }
 
     @Override

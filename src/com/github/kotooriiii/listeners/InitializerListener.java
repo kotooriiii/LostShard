@@ -2,6 +2,7 @@ package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.channels.IgnorePlayer;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
@@ -45,6 +46,7 @@ public class InitializerListener implements Listener {
 
         registerStatus(player);
         registerStat(player);
+        registerIgnore(player);
     }
 
     private void registerPlot(Player player) {
@@ -113,6 +115,16 @@ public class InitializerListener implements Listener {
         if (stat == null) {
             stat = new Stat(uuid);
             stat.add();
+        }
+    }
+
+    public void registerIgnore(Player player) {
+        UUID uuid = player.getUniqueId();
+
+        IgnorePlayer ignorePlayer = LostShardPlugin.getIgnoreManager().wrap(uuid);
+        if (ignorePlayer== null) {
+            ignorePlayer = new IgnorePlayer(uuid);
+            LostShardPlugin.getIgnoreManager().addIgnorePlayer(ignorePlayer, true);
         }
     }
 }

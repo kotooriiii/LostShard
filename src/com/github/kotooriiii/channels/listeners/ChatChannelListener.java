@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
@@ -59,6 +60,8 @@ public class ChatChannelListener implements Listener {
     public void artificialMessage(AsyncPlayerChatEvent asyncPlayerChatEvent) {
         //Message Color
         ChatColor messageColor = ChatColor.WHITE;
+        if(LostShardPlugin.getChannelManager().getChannel(asyncPlayerChatEvent.getPlayer()) == ChannelStatus.STAFF)
+            messageColor=ChatColor.RED;
         ShardChatEvent shardChatEvent = new ShardChatEvent(asyncPlayerChatEvent.getPlayer(), asyncPlayerChatEvent.getMessage(), getFormattedPing(asyncPlayerChatEvent.getMessage(), messageColor));
         Bukkit.getPluginManager().callEvent(shardChatEvent);
 
@@ -140,6 +143,9 @@ public class ChatChannelListener implements Listener {
             case WHISPER:
                 properties = new String[]{name, ChatColor.WHITE + "whispers"};
                 break;
+            case STAFF:
+                properties = new String[]{prefix, name};
+                break;
             default:
                 properties = new String[]{"nullChannel"};
                 break;
@@ -163,6 +169,9 @@ public class ChatChannelListener implements Listener {
 
             recipient.sendMessage(builder + messageColor + ": " + message);
         }
+
+        LostShardPlugin.plugin.getServer().getConsoleSender().sendMessage(builder + messageColor + ": " + message);
+
 
         if (recipients.size() == 1) {
             switch (LostShardPlugin.getChannelManager().getChannel(player)) {
@@ -280,6 +289,13 @@ public class ChatChannelListener implements Listener {
 //                    }
 //                }
 //                break;
+            case STAFF:
+                for(Player player : Staff.getOnlineStaffPlayers())
+                {
+                    if(!chattingPlayer.equals(player))
+                    players.add(player);
+                }
+
             case WHISPER:
                 for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
                     if (!onlinePlayers.getWorld().equals(chattingPlayer.getWorld()))
@@ -300,6 +316,15 @@ public class ChatChannelListener implements Listener {
                     }
                 }
                 break;
+        }
+
+        //check ignore
+        Iterator<Player> iterator = players.iterator();
+        while(iterator.hasNext())
+        {
+            Player player = iterator.next();
+            if(LostShardPlugin.getIgnoreManager().wrap(player.getUniqueId()).isIgnoring(chattingPlayer.getUniqueId()))
+                iterator.remove();
         }
         return players;
     }

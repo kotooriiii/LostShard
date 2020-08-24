@@ -1,5 +1,6 @@
 package com.github.kotooriiii.channels.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.listeners.ChatChannelListener;
 import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.util.HelperMethods;
@@ -50,14 +51,14 @@ public class MsgCommand implements CommandExecutor {
         String message = HelperMethods.stringBuilder(args, 1, " ");
 
         playerSender.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG to " + receivingPlayer.getName() + ChatColor.WHITE + "] " + message);
-        receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+        if (!LostShardPlugin.getIgnoreManager().wrap(receivingPlayer.getUniqueId()).isIgnoring(playerSender.getUniqueId())) {
+            receivingPlayer.sendMessage("[" + ChatColor.LIGHT_PURPLE + "MSG" + ChatColor.WHITE + "] " + playerSender.getName() + ": " + message);
+            if (NotificationCommand.isPingable(receivingPlayer))
+                receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
+        }
 
-        if (NotificationCommand.isPingable(receivingPlayer))
-            receivingPlayer.playSound(receivingPlayer.getLocation(), ChatChannelListener.PING_SOUND, 10, ChatChannelListener.PING_PITCH);
 
-        lastMessageMap.put(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
-        lastMessageMap.put(playerSender.getUniqueId(), receivingPlayer.getUniqueId()); // this is for convo based
-
+        updateMap(receivingPlayer.getUniqueId(), playerSender.getUniqueId());
 
         return true;
     }
@@ -67,7 +68,8 @@ public class MsgCommand implements CommandExecutor {
     }
 
     public static void updateMap(UUID receive, UUID sent) {
-        lastMessageMap.put(receive, sent); //only for person who messaged you
+        if (!LostShardPlugin.getIgnoreManager().wrap(receive).isIgnoring(sent))
+            lastMessageMap.put(receive, sent); //only for person who messaged you
         lastMessageMap.put(sent, receive); // this is for convo based
     }
 }

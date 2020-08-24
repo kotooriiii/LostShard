@@ -25,7 +25,7 @@ public class PlayerConnectServerEvent implements Listener {
             if(ip.equals(networkIP))
                 isNetwork=true;
 
-            if(ip.equalsIgnoreCase("lostshard.net"))
+            if(ip.equalsIgnoreCase("lostshard.net") || ip.equalsIgnoreCase("play.lostshard.club"))
                 isStringNetwork=true;
         }
 

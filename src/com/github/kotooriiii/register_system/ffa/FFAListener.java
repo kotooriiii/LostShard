@@ -23,7 +23,7 @@ public class FFAListener implements Listener {
         if(!gathering.getRegisterManager().hasPlayer(player))
             return;
 
-        FFA ffa = (FFA) gathering;
+        FFAMode ffa = (FFAMode) gathering;
 
         gathering.getRegisterManager().removePlayer(player);
 
@@ -47,7 +47,7 @@ public class FFAListener implements Listener {
             return;
         if(!gathering.getRegisterManager().hasPlayer(player))
             return;
-        FFA ffa = (FFA) gathering;
+        FFAMode ffa = (FFAMode) gathering;
 
         gathering.getRegisterManager().removePlayer(player);
 

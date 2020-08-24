@@ -169,6 +169,8 @@ public class RepairCommand implements CommandExecutor {
             case WOODEN_HOE:
             case WOODEN_SHOVEL:
                 return 50;
+            case FISHING_ROD:
+                return 10;
 
         }
         return -1;
@@ -265,6 +267,7 @@ public class RepairCommand implements CommandExecutor {
             case WOODEN_PICKAXE:
             case WOODEN_HOE:
             case WOODEN_SHOVEL:
+            case FISHING_ROD:
                 if (level < 0)
                     return 0;
                 else if (level > 30)
@@ -280,6 +283,8 @@ public class RepairCommand implements CommandExecutor {
 
         switch (material) {
 
+            case FISHING_ROD:
+                return new ItemStack[]{new ItemStack(Material.STRING, 1)};
             //BOW
             case BOW:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};

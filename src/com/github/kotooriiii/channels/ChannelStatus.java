@@ -5,7 +5,7 @@ import org.bukkit.ChatColor;
 public enum ChannelStatus {
     //LOCAL("Local", ChatColor.YELLOW),
     GLOBAL("Global", ChatColor.YELLOW), CLAN("Clan", ChatColor.GREEN)
-    ,WHISPER("Whisper", ChatColor.GRAY), SHOUT("Shout", ChatColor.GOLD);
+    ,WHISPER("Whisper", ChatColor.GRAY), SHOUT("Shout", ChatColor.GOLD), STAFF("Staff", ChatColor.LIGHT_PURPLE);
 
     private ChatColor chatColor;
     private String name;

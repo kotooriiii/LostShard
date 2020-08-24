@@ -6,6 +6,7 @@ import com.github.kotooriiii.plots.struct.Plot;
 import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -187,6 +188,36 @@ public class BlockChangePlotListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onVineSpread(BlockSpreadEvent event) {
+
+        final Block source = event.getSource();
+        if(source.getType() != Material.VINE)
+        return;
+
+
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(source.getLocation())) {
+
+                //Staff no permission
+                if (plot.getType().isStaff()) {
+
+                    //   playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot interact with blocks here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+
+    }
+
+
 
     @EventHandler
     public void onBlockChangePlot(PlayerInteractEvent playerInteractEvent) {

@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.Sale;
 import com.github.kotooriiii.bannedplayer.BannedPlayer;
+import com.github.kotooriiii.channels.IgnorePlayer;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.clans.ClanRank;
 import com.github.kotooriiii.discord.links.LinkPlayer;
@@ -27,6 +28,7 @@ import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.status.shrine.Shrine;
 import com.github.kotooriiii.status.shrine.ShrineType;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -64,6 +66,7 @@ public final class FileManager {
     private static File links_folder = new File(discord_folder + File.separator + "links");
     private static File shrines_folder = new File(plugin_folder + File.separator + "shrines");
     private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
+    private static File ignoredPlayer_folder =new File(plugin_folder + File.separator + "ignored_player");
 
 
     private static File config = new File(plugin_folder + File.separator + "config.yml");
@@ -104,6 +107,7 @@ public final class FileManager {
         links_folder.mkdirs();
         shrines_folder.mkdirs();
         buildchanger_folder.mkdirs();
+        ignoredPlayer_folder.mkdirs();
 
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -285,6 +289,13 @@ public final class FileManager {
                 continue;
 
             readGate(file);
+        }
+
+        for(File file : ignoredPlayer_folder.listFiles())
+        {
+            if(!file.getName().endsWith(".yml"))
+                continue;
+            readIgnoredPlayer(file);
         }
 
         HashMap<UUID, BannedPlayer> bannedPlayers = new HashMap<>();
@@ -881,6 +892,29 @@ public final class FileManager {
         }
     }
 
+    public static void readIgnoredPlayer(File file) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        String fileName = file.getName().substring(0, file.getName().indexOf('.'));
+
+        if(!fileName.equalsIgnoreCase(ignoredPlayer_folder.getName()))
+            return;
+
+        Set<String> paths = yaml.getConfigurationSection("ignoredList").getKeys(false);
+
+
+        for (String path : paths) {
+            IgnorePlayer ignorePlayer = new IgnorePlayer(UUID.fromString(path));
+            List<String> uuidsString = yaml.getStringList("ignoredList."+path);
+            HashSet<UUID> uuids = new HashSet<>();
+            for(String uuidString : uuidsString)
+                uuids.add(UUID.fromString(uuidString));
+            ignorePlayer.setIgnoredPlayers(uuids);
+            LostShardPlugin.getIgnoreManager().addIgnorePlayer(ignorePlayer, false);
+        }
+    }
+
+
 
     public static void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -1375,6 +1409,31 @@ public final class FileManager {
         }
     }
 
+    public static void write(IgnorePlayer ignorePlayer) {
+        String fileName = ignoredPlayer_folder.getName() + ".yml";
+        File ignorePlayerFile = new File(ignoredPlayer_folder + File.separator + fileName);
+        if (!ignorePlayerFile.exists()) {
+            try {
+                ignorePlayerFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ArrayList<String> uuidsStringList = new ArrayList<>();
+        for(UUID uuid : ignorePlayer.getIgnoredUUIDS())
+            uuidsStringList.add(uuid.toString());
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(ignorePlayerFile);
+        yaml.set("ignoredList." + ignorePlayer.getSource().toString(), uuidsStringList);
+
+        try {
+            yaml.save(ignorePlayerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void removeFile(Shrine shrine) {
         String fileName = shrine.getType().name() + ".yml";
@@ -1544,5 +1603,6 @@ public final class FileManager {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");
         }
     }
+
 
 }

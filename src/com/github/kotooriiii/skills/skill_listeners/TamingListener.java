@@ -33,6 +33,12 @@ public class TamingListener implements Listener {
 
         LivingEntity breederEntity = event.getBreeder();
 
+        if(breederEntity==null)
+        {
+            event.setCancelled(true);
+            return;
+        }
+
         if (!(breederEntity instanceof Player))
             return;
 
@@ -45,12 +51,31 @@ public class TamingListener implements Listener {
 
         if (LostShardPlugin.getSkillManager().getSkillPlayer(breederPlayer.getUniqueId()).getActiveBuild().getTaming().getLevel() >= 25) {
             LivingEntity entity = event.getEntity();
-            if (entity instanceof Wolf)
-                if (!addWolf(breederPlayer))
+            if (entity instanceof Wolf) {
+                if (!addWolf(breederPlayer)) {
                     event.setCancelled(true);
+                    return;
+                }
+            }
             addXP(breederPlayer, entity, 50);
         } else {
             breederPlayer.sendMessage(ERROR_COLOR + "You can not breed animals until Taming level 25.");
+
+            LivingEntity fatherEntity = event.getFather();
+            LivingEntity motherEntity = event.getMother();
+
+            if(fatherEntity instanceof Animals)
+            {
+                Animals fatherAnimals = (Animals) fatherEntity;
+                fatherAnimals.setLoveModeTicks(0);
+            }
+
+            if(motherEntity instanceof Animals)
+            {
+                Animals motherAnimals = (Animals) motherEntity;
+                motherAnimals.setLoveModeTicks(0);
+            }
+
             event.setCancelled(true);
         }
     }

@@ -89,7 +89,7 @@ public class PlotManager {
     public boolean isStaffPlotName(String name) {
 
         //Is reserved for order and chaos
-        if (name.equalsIgnoreCase("order") || name.equalsIgnoreCase("chaos") || name.equalsIgnoreCase("arena"))
+        if (name.equalsIgnoreCase("order") || name.equalsIgnoreCase("chaos") || name.equalsIgnoreCase("arena") || name.equalsIgnoreCase("ffa")  || name.equalsIgnoreCase("bracket") )
             return true;
 
         //Is reserved
