@@ -70,6 +70,7 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
+import com.github.kotooriiii.tutorial.TutorialManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.luckperms.api.LuckPerms;
@@ -132,6 +133,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static ShrineManager shrineManager;
     private static GatheringManager gatheringManager;
     private static IgnoreManager ignoreManager;
+    private static TutorialManager tutorialManager;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -233,7 +235,7 @@ public class LostShardPlugin extends JavaPlugin {
         if (!checkDependency())
             return;
 
-        isTutorial=false;
+        isTutorial = false;
 
         logger = Logger.getLogger("Minecraft");
         plugin = this;
@@ -258,6 +260,9 @@ public class LostShardPlugin extends JavaPlugin {
         shrineManager = new ShrineManager();
         gatheringManager = new GatheringManager();
         ignoreManager = new IgnoreManager();
+
+        if (isTutorial())
+            tutorialManager = new TutorialManager();
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -393,7 +398,7 @@ public class LostShardPlugin extends JavaPlugin {
             getSkillManager().saveSkillPlayer(skillPlayer);
         }
 
-        for(IgnorePlayer ignorePlayer :LostShardPlugin.getIgnoreManager().getIgnorePlayers())
+        for (IgnorePlayer ignorePlayer : LostShardPlugin.getIgnoreManager().getIgnorePlayers())
             getIgnoreManager().save(ignorePlayer);
 
         SignChangeListener.save();
@@ -1010,7 +1015,13 @@ public class LostShardPlugin extends JavaPlugin {
         return gatheringManager;
     }
 
-    public static IgnoreManager getIgnoreManager() {return ignoreManager;}
+    public static IgnoreManager getIgnoreManager() {
+        return ignoreManager;
+    }
+
+    public static TutorialManager getTutorialManager() {
+        return tutorialManager;
+    }
 
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
@@ -1020,8 +1031,7 @@ public class LostShardPlugin extends JavaPlugin {
         return ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "News -> " + majorUpdate;
     }
 
-    public static boolean isTutorial()
-    {
+    public static boolean isTutorial() {
         return isTutorial;
     }
 

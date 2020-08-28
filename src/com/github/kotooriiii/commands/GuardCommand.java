@@ -58,20 +58,19 @@ public class GuardCommand implements CommandExecutor {
 
                     StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
                     if (!statusPlayer.getStatus().equals(Status.WORTHY)) {
-                        //playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
+                        playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
                         return true;
                     }
 
                     NPC guardNPC = GuardNPC.getNearestGuard(playerLocation);
                     GuardTrait guardTrait = guardNPC.getTrait(GuardTrait.class);
                     if (guardNPC == null) {
-                       // playerSender.sendMessage(ERROR_COLOR + "No guard nearby!");
+                        playerSender.sendMessage(ERROR_COLOR + "No guard nearby!");
                         return true;
                     } else if (!statusPlayer.hasNearbyEnemyRange(5)) {
-                        //playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
+                        playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
                         return true;
                     }
-
 
 
                     guardTrait.setCalled(true);
@@ -95,7 +94,7 @@ public class GuardCommand implements CommandExecutor {
                                 guardNPC.getStoredLocation().getWorld().playSound(guardNPC.getStoredLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 10, 0);
                             }
                         }
-                    }.runTaskLater(LostShardPlugin.plugin, 40);
+                    }.runTaskLater(LostShardPlugin.plugin, 10);
 
                     new BukkitRunnable() {
                         @Override
@@ -114,7 +113,7 @@ public class GuardCommand implements CommandExecutor {
                             }
                         }
 
-                    }.runTaskLater(LostShardPlugin.plugin, 120);
+                    }.runTaskLater(LostShardPlugin.plugin, 20);
 
 
                 }

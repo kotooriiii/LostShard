@@ -266,7 +266,7 @@ public class GuardTrait extends Trait {
         w.spawnParticle(Particle.CRIT, playerLocation, 50, 0.3, 0.3, 0.3);
         w.spawnParticle(Particle.DRAGON_BREATH, playerLocation, 50, 2, 2, 2);
 
-        if (player.isOnline())
+        if (player.isOnline() && !player.isDead())
             player.setHealth(0);
 
 

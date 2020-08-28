@@ -91,8 +91,10 @@ public class TamingListener implements Listener {
 
 
         if (entity instanceof Wolf)
-            if (!addWolf(player))
+            if (!addWolf(player)) {
                 event.setCancelled(true);
+                return;
+            }
         addXP(player, entity);
 
     }
