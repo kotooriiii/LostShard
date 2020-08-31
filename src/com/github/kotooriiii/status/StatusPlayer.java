@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
-
 public class StatusPlayer {
     private static HashMap<UUID, StatusPlayer> playerStatus = new HashMap<>();
 

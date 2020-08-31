@@ -70,7 +70,7 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
-import com.github.kotooriiii.tutorial.TutorialManager;
+import com.github.kotooriiii.tutorial.newt.TutorialManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.luckperms.api.LuckPerms;
@@ -261,8 +261,10 @@ public class LostShardPlugin extends JavaPlugin {
         gatheringManager = new GatheringManager();
         ignoreManager = new IgnoreManager();
 
-        if (isTutorial())
+        if (isTutorial()) {
             tutorialManager = new TutorialManager();
+            tutorialManager.getChapterManager().registerDefault();
+        }
 
         //Read files (some onto the managers)
         FileManager.init();
