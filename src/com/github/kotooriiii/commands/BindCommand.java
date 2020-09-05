@@ -1,5 +1,7 @@
 package com.github.kotooriiii.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.events.BindEvent;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
@@ -67,6 +69,11 @@ public class BindCommand implements CommandExecutor {
                         return true;
                     }
 
+                    BindEvent bindEvent = new BindEvent(playerSender, wand.getSpell());
+                    LostShardPlugin.plugin.getServer().getPluginManager().callEvent(bindEvent);
+                    if(bindEvent.isCancelled())
+                        return false;
+
                     ItemStack wandItem = wand.createItem();
                     if(inHand.getAmount() > 1)
                     {
@@ -81,6 +88,8 @@ public class BindCommand implements CommandExecutor {
                     } else {
                         playerSender.getInventory().setItemInMainHand(wandItem);
                     }
+
+
                 }
             }
         }

@@ -1,15 +1,26 @@
 package com.github.kotooriiii.tutorial.newt;
 
-import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.tutorial.default_chapters.volume1.*;
+import com.github.kotooriiii.tutorial.default_chapters.volume2.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
+/**
+ * The class manages the storyline of a tutorial. It is instantiated by the {@link TutorialManager} class and can be retrieved using the {@link TutorialManager#getChapterManager()} method.
+ */
 public class ChapterManager {
+
+    /**
+     * The list of chapters kept in insertion order purposely.
+     */
     private ArrayList<Class<? extends AbstractChapter>> chapters;
 
+    /**
+     * Base constructor
+     */
     public ChapterManager() {
         chapters = new ArrayList<>();
     }
@@ -18,28 +29,44 @@ public class ChapterManager {
      * Registers the default story line of the tutorial.
      */
     public void registerDefault() {
-        //register(TChapter);
+
+        //Volume 1
+        register(TitleChapter.class);
+        register(IntroWandChapter.class);
+        register(GrabStickFromChestChapter.class);
+        register(WandInstructionChapter.class);
+        register(RavineChapter.class);
+
+        //Volume 2
+        register(SkillTitleChapter.class);
+        register(TrackSpiderChapter.class);
+        register(IntroMiningChapter.class);
+        register(DeadEndChapter.class);
+        register(MinerHutChapter.class);
+        register(FreedomChapter.class);
+        register(CraftingChapter.class);
+
+        //volume3
     }
 
     /**
-     * Register your own story line for the tutorial.
+     * Registers a chapter for the tutorial. Useful if you want to make your own storyline.
      **/
-    public void register(AbstractChapter chapter) {
-        LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(chapter, LostShardPlugin.plugin);
-        chapters.add(chapter.getClass());
+    public void register(Class<? extends AbstractChapter> clazz) {
+        chapters.add(clazz);
     }
 
     /**
-     * The constructed progression of the tutorial.
+     * The storyline stored in a Queue. The method constructs new objects for the classes and registers them to the {@link org.bukkit.event.Listener} interface.
+     *
      * @return an array of chapters. strict on insertion order to preserve the order of the story.
      */
-    public Queue<AbstractChapter> getStory()
-    {
-        Queue<AbstractChapter> chaptersArray = new ArrayBlockingQueue<AbstractChapter>(chapters.size());
-        for(Class<? extends AbstractChapter> clazz : this.chapters)
-        {
+    public Queue<AbstractChapter> getStory() {
+        Queue<AbstractChapter> chaptersArray = new ArrayBlockingQueue<>(chapters.size());
+        for (Class<? extends AbstractChapter> clazz : this.chapters) {
             try {
-               chaptersArray.offer(clazz.getDeclaredConstructor().newInstance());
+                AbstractChapter chapter = clazz.getDeclaredConstructor().newInstance();
+                chaptersArray.offer(chapter);
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

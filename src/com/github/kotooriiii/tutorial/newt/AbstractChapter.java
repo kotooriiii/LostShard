@@ -1,48 +1,163 @@
 package com.github.kotooriiii.tutorial.newt;
 
+import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
-public abstract class AbstractChapter implements Listener {
+import java.util.Observable;
+import java.util.UUID;
+
+/**
+ * An abstract class that represents an unfinished chapter.
+ * <p>
+ * The class contains the method: {@link #setComplete()} which notifies the {@link TutorialBook} class that the chapter is complete.
+ * <p>
+ * When using the class make sure to invoke the method to count the chapter as complete.
+ * <p>
+ * The class also implements {@link Listener} so feel free to create events to further specify what is needed to complete the chapter. HOWEVER, URGENTLY NOTE THAT YOU SHOULD CHECK IF THE CHAPTER IS ACTIVE BEFORE EXECUTING ANY CODE {@link #isActive}
+ * <p>
+ * Note: Make sure the Player exists before using {@link org.bukkit.Bukkit#getPlayer(UUID)}'s methods. The player could have logged off.
+ */
+public abstract class AbstractChapter extends Observable implements Listener {
 
     /**
+     * The Player's UUID
+     */
+    private UUID uuid;
+    /**
+     * The location for the chapter spawn.
+     */
+    private Location location;
+    /**
+     * Checks if the chapter is active.
+     */
+    private boolean isActive;
+
+    /**
+     * A delay tick to inform the
+     */
+    public final static  int DELAY_TICK = 40;
+    public final static int TIP_DELAY = 20*10;
+
+
+    /**
+     * The default constructor for the chapter.
+     */
+    public AbstractChapter() {
+        this.uuid = null;
+        this.location = null;
+        this.isActive = false;
+    }
+
+    /**
+     * Initializes the chapter at runtime with the player object and marks it as available.
+     *
+     * @param uuid The Player's UUID
+     * @return Returns immediately if the chapter has already been initialized.
+     */
+    public final void init(UUID uuid) {
+        if (isActive && this.uuid != null)
+            return;
+        this.uuid = uuid;
+        isActive = true;
+    }
+
+    /**
+     * {@inheritDoc}
      * Executes this code when the chapter has started.
+     * <p>
+     * When the method is invoked these instance variables have already been declared:
+     * {@link #getLocation()}
+     * {@link #getUUID()}
+     * <p>
+     * It is reasonable and appropriate to {@link #setLocation(Location)} if you would like set your own custom {@link Location}. The default {@link Location} is set to the Player's current location right before the {@link #onBegin()} is called.
+     * <p>
+     * Note: Make sure the Player exists before using {@link org.bukkit.Bukkit#getPlayer(UUID)}'s methods. The player could have logged off.
      */
-    public abstract void onBegin(Player player);
+    public abstract void onBegin();
 
     /**
-     * Executes this code when the chapter is destroyed
+     * {@inheritDoc}
+     * Executes this code when the chapter is destroyed.
+     * <p>
+     * This method is for you to use to clean up your chapter's mess if needed.
+     * <p>
+     * When the method is invoked these instance variables are still declared:
+     * <p>
+     * Note: Make sure the Player exists before using {@link org.bukkit.Bukkit#getPlayer(UUID)}'s methods. The player could have logged off.
+     * </p>
+     * {@link #getLocation()}
+     * {@link #getUUID()}
      */
-    public abstract void onDestroy(Player player);
+    public abstract void onDestroy();
 
     /**
      * If a player dies, retrieves the location of this chapter's spawn.
      *
      * @return location of the chapter
      */
-    public abstract Location getLocation();
+    public final Location getLocation() {
+        return this.location;
+    }
+
+    /**
+     * The Player UUID for this Chapter
+     *
+     * @return Player's UUID
+     */
+    public final UUID getUUID() {
+        return this.getUUID();
+    }
 
     /**
      * Sets the location of this chapter
      *
      * @param location chapter's location.
      */
-    public abstract void setLocation(Location location);
+    public final void setLocation(Location location) {
+        this.location = location;
+    }
 
     /**
-     * Attempts to complete the chapter to advance to the next.
-     * @param progression the player's tutorial progression
-     * @return true if advanced, false if the progression's current chapter is not 'this' one
+     * Returns to check if the player is currently playing this chapter. It is extremely crucial for the programmer to use this method when using the {@link Listener} interface.
+     *
+     * @return true if the Player is currently on this chapter, false otherwise.
      */
-    public final boolean completeChapter(TProgression progression) {
-        if (progression.getCurrentChapter() != this)
-            return false;
-        progression.advance();
-        return true;
+    public final boolean isActive() {
+        return this.isActive;
+    }
+
+    /**
+     * Completes the chapter.
+     *
+     * @return This method will always advance to the next one. However, it will immediately return if the chapter has not been initialized or if it has already been completed.
+     */
+    public final void setComplete() throws RuntimeException {
+        if (this.uuid == null)
+            return;
+        //throw new RuntimeException("The chapter has not been initialized.");
+
+        if (!isActive)
+            return;
+        //throw new RuntimeException("The chapter has already been completed.");
+        HandlerList.unregisterAll(this);
+        setChanged();
+        notifyObservers();
+        isActive = false;
+
+    }
+
+    /**
+     * @deprecated
+     */
+    public void sendMessage(Player player, String message) {
+        if (player.isOnline()) {
+            player.sendMessage(message);
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 10.0f, 0.0f);
+        }
     }
 
 }
-
-

@@ -2,6 +2,8 @@ package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
+import com.github.kotooriiii.skills.events.MiningSkillEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,40 +11,43 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MiningListener implements Listener {
 
     final int ADDED_XP = 10;
+
+
 
     @EventHandler
     public void mineBlock(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (!isStoneType(block) || !hasPickaxe(player.getInventory().getItemInMainHand()))
+        if (!isStoneOrOre(block) || !hasPickaxe(player.getInventory().getItemInMainHand()))
             return;
-
 
         Skill miningSkill = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getMining();
 
         ArrayList<ItemStack> rewards = getRewards(miningSkill.getLevel());
 
+        MiningSkillEvent callingEvent = new MiningSkillEvent(player, rewards);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(callingEvent);
+
+        if (callingEvent.isCancelled())
+            return;
+
         drop(block.getLocation(), rewards);
-
-
         miningSkill.addXP(ADDED_XP);
     }
 
-    private boolean hasPickaxe(ItemStack itemStack)
-    {
-        switch (itemStack.getType())
-        {
+    private boolean hasPickaxe(ItemStack itemStack) {
+        switch (itemStack.getType()) {
             case DIAMOND_PICKAXE:
             case GOLDEN_PICKAXE:
             case IRON_PICKAXE:
@@ -54,13 +59,21 @@ public class MiningListener implements Listener {
         return false;
     }
 
-    private boolean isStoneType(Block block) {
+    private boolean isStoneOrOre(Block block) {
         Material type = block.getType();
         switch (type) {
             case STONE:
             case ANDESITE:
             case DIORITE:
             case GRANITE:
+            case GOLD_ORE:
+            case IRON_ORE:
+            case COAL_ORE:
+            case EMERALD_ORE:
+            case REDSTONE_ORE:
+            case LAPIS_ORE:
+            case DIAMOND_ORE:
+            case NETHER_QUARTZ_ORE:
                 return true;
         }
         return false;
@@ -86,8 +99,11 @@ public class MiningListener implements Listener {
         for (Map.Entry<ItemStack, Double> entry : lootOfLevel.entrySet()) {
             double random = Math.random();
 
+            if (LostShardPlugin.isTutorial())
+                random -= 0.55f;
+
             ItemStack item = entry.getKey();
-            double chance = entry.getValue()*10/2;
+            double chance = entry.getValue() * 10 / 2;
 
             if (random < chance) {
                 rewards.add(item);

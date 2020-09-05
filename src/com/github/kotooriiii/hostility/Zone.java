@@ -22,29 +22,6 @@ public class Zone implements Serializable {
     private int z2;
 
 
-    public Zone(int x1, int y1, int z1) {
-        this.x1 = x1;
-        this.x2 = x1;
-
-        this.y1 = y1;
-        this.y2 = y1;
-
-        this.z1 = z1;
-        this.z2 = z1;
-    }
-
-    public Zone(Location loc1) {
-        this.x1 = loc1.getBlockX();
-        this.x2 = loc1.getBlockX();
-
-        this.y1 = loc1.getBlockY();
-        this.y2 = loc1.getBlockY();
-
-        this.z1 = loc1.getBlockZ();
-        this.z2 = loc1.getBlockZ();
-    }
-
-
     public Zone(int x1, int x2, int y1, int y2, int z1, int z2) {
         this.x1 = x1;
         this.x2 = x2;

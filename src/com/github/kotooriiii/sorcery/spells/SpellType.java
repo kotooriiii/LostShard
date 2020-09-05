@@ -6,7 +6,7 @@ public enum SpellType {
     HEAL(new String[]{"Heal Self", "Heal"}, "Selfishius Healicus"),
     ICE(new String[]{"Ice Ball", "Ice"}, "Freezius Ballicus"),
     LIGHTNING(new String[]{"Lightning"}, "Zeusius Similaricus"),
-    TELEPORT(new String[]{"Teleport"}, "Nearius Porticus"),
+    TELEPORT(new String[]{"Teleport", "TP"}, "Nearius Porticus"),
     WEB_FIELD(new String[]{"Web Field", "Web"}, "Webicus Fieldicus"),
     //DARKNESS(new String[]{"Darkness"}),
     CLONE(new String[]{"Clone"}, "clonus"),

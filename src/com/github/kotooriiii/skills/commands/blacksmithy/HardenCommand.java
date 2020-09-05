@@ -3,6 +3,7 @@ package com.github.kotooriiii.skills.commands.blacksmithy;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -90,6 +91,10 @@ public class HardenCommand implements CommandExecutor {
             return false;
         }
 
+        BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.HARDEN);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return false;
 
         //Harden
         enchant(mainHand);

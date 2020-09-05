@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -89,6 +90,11 @@ public class EnhanceCommand implements CommandExecutor {
             return false;
         }
 
+
+        BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.ENHANCE);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return false;
 
         //Harden
         enchant(mainHand,playerSender);

@@ -47,7 +47,7 @@ public abstract class Plot implements Serializable {
         this.world = world;
 
         //This is empty, must be calculated by subclass.
-        this.zone = new Zone(0, 0, 0);
+        this.zone = new Zone(0, 0, 0, 0, 0, 0);
         this.id = generateID();
     }
 
@@ -74,7 +74,7 @@ public abstract class Plot implements Serializable {
      */
     public boolean contains(Location location) {
 
-        if(!location.getWorld().equals(this.getWorld()))
+        if (!location.getWorld().equals(this.getWorld()))
             return false;
 
 
@@ -90,7 +90,7 @@ public abstract class Plot implements Serializable {
     public boolean isMinimumDistancePlotCreate(Player player) {
 
         int distance = MINIMUM_PLOT_CREATE_RANGE;
-        if(plotType.isStaff())
+        if (plotType.isStaff())
             distance = MINIMUM_PLOT_STAFF_CREATE_RANGE;
 
 

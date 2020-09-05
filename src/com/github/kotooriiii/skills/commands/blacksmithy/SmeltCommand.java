@@ -3,6 +3,7 @@ package com.github.kotooriiii.skills.commands.blacksmithy;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -68,6 +69,11 @@ public class SmeltCommand implements CommandExecutor {
         double chance = getChanceOfSmelt(mainHand, level);
         double random = Math.random();
 
+
+        BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.SMELT);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return false;
 
         //If won!
         if (random < chance) {

@@ -38,7 +38,6 @@ import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
-import com.github.kotooriiii.npc.reworked.PacketListener;
 import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.plots.commands.BuildCommand;
 import com.github.kotooriiii.plots.listeners.*;
@@ -70,6 +69,7 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
+import com.github.kotooriiii.tutorial.listeners.TutorialSettingsListener;
 import com.github.kotooriiii.tutorial.newt.TutorialManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
@@ -262,7 +262,8 @@ public class LostShardPlugin extends JavaPlugin {
         ignoreManager = new IgnoreManager();
 
         if (isTutorial()) {
-            tutorialManager = new TutorialManager();
+            tutorialManager = new TutorialManager(true);
+            LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new TutorialSettingsListener(), this);
             tutorialManager.getChapterManager().registerDefault();
         }
 
@@ -290,9 +291,6 @@ public class LostShardPlugin extends JavaPlugin {
         registerBuff();
         registerCorrupts();
         registerStaff();
-
-        PacketListener packetListener = new PacketListener();
-        packetListener.init();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");

@@ -101,7 +101,12 @@ public class NoMoreOldEnchantsListener implements Listener {
 //            event.getWhoClicked().getInventory().addItem(fireAspectItemStack);
 //            //REMOVE ^
 
+
             event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player) {
+                Player clickedPlayer = (Player) event.getWhoClicked();
+                clickedPlayer.updateInventory();
+            }
             return;
         }
                /*
@@ -116,6 +121,10 @@ public class NoMoreOldEnchantsListener implements Listener {
         if ((int) LostShardPlugin.getSkillManager().getSkillPlayer(event.getWhoClicked().getUniqueId()).getActiveBuild().getBlacksmithy().getLevel() != 100) {
             sendMessage(source, ERROR_COLOR + "You must be Blacksmithy level 100 to combine.");
             event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player) {
+                Player clickedPlayer = (Player) event.getWhoClicked();
+                clickedPlayer.updateInventory();
+            }
             return;
         }
 
@@ -124,6 +133,7 @@ public class NoMoreOldEnchantsListener implements Listener {
             if (clickedPlayer.getLevel() < COMBINABLE_LEVEL) {
                 sendMessage(source, ERROR_COLOR + "Insufficient levels. You must be at least xp level 30 to combine.");
                 event.setCancelled(true);
+                clickedPlayer.updateInventory();
                 return;
             }
         }

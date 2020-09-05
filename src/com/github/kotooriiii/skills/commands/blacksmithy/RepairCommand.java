@@ -3,6 +3,7 @@ package com.github.kotooriiii.skills.commands.blacksmithy;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
+import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -72,9 +73,14 @@ public class RepairCommand implements CommandExecutor {
         double chance = getChanceOfRepair(mainHand, level);
         double random = Math.random();
 
+        BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.REPAIR);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return false;
+
 
         //If won!
-        if (random < chance) {
+        if (random < chance || LostShardPlugin.isTutorial()) {
             //Repair item
             ((Damageable) meta).setDamage(0);
             playerSender.sendMessage(ChatColor.GOLD + "You repair the item.");

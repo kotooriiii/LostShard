@@ -1,5 +1,7 @@
 package com.github.kotooriiii.sorcery.wands;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.entity.Player;
@@ -25,8 +27,14 @@ public class WandListener implements Listener {
                 if (spell == null)
                     return;
                 Wand wand = new Wand(spell);
-                wand.cast(player);
-                event.setCancelled(true);
+
+                SpellCastEvent spellCastEvent = new SpellCastEvent(player, spell);
+                LostShardPlugin.plugin.getServer().getPluginManager().callEvent(spellCastEvent);
+
+                if(!spellCastEvent.isCancelled()) {
+                    wand.cast(player);
+                    event.setCancelled(true);
+                }
             }
         }
     }

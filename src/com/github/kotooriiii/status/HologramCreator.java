@@ -32,6 +32,7 @@ public class HologramCreator {
                 hologram.delete();
                 continue;
             }
+        }
 
         Hologram hologram = HologramsAPI.createHologram(LostShardPlugin.plugin, location);
     }
