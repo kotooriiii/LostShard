@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.ShardNMS;
 import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import net.citizensnpcs.api.CitizensAPI;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
@@ -29,10 +30,13 @@ public class TrackSpiderChapter extends AbstractChapter {
     private PacketHandler packetHandler;
     private UUID entityUUID;
     private Location location;
+    private boolean isComplete;
+
 
     public TrackSpiderChapter() {
         packetHandler = null;
         entityUUID = null;
+        isComplete=false;
         location = null; //todo set this
     }
 
@@ -131,7 +135,7 @@ public class TrackSpiderChapter extends AbstractChapter {
      */
     @EventHandler
     public void onTarget(EntityTargetLivingEntityEvent event) {
-        if (!event.getEntity().getUniqueId().equals(entityUUID))
+        if (event.getEntity().getUniqueId().equals(entityUUID))
             return;
         event.setCancelled(true);
     }
@@ -140,7 +144,11 @@ public class TrackSpiderChapter extends AbstractChapter {
     {
         Entity damager =event.getDamager();
 
-        if(!damager.getUniqueId().equals(entityUUID))
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
+            return;
+        if(!event.getEntity().getUniqueId().equals(entityUUID))
+            return;
+        if(damager.getUniqueId().equals(getUUID()))
             return;
         event.setCancelled(true);
     }
@@ -150,6 +158,8 @@ public class TrackSpiderChapter extends AbstractChapter {
      */
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
+        if(isComplete)
+            return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
@@ -165,6 +175,7 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (!zone.contains(to))
             return;
 
+        isComplete=true;
         sendMessage(event.getPlayer(), "Great Job!");
         setComplete();
     }

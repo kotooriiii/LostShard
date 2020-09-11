@@ -106,6 +106,8 @@ public class CraftingChapter extends AbstractChapter {
         Location from = event.getFrom();
         Location to = event.getTo();
         if (zone.contains(from) && !zone.contains(to)) {
+
+            sendMessage(event.getPlayer(), "You must craft some chain armor before leaving.");
             event.setCancelled(true);
             return;
         }
@@ -121,9 +123,10 @@ public class CraftingChapter extends AbstractChapter {
             return;
         Location from = event.getFrom();
         Location to = event.getTo();
-        if (!zone.contains(from) && zone.contains(to))
+        if (!zone.contains(from) && zone.contains(to)) {
             sendMessage(event.getPlayer(), "Before you go in, you should craft some Chain Armor.\nChain armor is crafted like any other armor, just using cobblestone!");
-
+            event.getPlayer().getInventory().addItem(new ItemStack(Material.COBBLESTONE, 24));
+        }
     }
 
 }

@@ -67,13 +67,16 @@ public class GuardCommand implements CommandExecutor {
                     if (guardNPC == null) {
                         playerSender.sendMessage(ERROR_COLOR + "No guard nearby!");
                         return true;
-                    } else if (!statusPlayer.hasNearbyEnemyRange(5)) {
+                    }
+
+                    if (!statusPlayer.hasNearbyEnemyRange(5)) {
                         playerSender.sendMessage(ERROR_COLOR + "No enemies nearby. Don't waste the guards' time.");
                         return true;
                     }
 
 
                     guardTrait.setCalled(true);
+                    guardTrait.setOwner(playerUUID);
                     guardNPC.teleport(playerLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
 
                     new BukkitRunnable() {
@@ -110,6 +113,7 @@ public class GuardCommand implements CommandExecutor {
                             if (curX != postX && curY != postY && curZ != postZ) {
                                 guardNPC.teleport(guardTrait.getGuardingLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
                                 guardTrait.setCalled(false);
+                                guardTrait.setOwner(null);
                             }
                         }
 

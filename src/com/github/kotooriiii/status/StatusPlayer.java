@@ -2,14 +2,13 @@ package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererNPC;
+import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.ScoreboardManager;
-import org.bukkit.scoreboard.Team;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -102,16 +101,31 @@ public class StatusPlayer {
     }
 
     public boolean hasNearbyEnemyRange(final int range) {
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-        if (!offlinePlayer.isOnline())
+        Player playerOnline = Bukkit.getPlayer(uuid);
+        if (playerOnline == null)
             return false;
+
+
+        if(LostShardPlugin.isTutorial())
+        {
+            boolean isFound = false;
+            Iterable<NPC> npcs = MurdererNPC.getAllMurdererNPC();
+            for(NPC npc : npcs)
+            {
+                if(!npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getPlayerUUID()))
+                    continue;
+                isFound=true;
+            }
+            return isFound;
+        }
+
 
         for (Player player : Bukkit.getOnlinePlayers()) {
 
-            if (!player.getWorld().equals(offlinePlayer.getPlayer().getWorld()))
+            if (!player.getWorld().equals(playerOnline.getWorld()))
                 continue;
 
-            if (player.getLocation().distance(offlinePlayer.getPlayer().getLocation()) <= range) {
+            if (player.getLocation().distance(playerOnline.getLocation()) <= range) {
                 StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
                 if (!statusPlayer.getStatus().equals(Status.WORTHY))
                     return true;

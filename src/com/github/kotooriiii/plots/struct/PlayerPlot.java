@@ -35,7 +35,7 @@ public class PlayerPlot extends Plot {
     /**
      * The default radius of a plot when first created
      */
-    private final static int defaultRadius = 5;
+    private final static int defaultRadius = LostShardPlugin.isTutorial() ? 1 : 5;
     /**
      * The plot's current radius.
      */
@@ -259,7 +259,7 @@ public class PlayerPlot extends Plot {
      */
     public double getExpandCost() {
         //If the plot is between size 5 (inclusive) and
-        if (1 <= radius && radius < 10) {
+        if (0 <= radius && radius < 10) {
             return 5;
         } else if (radius < 20) {
             return 10;

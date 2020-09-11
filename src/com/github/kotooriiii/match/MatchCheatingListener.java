@@ -1,6 +1,7 @@
 package com.github.kotooriiii.match;
 
 import com.github.kotooriiii.status.Staff;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -56,6 +57,10 @@ public class MatchCheatingListener implements Listener {
 
         Entity defender = event.getEntity();
         Entity damager = event.getDamager();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
+
 
         if (!isPlayerInduced(defender, damager))
             return;

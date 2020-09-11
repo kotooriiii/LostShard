@@ -25,7 +25,6 @@ public class TitleChapter extends AbstractChapter {
         final int fadeOut = 10;
 
         player.sendTitle(ChatColor.DARK_PURPLE + "Welcome to LostShard!", ChatColor.DARK_PURPLE + "Please complete the tutorial", fadeIn, stay, fadeOut);
-        player.getInventory().setItem(9, new ItemStack(Material.FEATHER, 64));
 
         new BukkitRunnable() {
             @Override

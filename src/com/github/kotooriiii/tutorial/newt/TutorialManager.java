@@ -75,13 +75,12 @@ public class TutorialManager implements Observer {
         TutorialBook book = wrap(uuid);
         if (book == null)
             return false;
-        if(book.getCurrentChapter() != null)
+        if(book.getCurrentChapter() != null && book.getCurrentChapter().isActive())
             book.getCurrentChapter().onDestroy();
         book.deleteObserver(this);
 
         switch (type)
         {
-
             case RESET:
                 break;
             case SKIP:

@@ -25,10 +25,13 @@ public class IntroMiningChapter extends AbstractChapter {
     private int counter;
     private Zone zone;
     private boolean isFirstTime;
+    private boolean isComplete;
+
 
     public IntroMiningChapter() {
         counter = 0;
         isFirstTime = true;
+        isComplete=false;
         //todo zone
     }
 
@@ -92,6 +95,8 @@ public class IntroMiningChapter extends AbstractChapter {
 
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
+        if (isComplete)
+            return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
@@ -102,7 +107,7 @@ public class IntroMiningChapter extends AbstractChapter {
         Location to = event.getTo();
         if (!zone.contains(to))
             return;
-
+        isComplete = true;
         setComplete();
     }
 
@@ -112,10 +117,10 @@ public class IntroMiningChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(!isFirstTime)
+        if (!isFirstTime)
             return;
 
-        isFirstTime= false;
+        isFirstTime = false;
         sendMessage(event.getPlayer(), "The Mining skill awards you extra drops when mining stone and ores.");
     }
 

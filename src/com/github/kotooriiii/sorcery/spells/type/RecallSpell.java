@@ -6,6 +6,7 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -80,6 +81,9 @@ public class RecallSpell extends Spell implements Listener {
     @EventHandler
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+
         if(!(entity instanceof Player))
             return;
         Player player = (Player) entity;

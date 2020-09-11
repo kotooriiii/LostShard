@@ -19,9 +19,11 @@ import org.bukkit.inventory.ItemStack;
 public class DeadEndChapter extends AbstractChapter {
 
     private Zone zone;
+    private boolean isComplete;
 
     public DeadEndChapter()
     {
+        isComplete=false;
         //todo zone this.zone =
     }
 
@@ -79,6 +81,8 @@ public class DeadEndChapter extends AbstractChapter {
 
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
+        if(isComplete)
+            return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
@@ -89,7 +93,7 @@ public class DeadEndChapter extends AbstractChapter {
         Location to = event.getTo();
         if (!zone.contains(to))
             return;
-
+isComplete=true;
         setComplete();
     }
 

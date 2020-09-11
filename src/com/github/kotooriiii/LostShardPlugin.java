@@ -6,6 +6,8 @@ import com.github.kotooriiii.bannedplayer.BanManager;
 import com.github.kotooriiii.bannedplayer.commands.BanCommand;
 import com.github.kotooriiii.bannedplayer.commands.UnbanCommand;
 import com.github.kotooriiii.bannedplayer.listeners.BannedJoinListener;
+import com.github.kotooriiii.bungee.BungeeAuthenticateChannel;
+import com.github.kotooriiii.bungee.BungeeReceiveCompleteChannel;
 import com.github.kotooriiii.channels.IgnoreManager;
 import com.github.kotooriiii.channels.IgnorePlayer;
 import com.github.kotooriiii.channels.commands.*;
@@ -38,6 +40,7 @@ import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
+import com.github.kotooriiii.npc.type.tutorial.TutorialTrait;
 import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.plots.commands.BuildCommand;
 import com.github.kotooriiii.plots.listeners.*;
@@ -69,17 +72,17 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
+import com.github.kotooriiii.tutorial.listeners.StatusListener;
 import com.github.kotooriiii.tutorial.listeners.TutorialSettingsListener;
 import com.github.kotooriiii.tutorial.newt.TutorialManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
@@ -102,6 +105,7 @@ import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,7 +117,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
-    public static boolean isTutorial;
+    public static boolean isTutorial = true;
 
     public static LuckPerms luckPerms;
 
@@ -235,8 +239,6 @@ public class LostShardPlugin extends JavaPlugin {
         if (!checkDependency())
             return;
 
-        isTutorial = false;
-
         logger = Logger.getLogger("Minecraft");
         plugin = this;
         pluginDescriptionFile = this.getDescription();
@@ -264,8 +266,17 @@ public class LostShardPlugin extends JavaPlugin {
         if (isTutorial()) {
             tutorialManager = new TutorialManager(true);
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new TutorialSettingsListener(), this);
+            LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new StatusListener(), this);
             tutorialManager.getChapterManager().registerDefault();
+
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete");
+        } else {
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate");
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Authenticate", BungeeAuthenticateChannel.getInstance());
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Complete", BungeeReceiveCompleteChannel.getInstance());
         }
+
+
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -304,6 +315,16 @@ public class LostShardPlugin extends JavaPlugin {
     public void onDisable() {
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
+
+        if (isTutorial()) {
+            ArrayList<NPC> dereg = new ArrayList<NPC>();
+
+            for (NPC npc : CitizensAPI.getNPCRegistry())
+                if (npc.hasTrait(TutorialTrait.class))
+                    dereg.add(npc);
+            for (NPC npc : dereg)
+                CitizensAPI.getNPCRegistry().deregister(npc);
+        }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             InventoryView inventoryView = player.getOpenInventory();
@@ -961,6 +982,11 @@ public class LostShardPlugin extends JavaPlugin {
         // Save all the settings to the config
         config.options().copyDefaults(true);
         this.saveConfig();
+    }
+
+    public static World getWorld()
+    {
+        return Bukkit.getWorld("LSWMAP2");
     }
 
     public static int getGameTicks() {

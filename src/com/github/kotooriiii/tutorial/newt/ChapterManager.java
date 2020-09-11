@@ -1,7 +1,9 @@
 package com.github.kotooriiii.tutorial.newt;
 
+import com.github.kotooriiii.plots.events.PlotDepositEvent;
 import com.github.kotooriiii.tutorial.default_chapters.volume1.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume2.*;
+import com.github.kotooriiii.tutorial.default_chapters.volume3.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -47,6 +49,22 @@ public class ChapterManager {
         register(CraftingChapter.class);
 
         //volume3
+        register(EnterOrderChapter.class);
+        register(MurdererChapter.class);
+        register(StatusInstructionChapter.class);
+        register(BankerIntroChapter.class);
+        register(BankChestChapter.class);
+        register(PlotIntroChapter.class);
+        register(PlotDepositChapter.class);
+        register(PlotExpandChapter.class);
+        register(IntroMarkChapter.class);
+        register(PathToEventChapter.class);
+        register(FallChapter.class);
+        register(ZombieChapter.class);
+        register(GorpsEnterChapter.class);
+        register(RecallChapter.class);
+        register(FinaleChapter.class);
+
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.plots.struct.PlayerPlot;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -22,6 +23,11 @@ public class GoldEquipmentListener implements Listener {
         if (event.isCancelled())
             return;
         Entity damager = event.getDamager();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
+            return;
+
+
         if (!(damager instanceof Player))
             return;
 
@@ -57,6 +63,9 @@ public class GoldEquipmentListener implements Listener {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
 
+        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+            return;
+
         //must be player
         if (!(entity instanceof Player))
             return;
@@ -79,6 +88,8 @@ public class GoldEquipmentListener implements Listener {
     public void onSuffocate(EntityDamageEvent entityDamageEvent) {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
+        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+            return;
 
         //must be player
         if (!(entity instanceof Player))
@@ -103,6 +114,10 @@ public class GoldEquipmentListener implements Listener {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
 
+        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+            return;
+
+
         //must be player
         if (!(entity instanceof Player))
             return;
@@ -124,6 +139,10 @@ public class GoldEquipmentListener implements Listener {
     public void onFall(EntityDamageEvent entityDamageEvent) {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+            return;
+
 
         //must be player
         if (!(entity instanceof Player))

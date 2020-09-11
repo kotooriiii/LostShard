@@ -2,16 +2,16 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.channels.ChannelManager;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
+import com.github.kotooriiii.plots.events.PlotCreateEvent;
+import com.github.kotooriiii.plots.events.PlotDepositEvent;
+import com.github.kotooriiii.plots.events.PlotExpandEvent;
 import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
-import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.status.Staff;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -67,7 +67,7 @@ public class PlotCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to create your own plot? /plot create (name)");
                             else if (plotSenderPlayer.hasReachedMaxPlots())
                                 playerSender.sendMessage(ERROR_COLOR + "You've reached the max amount of plots you can own.");
-                            else if (plotManager.hasNearbyPlots(playerSender))
+                            else if (plotManager.hasNearbyPlots(playerSender.getLocation()))
                                 playerSender.sendMessage(ERROR_COLOR + "There are other plot(s) nearby. \nYou must be a minimum of " + Plot.MINIMUM_PLOT_CREATE_RANGE + " block(s) away from player plots and " + Plot.MINIMUM_PLOT_STAFF_CREATE_RANGE + " block(s) away from staff plots.");
                             else if (supply.length() > 16)
                                 playerSender.sendMessage(ERROR_COLOR + "The name can not exceed 16 characters.");
@@ -302,7 +302,10 @@ public class PlotCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "You don't have the money to expand your plot. You need " + df.format(expandPlot.getExpandCost()) + " to expand to the next size.");
                                 return false;
                             }
-
+                            PlotExpandEvent event = new PlotExpandEvent(playerSender, expandPlot, expandPlot.getRadius());
+                            LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                            if(event.isCancelled())
+                                return false;
                             expandPlot.expand();
                             expandPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " expanded the plot to size " + expandPlot.getRadius() + ".");
                             break;
@@ -343,6 +346,11 @@ public class PlotCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "You can't deposit more than your current balance.");
                                 return false;
                             }
+
+                            PlotDepositEvent depositEvent = new PlotDepositEvent(playerSender, depositPlot, deposit.doubleValue());
+                            LostShardPlugin.plugin.getServer().getPluginManager().callEvent(depositEvent);
+                            if(depositEvent.isCancelled())
+                                return false;
 
                             bank.setCurrency(currentCurrency - deposit.doubleValue());
                             depositPlot.deposit(deposit.doubleValue());
@@ -756,14 +764,20 @@ public class PlotCommand implements CommandExecutor {
     }
 
     public void createPlot(Player player, String name) {
-        Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
-        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
-
-        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
-        removeIngredients(player, ingredients);
-
 
         PlayerPlot playerPlot = new PlayerPlot(name, player.getUniqueId(), player.getLocation());
+        PlotCreateEvent event = new PlotCreateEvent(player, playerPlot);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return;
+
+
+        Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
+        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
+
+        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+        removeIngredients(player, ingredients);
+
         LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
         player.sendMessage(ChatColor.GOLD + "You have created the plot \"" + playerPlot.getName() + "\", it cost $" + PlayerPlot.CREATE_COST + " and 1 diamond.");
     }

@@ -132,9 +132,9 @@ public class PlotManager {
         return null;
     }
 
-    public  boolean hasNearbyPlots(Player player) {
+    public  boolean hasNearbyPlots(Location location) {
         for (Plot plot : getAllPlots())
-            if (!plot.isMinimumDistancePlotCreate(player))
+            if (!plot.isMinimumDistancePlotCreate(location))
                 return true;
         return false;
     }

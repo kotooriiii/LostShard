@@ -1,5 +1,6 @@
 package com.github.kotooriiii.npc.type.guard;
 
+import com.github.kotooriiii.npc.type.tutorial.TutorialTrait;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
@@ -27,6 +28,7 @@ public class GuardNPC  {
         npc.setProtected(true);
         GuardTrait guardTrait = new GuardTrait(name, location);
         npc.addTrait(guardTrait);
+        npc.addTrait(new TutorialTrait());
     }
 
     public static Iterable<NPC> getAllGuardNPC()

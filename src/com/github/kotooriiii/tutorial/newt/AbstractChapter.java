@@ -42,7 +42,6 @@ public abstract class AbstractChapter extends Observable implements Listener {
     public final static  int DELAY_TICK = 40;
     public final static int TIP_DELAY = 20*10;
 
-
     /**
      * The default constructor for the chapter.
      */
@@ -135,7 +134,7 @@ public abstract class AbstractChapter extends Observable implements Listener {
      *
      * @return This method will always advance to the next one. However, it will immediately return if the chapter has not been initialized or if it has already been completed.
      */
-    public final void setComplete() throws RuntimeException {
+    public final void setComplete()  {
         if (this.uuid == null)
             return;
         //throw new RuntimeException("The chapter has not been initialized.");

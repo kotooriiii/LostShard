@@ -1,6 +1,7 @@
 package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -221,6 +222,8 @@ public class SurvivalismListener implements Listener {
     public void onFireCampfire(EntityDamageEvent event) {
         Entity damagedEntity = event.getEntity();
         EntityDamageEvent.DamageCause cause = event.getCause();
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
 
         if (!(damagedEntity instanceof Player))
             return;
@@ -273,6 +276,8 @@ public class SurvivalismListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPPlayerDeath(PlayerDeathEvent event) {
         Player defenderPlayer = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
@@ -303,6 +308,8 @@ public class SurvivalismListener implements Listener {
     public void onXPEntityDeath(EntityDeathEvent event) {
 
         LivingEntity defenderEntity = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
 

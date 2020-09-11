@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -20,6 +21,11 @@ public class VoidDamageListener implements Listener {
     public void onVoidDMG(EntityDamageEvent event)
     {
         Entity damagedEntity = event.getEntity();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+
+
         EntityDamageEvent.DamageCause cause = event.getCause();
 
         if(!(damagedEntity instanceof Player))

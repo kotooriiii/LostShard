@@ -2,6 +2,7 @@ package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.util.HelperMethods;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -33,6 +34,10 @@ public class BrawlingListener implements Listener {
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
+
+
         if (!isPlayerInduced(defender, damager))
             return;
 
@@ -61,8 +66,15 @@ public class BrawlingListener implements Listener {
         if (event.isCancelled())
             return;
 
+
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager))
+            return;
+        if(CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
+
 
         if (!HelperMethods.isPlayerDamagerONLY(defender, damager))
             return;
@@ -87,6 +99,10 @@ public class BrawlingListener implements Listener {
     public void onXPPlayerDeath(PlayerDeathEvent event) {
 
         Player defenderPlayer = event.getEntity();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
@@ -119,6 +135,8 @@ public class BrawlingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPEntityDeath(EntityDeathEvent event) {
         Entity defenderEntity = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))

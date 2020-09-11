@@ -2,11 +2,15 @@ package com.github.kotooriiii.hostility;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.hostility.events.PlatformCaptureEvent;
+import com.github.kotooriiii.hostility.events.PlatformStartEvent;
+import com.github.kotooriiii.hostility.events.PlatformVictoryEvent;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -68,7 +72,7 @@ public class HostilityMatch {
 
     public HostilityMatch(HostilityPlatform platform) {
         this.platform = platform;
-        this.maxTicks = toTicks(3);
+        this.maxTicks = LostShardPlugin.isTutorial() ? toTicks(0,15) : toTicks(3);
         this.lastClan = null;
         this.lastWinStreak = 0;
         init();
@@ -93,6 +97,7 @@ public class HostilityMatch {
             }
         }
         broadcast(ChatColor.GOLD + platform.getName() + " is now available for capture.", null);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new PlatformStartEvent(getPlatform()));
         activeHostilityGames.add(this);
         checkForCapturer();
     }
@@ -118,7 +123,6 @@ public class HostilityMatch {
                 if (capturingPlayer == null || !capturingPlayer.isOnline() || !platform.contains(capturingPlayer) || !capturingClan.isInThisClan(capturingPlayer.getUniqueId())) {
                     broadcast(ChatColor.YELLOW + capturingClan.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks), capturingClan);
                     capturingClan.broadcast(ChatColor.YELLOW + capturingPlayer.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks));
-
                     init();
                     this.cancel();
                     checkForCapturer();
@@ -153,11 +157,21 @@ public class HostilityMatch {
                     if (uniqueClan != null) {
                         Player[] players = platform.getUniqueClanPlayers(); //by definition, all of these players must be in the unique clan
                         int random = new Random().nextInt(players.length);
-                        capturingClan = uniqueClan;
-                        capturingPlayer = players[random];
-                        if (lastClan != null && capturingClan.equals(lastClan))
-                            winStreak = lastWinStreak;
+                        Player chosen = players[random];
 
+                        PlatformCaptureEvent event = new PlatformCaptureEvent(chosen, uniqueClan);
+                        if (lastClan != null && capturingClan.equals(lastClan))
+                            event.setWins(lastWinStreak);
+                        else
+                            event.setWins(0);
+
+                            LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                        if(event.isCancelled())
+                            return;
+                        capturingClan = event.getClan();
+                        capturingPlayer = event.getPlayer();
+                        if (lastClan != null && capturingClan.equals(lastClan))
+                            winStreak = event.getWins();
                         this.cancel();
                         start();
                         return;
@@ -224,6 +238,7 @@ public class HostilityMatch {
                         this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
                         capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
 
+                        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new PlatformVictoryEvent(capturingPlayer, capturingClan, platform.getName()));
 
                         win();
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
@@ -578,6 +593,10 @@ public class HostilityMatch {
     }
 
     public void broadcast(String message, Clan clan) {
+
+        if(LostShardPlugin.isTutorial())
+            return;
+
         if (clan == null) {
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 player.sendMessage(message);
@@ -585,6 +604,9 @@ public class HostilityMatch {
             }
             return;
         }
+
+
+
         UUID[] clanUUIDS = clan.getOnlineUUIDS();
         Player[] clanPlayers = new Player[clanUUIDS.length];
         for (int i = 0; i < clanUUIDS.length; i++) {
@@ -597,7 +619,6 @@ public class HostilityMatch {
             for (Player clanPlayer : clanPlayers) {
                 if (clanPlayer.getUniqueId().equals(player.getUniqueId()))
                     continue all;
-                break clan;
             }
             player.sendMessage(message);
         }

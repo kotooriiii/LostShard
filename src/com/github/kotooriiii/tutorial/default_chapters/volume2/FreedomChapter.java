@@ -9,9 +9,11 @@ import org.bukkit.event.player.PlayerMoveEvent;
 public class FreedomChapter extends AbstractChapter {
 
     private Zone zone;
-    public FreedomChapter()
-    {
+    private boolean isComplete;
+
+    public FreedomChapter() {
         //todo zone
+        isComplete = false;
     }
 
     @Override
@@ -26,6 +28,8 @@ public class FreedomChapter extends AbstractChapter {
 
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
+        if (isComplete)
+            return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
@@ -36,7 +40,7 @@ public class FreedomChapter extends AbstractChapter {
         Location to = event.getTo();
         if (!zone.contains(to))
             return;
-
+        isComplete = true;
         sendMessage(event.getPlayer(), "You've made it!\nMake your way to Order straight ahead.");
         setComplete();
     }

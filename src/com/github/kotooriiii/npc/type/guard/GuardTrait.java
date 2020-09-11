@@ -2,10 +2,13 @@ package com.github.kotooriiii.npc.type.guard;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.npc.Skin;
+import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
 import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import com.github.kotooriiii.tutorial.events.TutorialMurdererDeathEvent;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
@@ -13,6 +16,7 @@ import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.util.DataKey;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -21,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Iterator;
 import java.util.Random;
+import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.GUARD_COLOR;
 
@@ -42,9 +47,9 @@ public class GuardTrait extends Trait {
 
     private boolean isBusy = false;
     private boolean isCalled = false;
+    private UUID owner;
 
-    public GuardTrait()
-    {
+    public GuardTrait() {
         super("GuardTrait");
     }
 
@@ -71,7 +76,7 @@ public class GuardTrait extends Trait {
 
     // An example event handler. All traits will be registered automatically as Bukkit Listeners.
     @EventHandler
-    public void click(net.citizensnpcs.api.event.NPCRightClickEvent event) {
+    public void click(NPCRightClickEvent event) {
         //Handle a click on a NPC. The event has a getNPC() method.
         //Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on this NPC!
         if (!event.getNPC().equals(this.getNPC()))
@@ -90,18 +95,37 @@ public class GuardTrait extends Trait {
     // Called every tick
     @Override
     public void run() {
-        if(getNPC() == null)
+        if (getNPC() == null)
             return;
-        if(!getNPC().isSpawned())
+        if (!getNPC().isSpawned())
+            return;
+        if (isBusy)
             return;
         for (Entity entity : getNPC().getStoredLocation().getWorld().getNearbyEntities(getNPC().getStoredLocation(), warningRadius, warningRadius, warningRadius)) {
 
-            if(CitizensAPI.getNPCRegistry().isNPC(entity))
-                continue;
+            NPC npc = CitizensAPI.getNPCRegistry().getNPC(entity);
 
-            if (entity instanceof Player) {
+
+            //NPC exists and is tutorial.
+            if (npc != null && LostShardPlugin.isTutorial()) {
+                MurdererTrait trait = npc.getTrait(MurdererTrait.class);
+
+                if (trait == null)
+                    continue;
+                if(getOwner() == null || !trait.getTargetTutorial().getUniqueId().equals(getOwner()))
+                    continue;
+
+                isCalled = false;
+                isBusy = true;
+                teleportKill(npc);
+                return;
+            }
+
+            //Player AND not a "madeup" player from Citizens
+            else if (entity instanceof Player && !CitizensAPI.getNPCRegistry().isNPC(entity)){
+
                 Player player = (Player) entity;
-                if(player.isDead())
+                if (player.isDead())
                     continue;
                 if (Staff.isStaff(player.getUniqueId()))
                     continue;
@@ -119,7 +143,6 @@ public class GuardTrait extends Trait {
                     isCalled = false;
                     isBusy = true;
                     teleportKill(player);
-
                     return;
                 } else {
 
@@ -133,8 +156,8 @@ public class GuardTrait extends Trait {
 
 
                 }
-
             }
+
         }
     }
 
@@ -206,6 +229,15 @@ public class GuardTrait extends Trait {
         isCalled = called;
     }
 
+    public void setOwner(UUID owner) {
+        this.owner = owner;
+    }
+
+    public UUID getOwner()
+    {
+        return this.owner;
+    }
+
     //END OF BASIC GETTERS/SETTERS
 
     private void sendMessage(Player clicker, NPC clicked) {
@@ -251,7 +283,7 @@ public class GuardTrait extends Trait {
         }
     }
 
-    public void teleportKill(Player player) {
+    private void teleportKill(Player player) {
         if (!npc.isSpawned())
             return;
         //Get the world
@@ -275,11 +307,48 @@ public class GuardTrait extends Trait {
             public void run() {
                 if (!npc.isSpawned())
                     return;
-                isBusy = false;
                 npc.teleport(guardingLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                isBusy = false;
             }
         }.runTaskLater(LostShardPlugin.plugin, 20);
-        ;
     }
+
+    private void teleportKill(NPC npcParam) {
+        if (!this.npc.isSpawned())
+            return;
+        //Get the world
+        World w = npcParam.getStoredLocation().getWorld();
+
+        w.spawnParticle(Particle.FIREWORKS_SPARK, npcParam.getStoredLocation(), 20, 0.3, 0.3, 0.3);
+
+        //Get location of player in case of logging out
+        final Location playerLocation = npcParam.getStoredLocation();
+
+        this.npc.teleport(playerLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        w.spawnParticle(Particle.CRIT, playerLocation, 50, 0.3, 0.3, 0.3);
+        w.spawnParticle(Particle.DRAGON_BREATH, playerLocation, 50, 2, 2, 2);
+
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new TutorialMurdererDeathEvent(npcParam));
+        if(npcParam.getEntity() instanceof LivingEntity)
+        ((LivingEntity) npcParam.getEntity()).setHealth(0);
+        new BukkitRunnable(){
+
+            @Override
+            public void run() {
+                npcParam.getOwningRegistry().deregister(npcParam);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20*5);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!npc.isSpawned())
+                    return;
+                npc.teleport(guardingLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                isBusy = false;
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20);
+    }
+
 
 }

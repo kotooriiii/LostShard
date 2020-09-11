@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -97,6 +98,10 @@ public class BlockChangePlotListener implements Listener {
     public void onEntityDamage(VehicleDamageEvent vehicleDamageEvent) {
         final Vehicle vehicle = vehicleDamageEvent.getVehicle();
 
+        if(CitizensAPI.getNPCRegistry().isNPC(vehicle))
+            return;
+
+
         final Location location = vehicle.getLocation();
         //Check entity
         final Entity entity = vehicleDamageEvent.getAttacker();
@@ -147,6 +152,10 @@ public class BlockChangePlotListener implements Listener {
         final Location location = entity.getLocation();
         //Check entity
         final Entity damagerEntity = event.getDamager();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(entity) || CitizensAPI.getNPCRegistry().isNPC(damagerEntity))
+            return;
+
 
         if (!(entity instanceof ArmorStand))
             return;
@@ -362,6 +371,8 @@ public class BlockChangePlotListener implements Listener {
 
         final Location location = event.getEntity().getLocation();
         //If entity is not a player then cancel it
+        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
 
 
         if (!(event.getEntity() instanceof ItemFrame))

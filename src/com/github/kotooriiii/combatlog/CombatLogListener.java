@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import net.citizensnpcs.api.CitizensAPI;
 import net.minecraft.server.v1_15_R1.CommandGamemode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -117,6 +118,8 @@ public class CombatLogListener implements Listener {
 
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(defender) || CitizensAPI.getNPCRegistry().isNPC(damager))
+            return;
 
         if (!isPlayerInduced(defender, damager))
             return;

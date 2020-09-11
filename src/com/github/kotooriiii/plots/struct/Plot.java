@@ -11,10 +11,10 @@ import java.util.*;
 
 public abstract class Plot implements Serializable {
 
-    public static final int MINIMUM_PLOT_STAFF_CREATE_RANGE = 100;
-    public static final int MINIMUM_PLOT_EXPAND_RANGE = 75;
+    public static final int MINIMUM_PLOT_STAFF_CREATE_RANGE = LostShardPlugin.isTutorial() ? 25 : 100;
+    public static final int MINIMUM_PLOT_EXPAND_RANGE = LostShardPlugin.isTutorial() ? 25 : 75;
     private static final long serialVersionUID = 1L;
-    public static final int MINIMUM_PLOT_CREATE_RANGE = 10;
+    public static final int MINIMUM_PLOT_CREATE_RANGE = LostShardPlugin.isTutorial() ? 5 : 10;
 
     /**
      * The plot's ID
@@ -82,12 +82,12 @@ public abstract class Plot implements Serializable {
     }
 
     /**
-     * Checks if a player can safely create a plot when using *this* plot independently.
+     * Checks if a location can safely create a plot when using *this* plot independently.
      *
-     * @param player The player trying to create a plot.
+     * @param location The location trying to create a plot.
      * @return true if player can create plot, false if player is not far enough yet.
      */
-    public boolean isMinimumDistancePlotCreate(Player player) {
+    public boolean isMinimumDistancePlotCreate(Location location) {
 
         int distance = MINIMUM_PLOT_CREATE_RANGE;
         if (plotType.isStaff())
@@ -104,7 +104,7 @@ public abstract class Plot implements Serializable {
         int maxZ = getZone().getZ2() + distance;
 
         Zone zone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
-        if (zone.contains(player.getLocation()) && this.world.equals(player.getWorld()))
+        if (zone.contains(location) && this.world.equals(location.getWorld()))
             return false;
         return true;
     }
