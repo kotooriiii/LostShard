@@ -68,7 +68,6 @@ public final class FileManager {
     private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
     private static File ignoredPlayer_folder =new File(plugin_folder + File.separator + "ignored_player");
 
-
     private static File config = new File(plugin_folder + File.separator + "config.yml");
 
 

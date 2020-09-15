@@ -2,13 +2,11 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.events.PlotDepositEvent;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import javax.swing.*;
 
 public class PlotDepositChapter extends AbstractChapter {
     @Override

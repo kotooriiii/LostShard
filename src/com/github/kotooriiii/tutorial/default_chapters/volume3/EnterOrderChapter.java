@@ -2,7 +2,7 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -17,7 +17,7 @@ public class EnterOrderChapter extends AbstractChapter {
 
     public EnterOrderChapter() {
         isComplete=false;
-        //todo this.zone =
+        this.zone = new Zone(558, 558, 72, 66, 796, 817);
     }
 
     @Override
@@ -65,4 +65,20 @@ public class EnterOrderChapter extends AbstractChapter {
             }
         }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
     }
+
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+            return;
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+
+        event.setCancelled(true);
+    }
+
 }

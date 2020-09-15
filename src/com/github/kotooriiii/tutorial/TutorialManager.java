@@ -1,4 +1,8 @@
-package com.github.kotooriiii.tutorial.newt;
+package com.github.kotooriiii.tutorial;
+
+import com.github.kotooriiii.bungee.BungeeTutorialCompleteChannel;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 import java.util.HashMap;
 import java.util.Observable;
@@ -84,14 +88,19 @@ public class TutorialManager implements Observer {
             case RESET:
                 break;
             case SKIP:
-                //todo talk to bungee
+                BungeeTutorialCompleteChannel.getInstance().sendTutorialComplete(uuid, false);
                 break;
             case COMPLETE:
-                //todo talk to bungee and award
+                BungeeTutorialCompleteChannel.getInstance().sendTutorialComplete(uuid, true);
                 break;
         }
 
         return playerProgressions.remove(uuid, book);
+    }
+
+    public World getTutorialWorld()
+    {
+        return Bukkit.getWorld("world");
     }
 
     /**

@@ -3,7 +3,7 @@ package com.github.kotooriiii.tutorial.default_chapters.volume2;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.skills.events.MiningSkillEvent;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,8 +18,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.swing.*;
-
 public class IntroMiningChapter extends AbstractChapter {
 
     private int counter;
@@ -31,8 +29,8 @@ public class IntroMiningChapter extends AbstractChapter {
     public IntroMiningChapter() {
         counter = 0;
         isFirstTime = true;
-        isComplete=false;
-        //todo zone
+        isComplete = false;
+        this.zone = new Zone(370, 363, 42, 38, 723, 718);
     }
 
     @Override

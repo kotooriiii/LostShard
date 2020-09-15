@@ -1,16 +1,13 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
-import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class PathToEventChapter extends AbstractChapter {
 
@@ -20,7 +17,7 @@ public class PathToEventChapter extends AbstractChapter {
     public PathToEventChapter()
     {
         isComplete = false;
-        //todo zone
+        this.zone = new Zone(929, 884, 110, 89, 978, 949);
     }
 
     @Override

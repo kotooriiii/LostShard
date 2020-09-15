@@ -1,7 +1,7 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume2;
 
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,7 +24,7 @@ public class DeadEndChapter extends AbstractChapter {
     public DeadEndChapter()
     {
         isComplete=false;
-        //todo zone this.zone =
+        this.zone = new Zone(393, 400, 40, 37, 723, 718);
     }
 
     @Override

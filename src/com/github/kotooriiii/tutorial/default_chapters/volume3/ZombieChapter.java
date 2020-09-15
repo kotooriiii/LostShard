@@ -3,8 +3,7 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
-import net.citizensnpcs.api.CitizensAPI;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.*;
@@ -12,25 +11,23 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 public class ZombieChapter extends AbstractChapter {
 
     private int counter;
     private List<Zombie> entityList;
+    private Zone cantLeaveZone;
 
     public ZombieChapter() {
         this.counter = 0;
         this.entityList = new ArrayList<>();
-        //todo zone
+        cantLeaveZone = new Zone(442, 477, 78, 30, 1109, 1068);
     }
 
     @Override
@@ -39,6 +36,8 @@ public class ZombieChapter extends AbstractChapter {
         final Player player = Bukkit.getPlayer(getUUID());
         if (player == null)
             return;
+
+        setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 540, 58, 1160, 126, 3));
 
         new BukkitRunnable() {
             @Override
@@ -52,7 +51,7 @@ public class ZombieChapter extends AbstractChapter {
     }
 
     private void spawnZombies(Player player) {
-        final int x =?,y =?,z ?;
+        final int x =523, y=56, z=1149;
 
         player.getWorld().createExplosion(x, y, z, 6f, false, false);
 
@@ -142,6 +141,20 @@ public class ZombieChapter extends AbstractChapter {
 
         //kill zombies
         onBegin();
+    }
+
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(!cantLeaveZone.contains(event.getTo()))
+            return;
+        sendMessage(event.getPlayer(), "You must defeat the zombies before being able to venture out.");
+        event.setCancelled(true);
     }
 
 }

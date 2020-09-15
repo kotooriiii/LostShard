@@ -1,6 +1,5 @@
-package com.github.kotooriiii.tutorial.newt;
+package com.github.kotooriiii.tutorial;
 
-import com.github.kotooriiii.plots.events.PlotDepositEvent;
 import com.github.kotooriiii.tutorial.default_chapters.volume1.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume2.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume3.*;

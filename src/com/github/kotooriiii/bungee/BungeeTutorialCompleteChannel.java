@@ -29,16 +29,16 @@ public class BungeeTutorialCompleteChannel {
     Send
     TutorialLostShard->BungeeCord:Complete
      */
-    public void sendTutorialComplete(Player player, boolean isAuthentic) {
+    public void sendTutorialComplete(UUID uuid, boolean isAuthentic) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(player.getUniqueId().toString()); // Write the UUID
+        out.writeUTF(uuid.toString()); // Write the UUID
         out.writeUTF(String.valueOf(isAuthentic)); //Write if authentic
         Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete", out.toByteArray());
     }
 
-    private BungeeTutorialCompleteChannel instance;
+    private static  BungeeTutorialCompleteChannel instance;
 
-    public BungeeTutorialCompleteChannel getInstance() {
+    public static BungeeTutorialCompleteChannel getInstance() {
         if (instance == null) {
             synchronized (BungeeTutorialCompleteChannel.class) {
                 if (instance == null)

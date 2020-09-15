@@ -3,9 +3,8 @@ package com.github.kotooriiii.tutorial.default_chapters.volume2;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.ShardNMS;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import net.citizensnpcs.api.CitizensAPI;
-import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,15 +28,15 @@ public class TrackSpiderChapter extends AbstractChapter {
 
     private PacketHandler packetHandler;
     private UUID entityUUID;
-    private Location location;
+    private Location spiderLocation;
     private boolean isComplete;
 
 
     public TrackSpiderChapter() {
         packetHandler = null;
         entityUUID = null;
-        isComplete=false;
-        location = null; //todo set this
+        isComplete = false;
+        spiderLocation = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 297, 53, 684); //todo set this
     }
 
     @Override
@@ -48,7 +47,7 @@ public class TrackSpiderChapter extends AbstractChapter {
 
         LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().setLevel(100.0f);
 
-        Entity entity = player.getWorld().spawnEntity(location, EntityType.SPIDER);
+        Entity entity = player.getWorld().spawnEntity(spiderLocation, EntityType.SPIDER);
         entityUUID = entity.getUniqueId();
 
         initListener();
@@ -94,9 +93,6 @@ public class TrackSpiderChapter extends AbstractChapter {
             @Override
             public void onSend(SentPacket packet) {
 
-
-                //todo pseudo code
-
                 //If the packet is not the one we are searching for, return.
                 if (!packet.getPacketName().equals("PacketPlayOutSpawnEntityLiving"))
                     return;
@@ -139,16 +135,16 @@ public class TrackSpiderChapter extends AbstractChapter {
             return;
         event.setCancelled(true);
     }
-    @EventHandler
-    public void onDmg(EntityDamageByEntityEvent event)
-    {
-        Entity damager =event.getDamager();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
+    @EventHandler
+    public void onDmg(EntityDamageByEntityEvent event) {
+        Entity damager = event.getDamager();
+
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
             return;
-        if(!event.getEntity().getUniqueId().equals(entityUUID))
+        if (!event.getEntity().getUniqueId().equals(entityUUID))
             return;
-        if(damager.getUniqueId().equals(getUUID()))
+        if (damager.getUniqueId().equals(getUUID()))
             return;
         event.setCancelled(true);
     }
@@ -158,24 +154,24 @@ public class TrackSpiderChapter extends AbstractChapter {
      */
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
-        if(isComplete)
+        if (isComplete)
             return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if (location == null)
+        if (spiderLocation == null)
             return;
 
         final int distance = 5;
 
         Location to = event.getTo();
 
-        Zone zone = new Zone(location.getBlockX() - distance, location.getBlockX() + distance, location.getBlockY() - distance, location.getBlockY() + distance, location.getBlockZ() - distance, location.getBlockZ() + distance);
+        Zone zone = new Zone(spiderLocation.getBlockX() - distance, spiderLocation.getBlockX() + distance, spiderLocation.getBlockY() - distance, spiderLocation.getBlockY() + distance, spiderLocation.getBlockZ() - distance, spiderLocation.getBlockZ() + distance);
         if (!zone.contains(to))
             return;
 
-        isComplete=true;
+        isComplete = true;
         sendMessage(event.getPlayer(), "Great Job!");
         setComplete();
     }

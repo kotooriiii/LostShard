@@ -2,10 +2,9 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
-import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.type.RecallSpell;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

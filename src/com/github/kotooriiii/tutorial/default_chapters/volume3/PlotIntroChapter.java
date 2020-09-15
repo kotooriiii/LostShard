@@ -1,8 +1,9 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.plots.events.PlotCreateEvent;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PlotIntroChapter extends AbstractChapter {
     private boolean isFound;
     private Location location;
+    private static Zone zone = new Zone(738, 754, 72, 65, 796, 812);
 
     public PlotIntroChapter()
     {
@@ -69,5 +71,7 @@ public class PlotIntroChapter extends AbstractChapter {
         setComplete();
     }
 
-
+    public static Zone getZone() {
+        return zone;
+    }
 }

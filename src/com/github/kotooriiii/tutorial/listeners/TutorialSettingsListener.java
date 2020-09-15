@@ -3,9 +3,9 @@ package com.github.kotooriiii.tutorial.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
-import com.github.kotooriiii.tutorial.newt.TutorialBook;
-import com.github.kotooriiii.tutorial.newt.TutorialCompleteType;
-import com.github.kotooriiii.tutorial.newt.TutorialManager;
+import com.github.kotooriiii.tutorial.TutorialBook;
+import com.github.kotooriiii.tutorial.TutorialCompleteType;
+import com.github.kotooriiii.tutorial.TutorialManager;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -20,6 +20,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -46,6 +47,22 @@ public class TutorialSettingsListener implements Listener {
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
         event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDeath(EntityDamageByEntityEvent ev) //Listens to EntityDamageEvent
+    {
+        if (ev.getEntity() instanceof Player && ev.getDamager() instanceof Player) {
+            ev.setCancelled(true);
+            return;
+        }
+
+        if (ev.getEntity() instanceof Player && ev.getDamager() instanceof AbstractArrow) {
+            if (((AbstractArrow) ev.getDamager()).getShooter() instanceof Player) {
+                ev.setCancelled(true);
+                return;
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -100,15 +117,14 @@ public class TutorialSettingsListener implements Listener {
             public Pair(Zone z, Material[] mat, int seconds) {
                 this.z = z;
                 this.mats = mat;
-                this.seconds=seconds;
+                this.seconds = seconds;
             }
 
             public Material[] getMats() {
                 return mats;
             }
 
-            public int getSeconds()
-            {
+            public int getSeconds() {
                 return seconds;
             }
 
@@ -118,8 +134,10 @@ public class TutorialSettingsListener implements Listener {
         }
 
         Pair[] pairs = new Pair[]{
-                new Pair(new Zone(), new Material[]{Material.IRON_ORE, Material.GOLD_ORE, Material.STONE, Material.SAND, Material.GRAVEL}, 15),
-                new Pair(new Zone(), new Material[]{Material.MELON}, 5)
+                new Pair(new Zone(372, 316, 38, 102, 723, 634), new Material[]{Material.IRON_ORE, Material.GOLD_ORE}, 7),
+                new Pair(new Zone(392, 371, 38, 41, 719, 723), new Material[]{Material.IRON_ORE, Material.GOLD_ORE, Material.STONE, Material.ANDESITE}, 30),
+                new Pair(new Zone(403, 421, 38, 40, 722, 719), new Material[]{Material.IRON_ORE, Material.GOLD_ORE, Material.STONE, Material.ANDESITE}, 30),
+                new Pair(new Zone(746, 691, 48, 75, 1061, 1131), new Material[]{Material.MELON}, 5)
         };
 
         final Material type = event.getBlock().getType();

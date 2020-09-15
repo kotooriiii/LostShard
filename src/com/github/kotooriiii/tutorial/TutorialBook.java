@@ -1,12 +1,9 @@
-package com.github.kotooriiii.tutorial.newt;
+package com.github.kotooriiii.tutorial;
 
 
 import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Observable;
 import java.util.Observer;

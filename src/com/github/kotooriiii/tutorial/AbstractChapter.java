@@ -1,6 +1,5 @@
-package com.github.kotooriiii.tutorial.newt;
+package com.github.kotooriiii.tutorial;
 
-import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

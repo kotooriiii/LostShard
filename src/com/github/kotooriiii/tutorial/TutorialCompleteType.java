@@ -1,4 +1,4 @@
-package com.github.kotooriiii.tutorial.newt;
+package com.github.kotooriiii.tutorial;
 
 public enum TutorialCompleteType {
     RESET,SKIP,COMPLETE;

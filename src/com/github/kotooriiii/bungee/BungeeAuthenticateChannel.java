@@ -46,8 +46,7 @@ public class BungeeAuthenticateChannel implements PluginMessageListener {
             String uuidString = in.readUTF(); // Read the UUID
             UUID playerUUID = UUID.fromString(uuidString);
 
-            boolean isTutorialComplete=false;
-            //todo check if is in yaml, set the value of isTutorialComplete
+            boolean isTutorialComplete=LostShardPlugin.getTutorialReader().hasCompletedTutorial(playerUUID);
             authenticate(playerUUID, isTutorialComplete);
 
 

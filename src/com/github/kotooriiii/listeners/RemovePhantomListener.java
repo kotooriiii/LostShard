@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Phantom;
 import org.bukkit.event.EventHandler;
@@ -11,6 +12,10 @@ public class RemovePhantomListener implements Listener {
     @EventHandler (priority = EventPriority.LOWEST)
     public void onPhantomSpawn(EntitySpawnEvent event)
     {
+
+        if(LostShardPlugin.isTutorial())
+            return;
+
         Entity entity = event.getEntity();
         if(!(entity instanceof Phantom))
             return;

@@ -72,9 +72,12 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
+import com.github.kotooriiii.tutorial.SkipCommand;
+import com.github.kotooriiii.tutorial.TutorialReader;
+import com.github.kotooriiii.tutorial.listeners.PlayerJoinRealServerListener;
 import com.github.kotooriiii.tutorial.listeners.StatusListener;
 import com.github.kotooriiii.tutorial.listeners.TutorialSettingsListener;
-import com.github.kotooriiii.tutorial.newt.TutorialManager;
+import com.github.kotooriiii.tutorial.TutorialManager;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.citizensnpcs.api.CitizensAPI;
@@ -138,6 +141,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static GatheringManager gatheringManager;
     private static IgnoreManager ignoreManager;
     private static TutorialManager tutorialManager;
+    private static TutorialReader tutorialReader;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -271,6 +275,8 @@ public class LostShardPlugin extends JavaPlugin {
 
             getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete");
         } else {
+            tutorialReader = new TutorialReader();
+            LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new PlayerJoinRealServerListener(), this);
             getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate");
             getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Authenticate", BungeeAuthenticateChannel.getInstance());
             getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Complete", BungeeReceiveCompleteChannel.getInstance());
@@ -518,6 +524,9 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("build").setExecutor(new BuildCommand());
         getCommand("ignore").setExecutor(new IgnoreCommand());
+
+        getCommand("skip").setExecutor(new SkipCommand());
+
 
 
         //todo to use later -->
@@ -984,11 +993,6 @@ public class LostShardPlugin extends JavaPlugin {
         this.saveConfig();
     }
 
-    public static World getWorld()
-    {
-        return Bukkit.getWorld("LSWMAP2");
-    }
-
     public static int getGameTicks() {
         return gameTicks;
     }
@@ -1047,6 +1051,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static TutorialManager getTutorialManager() {
         return tutorialManager;
+    }
+
+    public static TutorialReader getTutorialReader() {
+        return tutorialReader;
     }
 
     public static LSBorder getBorder(String worldName) {

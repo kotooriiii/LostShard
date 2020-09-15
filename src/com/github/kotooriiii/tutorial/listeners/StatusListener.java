@@ -24,10 +24,10 @@ public class StatusListener implements Listener {
     public StatusListener() {
         this.a2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Elise");
         a2.setProtected(true);
-        //todo a2.spawn(new Location(LostShardPlugin.getWorld(), ));
+        a2.spawn(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 663, 66, 875));
 
         this.a1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Jackie");
-        //todo a1.spawn(new Location(LostShardPlugin.getWorld(), ));
+        a1.spawn(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 665, 66, 875));
 
         a1.setProtected(true);
         a1.getNavigator().setTarget(a2.getEntity(), true);
@@ -35,13 +35,13 @@ public class StatusListener implements Listener {
         a1.getNavigator().getLocalParameters().baseSpeed(0.0f);
 
         this.b2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Daniel");
-        //todo b2.spawn(new Location(LostShardPlugin.getWorld(), ));
+        b2.spawn(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 665, 66, 733));
 
         this.b1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.CORRUPT.getChatColor() + "[NPC] Marie");
         b1.setProtected(true);
         b1.getNavigator().setTarget(b2.getEntity(), true);
         b1.getNavigator().getLocalParameters().baseSpeed(0.0f);
-        //todo b1.spawn(new Location(LostShardPlugin.getWorld(), ));
+        b1.spawn(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 663, 66, 733));
 
     }
 
@@ -58,7 +58,7 @@ public class StatusListener implements Listener {
             if (entity instanceof LivingEntity)
                 ((LivingEntity) entity).setHealth(((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             event.setDamage(1);
-            event.getNPC().getEntity().setVelocity(new Vector(0,0,0));
+            event.getNPC().getEntity().setVelocity(new Vector(0, 0, 0));
             a1.setName(Status.CORRUPT.getChatColor() + "[NPC] Jackie");
 
             new BukkitRunnable() {
@@ -67,7 +67,7 @@ public class StatusListener implements Listener {
                     a1.setName(Status.WORTHY.getChatColor() + "[NPC] Jackie");
 
                 }
-            }.runTaskLater(LostShardPlugin.plugin, a1.getNavigator().getLocalParameters().attackDelayTicks()/2);
+            }.runTaskLater(LostShardPlugin.plugin, a1.getNavigator().getLocalParameters().attackDelayTicks() / 2);
 
         } else if (b2 == event.getNPC()) {
             event.setDamage((int) ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());

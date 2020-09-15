@@ -1,24 +1,20 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume1;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.UUID;
 
 public class TitleChapter extends AbstractChapter {
 
     @Override
     public void onBegin() {
 
-       Player player = Bukkit.getPlayer(getUUID());
-       if(player==null)
-           return;
+        Player player = Bukkit.getPlayer(getUUID());
+        if (player == null)
+            return;
 
         final int fadeIn = 10;
         final int stay = 40;
@@ -29,11 +25,25 @@ public class TitleChapter extends AbstractChapter {
         new BukkitRunnable() {
             @Override
             public void run() {
-                setComplete();
-                this.cancel();
-                return;
+
+
+                player.sendTitle(ChatColor.DARK_PURPLE + "", ChatColor.DARK_PURPLE + "You may skip the tutorial with '/skip' at any time.\nDeciding to complete the tutorial will reward you in the LostShard server.", fadeIn, stay, fadeOut);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        setComplete();
+                        this.cancel();
+                        return;
+
+
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
+
+
             }
         }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
+
 
     }
 

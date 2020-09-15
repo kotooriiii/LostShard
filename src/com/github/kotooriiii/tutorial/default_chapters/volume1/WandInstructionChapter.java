@@ -1,13 +1,10 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume1;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.events.BindEvent;
 import com.github.kotooriiii.events.SpellCastEvent;
-import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,13 +14,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class WandInstructionChapter extends AbstractChapter {
 
-    private Zone zone;
+    private int z;
     private boolean isComplete;
 
     public WandInstructionChapter() {
-        isComplete=false;
-      //todo
-        // zone = new Zone();
+        isComplete = false;
+        z = 467;
     }
 
     @Override
@@ -33,8 +29,7 @@ public class WandInstructionChapter extends AbstractChapter {
         if (player == null)
             return;
 
-        //todo
-        //setLocation();
+        setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 487, 65, 383, -27, 2));
 
         sendMessage(player, "To teleport, swing the stick in the direction you want to teleport.");
 
@@ -51,15 +46,15 @@ public class WandInstructionChapter extends AbstractChapter {
 
     @EventHandler
     public void move(PlayerMoveEvent event) {
-        if(isComplete)
+        if (isComplete)
             return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if(!zone.contains(event.getTo()))
+        if (event.getTo().getBlockZ() < z)
             return;
-        isComplete=true;
+        isComplete = true;
         setComplete();
 
     }
@@ -71,6 +66,20 @@ public class WandInstructionChapter extends AbstractChapter {
         if (!isActive())
             return;
         event.getPlayer().getInventory().setItem(9, new ItemStack(Material.FEATHER, 64));
+    }
+
+    @EventHandler
+    public void onFall(PlayerMoveEvent event) {
+
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+
+        if (event.getTo().getBlockY() < 45) {
+            if (!event.getPlayer().isDead())
+                event.getPlayer().damage(500.0f);
+        }
     }
 
 

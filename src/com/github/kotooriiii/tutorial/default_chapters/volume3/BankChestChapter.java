@@ -2,12 +2,13 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class BankChestChapter extends AbstractChapter {
@@ -41,5 +42,19 @@ public class BankChestChapter extends AbstractChapter {
             return;
         }
         sendMessage((Player) event.getPlayer(), "Don't you want that diamond? It might just come in handy...");
+    }
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+            return;
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+
+        event.setCancelled(true);
     }
 }

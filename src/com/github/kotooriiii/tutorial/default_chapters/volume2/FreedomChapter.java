@@ -1,7 +1,7 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume2;
 
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -12,7 +12,7 @@ public class FreedomChapter extends AbstractChapter {
     private boolean isComplete;
 
     public FreedomChapter() {
-        //todo zone
+        this.zone = new Zone(423, 427, 44, 36, 724, 716);
         isComplete = false;
     }
 

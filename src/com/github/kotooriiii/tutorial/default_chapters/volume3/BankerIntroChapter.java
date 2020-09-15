@@ -1,18 +1,15 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
-import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.events.BankDepositEvent;
 import com.github.kotooriiii.hostility.Zone;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class BankerIntroChapter extends AbstractChapter {
 
@@ -21,7 +18,7 @@ public class BankerIntroChapter extends AbstractChapter {
     public BankerIntroChapter()
     {
         isComplete=false;
-        //todo
+        this.zone = new Zone(712, 703, 72, 68, 861, 874);
     }
 
     @Override
@@ -30,7 +27,7 @@ public class BankerIntroChapter extends AbstractChapter {
         if (player == null)
             return;
 
-        sendMessage(player, "Deposit your gold at the banker.");
+        sendMessage(player, "Deposit your gold at the banker. It is in here somewhere...");
     }
 
     @Override
@@ -57,7 +54,7 @@ public class BankerIntroChapter extends AbstractChapter {
 
         final Player player = event.getPlayer();
         player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 10));
-        sendMessage(player, "Type: /deposit (amount)");
+        sendMessage(player, "You found it! Let's deposit all the gold you mined.\nType: /deposit (amount)");
     }
 
     @EventHandler
@@ -68,5 +65,20 @@ public class BankerIntroChapter extends AbstractChapter {
         if (!isActive())
             return;
         setComplete();
+    }
+
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+            return;
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+
+        event.setCancelled(true);
     }
 }

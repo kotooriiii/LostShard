@@ -2,12 +2,10 @@ package com.github.kotooriiii.tutorial.default_chapters.volume2;
 
 import com.github.kotooriiii.skills.commands.blacksmithy.BlacksmithyType;
 import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-
-import javax.swing.*;
 
 public class MinerHutChapter extends AbstractChapter {
     @Override
@@ -16,7 +14,7 @@ public class MinerHutChapter extends AbstractChapter {
         if (player == null)
             return;
 
-        sendMessage(player, "Your pickaxe is considerably low.\nYou can use the Blacksmithy skill to repair it.\nHold it in your hand and type: /repair");
+        sendMessage(player, "A miner station!\nYour pickaxe is considerably low. You can use the Blacksmithy skill to repair it.\nHold it in your hand and type: /repair");
     }
 
     @Override

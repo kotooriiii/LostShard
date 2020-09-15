@@ -1,9 +1,8 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume1;
 
-import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.BindEvent;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.tutorial.newt.AbstractChapter;
+import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,10 +12,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class GrabStickFromChestChapter extends AbstractChapter {
     @Override
