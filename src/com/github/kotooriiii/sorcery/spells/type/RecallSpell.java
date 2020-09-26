@@ -2,6 +2,7 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
+import com.github.kotooriiii.sorcery.events.SuccessfulRecallEvent;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
@@ -215,8 +216,11 @@ public class RecallSpell extends Spell implements Listener {
      * @return
      */
     private void postCast(Player playerSender, MarkPlayer.Mark mark) {
+        SuccessfulRecallEvent event = new SuccessfulRecallEvent(playerSender);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        if(event.isCancelled())
+            return;
         playerSender.teleport(mark.getLocation());
-
         playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
 
         if (mark.getName().equalsIgnoreCase("spawn")) {

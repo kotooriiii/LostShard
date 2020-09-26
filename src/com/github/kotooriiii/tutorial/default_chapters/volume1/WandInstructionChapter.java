@@ -2,6 +2,8 @@ package com.github.kotooriiii.tutorial.default_chapters.volume1;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
+import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,7 +17,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class WandInstructionChapter extends AbstractChapter {
 
     private int z;
-    private boolean isComplete;
+    private boolean isComplete,isHologramSetup;
+    private static final int dontGoPastOver = 354;
+
+    public static int getLimitZone()
+    {
+        return dontGoPastOver;
+    }
 
     public WandInstructionChapter() {
         isComplete = false;
@@ -32,17 +40,27 @@ public class WandInstructionChapter extends AbstractChapter {
         setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 487, 65, 383, -27, 2));
 
         sendMessage(player, "To teleport, swing the stick in the direction you want to teleport.");
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                sendMessage(player, "Make it past the ravine to get to the next marker!");
-                this.cancel();
-                return;
-            }
-        }.runTaskLater(LostShardPlugin.plugin, DELAY_TICK);
-
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
     }
+
+    @EventHandler
+    public void onCast2(SpellCastEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(event.getSpell().getType() != SpellType.TELEPORT)
+            return;
+        if(isHologramSetup)
+            return;
+
+        isHologramSetup=true;
+        sendMessage(event.getPlayer(), "Make it past the ravine to get to the next marker!");
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+    }
+
 
     @EventHandler
     public void move(PlayerMoveEvent event) {
@@ -80,6 +98,25 @@ public class WandInstructionChapter extends AbstractChapter {
             if (!event.getPlayer().isDead())
                 event.getPlayer().damage(500.0f);
         }
+    }
+
+    @EventHandler
+    public void onProximity(PlayerMoveEvent event) {
+
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(isHologramSetup)
+            return;
+
+        Location to = event.getTo();
+        if (to.getBlockZ() < WandInstructionChapter.getLimitZone())
+            return;
+
+        sendMessage(event.getPlayer(), "You can't go past here until you swing your wand!");
+        event.setCancelled(true);
+
     }
 
 

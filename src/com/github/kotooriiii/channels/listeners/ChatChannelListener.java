@@ -49,6 +49,7 @@ public class ChatChannelListener implements Listener {
                 @Override
                 public void run() {
                     artificialMessage(asyncPlayerChatEvent);
+                    this.cancel();
                 }
             }.runTask(LostShardPlugin.plugin);
         } else {

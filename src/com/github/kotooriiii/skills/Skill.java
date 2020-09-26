@@ -1,5 +1,7 @@
 package com.github.kotooriiii.skills;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.skills.events.SkillLevelUpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -11,7 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
 
-public class Skill  {
+public class Skill {
 
     private SkillBuild parentBuild;
 
@@ -66,6 +68,10 @@ public class Skill  {
 
             boolean isLeveledUp = addLevels(randomSkillPoint);
 
+            SkillLevelUpEvent event = new SkillLevelUpEvent(parentBuild.getSkillPlayer().getPlayerUUID(), getType(), (int) new BigDecimal(getLevel()).setScale(1, RoundingMode.HALF_UP).floatValue());
+            LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+            if(event.isCancelled())
+                return false;
 
             if (isLeveledUp) {
                 float leftoverXP = this.xp - getMaxXPOf(this.level);
@@ -78,6 +84,10 @@ public class Skill  {
             sendLevelUpMessage(randomSkillPoint);
 
             if (this.xp < 0) this.xp = 0;
+
+
+
+
             return isLeveledUp;
         }
         return false;
@@ -195,7 +205,7 @@ public class Skill  {
 
     private void sendLevelUpMessage(float val) {
         Player player = Bukkit.getPlayer(parentBuild.getSkillPlayer().getPlayerUUID());
-        if(player == null || !player.isOnline())
+        if (player == null || !player.isOnline())
             return;
 
         BigDecimal valMessage = new BigDecimal(val).setScale(1, RoundingMode.HALF_UP);

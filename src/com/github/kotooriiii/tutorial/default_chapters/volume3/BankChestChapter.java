@@ -17,7 +17,8 @@ public class BankChestChapter extends AbstractChapter {
         final Player player = Bukkit.getPlayer(getUUID());
         if(player==null)
             return;
-        LostShardPlugin.getBankManager().wrap(player.getUniqueId()).getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
+        LostShardPlugin.getBankManager().wrap(player.getUniqueId()).getInventory().setItem(13, new ItemStack(Material.DIAMOND, 1));
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(player, "To access your bank, type /bank\nNo one else has access to your bank.");
     }
 
@@ -51,7 +52,7 @@ public class BankChestChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+        if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
         sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
 

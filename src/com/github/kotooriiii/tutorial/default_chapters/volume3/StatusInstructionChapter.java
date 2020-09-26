@@ -27,7 +27,6 @@ public class StatusInstructionChapter extends AbstractChapter {
         Player player = Bukkit.getPlayer(getUUID());
         if (player == null)
             return;
-
     }
 
     @Override
@@ -101,7 +100,7 @@ public class StatusInstructionChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+        if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
         sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
 

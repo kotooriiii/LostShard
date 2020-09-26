@@ -1,8 +1,12 @@
 package com.github.kotooriiii.tutorial;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.tutorial.default_chapters.volume1.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume2.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume3.*;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import org.bukkit.Location;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -30,6 +34,8 @@ public class ChapterManager {
      * Registers the default story line of the tutorial.
      */
     public void registerDefault() {
+
+        //Volume initialization
 
         //Volume 1
         register(TitleChapter.class);
@@ -63,8 +69,8 @@ public class ChapterManager {
         register(GorpsEnterChapter.class);
         register(RecallChapter.class);
         register(FinaleChapter.class);
-
     }
+
 
     /**
      * Registers a chapter for the tutorial. Useful if you want to make your own storyline.

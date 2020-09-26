@@ -206,7 +206,6 @@ public class MarkPlayer {
     public void remove() {
         FileManager.removeFile(this);
         this.markPlayerHashMap.remove(this.playerUUID);
-
     }
 
     public void setMarks(Mark[] marks) {

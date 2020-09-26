@@ -28,7 +28,6 @@ public class GuardNPC  {
         npc.setProtected(true);
         GuardTrait guardTrait = new GuardTrait(name, location);
         npc.addTrait(guardTrait);
-        npc.addTrait(new TutorialTrait());
     }
 
     public static Iterable<NPC> getAllGuardNPC()

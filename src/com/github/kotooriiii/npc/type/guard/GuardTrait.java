@@ -108,11 +108,9 @@ public class GuardTrait extends Trait {
 
             //NPC exists and is tutorial.
             if (npc != null && LostShardPlugin.isTutorial()) {
-                MurdererTrait trait = npc.getTrait(MurdererTrait.class);
-
-                if (trait == null)
+                if(!npc.hasTrait(MurdererTrait.class))
                     continue;
-                if(getOwner() == null || !trait.getTargetTutorial().getUniqueId().equals(getOwner()))
+                if(getOwner() == null || !npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getOwner()))
                     continue;
 
                 isCalled = false;
@@ -329,19 +327,18 @@ public class GuardTrait extends Trait {
         w.spawnParticle(Particle.DRAGON_BREATH, playerLocation, 50, 2, 2, 2);
 
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new TutorialMurdererDeathEvent(npcParam));
-        if(npcParam.getEntity() instanceof LivingEntity)
-        ((LivingEntity) npcParam.getEntity()).setHealth(0);
-        new BukkitRunnable(){
 
-            @Override
-            public void run() {
-                npcParam.getOwningRegistry().deregister(npcParam);
-            }
-        }.runTaskLater(LostShardPlugin.plugin, 20*5);
+        npcParam.getEntity().getWorld().spawnParticle(Particle.FIREWORKS_SPARK, npcParam.getStoredLocation(), 3, 0, 0f, 0f);
+        npcParam.getEntity().getWorld().playSound(npcParam.getStoredLocation(), Sound.ENTITY_PLAYER_DEATH, 10.0f, 3.0f);
+        npcParam.setProtected(false);
+        if(npcParam.getEntity() instanceof LivingEntity)
+        ((LivingEntity) npcParam.getEntity()).damage(20.0f);
 
         new BukkitRunnable() {
             @Override
             public void run() {
+                npcParam.despawn();
+                npcParam.getOwningRegistry().deregister(npcParam);
                 if (!npc.isSpawned())
                     return;
                 npc.teleport(guardingLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);

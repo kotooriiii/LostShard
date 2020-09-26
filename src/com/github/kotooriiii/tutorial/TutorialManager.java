@@ -1,8 +1,10 @@
 package com.github.kotooriiii.tutorial;
 
 import com.github.kotooriiii.bungee.BungeeTutorialCompleteChannel;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.event.HandlerList;
 
 import java.util.HashMap;
 import java.util.Observable;
@@ -22,6 +24,7 @@ public class TutorialManager implements Observer {
      * Manages the story line
      */
     private ChapterManager chapterManager;
+    private THologramManager hologramManager;
     private boolean isRestartWhenLoggedOff;
 
     /**
@@ -29,6 +32,7 @@ public class TutorialManager implements Observer {
      */
     public TutorialManager(boolean shouldRestartTutorialOnQuit) {
         playerProgressions = new HashMap<>();
+        hologramManager = new THologramManager();
         chapterManager = new ChapterManager();
         isRestartWhenLoggedOff = shouldRestartTutorialOnQuit;
     }
@@ -43,7 +47,16 @@ public class TutorialManager implements Observer {
     }
 
     /**
+     * The hologram manager works to register holograms for each chapter.
+     * @return the managing class for the holograms
+     */
+    public THologramManager getHologramManager() {
+        return hologramManager;
+    }
+
+    /**
      * Restarts the tutorial when the Player is logged off.
+     *
      * @return true if set to restart, false otherwise.
      */
     public boolean isRestartWhenLoggedOff() {
@@ -52,6 +65,7 @@ public class TutorialManager implements Observer {
 
     /**
      * Sets the value for the tutorial to restart when the Player is logged off.
+     *
      * @param restartWhenLoggedOff True for restart, false otherwise
      */
     public void setRestartWhenLoggedOff(boolean restartWhenLoggedOff) {
@@ -67,6 +81,17 @@ public class TutorialManager implements Observer {
         TutorialBook book = new TutorialBook(uuid, getChapterManager().getStory());
         book.addObserver(this);
         playerProgressions.put(uuid, book);
+        book.advance();
+    }
+
+    /**
+     * Checks to see if a player's UUID is in the tutorial.
+     *
+     * @param uuid The player's UUID.
+     * @return true if the player is currently in tutorial, false otherwise.
+     */
+    public boolean hasTutorial(UUID uuid) {
+        return wrap(uuid) != null;
     }
 
     /**
@@ -79,12 +104,19 @@ public class TutorialManager implements Observer {
         TutorialBook book = wrap(uuid);
         if (book == null)
             return false;
-        if(book.getCurrentChapter() != null && book.getCurrentChapter().isActive())
+        if (book.getCurrentChapter() != null && book.getCurrentChapter().isActive()) {
+            HandlerList.unregisterAll(book.getCurrentChapter());
             book.getCurrentChapter().onDestroy();
+        }
         book.deleteObserver(this);
 
-        switch (type)
+        for(Hologram hologram : getHologramManager().getList())
         {
+            getHologramManager().hideHologram(hologram, uuid);
+
+        }
+
+        switch (type) {
             case RESET:
                 break;
             case SKIP:
@@ -95,11 +127,11 @@ public class TutorialManager implements Observer {
                 break;
         }
 
+        getHologramManager().clear(uuid);
         return playerProgressions.remove(uuid, book);
     }
 
-    public World getTutorialWorld()
-    {
+    public World getTutorialWorld() {
         return Bukkit.getWorld("world");
     }
 
@@ -122,7 +154,7 @@ public class TutorialManager implements Observer {
     @Override
     public void update(Observable o, Object arg) {
 
-        if(!(arg instanceof TutorialCompleteType))
+        if (!(arg instanceof TutorialCompleteType))
             return;
 
         if (o instanceof TutorialBook) {

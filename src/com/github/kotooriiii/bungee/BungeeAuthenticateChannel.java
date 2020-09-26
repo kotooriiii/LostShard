@@ -32,7 +32,7 @@ public class BungeeAuthenticateChannel implements PluginMessageListener {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(uuid.toString()); // Write the UUID
         out.writeUTF(String.valueOf(isTutorialComplete)); // Write the UUID
-        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate", out.toByteArray());
+        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate".toLowerCase(), out.toByteArray());
     }
 
     /*

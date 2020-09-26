@@ -516,9 +516,12 @@ public class BlockChangePlotListener implements Listener {
 
     @EventHandler
     public void onSpawn(EntitySpawnEvent entitySpawnEvent) {
+        if(LostShardPlugin.isTutorial())
+            return;
         if (entitySpawnEvent.getEntity() instanceof Player)
             return;
-
+        if(CitizensAPI.getNPCRegistry().isNPC(entitySpawnEvent.getEntity()))
+            return;
         Location spawnedLocation = entitySpawnEvent.getLocation();
         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(spawnedLocation);
         if (plot == null)

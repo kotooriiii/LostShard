@@ -2,8 +2,10 @@ package com.github.kotooriiii.tutorial;
 
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.commands.HealCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -48,6 +50,7 @@ public class TutorialBook extends Observable implements Observer {
 
         //Destroys the old chapter and removes the observer.
         if (currentChapter != null) {
+            HandlerList.unregisterAll(currentChapter);
             currentChapter.onDestroy();
             currentChapter.deleteObserver(this);
         }
@@ -66,8 +69,17 @@ public class TutorialBook extends Observable implements Observer {
         currentChapter.addObserver(this);
 
         //If the player is not null when this method is invoked set the default location to the player's location
-        if (player != null)
+        if (player != null) {
             currentChapter.setLocation(player.getLocation());
+
+            if (this.getCurrentChapter().isUsingHeal())
+                HealCommand.heal(player, false);
+            else
+            {
+                player.setHealth(this.getCurrentChapter().getDefaultHealth());
+                player.setFoodLevel(this.getCurrentChapter().getDefaultFoodLevel());
+            }
+        }
 
         //Initialize the chapter.
         currentChapter.init(uuid);

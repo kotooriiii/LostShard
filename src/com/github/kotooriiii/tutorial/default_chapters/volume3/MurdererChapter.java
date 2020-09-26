@@ -7,31 +7,34 @@ import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
 import com.github.kotooriiii.tutorial.events.TutorialMurdererDeathEvent;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
-import com.sun.corba.se.impl.resolver.SplitLocalResolverImpl;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+
 public class MurdererChapter extends AbstractChapter {
 
     private int counter = 0;
-    private boolean isSpawnedMurderer = false;
+    private boolean isSpawnedMurderer = false, isHologramSetup = false, isHologramSetup2 = false;
 
 
     //todo
-    private static Zone zone = new Zone(590,592,66,66,796,794);
+    private static Zone zone = new Zone(590, 596, 60, 70, 813, 792);
     private static Location[] locations = new Location[]
             {
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 635, 71, 785),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 599, 70, 821),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 625, 71, 823),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 600, 71, 788)
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 630, 66, 795),
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 635, 68, 798),
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 635, 68, 808),
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 634, 68, 804)
             };
 
     @Override
@@ -40,7 +43,7 @@ public class MurdererChapter extends AbstractChapter {
         if (player == null)
             return;
 
-        isSpawnedMurderer=false;
+        isSpawnedMurderer = false;
         sendIntro(player);
     }
 
@@ -50,11 +53,14 @@ public class MurdererChapter extends AbstractChapter {
     }
 
     public void sendIntro(Player player) {
+        if (!isHologramSetup)
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(player, "This is Order. It is where all worthy players spawn.\nOrder protects Worthy players with Guards.\nIf you see a murderer, type /guards.");
+        isHologramSetup = true;
     }
 
     public void spawnMurderer(Player player) {
-        if(!player.isOnline())
+        if (!player.isOnline())
             return;
         Location location = locations[new Random().nextInt(locations.length)];
         MurdererNPC npc = new MurdererNPC(player);
@@ -62,67 +68,91 @@ public class MurdererChapter extends AbstractChapter {
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent event)
-    {
-        if(!event.getPlayer().getUniqueId().equals(getUUID()))
-            return;
-        if(!isActive())
-            return;
-        if(isSpawnedMurderer)
-            return;
-        if(!zone.contains(event.getTo()))
-            return;
-
-        Player player = event.getPlayer();
-        isSpawnedMurderer=true;
-        spawnMurderer(player);
-        sendMessage(player, "Watch out! A murderer!");
-
-        if(counter++>=1)
-            player.sendTitle("Type \"/guards\" when a Murderer is nearby.", "", 40, 40, 10);
-        return;
-    }
-
-    @EventHandler
-    public void onDeath(TutorialPlayerDeathEvent event)
-    {
-        if(!event.getPlayer().getUniqueId().equals(getUUID()))
-            return;
-        if(!isActive())
-            return;
-
-        isSpawnedMurderer=false;
-        sendIntro(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onNPCDeath(TutorialMurdererDeathEvent event)
-    {
-        if(!event.getNPC().getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getUUID()))
-            return;
-        if(!isActive())
-            return;
-
-        Player player = Bukkit.getPlayer(getUUID());
-        if(player!=null)
-        sendMessage(player, "Good job!\nGuards kill criminals and murderers instantly.\nLet's explore the site.");
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                setComplete();
-            }
-        }.runTaskLater(LostShardPlugin.plugin, DELAY_TICK);
-    }
-
-
-    @EventHandler
-    public void onLeaveOrder(PlayerMoveEvent event)
-    {
+    public void onMove(PlayerMoveEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+        if (isSpawnedMurderer)
+            return;
+        if (!zone.contains(event.getTo()))
+            return;
+
+        Player player = event.getPlayer();
+        isSpawnedMurderer = true;
+        spawnMurderer(player);
+        if (!isHologramSetup2)
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        isHologramSetup2 = true;
+        sendMessage(player, "Watch out! A murderer!");
+
+        if (counter++ >= 1)
+            player.sendTitle("", "Type \"/guards\" when a Murderer is nearby.", 40, 40, 10);
+        return;
+    }
+
+    @EventHandler
+    public void onDeath(TutorialPlayerDeathEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+
+        isSpawnedMurderer = false;
+        sendIntro(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onNPCDeath(TutorialMurdererDeathEvent event) {
+        if (!event.getNPC().getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        Player player = Bukkit.getPlayer(getUUID());
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+        player.sendMessage(ERROR_COLOR + "The murderer, Colton, has been killed!");
+        if (player != null)
+            sendMessage(player, "Good job! You killed the murderer using guards.");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                setComplete();
+                LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+                LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+                LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+
+            }
+        }.runTaskLater(LostShardPlugin.plugin, DELAY_TICK);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        NPC npc = null;
+        for (NPC inpc : MurdererNPC.getAllMurdererNPC()) {
+            if (!inpc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(event.getPlayer().getUniqueId()))
+                continue;
+            npc = inpc;
+            break;
+        }
+
+        if (npc == null)
+            return;
+
+        npc.getOwningRegistry().deregister(npc);
+
+    }
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
         sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
 

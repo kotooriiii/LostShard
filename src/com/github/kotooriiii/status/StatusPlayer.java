@@ -8,6 +8,7 @@ import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.time.Instant;
@@ -47,18 +48,15 @@ public class StatusPlayer {
         return kills;
     }
 
-    public ZonedDateTime getLastAtoneDate()
-    {
+    public ZonedDateTime getLastAtoneDate() {
         return lastAtoneDate;
     }
 
-    public ZonedDateTime getNextAtoneDate()
-    {
+    public ZonedDateTime getNextAtoneDate() {
         return lastAtoneDate.plusDays(5);
     }
 
-    public boolean isAbleToAtone()
-    {
+    public boolean isAbleToAtone() {
         ZonedDateTime days = ZonedDateTime.now().minusDays(7);
 
         Instant instantDaysSubtracted = days.toInstant();
@@ -66,10 +64,10 @@ public class StatusPlayer {
         return instantLastAtone.toEpochMilli() <= instantDaysSubtracted.toEpochMilli();
     }
 
-    public boolean hasAtonedBefore()
-    {
+    public boolean hasAtonedBefore() {
         return lastAtoneDate.toInstant().equals(Instant.EPOCH);
     }
+
     public void setKills(int kills) {
         this.kills = kills;
         save();
@@ -106,15 +104,17 @@ public class StatusPlayer {
             return false;
 
 
-        if(LostShardPlugin.isTutorial())
-        {
+        if (LostShardPlugin.isTutorial()) {
             boolean isFound = false;
             Iterable<NPC> npcs = MurdererNPC.getAllMurdererNPC();
-            for(NPC npc : npcs)
-            {
-                if(!npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getPlayerUUID()))
+            for (NPC npc : npcs) {
+                LivingEntity entity = npc.getTrait(MurdererTrait.class).getTargetTutorial();
+                if (entity == null)
                     continue;
-                isFound=true;
+                if (!entity.getUniqueId().equals(getPlayerUUID()))
+                    continue;
+                isFound = true;
+                break;
             }
             return isFound;
         }

@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,6 +20,9 @@ public class PlayerStatusRespawnListener implements Listener {
     public void onRespawnStatus(PlayerRespawnEvent event)
     {
         Player player = event.getPlayer();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(player))
+            return;
 
         Location loc = getSpawnLocation(player);
         if(loc!=null)

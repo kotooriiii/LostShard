@@ -16,6 +16,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.github.kotooriiii.data.Maps.*;
@@ -60,6 +62,7 @@ public class GorpsEnterChapter extends AbstractChapter {
         final Player player = event.getPlayer();
         setLocation(event.getTo());
         Clan clan = new Clan(player.getName(), player.getUniqueId());
+        clan.update(player.getUniqueId(), false);
         LostShardPlugin.getClanManager().addClan(clan, true);
 
         sendMessage(player, "You've made it to Gorps!\nHead to the center to capture it.");
@@ -124,55 +127,20 @@ public class GorpsEnterChapter extends AbstractChapter {
             }
         }
 
-        if(!exists) {
-            final int x = 317, y=104, z=924;
-            final int delayer = 20*2;
 
-            Location locA = new Location(event.getPlayer().getWorld(), x + 25, y, z - 25);
-            Entity riderA = LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locA, EntityType.SKELETON);
-            LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locA, EntityType.PHANTOM).addPassenger(riderA);
-            riderA.getWorld().playSound(riderA.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 10, 0);
-            riderA.getWorld().spawnParticle(Particle.FLASH, riderA.getLocation(), 5,0,0,0);
+        if (!exists) {
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Location locB = new Location(event.getPlayer().getWorld(), x + 25, y, z + 25);
+            //kill zombs
+            for (Entity entity : event.getPlayer().getWorld().getNearbyEntities(event.getPlayer().getLocation(), 100, 100, 100)) {
+                if (!(entity instanceof Zombie))
+                    continue;
+                if (entity.isDead())
+                    continue;
+                entity.remove();
+            }
 
-                    Entity riderB = LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locB, EntityType.SKELETON);
-                    LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locB, EntityType.PHANTOM).addPassenger(riderB);
-                    riderB.getWorld().playSound(riderB.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 10, 0);
-                    riderB.getWorld().spawnParticle(Particle.FLASH, riderB.getLocation(), 5,0,0,0);
-                    this.cancel();
-                }
-            }.runTaskLater(LostShardPlugin.plugin, delayer);
-
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Location locC = new Location(event.getPlayer().getWorld(), x - 25, y, z + 25);
-                    Entity riderC = LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locC, EntityType.SKELETON);
-                    LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locC, EntityType.PHANTOM).addPassenger(riderC);
-                    riderC.getWorld().playSound(riderC.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 10, 0);
-                    riderC.getWorld().spawnParticle(Particle.FLASH, riderC.getLocation(), 5,0,0,0);
-                    this.cancel();
-                }
-            }.runTaskLater(LostShardPlugin.plugin, delayer * 2);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Location locD = new Location(event.getPlayer().getWorld(), x - 25, y, z - 25);
-
-                    Entity riderD = LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locD, EntityType.SKELETON);
-                    LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locD, EntityType.PHANTOM).addPassenger(riderD);
-                    riderD.getWorld().playSound(riderD.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 10, 0);
-                    riderD.getWorld().spawnParticle(Particle.FLASH, riderD.getLocation(), 5,0,0,0);
-                    this.cancel();
-                }
-            }.runTaskLater(LostShardPlugin.plugin, delayer * 3);
-
+            spawnZombies();
+            spawnFlies();
         }
 
 
@@ -181,10 +149,87 @@ public class GorpsEnterChapter extends AbstractChapter {
             ItemMeta meta = bow.getItemMeta();
             meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
             bow.setItemMeta(meta);
-            event.getPlayer().getInventory().addItem(bow, new ItemStack(Material.ARROW, 1));
+            event.getPlayer().getInventory().setItem(1, bow);
+            event.getPlayer().getInventory().addItem(new ItemStack(Material.ARROW, 1));
         }
 
         event.setWins(2);
+    }
+
+    private void spawnFlies() {
+
+        World world = LostShardPlugin.getTutorialManager().getTutorialWorld();
+        final int x = 317, y = 104, z = 924;
+        final int delayer = 20 * 1;
+
+        Location[] locations = new Location[]
+                {
+                        new Location(world, x + 7, y, z - 7),
+                        new Location(world, x + 7, y, z + 7),
+                        new Location(world, x - 7, y, z + 7),
+                        new Location(world, x - 7, y, z - 7)
+                };
+        final int[] currentIndex = {0};
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                if (currentIndex[0] == locations.length) {
+                    this.cancel();
+                    return;
+                }
+
+                //spawn and then inc by one
+                spawnFly(locations[currentIndex[0]++]);
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, delayer);
+    }
+
+    private void spawnFly(Location locD) {
+
+        Skeleton riderD = (Skeleton) LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locD, EntityType.SKELETON);
+        riderD.setCustomName("[Tutorial] Skelly");
+        riderD.setCustomNameVisible(true);
+        riderD.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20 * 60 * 5, 2));
+        ItemStack bow = new ItemStack(Material.BOW, 1);
+        bow.addEnchantment(Enchantment.ARROW_DAMAGE, 3);
+        riderD.getEquipment().setItemInMainHand(bow);
+
+        Phantom phantomD = (Phantom) LostShardPlugin.getTutorialManager().getTutorialWorld().spawnEntity(locD, EntityType.PHANTOM);
+        phantomD.setCustomName("[Tutorial] Phantom");
+        phantomD.setCustomNameVisible(true);
+        phantomD.addPassenger(riderD);
+        phantomD.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60*5, 2));
+        final Player player = Bukkit.getPlayer(getUUID());
+        if (player != null)
+            riderD.setTarget(player);
+        phantomD.setTarget(player);
+
+        riderD.getWorld().playSound(riderD.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 10, 0);
+        riderD.getWorld().spawnParticle(Particle.FLASH, riderD.getLocation(), 5, 0, 0, 0);
+    }
+
+    private void spawnZombies() {
+
+        Location locA = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 317, 86, 943);
+        Location locB = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 298, 86, 924);
+        Location locC = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 317, 86, 908);
+
+        spawnZombie(locA);
+        spawnZombie(locB);
+        spawnZombie(locC);
+
+    }
+
+    private void spawnZombie(Location loc) {
+        Zombie zombie = (Zombie) loc.getWorld().spawnEntity(loc, EntityType.ZOMBIE);
+        zombie.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 60 * 5, 1, true, true, true));
+        zombie.setCustomName("[Tutorial] Zombie");
+        zombie.setCustomNameVisible(true);
+        Player player = Bukkit.getPlayer(getUUID());
+        if (player != null)
+            zombie.setTarget(player);
     }
 
     @EventHandler
@@ -213,8 +258,10 @@ public class GorpsEnterChapter extends AbstractChapter {
         }
 
 
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(event.getPlayer(), "Congratulations! You've captured Gorps! You've been awarded 100 gold for your efforts and your max mana has increased to 115 for 24 hours.");
         event.getPlayer().getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 100));
+
         startGame(null);
     }
 }

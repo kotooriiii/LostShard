@@ -1,5 +1,6 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.events.BankDepositEvent;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.AbstractChapter;
@@ -10,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class BankerIntroChapter extends AbstractChapter {
 
@@ -27,7 +30,12 @@ public class BankerIntroChapter extends AbstractChapter {
         if (player == null)
             return;
 
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+
         sendMessage(player, "Deposit your gold at the banker. It is in here somewhere...");
+
     }
 
     @Override
@@ -53,7 +61,8 @@ public class BankerIntroChapter extends AbstractChapter {
         isComplete=true;
 
         final Player player = event.getPlayer();
-        player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 10));
+        player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 44));
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(player, "You found it! Let's deposit all the gold you mined.\nType: /deposit (amount)");
     }
 
@@ -64,6 +73,23 @@ public class BankerIntroChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
+
+        int counter=0;
+        for(ItemStack item : event.getPlayer().getInventory().getContents()) {
+            if (item == null)
+                continue;
+            if (item.getType() == Material.GOLD_INGOT)
+            {
+                counter = counter + item.getAmount();
+            }
+        }
+
+        if(counter != 0)
+        {
+            event.getPlayer().sendMessage(ERROR_COLOR + "Deposit all of your gold here!");
+            return;
+        }
+
         setComplete();
     }
 
@@ -75,7 +101,7 @@ public class BankerIntroChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+        if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
         sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
 

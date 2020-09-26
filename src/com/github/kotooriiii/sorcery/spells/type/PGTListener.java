@@ -5,6 +5,7 @@ import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateBlock;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -222,6 +223,8 @@ public class PGTListener  implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(entity))
+            return;
         if (!(entity instanceof Projectile) && !(entity instanceof Explosive))
             return;
         projectileSet.put(entity.getUniqueId(), false);

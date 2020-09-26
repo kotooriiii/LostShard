@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,6 +36,9 @@ public class StatusUpdateListener implements Listener {
 
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
 
         if (!isPlayerInduced(defender, damager))
             return;
@@ -92,6 +96,9 @@ public class StatusUpdateListener implements Listener {
         if (defenderPlayer.getKiller() == null)
             return;
         Entity damager = defenderPlayer.getKiller();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
 
         if (!isPlayerInduced(defender, damager))
             return;

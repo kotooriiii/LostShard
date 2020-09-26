@@ -17,7 +17,7 @@ public class EnterOrderChapter extends AbstractChapter {
 
     public EnterOrderChapter() {
         isComplete=false;
-        this.zone = new Zone(558, 558, 72, 66, 796, 817);
+        this.zone = new Zone(558, 576, 72, 66, 796, 804);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class EnterOrderChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getZone().contains(event.getTo()))
+        if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
         sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
 

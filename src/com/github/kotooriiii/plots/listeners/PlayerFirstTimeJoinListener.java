@@ -15,7 +15,7 @@ public class PlayerFirstTimeJoinListener implements Listener {
     public void firstTimeJoin(PlayerJoinEvent event)
     {
         Player player = event.getPlayer();
-        if(player.hasPlayedBefore())
+        if(player.hasPlayedBefore() || LostShardPlugin.isTutorial())
             return;
 
         //player has not played before

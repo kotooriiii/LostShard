@@ -1,5 +1,6 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume2;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
@@ -12,12 +13,14 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class CraftingChapter extends AbstractChapter {
 
     private Zone zone;
+    private boolean isPerformedBeginChain=false;
 
     public CraftingChapter() {
         this.zone = new Zone(477,534,73, 66, 802,790);
@@ -61,11 +64,15 @@ public class CraftingChapter extends AbstractChapter {
                 return;
         }
 
-        List<ItemStack> items = Arrays.asList(player.getInventory().getContents());
+        List<ItemStack> items = new ArrayList<>(Arrays.asList(player.getInventory().getContents()));
         items.add(itemStack);
 
         boolean[] armor = new boolean[]{false, false, false, false};
         for (ItemStack istack : items) {
+
+            if(istack == null || istack.getType() == null)
+                continue;
+
             if (istack.getType() == Material.CHAINMAIL_HELMET && !armor[0])
                 armor[0] = true;
 
@@ -87,6 +94,7 @@ public class CraftingChapter extends AbstractChapter {
         if (!isUnanimous)
             return;
 
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(player, "Good job!\nYou're ready to head to Order.");
         setComplete();
     }
@@ -104,7 +112,7 @@ public class CraftingChapter extends AbstractChapter {
         Location to = event.getTo();
         if (zone.contains(from) && !zone.contains(to)) {
 
-            sendMessage(event.getPlayer(), "You must craft some chain armor before leaving.");
+            sendMessage(event.getPlayer(), "You must craft chain armor before entering Order.");
             if(!event.getPlayer().getInventory().contains(Material.COBBLESTONE, 24))
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.COBBLESTONE, 24));
 
@@ -121,10 +129,13 @@ public class CraftingChapter extends AbstractChapter {
             return;
         if (zone == null)
             return;
+        if(isPerformedBeginChain)
+            return;
         Location from = event.getFrom();
         Location to = event.getTo();
         if (!zone.contains(from) && zone.contains(to)) {
-            sendMessage(event.getPlayer(), "Before you go in, you should craft some Chain Armor.\nChain armor is crafted like any other armor, just using cobblestone!\nThere's a crafting bench towards your right.");
+            isPerformedBeginChain = true;
+            sendMessage(event.getPlayer(), "Before you go in, you should craft some Chain Armor.\nChain armor is crafted like any other armor, just using cobblestone!");
             event.getPlayer().getInventory().addItem(new ItemStack(Material.COBBLESTONE, 24));
         }
     }

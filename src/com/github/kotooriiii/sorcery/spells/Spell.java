@@ -1,5 +1,7 @@
 package com.github.kotooriiii.sorcery.spells;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.type.*;
 import com.github.kotooriiii.stats.Stat;
@@ -350,6 +352,12 @@ public abstract class Spell {
     public abstract void updateCooldown(Player player);
 
     public boolean cast(Player player) {
+
+        SpellCastEvent spellCastEvent = new SpellCastEvent(player, this);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(spellCastEvent);
+
+        if(spellCastEvent.isCancelled())
+            return false;
 
         if (!hasCastingRequirements(player))
             return false;

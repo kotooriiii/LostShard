@@ -1,8 +1,10 @@
 package com.github.kotooriiii.npc.type.tutorial.murderer;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.npc.Skin;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import net.citizensnpcs.api.ai.Navigator;
+import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Equipment;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 //This is your trait that will be applied to a npc using the /trait mytraitname command. Each NPC gets its own instance of this class.
 //the Trait class has a reference to the attached NPC class through the protected field 'npc' or getNPC().
@@ -25,6 +28,10 @@ public class MurdererTrait extends Trait {
     public MurdererTrait(Player target) {
         super("MurdererTrait");
         entity = target;
+    }
+
+    public MurdererTrait() {
+        super("MurdererTrait");
     }
 
     // Here you should load up any values you have previously saved (optional).
@@ -50,7 +57,8 @@ public class MurdererTrait extends Trait {
 
         if (entity == event.getClicker())
             event.getClicker().sendMessage(ChatColor.DARK_RED + "You must type: /guards in order to kill this murderer.");
-        else event.getClicker().sendMessage(ChatColor.DARK_RED + "Don't waste time with this murderer. He is not going after you.");
+        else
+            event.getClicker().sendMessage(ChatColor.DARK_RED + "Don't waste time with this murderer. He is not going after you.");
 
     }
 
@@ -61,6 +69,19 @@ public class MurdererTrait extends Trait {
             return;
         if (!getNPC().isSpawned())
             return;
+        if (entity == null)
+            return;
+        Navigator nav = getNPC().getNavigator();
+
+        while (!nav.isNavigating()) {
+            if (!this.entity.isDead() && this.entity.isOnline()) {
+                nav.setTarget(entity, true);
+            }
+            nav.getLocalParameters().range(169);
+            nav.getLocalParameters().speedModifier(1.6f);
+            nav.getLocalParameters().stuckAction((npc, navigator) -> true);
+            nav.getLocalParameters().attackDelayTicks(10);
+        }
     }
 
     //Run code when your trait is attached to a NPC.
@@ -75,6 +96,8 @@ public class MurdererTrait extends Trait {
 
         //important for off hand since hand will do more dmg
         npc.getTrait(Equipment.class).set(Equipment.EquipmentSlot.OFF_HAND, new ItemStack(Material.IRON_SWORD, 1));
+        npc.getTrait(Equipment.class).set(Equipment.EquipmentSlot.HAND, new ItemStack(Material.IRON_SWORD, 1));
+
 
         //todo v
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_METADATA, Skin.BANKER.getTexture());
@@ -91,14 +114,16 @@ public class MurdererTrait extends Trait {
     //This is called AFTER onAttach and AFTER Load when the server is started.
     @Override
     public void onSpawn() {
-        Navigator nav = getNPC().getNavigator();
-        if (!this.entity.isDead() && this.entity.isOnline())
-            nav.setTarget(entity, true);
-        nav.getLocalParameters().attackDelayTicks(40);
+
+
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        if (!npc.isSpawned())
+            return;
+        if (getTargetTutorial() == null)
+            return;
         if (!event.getPlayer().equals(getTargetTutorial()))
             return;
 
@@ -106,11 +131,23 @@ public class MurdererTrait extends Trait {
     }
 
     @EventHandler
-    public void onDeath(TutorialPlayerDeathEvent event)
-    {
-        if(!event.getPlayer().getUniqueId().equals(getTargetTutorial().getUniqueId()))
+    public void onDeath(TutorialPlayerDeathEvent event) {
+        if (!npc.isSpawned())
             return;
-        getNPC().getOwningRegistry().deregister(getNPC());
+        if (getTargetTutorial() == null)
+            return;
+        if (!event.getPlayer().getUniqueId().equals(getTargetTutorial().getUniqueId()))
+            return;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                getNPC().despawn();
+                getNPC().getOwningRegistry().deregister(getNPC());
+                this.cancel();
+            }
+        }.runTask(LostShardPlugin.plugin);
+
 
     }
 

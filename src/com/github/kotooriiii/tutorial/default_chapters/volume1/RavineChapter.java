@@ -1,5 +1,6 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume1;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
@@ -15,15 +16,16 @@ public class RavineChapter extends AbstractChapter {
     public void onBegin() {
 
         final Player player = Bukkit.getPlayer(getUUID());
-        if(player==null)
+        if (player == null)
             return;
 
-        PlayerInventory inventory =player.getInventory();
-        for (int i = 0; i < inventory.getContents().length; i++)
-        {
-            if(inventory.getContents()[i].getType() == Material.FEATHER)
-                inventory.setItem(i, null);
-        }
+//        PlayerInventory inventory = player.getInventory();
+//        for (int i = 0; i < inventory.getContents().length; i++) {
+//            if(inventory.getContents()[i] == null)
+//                continue;
+//            if (inventory.getContents()[i].getType() == Material.FEATHER || inventory.getContents()[i].getType() == Material.STICK)
+//                inventory.setItem(i, null);
+//        }
 
 
         sendMessage(player, "Great job!");

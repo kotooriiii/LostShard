@@ -17,7 +17,7 @@ public class TitleChapter extends AbstractChapter {
             return;
 
         final int fadeIn = 10;
-        final int stay = 40;
+        final int stay = 60;
         final int fadeOut = 10;
 
         player.sendTitle(ChatColor.DARK_PURPLE + "Welcome to LostShard!", ChatColor.DARK_PURPLE + "Please complete the tutorial", fadeIn, stay, fadeOut);
@@ -25,26 +25,26 @@ public class TitleChapter extends AbstractChapter {
         new BukkitRunnable() {
             @Override
             public void run() {
-
-
-                player.sendTitle(ChatColor.DARK_PURPLE + "", ChatColor.DARK_PURPLE + "You may skip the tutorial with '/skip' at any time.\nDeciding to complete the tutorial will reward you in the LostShard server.", fadeIn, stay, fadeOut);
-
+                player.sendTitle(ChatColor.DARK_PURPLE + "", ChatColor.DARK_PURPLE + "You may skip the tutorial with '/skip' at any time, however...", fadeIn, stay, fadeOut);
+                this.cancel();
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        setComplete();
+                        player.sendTitle(ChatColor.DARK_PURPLE + "", ChatColor.DARK_PURPLE + "Completing the tutorial rewards you.", fadeIn, stay, fadeOut);
                         this.cancel();
-                        return;
+                        new BukkitRunnable() {
 
-
+                            @Override
+                            public void run() {
+                                setComplete();
+                                this.cancel();
+                                return;
+                            }
+                        }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
                     }
                 }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
-
-
             }
         }.runTaskLater(LostShardPlugin.plugin, fadeIn + stay + fadeOut);
-
-
     }
 
     @Override

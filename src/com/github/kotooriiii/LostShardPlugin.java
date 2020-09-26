@@ -38,9 +38,12 @@ import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.hostility.listeners.HostilityTimeCreatorListener;
 import com.github.kotooriiii.instaeat.InstaEatListener;
 import com.github.kotooriiii.listeners.*;
+import com.github.kotooriiii.npc.DeathNPCListener;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import com.github.kotooriiii.npc.type.clone.CloneTrait;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
 import com.github.kotooriiii.npc.type.tutorial.TutorialTrait;
+import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
 import com.github.kotooriiii.plots.*;
 import com.github.kotooriiii.plots.commands.BuildCommand;
 import com.github.kotooriiii.plots.listeners.*;
@@ -232,6 +235,9 @@ public class LostShardPlugin extends JavaPlugin {
 
     public void registerTrait() {
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(GuardTrait.class).withName("GuardTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(CloneTrait.class).withName("CloneTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(TutorialTrait.class).withName("TutorialTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MurdererTrait.class).withName("MurdererTrait"));
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(BankerTrait.class).withName("BankerTrait"));
 
     }
@@ -272,16 +278,15 @@ public class LostShardPlugin extends JavaPlugin {
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new TutorialSettingsListener(), this);
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new StatusListener(), this);
             tutorialManager.getChapterManager().registerDefault();
-
-            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete");
+            tutorialManager.getHologramManager().createDefaultHolograms();
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete".toLowerCase());
         } else {
             tutorialReader = new TutorialReader();
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new PlayerJoinRealServerListener(), this);
-            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate");
-            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Authenticate", BungeeAuthenticateChannel.getInstance());
-            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Complete", BungeeReceiveCompleteChannel.getInstance());
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate".toLowerCase());
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Authenticate".toLowerCase(), BungeeAuthenticateChannel.getInstance());
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Complete".toLowerCase(), BungeeReceiveCompleteChannel.getInstance());
         }
-
 
 
         //Read files (some onto the managers)
@@ -330,6 +335,8 @@ public class LostShardPlugin extends JavaPlugin {
                     dereg.add(npc);
             for (NPC npc : dereg)
                 CitizensAPI.getNPCRegistry().deregister(npc);
+            LostShardPlugin.getTutorialManager().getChapterManager();
+            LostShardPlugin.getTutorialManager().getHologramManager().deconstructHolograms();
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -526,7 +533,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("ignore").setExecutor(new IgnoreCommand());
 
         getCommand("skip").setExecutor(new SkipCommand());
-
+        getCommand("tutorial").setExecutor(new TutorialCommand());
 
 
         //todo to use later -->
@@ -584,6 +591,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new SurvivalismListener(), this);
         pm.registerEvents(new SwordsmanshipListener(), this);
         pm.registerEvents(new TamingListener(), this);
+
+        pm.registerEvents(new DeathNPCListener(), this);
 
         pm.registerEvents(new ZombieDeathListener(), this);
         pm.registerEvents(new HostilityNamePreprocessListener(), this);

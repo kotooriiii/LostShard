@@ -3,11 +3,13 @@ package com.github.kotooriiii.tutorial.default_chapters.volume2;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.ShardNMS;
+import com.github.kotooriiii.skills.events.EntityTrackEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -16,6 +18,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.inventivetalent.packetlistener.PacketListenerAPI;
 import org.inventivetalent.packetlistener.handler.PacketHandler;
@@ -29,14 +33,14 @@ public class TrackSpiderChapter extends AbstractChapter {
     private PacketHandler packetHandler;
     private UUID entityUUID;
     private Location spiderLocation;
-    private boolean isComplete;
+    private boolean isComplete, isCrossed, isTracked;
 
 
     public TrackSpiderChapter() {
         packetHandler = null;
         entityUUID = null;
-        isComplete = false;
-        spiderLocation = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 297, 53, 684); //todo set this
+        isComplete = isCrossed = isTracked = false;
+        spiderLocation = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 297, 54, 684); //todo set this
     }
 
     @Override
@@ -47,12 +51,21 @@ public class TrackSpiderChapter extends AbstractChapter {
 
         LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().setLevel(100.0f);
 
-        Entity entity = player.getWorld().spawnEntity(spiderLocation, EntityType.SPIDER);
-        entityUUID = entity.getUniqueId();
-
         initListener();
 
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sendMessage(player, "To find the spider, press F3 and use the directions (North, East, South, West) to guide you.");
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20*5);
         sendMessage(player, "Track the spider to get to the next marker.");
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        player.getInventory().addItem(new ItemStack(Material.COMPASS, 1));
+        player.updateInventory();
 
         new BukkitRunnable() {
             @Override
@@ -67,6 +80,72 @@ public class TrackSpiderChapter extends AbstractChapter {
             }
         }.runTaskLater(LostShardPlugin.plugin, TIP_DELAY);
 
+    }
+
+    @EventHandler
+    public void onApproachA(PlayerMoveEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (isTracked)
+            return;
+        if (event.getTo().getZ() < 557)
+            return;
+        event.setCancelled(true);
+        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.");
+    }
+
+    @EventHandler
+    public void onApproachA(PlayerTeleportEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (isTracked)
+            return;
+        if (event.getTo().getZ() < 557)
+            return;
+        event.setCancelled(true);
+        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.");
+    }
+
+    @EventHandler
+    public void onTrack(EntityTrackEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (isTracked)
+            return;
+        if (event.getType() != EntityType.SPIDER)
+            return;
+        isTracked = true;
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                sendMessage(event.getPlayer(), "To find the spider, press F3 and use the directions (North, East, South, West) to guide you.");
+//            }
+//        }.runTaskLater(LostShardPlugin.plugin, 20*5);
+    }
+
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (isCrossed)
+            return;
+        if (event.getTo().getX() > 335)
+            return;
+        isCrossed = true;
+
+        Entity entity = event.getPlayer().getWorld().spawnEntity(spiderLocation, EntityType.SPIDER);
+        entity.setCustomName("[Tutorial] Spider");
+        entity.setCustomNameVisible(true);
+        entityUUID = entity.getUniqueId();
     }
 
     @Override
@@ -95,6 +174,11 @@ public class TrackSpiderChapter extends AbstractChapter {
 
                 //If the packet is not the one we are searching for, return.
                 if (!packet.getPacketName().equals("PacketPlayOutSpawnEntityLiving"))
+                    return;
+                if (entityUUID == null)
+                    return;
+
+                if (packet == null || packet.getPlayer() == null)
                     return;
 
                 //If the player who is progressing in this chapter is the one forcing the spawn, let them see it, so return.
@@ -131,7 +215,7 @@ public class TrackSpiderChapter extends AbstractChapter {
      */
     @EventHandler
     public void onTarget(EntityTargetLivingEntityEvent event) {
-        if (event.getEntity().getUniqueId().equals(entityUUID))
+        if (!event.getEntity().getUniqueId().equals(entityUUID))
             return;
         event.setCancelled(true);
     }
@@ -166,13 +250,23 @@ public class TrackSpiderChapter extends AbstractChapter {
         final int distance = 5;
 
         Location to = event.getTo();
+        if (entityUUID == null)
+            return;
+        LivingEntity entity = (LivingEntity) Bukkit.getEntity(entityUUID);
+        if (entity == null) {
+            isComplete = true;
+            sendMessage(event.getPlayer(), "Great Job!");
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+            setComplete();
+            return;
+        }
 
-        Zone zone = new Zone(spiderLocation.getBlockX() - distance, spiderLocation.getBlockX() + distance, spiderLocation.getBlockY() - distance, spiderLocation.getBlockY() + distance, spiderLocation.getBlockZ() - distance, spiderLocation.getBlockZ() + distance);
-        if (!zone.contains(to))
+        if (!(to.distance(entity.getLocation()) < distance))
             return;
 
         isComplete = true;
         sendMessage(event.getPlayer(), "Great Job!");
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         setComplete();
     }
 

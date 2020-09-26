@@ -2,6 +2,8 @@ package com.github.kotooriiii.skills.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
+import com.github.kotooriiii.skills.events.EntityTrackEvent;
+import com.github.kotooriiii.skills.events.PlayerTrackEvent;
 import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
@@ -64,6 +66,8 @@ public class TrackCommand implements CommandExecutor {
             int level = (int) survivalism.getLevel();
 
 
+
+
             if (type == EntityType.PLAYER) {
 
                 if (level < 100) {
@@ -123,24 +127,29 @@ public class TrackCommand implements CommandExecutor {
                     trackedPlayer.sendMessage(ChatColor.GRAY + "The hairs on the back of your neck stand up.");
                 }
 
-trackedPlayer.setGlowing(true);
+
+                PlayerTrackEvent event = new PlayerTrackEvent(playerSender, trackedPlayer);
+                LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                if(event.isCancelled())
+                    return false;
+
+
+                trackedPlayer.setGlowing(true);
 
                 final Player finalTrackedPlayer = trackedPlayer;
-                new BukkitRunnable()
-                {
+                new BukkitRunnable() {
                     @Override
                     public void run() {
 
-                        if(!finalTrackedPlayer.isDead())
-                        finalTrackedPlayer.setGlowing(false);
+                        if (!finalTrackedPlayer.isDead())
+                            finalTrackedPlayer.setGlowing(false);
                     }
-                }.runTaskLater(LostShardPlugin.plugin, 20*1);
+                }.runTaskLater(LostShardPlugin.plugin, 20 * 1);
 
 
                 String direction = getCompassDirection(playerSender, trackedPlayer.getLocation());
-                if(direction == null)
-                {
-                 playerSender.sendMessage(ChatColor.GOLD + trackedPlayer.getName() + " seems to be in another dimension...");
+                if (direction == null) {
+                    playerSender.sendMessage(ChatColor.GOLD + trackedPlayer.getName() + " seems to be in another dimension...");
                 } else {
                     direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
                     playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
@@ -153,36 +162,59 @@ trackedPlayer.setGlowing(true);
                     return false;
                 }
 
-                final int manaCost = 25;
+                final int stamina = 25;
 
-                if (!hasStamina(playerSender, manaCost)) {
-                    playerSender.sendMessage(ERROR_COLOR + "You need at least " + manaCost + " to track.");
+                if (!hasStamina(playerSender, stamina)) {
+                    playerSender.sendMessage(ERROR_COLOR + "You need at least " + stamina + " stamina to track.");
                     return false;
                 }
 
                 double distance = Double.MAX_VALUE;
                 Entity closestEntity = null;
 
-                for (Entity entity : playerSender.getLocation().getWorld().getNearbyEntities(playerSender.getLocation(), 2000, 256, 2000)) {
-                    if (entity.getType().equals(type)) {
-                        double entityDistance = entity.getLocation().distance(playerSender.getLocation());
-                        if (entityDistance < distance) {
-                            distance = entityDistance;
-                            closestEntity = entity;
+                boolean isTutorialTrack = LostShardPlugin.isTutorial() && type == EntityType.SPIDER;
+                Location spiderLoc = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 300, 53, 682);
+
+                if (isTutorialTrack) {
+                    distance = spiderLoc.distance(playerSender.getLocation());
+                } else {
+                    for (Entity entity : playerSender.getLocation().getWorld().getNearbyEntities(playerSender.getLocation(), 2000, 256, 2000)) {
+                        if (entity.getType().equals(type)) {
+                            double entityDistance = entity.getLocation().distance(playerSender.getLocation());
+                            if (entityDistance < distance) {
+                                distance = entityDistance;
+                                closestEntity = entity;
+                            }
                         }
                     }
                 }
 
-                if (closestEntity == null) {
+
+
+                //if its null we got to make sure its tutorial. if its not tutorial and its null then we dont know
+                if (closestEntity == null && !isTutorialTrack) {
                     String name = type.getKey().getKey().toLowerCase().replace("_", " ");
                     name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
                     playerSender.sendMessage(ERROR_COLOR + "We could not find a " + name + " close to your location.");
                     return false;
                 }
 
+                EntityTrackEvent event;
+                if(LostShardPlugin.isTutorial())
+                    event = new EntityTrackEvent(playerSender, null, EntityType.SPIDER);
+                else
+                    event = new EntityTrackEvent(playerSender, closestEntity, closestEntity.getType());
+                LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                if(event.isCancelled())
+                    return false;
+
                 survivalism.addXP(SurvivalismListener.TRACKING_XP);
-                removeStamina(playerSender, manaCost);
-                String direction = getCompassDirection(playerSender, closestEntity.getLocation());
+                removeStamina(playerSender, stamina);
+                String direction;
+                if (LostShardPlugin.isTutorial())
+                    direction = getCompassDirection(playerSender, spiderLoc);
+                else
+                    direction = getCompassDirection(playerSender, closestEntity.getLocation());
                 direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
                 playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
                 playerSender.sendMessage(ChatColor.GOLD + howClose(distance));
@@ -211,9 +243,8 @@ trackedPlayer.setGlowing(true);
 
     public String getCompassDirection(Player player, Location location) {
 
-        if(!player.getLocation().getWorld().equals(location.getWorld()))
-        {
-            return  null;
+        if (!player.getLocation().getWorld().equals(location.getWorld())) {
+            return null;
         }
 
         Vector playerVector = player.getLocation().toVector();
@@ -224,13 +255,11 @@ trackedPlayer.setGlowing(true);
 
         double yaw = (angle * 180) / Math.PI;
 
-yaw+=270;
+        yaw += 270;
 
-if(yaw > 360)
-{
-    yaw = yaw-360;
-}
-
+        if (yaw > 360) {
+            yaw = yaw - 360;
+        }
 
 
         String compassDir = "null";

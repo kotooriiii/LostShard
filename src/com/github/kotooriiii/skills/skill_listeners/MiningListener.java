@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -24,8 +25,12 @@ public class MiningListener implements Listener {
 
 
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGH)
     public void mineBlock(BlockBreakEvent event) {
+
+        if(event.isCancelled())
+            return;
+
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
@@ -66,14 +71,14 @@ public class MiningListener implements Listener {
             case ANDESITE:
             case DIORITE:
             case GRANITE:
-            case GOLD_ORE:
-            case IRON_ORE:
-            case COAL_ORE:
-            case EMERALD_ORE:
-            case REDSTONE_ORE:
-            case LAPIS_ORE:
-            case DIAMOND_ORE:
-            case NETHER_QUARTZ_ORE:
+//            case GOLD_ORE:
+//            case IRON_ORE:
+//            case COAL_ORE:
+//            case EMERALD_ORE:
+//            case REDSTONE_ORE:
+//            case LAPIS_ORE:
+//            case DIAMOND_ORE:
+//            case NETHER_QUARTZ_ORE:
                 return true;
         }
         return false;
@@ -99,8 +104,12 @@ public class MiningListener implements Listener {
         for (Map.Entry<ItemStack, Double> entry : lootOfLevel.entrySet()) {
             double random = Math.random();
 
-            if (LostShardPlugin.isTutorial())
-                random -= 0.55f;
+            if(LostShardPlugin.isTutorial())
+            {
+                if(entry.getKey().getType() == Material.DIAMOND)
+                    continue;
+                random -= 0.08;
+            }
 
             ItemStack item = entry.getKey();
             double chance = entry.getValue() * 10 / 2;

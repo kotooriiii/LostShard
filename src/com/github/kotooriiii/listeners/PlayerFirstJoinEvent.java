@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +12,8 @@ public class PlayerFirstJoinEvent implements Listener {
     {
         Player player = event.getPlayer();
         if(player.hasPlayedBefore())
+            return;
+        if(LostShardPlugin.isTutorial())
             return;
 
         //first time played

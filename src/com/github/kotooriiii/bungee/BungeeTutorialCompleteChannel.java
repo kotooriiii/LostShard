@@ -33,7 +33,7 @@ public class BungeeTutorialCompleteChannel {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(uuid.toString()); // Write the UUID
         out.writeUTF(String.valueOf(isAuthentic)); //Write if authentic
-        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete", out.toByteArray());
+        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete".toLowerCase(), out.toByteArray());
     }
 
     private static  BungeeTutorialCompleteChannel instance;

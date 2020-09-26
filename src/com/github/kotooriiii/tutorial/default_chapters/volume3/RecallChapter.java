@@ -2,6 +2,7 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
+import com.github.kotooriiii.sorcery.events.SuccessfulRecallEvent;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.type.RecallSpell;
 import com.github.kotooriiii.tutorial.AbstractChapter;
@@ -41,17 +42,13 @@ public class RecallChapter extends AbstractChapter {
     }
 
     @EventHandler
-    public void onCast(SpellCastEvent event) {
+    public void onCast(SuccessfulRecallEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if (event.getSpell().getType() != SpellType.RECALL) {
-            sendMessage(event.getPlayer(), ChatColor.RED + "You will be able to try out other spells after the tutorial.");
-            event.setCancelled(true);
-            return;
-        }
 
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         sendMessage(event.getPlayer(), "Great job! You recalled back successfully.");
         setComplete();
     }

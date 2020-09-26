@@ -122,7 +122,7 @@ public class TeleportSpell extends Spell {
             return true;
 
 
-        if(block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().endsWith("door"))
+        if(block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().endsWith("door") && !block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().contains("trap"))
         {
             Door door = (Door) block.getState().getBlockData();
             BlockFace face = door.getFacing();

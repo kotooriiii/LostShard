@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.sorcery.events.MarkCreateEvent;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
@@ -127,6 +128,8 @@ public class MarkSpell extends Spell implements Listener {
      */
     private void postCast(Player playerSender, Location location, String name)
     {
+        MarkCreateEvent event = new MarkCreateEvent(playerSender, location, name);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
         //message
         playerSender.sendMessage(ChatColor.GOLD + "You have created a mark called \"" + name + "\".");
         //add mark

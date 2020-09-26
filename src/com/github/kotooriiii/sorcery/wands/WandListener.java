@@ -28,13 +28,9 @@ public class WandListener implements Listener {
                     return;
                 Wand wand = new Wand(spell);
 
-                SpellCastEvent spellCastEvent = new SpellCastEvent(player, spell);
-                LostShardPlugin.plugin.getServer().getPluginManager().callEvent(spellCastEvent);
 
-                if(!spellCastEvent.isCancelled()) {
-                    wand.cast(player);
-                    event.setCancelled(true);
-                }
+                wand.cast(player);
+
             }
         }
     }

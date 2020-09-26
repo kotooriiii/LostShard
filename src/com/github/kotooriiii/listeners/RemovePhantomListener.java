@@ -1,6 +1,7 @@
 package com.github.kotooriiii.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Phantom;
 import org.bukkit.event.EventHandler;
@@ -15,8 +16,9 @@ public class RemovePhantomListener implements Listener {
 
         if(LostShardPlugin.isTutorial())
             return;
-
         Entity entity = event.getEntity();
+        if(CitizensAPI.getNPCRegistry().isNPC(entity))
+            return;
         if(!(entity instanceof Phantom))
             return;
         event.setCancelled(true);

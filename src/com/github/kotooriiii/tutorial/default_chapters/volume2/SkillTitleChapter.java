@@ -20,11 +20,14 @@ public class SkillTitleChapter extends AbstractChapter {
         final int fadeOut = 10;
 
         player.sendTitle(ChatColor.DARK_AQUA + "MCMMO", "", fadeIn, stay, fadeOut);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
 
         new BukkitRunnable() {
             @Override
             public void run() {
                 sendMessage(player, "LostShard features a variety of fully custom McMMO skills.\nThe Survivalism skill allows you to track mobs or players.\nTo track a mob or player, type: /track (name)");
+                LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+                LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
                 setComplete();
                 this.cancel();
                 return;

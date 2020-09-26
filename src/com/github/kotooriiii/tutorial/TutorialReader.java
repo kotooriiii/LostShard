@@ -74,6 +74,8 @@ public class TutorialReader {
 
     public void completeTutorial(UUID uuid, boolean isAuthentic) {
 
+        if(hasCompletedTutorial(uuid))
+            return;
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
 

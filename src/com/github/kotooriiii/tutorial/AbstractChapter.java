@@ -1,5 +1,6 @@
 package com.github.kotooriiii.tutorial;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -8,6 +9,8 @@ import org.bukkit.event.Listener;
 
 import java.util.Observable;
 import java.util.UUID;
+
+import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 
 /**
  * An abstract class that represents an unfinished chapter.
@@ -38,7 +41,7 @@ public abstract class AbstractChapter extends Observable implements Listener {
     /**
      * A delay tick to inform the
      */
-    public final static  int DELAY_TICK = 40;
+    public final static  int DELAY_TICK = 120;
     public final static int TIP_DELAY = 20*10;
 
     /**
@@ -107,7 +110,7 @@ public abstract class AbstractChapter extends Observable implements Listener {
      * @return Player's UUID
      */
     public final UUID getUUID() {
-        return this.getUUID();
+        return this.uuid;
     }
 
     /**
@@ -117,6 +120,21 @@ public abstract class AbstractChapter extends Observable implements Listener {
      */
     public final void setLocation(Location location) {
         this.location = location;
+    }
+
+    public double getDefaultHealth()
+    {
+        return 20.0f;
+    }
+
+    public int getDefaultFoodLevel()
+    {
+        return 20;
+    }
+
+    public boolean isUsingHeal()
+    {
+        return true;
     }
 
     /**
@@ -141,7 +159,6 @@ public abstract class AbstractChapter extends Observable implements Listener {
         if (!isActive)
             return;
         //throw new RuntimeException("The chapter has already been completed.");
-        HandlerList.unregisterAll(this);
         setChanged();
         notifyObservers();
         isActive = false;
@@ -153,7 +170,7 @@ public abstract class AbstractChapter extends Observable implements Listener {
      */
     public void sendMessage(Player player, String message) {
         if (player.isOnline()) {
-            player.sendMessage(message);
+            player.sendMessage(STANDARD_COLOR + message);
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 10.0f, 0.0f);
         }
     }

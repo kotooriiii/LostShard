@@ -12,6 +12,8 @@ import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.tutorial.TutorialBook;
+import com.github.kotooriiii.tutorial.default_chapters.volume3.PlotDepositChapter;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -302,9 +304,9 @@ public class PlotCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "You don't have the money to expand your plot. You need " + df.format(expandPlot.getExpandCost()) + " to expand to the next size.");
                                 return false;
                             }
-                            PlotExpandEvent event = new PlotExpandEvent(playerSender, expandPlot, expandPlot.getRadius());
+                            PlotExpandEvent event = new PlotExpandEvent(playerSender, expandPlot, expandPlot.getRadius() + 1);
                             LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-                            if(event.isCancelled())
+                            if (event.isCancelled())
                                 return false;
                             expandPlot.expand();
                             expandPlot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " expanded the plot to size " + expandPlot.getRadius() + ".");
@@ -316,20 +318,51 @@ public class PlotCommand implements CommandExecutor {
                             }
 
                             if (standingOnPlot == null) {
-                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
-                                return false;
+
+                                if (LostShardPlugin.isTutorial()) {
+                                    TutorialBook book = LostShardPlugin.getTutorialManager().wrap(playerUUID);
+                                    if (!book.getCurrentChapter().getClass().equals(PlotDepositChapter.class)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                        return false;
+                                    }
+
+
+                                    //Free to go
+
+                                } else {
+                                    playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                                    return false;
+                                }
+
+
                             }
 
-                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't deposit onto staff plots.");
-                                return false;
+                            if (LostShardPlugin.isTutorial() || !standingOnPlot.getType().equals(PlotType.PLAYER)) {
+
+
+                                if (LostShardPlugin.isTutorial()) {
+                                    TutorialBook book = LostShardPlugin.getTutorialManager().wrap(playerUUID);
+                                    if (!book.getCurrentChapter().getClass().equals(PlotDepositChapter.class)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You can't deposit onto staff plots.");
+                                        return false;
+                                    }
+
+                                    //free to go
+                                } else {
+                                    playerSender.sendMessage(ERROR_COLOR + "You can't deposit onto staff plots.");
+                                    return false;
+                                }
                             }
 
-                            PlayerPlot depositPlot = (PlayerPlot) standingOnPlot;
 
-                            if (!depositPlot.isOwner(playerUUID) && !depositPlot.isJointOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't deposit into this plot's funds.");
-                                return false;
+                            PlayerPlot depositPlot = null;
+                            if (!LostShardPlugin.isTutorial()) {
+                                depositPlot = (PlayerPlot) standingOnPlot;
+
+                                if (!depositPlot.isOwner(playerUUID) && !depositPlot.isJointOwner(playerUUID)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You can't deposit into this plot's funds.");
+                                    return false;
+                                }
                             }
 
                             //Is this a number
@@ -349,7 +382,7 @@ public class PlotCommand implements CommandExecutor {
 
                             PlotDepositEvent depositEvent = new PlotDepositEvent(playerSender, depositPlot, deposit.doubleValue());
                             LostShardPlugin.plugin.getServer().getPluginManager().callEvent(depositEvent);
-                            if(depositEvent.isCancelled())
+                            if (depositEvent.isCancelled())
                                 return false;
 
                             bank.setCurrency(currentCurrency - deposit.doubleValue());
@@ -571,13 +604,11 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    if(standingOnPlot.getType().equals(PlotType.STAFF_BRACKET))
-                                    {
+                                    if (standingOnPlot.getType().equals(PlotType.STAFF_BRACKET)) {
                                         BracketPlot bracketPlotA = (BracketPlot) standingOnPlot;
                                         bracketPlotA.setSpawnA(playerSender.getLocation());
                                         playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + bracketPlotA.getName() + " has been set to where you are standing.");
-                                    } else if(standingOnPlot.getType().equals(PlotType.STAFF_ARENA))
-                                    {
+                                    } else if (standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
                                         ArenaPlot arenaPlotA = (ArenaPlot) standingOnPlot;
                                         arenaPlotA.setSpawnA(playerSender.getLocation());
                                         playerSender.sendMessage(ChatColor.GOLD + "The spawn A for " + arenaPlotA.getName() + " has been set to where you are standing.");
@@ -600,14 +631,12 @@ public class PlotCommand implements CommandExecutor {
                                         return false;
                                     }
 
-                                    if(standingOnPlot.getType().equals(PlotType.STAFF_BRACKET))
-                                    {
+                                    if (standingOnPlot.getType().equals(PlotType.STAFF_BRACKET)) {
                                         BracketPlot bracketPlotB = (BracketPlot) standingOnPlot;
                                         bracketPlotB.setSpawnB(playerSender.getLocation());
                                         playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + bracketPlotB.getName() + " has been set to where you are standing.");
-                                    } else if(standingOnPlot.getType().equals(PlotType.STAFF_ARENA))
-                                    {
-                                        ArenaPlot arenaPlotB= (ArenaPlot) standingOnPlot;
+                                    } else if (standingOnPlot.getType().equals(PlotType.STAFF_ARENA)) {
+                                        ArenaPlot arenaPlotB = (ArenaPlot) standingOnPlot;
                                         arenaPlotB.setSpawnB(playerSender.getLocation());
                                         playerSender.sendMessage(ChatColor.GOLD + "The spawn B for " + arenaPlotB.getName() + " has been set to where you are standing.");
                                     }
@@ -722,13 +751,11 @@ public class PlotCommand implements CommandExecutor {
             }
         }
 
-        for(Location loc : SignChangeListener.getBuildChangeLocations())
-        {
-            if(loc==null)
+        for (Location loc : SignChangeListener.getBuildChangeLocations()) {
+            if (loc == null)
                 continue;
 
-            if(plot.contains(loc))
-            {
+            if (plot.contains(loc)) {
                 SignChangeListener.remove(loc);
             }
         }
@@ -768,7 +795,7 @@ public class PlotCommand implements CommandExecutor {
         PlayerPlot playerPlot = new PlayerPlot(name, player.getUniqueId(), player.getLocation());
         PlotCreateEvent event = new PlotCreateEvent(player, playerPlot);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return;
 
 

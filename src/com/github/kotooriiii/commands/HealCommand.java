@@ -31,36 +31,36 @@ public class HealCommand implements CommandExecutor {
             return false;
         }
 
-        if(args.length == 0) {
-            playerSender.setHealth(playerSender.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-            playerSender.setFoodLevel(20);
-            Stat stat = Stat.wrap(playerSender.getUniqueId());
-            stat.setStamina(stat.getMaxStamina());
-            stat.setMana(stat.getMaxMana());
-            playerSender.sendMessage(ChatColor.GOLD + "Replenished health, mana, and stamina.");
-        } else if (args.length == 1)
-        {
+        if (args.length == 0) {
+            heal(playerSender, true);
+        } else if (args.length == 1) {
 
             String playerName = args[0];
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-            if( !offlinePlayer.isOnline())
-            {
+            if (!offlinePlayer.isOnline()) {
                 playerSender.sendMessage(ERROR_COLOR + "The player is not online");
                 return false;
             }
 
             Player healedPlayer = offlinePlayer.getPlayer();
 
-            healedPlayer.setHealth(healedPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-            healedPlayer.setFoodLevel(20);
-
-            Stat stat = Stat.wrap(healedPlayer.getUniqueId());
-            stat.setStamina(stat.getMaxStamina());
-            stat.setMana(stat.getMaxMana());
+            heal(healedPlayer, true);
             playerSender.sendMessage(ChatColor.GOLD + "Replenished " + PLAYER_COLOR + healedPlayer.getName() + ChatColor.GOLD + "'s health, mana, and stamina.");
-            healedPlayer.sendMessage(ChatColor.GOLD + "Replenished health, mana, and stamina.");
+
         }
 
         return false;
+    }
+
+    public static void heal(Player healedPlayer, boolean isMessaging) {
+        healedPlayer.setHealth(healedPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+        healedPlayer.setFoodLevel(20);
+        healedPlayer.setFireTicks(0);
+
+        Stat stat = Stat.wrap(healedPlayer.getUniqueId());
+        stat.setStamina(stat.getMaxStamina());
+        stat.setMana(stat.getMaxMana());
+        if (isMessaging)
+            healedPlayer.sendMessage(ChatColor.GOLD + "Replenished health, mana, and stamina.");
     }
 }

@@ -5,8 +5,10 @@ import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -14,14 +16,14 @@ public class FallChapter extends AbstractChapter {
 
     private boolean isComplete;
     private boolean isCompleteToLeave;
+    private boolean hasBrokenMelon;
     private Zone zone;
     private Zone completeZone;
 
 
     public FallChapter() {
-        this.isComplete = false;
-        this.isCompleteToLeave = false;
-        this.zone = new Zone(746, 691, 48, 75, 1061, 1131);
+        this.isComplete = this.isCompleteToLeave = this.hasBrokenMelon = false;
+        this.zone = new Zone(753, 691, 48, 75, 1066, 1131);
         completeZone = new Zone(561, 486, 78, 30, 1132, 1160);
     }
 
@@ -32,12 +34,44 @@ public class FallChapter extends AbstractChapter {
         if (player == null)
             return;
         setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 891, 54, 976, 47, 13));
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         sendMessage(player, "Ouch, that was a hard hit!\nMaybe we'll find something on the way to heal us...");
     }
 
     @Override
     public void onDestroy() {
 
+    }
+
+    @Override
+    public double getDefaultHealth()
+    {
+        return 10.0f;
+    }
+
+    @Override
+    public int getDefaultFoodLevel()
+    {
+        return 17;
+    }
+
+    @Override
+    public boolean isUsingHeal()
+    {
+        return false;
+    }
+
+    @EventHandler
+    public void onMelonBreak(BlockBreakEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(event.getBlock().getType() != Material.MELON)
+            return;
+        hasBrokenMelon = true;
     }
 
     @EventHandler
@@ -57,7 +91,29 @@ public class FallChapter extends AbstractChapter {
 
         isComplete = true;
         final Player player = event.getPlayer();
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+
         sendMessage(player, "Some melons! Break them to collect them!\nMelons can be instantly eaten by right clicking them.\nThey instantly heal your hearts and hunger.\nThis can be very useful in combat, let's move on.");
+
+    }
+
+    @EventHandler
+    public void onMelonAbandon(PlayerMoveEvent event){
+        if (hasBrokenMelon)
+            return;
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+
+        Location to = event.getTo();
+        if (to.getBlockX() > 694)
+            return;
+
+        final Player player = event.getPlayer();
+        sendMessage(player, "You must break some melons before continuing.");
+        event.setCancelled(true);
 
     }
 

@@ -1196,7 +1196,6 @@ public class ClanCommand implements CommandExecutor {
     private void createClan(Player playerSender, UUID playerUUID, String clanName) {
 
         Clan clan = new Clan(clanName, playerUUID);
-
         switch (clan.create(playerUUID, clanName)) {
             case 0:
                 LostShardPlugin.getClanManager().addClan(clan, true);

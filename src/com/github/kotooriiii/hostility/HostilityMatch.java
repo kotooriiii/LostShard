@@ -72,7 +72,7 @@ public class HostilityMatch {
 
     public HostilityMatch(HostilityPlatform platform) {
         this.platform = platform;
-        this.maxTicks = LostShardPlugin.isTutorial() ? toTicks(0,15) : toTicks(3);
+        this.maxTicks = LostShardPlugin.isTutorial() ? toTicks(0, 30) : toTicks(3);
         this.lastClan = null;
         this.lastWinStreak = 0;
         init();
@@ -160,18 +160,17 @@ public class HostilityMatch {
                         Player chosen = players[random];
 
                         PlatformCaptureEvent event = new PlatformCaptureEvent(chosen, uniqueClan);
-                        if (lastClan != null && capturingClan.equals(lastClan))
+                        if (lastClan != null && uniqueClan.equals(lastClan))
                             event.setWins(lastWinStreak);
                         else
                             event.setWins(0);
 
-                            LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-                        if(event.isCancelled())
+                        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                        if (event.isCancelled())
                             return;
                         capturingClan = event.getClan();
                         capturingPlayer = event.getPlayer();
-                        if (lastClan != null && capturingClan.equals(lastClan))
-                            winStreak = event.getWins();
+                        winStreak = event.getWins();
                         this.cancel();
                         start();
                         return;
@@ -362,8 +361,7 @@ public class HostilityMatch {
                 capturingClan.setStaminaBuffTimer(60 * 60 * 24);
                 buff = "stamina";
 
-                for(UUID uuid : capturingClan.getAllUUIDS())
-                {
+                for (UUID uuid : capturingClan.getAllUUIDS()) {
                     Stat.wrap(uuid).setMaxStamina(Stat.HOST_MAX_STAMINA);
                 }
 
@@ -403,8 +401,7 @@ public class HostilityMatch {
                 capturingClan.setManaBuffTimer(60 * 60 * 24);
                 buff = "mana";
 
-                for(UUID uuid : capturingClan.getAllUUIDS())
-                {
+                for (UUID uuid : capturingClan.getAllUUIDS()) {
                     Stat.wrap(uuid).setMaxMana(Stat.HOST_MAX_MANA);
                 }
 
@@ -594,7 +591,7 @@ public class HostilityMatch {
 
     public void broadcast(String message, Clan clan) {
 
-        if(LostShardPlugin.isTutorial())
+        if (LostShardPlugin.isTutorial())
             return;
 
         if (clan == null) {
@@ -604,7 +601,6 @@ public class HostilityMatch {
             }
             return;
         }
-
 
 
         UUID[] clanUUIDS = clan.getOnlineUUIDS();

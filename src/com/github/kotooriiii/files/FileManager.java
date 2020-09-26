@@ -1517,7 +1517,7 @@ public final class FileManager {
     }
 
     public static void removeFile(MarkPlayer markPlayer) {
-        File marksFile = new File(marks_folder + File.separator + markPlayer.getPlayerUUID() + ".obj");
+        File marksFile = new File(marks_folder + File.separator + markPlayer.getPlayerUUID() + ".yml");
 
         if (marksFile.exists())
             marksFile.delete();
