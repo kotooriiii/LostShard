@@ -8,6 +8,8 @@ public class PlayerConnectServerEvent implements Listener {
     @EventHandler
     public void onLogin(PlayerLoginEvent event)
     {
+        if(true)
+            return;
         String ip = event.getHostname().split(":")[0];
 
         if (ip.startsWith("70.181.242.67") || ip.startsWith("localhost"

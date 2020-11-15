@@ -1,10 +1,8 @@
 package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.World;
+import net.minecraft.server.v1_15_R1.IChunkAccess;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -12,9 +10,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +34,7 @@ public class TamingListener implements Listener {
 
         LivingEntity breederEntity = event.getBreeder();
 
-        if(breederEntity==null)
-        {
+        if (breederEntity == null) {
             event.setCancelled(true);
             return;
         }
@@ -64,14 +64,12 @@ public class TamingListener implements Listener {
             LivingEntity fatherEntity = event.getFather();
             LivingEntity motherEntity = event.getMother();
 
-            if(fatherEntity instanceof Animals)
-            {
+            if (fatherEntity instanceof Animals) {
                 Animals fatherAnimals = (Animals) fatherEntity;
                 fatherAnimals.setLoveModeTicks(0);
             }
 
-            if(motherEntity instanceof Animals)
-            {
+            if (motherEntity instanceof Animals) {
                 Animals motherAnimals = (Animals) motherEntity;
                 motherAnimals.setLoveModeTicks(0);
             }
@@ -94,8 +92,10 @@ public class TamingListener implements Listener {
             if (!addWolf(player)) {
                 event.setCancelled(true);
                 return;
+            } else {
+                addXP(player, entity);
+
             }
-        addXP(player, entity);
 
     }
 
@@ -121,7 +121,7 @@ public class TamingListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) entity;
 
         //must be lower than max hp
-        if (livingEntity.getHealth() == livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+        if (livingEntity.getHealth() >= livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
             return;
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
@@ -172,7 +172,7 @@ public class TamingListener implements Listener {
             return;
 
         //must be max hp
-        if (((LivingEntity) entity).getHealth() != ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+        if (((LivingEntity) entity).getHealth() < ((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
             return;
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
@@ -184,6 +184,18 @@ public class TamingListener implements Listener {
                 exists = true;
         if (!exists)
             return;
+
+        //
+        if (entity instanceof Wolf) {
+            Wolf[] wolves = getWolves(player);
+            int maxSize = getMaxSizeOfWolves(player);
+            if (wolves.length >= maxSize) {
+                player.sendMessage(ERROR_COLOR + "You have reached your wolf pack limit. Limit: " + maxSize + ".");
+                event.setCancelled(true);
+                return;
+            }
+
+        }
 
                    /*
         entity is tameable
@@ -215,6 +227,14 @@ public class TamingListener implements Listener {
             return;
 
         addXP((Player) livingEntity, vehicle);
+    }
+
+
+    @EventHandler
+    public void denyMobSpawnerChange(PlayerInteractEvent event){
+        if((event.getClickedBlock() != null) && (event.getItem() != null) && (event.getClickedBlock().getType() == Material.SPAWNER) && (event.getItem().getType().getKey().getKey().toUpperCase().endsWith("SPAWN_EGG")))
+            if(event.getPlayer().getGameMode() != GameMode.CREATIVE)
+                event.setCancelled(true);
     }
 
     //Pokeball
@@ -857,8 +877,7 @@ public class TamingListener implements Listener {
         return new ItemStack(material, 1);
     }
 
-    public static boolean addWolf(Player player) {
-        Wolf[] wolves = getWolves(player);
+    public static int getMaxSizeOfWolves(Player player) {
         int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getTaming().getLevel();
 
         int maxSize = 0;
@@ -872,6 +891,14 @@ public class TamingListener implements Listener {
             maxSize = 3;
         else if (level == 100)
             maxSize = 5;
+
+        return maxSize;
+    }
+
+    public static boolean addWolf(Player player) {
+        Wolf[] wolves = getWolves(player);
+        int maxSize = getMaxSizeOfWolves(player);
+
         //If we try to add one more wolf, is it allowed?
         if (wolves.length + 1 > maxSize) {
             //TOO MUCH
@@ -906,6 +933,47 @@ public class TamingListener implements Listener {
             }
         }
         return wolves.toArray(new Wolf[wolves.size()]);
+    }
+
+    private static final ArrayList<Chunk> chunks = new ArrayList<>();
+    private boolean initialized = false;
+
+    @EventHandler
+    public void onChunkDespawnwolf(ChunkUnloadEvent event) {
+        for (Entity entity : event.getChunk().getEntities()) {
+            if (entity instanceof Wolf) {
+                Wolf wolf = (Wolf) entity;
+                if (!wolf.isTamed())
+                    continue;
+
+                AnimalTamer tamer = wolf.getOwner();
+                if (!(tamer instanceof Player))
+                    continue;
+
+                event.getChunk().setForceLoaded(true);
+                chunks.add(event.getChunk());
+
+                if (!initialized) {
+                    initialized = true;
+                    initRunnable();
+                }
+                break;
+            }
+        }
+    }
+
+    public static void initRunnable() {
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                for (Chunk chunk : chunks) {
+                    chunk.setForceLoaded(false);
+                }
+
+                chunks.clear();
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 20 * 60 * 5, 20 * 60 * 1);
     }
 
     private boolean addXP(Player player, Entity entity) {

@@ -23,15 +23,18 @@ import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.SkillType;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.status.shrine.Shrine;
 import com.github.kotooriiii.status.shrine.ShrineType;
 import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -66,7 +69,7 @@ public final class FileManager {
     private static File links_folder = new File(discord_folder + File.separator + "links");
     private static File shrines_folder = new File(plugin_folder + File.separator + "shrines");
     private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
-    private static File ignoredPlayer_folder =new File(plugin_folder + File.separator + "ignored_player");
+    private static File ignoredPlayer_folder = new File(plugin_folder + File.separator + "ignored_player");
 
     private static File config = new File(plugin_folder + File.separator + "config.yml");
 
@@ -290,9 +293,8 @@ public final class FileManager {
             readGate(file);
         }
 
-        for(File file : ignoredPlayer_folder.listFiles())
-        {
-            if(!file.getName().endsWith(".yml"))
+        for (File file : ignoredPlayer_folder.listFiles()) {
+            if (!file.getName().endsWith(".yml"))
                 continue;
             readIgnoredPlayer(file);
         }
@@ -768,21 +770,20 @@ public final class FileManager {
 
     }
 
-    public static HashSet<Location> readBuildChangers(File file)
-    {
+    public static HashSet<Location> readBuildChangers(File file) {
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         HashSet<Location> locations = new HashSet<>();
 
         ConfigurationSection section = yaml.getConfigurationSection("locations");
-        if(section==null)
+        if (section == null)
             return locations;
 
-       for(String path : section.getKeys(false)) {
-           Location location = yaml.getLocation("locations." + path);
-           locations.add(location);
-       }
-       return locations;
+        for (String path : section.getKeys(false)) {
+            Location location = yaml.getLocation("locations." + path);
+            locations.add(location);
+        }
+        return locations;
     }
 
 
@@ -896,7 +897,7 @@ public final class FileManager {
 
         String fileName = file.getName().substring(0, file.getName().indexOf('.'));
 
-        if(!fileName.equalsIgnoreCase(ignoredPlayer_folder.getName()))
+        if (!fileName.equalsIgnoreCase(ignoredPlayer_folder.getName()))
             return;
 
         Set<String> paths = yaml.getConfigurationSection("ignoredList").getKeys(false);
@@ -904,15 +905,14 @@ public final class FileManager {
 
         for (String path : paths) {
             IgnorePlayer ignorePlayer = new IgnorePlayer(UUID.fromString(path));
-            List<String> uuidsString = yaml.getStringList("ignoredList."+path);
+            List<String> uuidsString = yaml.getStringList("ignoredList." + path);
             HashSet<UUID> uuids = new HashSet<>();
-            for(String uuidString : uuidsString)
+            for (String uuidString : uuidsString)
                 uuids.add(UUID.fromString(uuidString));
             ignorePlayer.setIgnoredPlayers(uuids);
             LostShardPlugin.getIgnoreManager().addIgnorePlayer(ignorePlayer, false);
         }
     }
-
 
 
     public static void write(Clan clan) {
@@ -1000,15 +1000,28 @@ public final class FileManager {
 
         for (int i = 0; i < bank.getInventory().getSize(); i++) {
             ItemStack item = bank.getInventory().getItem(i);
+
+            boolean exists = false;
+            if(item != null) {
+                if (item.getEnchantments() != null) {
+                    for (Enchantment enchantment : item.getEnchantments().keySet()) {
+                        if (enchantment.getKey().getKey().equals("GlowCustomEnchantment"))
+                            exists = true;
+                    }
+                }
+            }
+
             if (item == null)
                 yaml.set("chest." + i, new ItemStack(Material.AIR, 1));
+            else if (exists)
+                yaml.set("chest." + i, new ItemStack(Material.STICK, 1));
             else
                 yaml.set("chest." + i, bank.getInventory().getItem(i));
         }
         yaml.set("Currency", bank.getCurrency());
         try {
             yaml.save(bankFile);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -1420,7 +1433,7 @@ public final class FileManager {
         }
 
         ArrayList<String> uuidsStringList = new ArrayList<>();
-        for(UUID uuid : ignorePlayer.getIgnoredUUIDS())
+        for (UUID uuid : ignorePlayer.getIgnoredUUIDS())
             uuidsStringList.add(uuid.toString());
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(ignorePlayerFile);

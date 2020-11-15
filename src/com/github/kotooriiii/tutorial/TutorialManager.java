@@ -1,10 +1,17 @@
 package com.github.kotooriiii.tutorial;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bungee.BungeeTutorialCompleteChannel;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Observable;
@@ -30,11 +37,28 @@ public class TutorialManager implements Observer {
     /**
      * Base constructor. Instantiates the object.
      */
-    public TutorialManager(boolean shouldRestartTutorialOnQuit) {
+    public TutorialManager(boolean shouldRestartTutorialOnQuit, boolean givePotion) {
         playerProgressions = new HashMap<>();
         hologramManager = new THologramManager();
         chapterManager = new ChapterManager();
         isRestartWhenLoggedOff = shouldRestartTutorialOnQuit;
+        if(givePotion)
+            givePotion();
+    }
+    public void givePotion()
+    {
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for(Player player : Bukkit.getOnlinePlayers())
+                {
+                    if(CitizensAPI.getNPCRegistry().isNPC(player))
+                        continue;
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20*60*5, 1, false, false, false));
+                }
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 20*60*1);
     }
 
     /**
@@ -76,12 +100,14 @@ public class TutorialManager implements Observer {
      * Add a player to this tutorial.
      *
      * @param uuid The player's UUID.
+     * @return TutorialBook of the UUID
      */
-    public void addTutorial(UUID uuid) {
+    public TutorialBook addTutorial(UUID uuid) {
         TutorialBook book = new TutorialBook(uuid, getChapterManager().getStory());
         book.addObserver(this);
         playerProgressions.put(uuid, book);
         book.advance();
+        return book;
     }
 
     /**
@@ -128,6 +154,8 @@ public class TutorialManager implements Observer {
         }
 
         getHologramManager().clear(uuid);
+        book.getBossBar().removeAll();
+        Bukkit.removeBossBar(book.getBossBarKey());
         return playerProgressions.remove(uuid, book);
     }
 

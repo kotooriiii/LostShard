@@ -2,36 +2,28 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.sorcery.GateBlock;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.status.Staff;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.data.Maps.platforms;
 
 public class PermanentGateTravelSpell extends Spell implements Listener {
 
@@ -230,9 +222,39 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
             return;
         }
 
+        Plot fromPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getFrom());
+        Plot toPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getTo());
+
+        if (!Staff.isStaff(playerSender.getUniqueId()) && !hasPlotBuildingPerms(playerSender, fromPlot, toPlot))
+            return;
+
+
         if (gate.isBuildable()) {
             LostShardPlugin.getGateManager().addGate(gate, true);
         }
+    }
+
+    private boolean hasPlotBuildingPerms(Player player, Plot... plots) {
+
+        for (Plot plot : plots) {
+            if (plot != null) {
+                if (plot.getType().isStaff()) {
+                    if (player.isOnline())
+                        player.sendMessage(ERROR_COLOR + "You can't build a gate on staff plots. Verify both portals are not in staff territory!");
+                    return false;
+                }
+
+                if (plot instanceof PlayerPlot) {
+                    PlayerPlot playerPlot = (PlayerPlot) plot;
+                    if (!playerPlot.isJointOwner(player.getUniqueId()) && !playerPlot.isOwner(player.getUniqueId())) {
+                        player.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to build a gate. Verify both portals are in plots you can build!");
+                        return false;
+                    }
+                }
+
+            }
+        }
+        return true;
     }
 
 

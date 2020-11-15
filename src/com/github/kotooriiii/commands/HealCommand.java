@@ -58,6 +58,8 @@ public class HealCommand implements CommandExecutor {
         healedPlayer.setFireTicks(0);
 
         Stat stat = Stat.wrap(healedPlayer.getUniqueId());
+        if(stat==null)
+            return;
         stat.setStamina(stat.getMaxStamina());
         stat.setMana(stat.getMaxMana());
         if (isMessaging)

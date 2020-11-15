@@ -31,7 +31,7 @@ public class FishingListener implements Listener {
         if (entity == null)
             return;
 
-        if (!(entity instanceof Item))
+        if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH)
             return;
 
         if (!isFishingRod(player.getInventory().getItemInMainHand()))

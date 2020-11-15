@@ -30,13 +30,15 @@ public class BungeeTutorialCompleteChannel {
     TutorialLostShard->BungeeCord:Complete
      */
     public void sendTutorialComplete(UUID uuid, boolean isAuthentic) {
+        String channelOut = "tls-b:Complete".toLowerCase();
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(uuid.toString()); // Write the UUID
         out.writeUTF(String.valueOf(isAuthentic)); //Write if authentic
-        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete".toLowerCase(), out.toByteArray());
+        BungeeAuthenticateChannel.debug("Sending", channelOut, uuid.toString(), String.valueOf(isAuthentic));
+        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, channelOut, out.toByteArray());
     }
 
-    private static  BungeeTutorialCompleteChannel instance;
+    private static BungeeTutorialCompleteChannel instance;
 
     public static BungeeTutorialCompleteChannel getInstance() {
         if (instance == null) {

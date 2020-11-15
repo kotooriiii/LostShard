@@ -95,7 +95,7 @@ public class CraftingChapter extends AbstractChapter {
             return;
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "Good job!\nYou're ready to head to Order.");
+        sendMessage(player, "Good job!\nYou're ready to head to Order.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         setComplete();
     }
 
@@ -112,7 +112,7 @@ public class CraftingChapter extends AbstractChapter {
         Location to = event.getTo();
         if (zone.contains(from) && !zone.contains(to)) {
 
-            sendMessage(event.getPlayer(), "You must craft chain armor before entering Order.");
+            sendMessage(event.getPlayer(), "You must craft chain armor before entering Order.", ChapterMessageType.HELPER);
             if(!event.getPlayer().getInventory().contains(Material.COBBLESTONE, 24))
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.COBBLESTONE, 24));
 
@@ -135,7 +135,7 @@ public class CraftingChapter extends AbstractChapter {
         Location to = event.getTo();
         if (!zone.contains(from) && zone.contains(to)) {
             isPerformedBeginChain = true;
-            sendMessage(event.getPlayer(), "Before you go in, you should craft some Chain Armor.\nChain armor is crafted like any other armor, just using cobblestone!");
+            sendMessage(event.getPlayer(), "Before you go in, you should craft some Chain Armor.\nChain armor is crafted like any other armor, just using cobblestone!", ChapterMessageType.HOLOGRAM_TO_TEXT);
             event.getPlayer().getInventory().addItem(new ItemStack(Material.COBBLESTONE, 24));
         }
     }

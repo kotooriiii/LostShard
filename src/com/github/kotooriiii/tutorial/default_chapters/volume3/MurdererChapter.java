@@ -1,6 +1,7 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.commands.HealCommand;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererNPC;
 import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
@@ -9,6 +10,7 @@ import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
 import org.bukkit.entity.Player;
@@ -31,10 +33,9 @@ public class MurdererChapter extends AbstractChapter {
     private static Zone zone = new Zone(590, 596, 60, 70, 813, 792);
     private static Location[] locations = new Location[]
             {
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 630, 66, 795),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 635, 68, 798),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 635, 68, 808),
-                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 634, 68, 804)
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 617, 66, 804),
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 618, 66, 802),
+                    new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 618, 66, 806)
             };
 
     @Override
@@ -55,7 +56,7 @@ public class MurdererChapter extends AbstractChapter {
     public void sendIntro(Player player) {
         if (!isHologramSetup)
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "This is Order. It is where all worthy players spawn.\nOrder protects Worthy players with Guards.\nIf you see a murderer, type /guards.");
+        sendMessage(player, "This is Order. It is where all worthy players spawn.\nOrder protects Worthy players with Guards.\nIf you see a murderer, type /guards.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         isHologramSetup = true;
     }
 
@@ -63,6 +64,7 @@ public class MurdererChapter extends AbstractChapter {
         if (!player.isOnline())
             return;
         Location location = locations[new Random().nextInt(locations.length)];
+        location.getWorld().strikeLightningEffect(location);
         MurdererNPC npc = new MurdererNPC(player);
         npc.spawn(location);
     }
@@ -84,7 +86,8 @@ public class MurdererChapter extends AbstractChapter {
         if (!isHologramSetup2)
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         isHologramSetup2 = true;
-        sendMessage(player, "Watch out! A murderer!");
+        sendMessage(player, "Watch out! A murderer!", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        sendMessage(player, ChatColor.LIGHT_PURPLE + "Type: /guards", ChapterMessageType.HELPER);
 
         if (counter++ >= 1)
             player.sendTitle("", "Type \"/guards\" when a Murderer is nearby.", 40, 40, 10);
@@ -112,7 +115,8 @@ public class MurdererChapter extends AbstractChapter {
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         player.sendMessage(ERROR_COLOR + "The murderer, Colton, has been killed!");
         if (player != null)
-            sendMessage(player, "Good job! You killed the murderer using guards.");
+            sendMessage(player, "Good job! You killed the murderer using guards.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        HealCommand.heal(player, false);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -122,7 +126,7 @@ public class MurdererChapter extends AbstractChapter {
                 LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
 
             }
-        }.runTaskLater(LostShardPlugin.plugin, DELAY_TICK);
+        }.runTaskLater(LostShardPlugin.plugin, 20*3);
     }
 
     @EventHandler
@@ -154,7 +158,7 @@ public class MurdererChapter extends AbstractChapter {
             return;
         if (!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
-        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.", ChapterMessageType.HELPER);
 
         event.setCancelled(true);
     }

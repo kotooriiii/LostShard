@@ -29,7 +29,15 @@ public class RecallChapter extends AbstractChapter {
                     player.getInventory().addItem(itemStack);
 
                 }
-                sendMessage(player, "Head back to your plot by recalling to the mark you set there.\nType: /cast recall\nIf you forgot the name of your mark, type: /marks");
+
+                new BukkitRunnable()
+                {
+                    @Override
+                    public void run() {
+                        sendMessage(player, "If you forgot the name of your mark, type: /marks", ChapterMessageType.HELPER);
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, (20*10));
+
                 this.cancel();
                 return;
             }
@@ -49,7 +57,7 @@ public class RecallChapter extends AbstractChapter {
             return;
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(event.getPlayer(), "Great job! You recalled back successfully.");
+        sendMessage(event.getPlayer(), "Great job! You recalled back successfully.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         setComplete();
     }
 }

@@ -32,13 +32,13 @@ public class TutorialReader {
     public boolean hasCompletedTutorial(UUID uuid) {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         List<String> playerValues = yaml.getStringList(id + "."  + uuid.toString());
-        return playerValues != null;
+        return playerValues != null && !playerValues.isEmpty();
     }
 
     public boolean isAuthentic(UUID uuid) {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         List<String> playerValues = yaml.getStringList(id + "."  + uuid.toString());
-        if (playerValues == null)
+        if (playerValues == null || playerValues.isEmpty())
             return false;
 
         boolean isAuthentic = Boolean.valueOf(playerValues.get(1));
@@ -49,7 +49,7 @@ public class TutorialReader {
     public boolean isAwarded(UUID uuid) {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         List<String> playerValues = yaml.getStringList(id + "."  + uuid.toString());
-        if (playerValues == null)
+        if (playerValues == null || playerValues.isEmpty())
             return false;
 
         boolean isAwarded = Boolean.valueOf(playerValues.get(0));
@@ -61,7 +61,7 @@ public class TutorialReader {
     {
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
         List<String> playerValues = yaml.getStringList(id + "."  + uuid.toString());
-        if (playerValues == null)
+        if (playerValues == null || playerValues.isEmpty())
             return;
         playerValues.set(0, true + "");
         yaml.set(id + "." + uuid.toString(), playerValues);

@@ -28,7 +28,7 @@ public class RavineChapter extends AbstractChapter {
 //        }
 
 
-        sendMessage(player, "Great job!");
+        sendMessage(player, "Great job!", ChapterMessageType.HOLOGRAM_TO_TEXT);
         setComplete();
     }
 

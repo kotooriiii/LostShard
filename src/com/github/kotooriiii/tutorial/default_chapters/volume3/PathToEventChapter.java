@@ -49,7 +49,7 @@ public class PathToEventChapter extends AbstractChapter {
         isComplete = true;
         final Player player = event.getPlayer();
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "That's a setback. Looks like the only way to keep moving forward is to jump...");
+        sendMessage(player, "That's a setback. Looks like the only way to keep moving forward is to jump...",  ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
     @EventHandler

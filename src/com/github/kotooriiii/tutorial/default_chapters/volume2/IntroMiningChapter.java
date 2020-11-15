@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 public class IntroMiningChapter extends AbstractChapter {
 
     private int goldCounter, ironCounter;
-    private static int GOLD_MAX = 10, IRON_MAX = 3;
+    private static int GOLD_MAX = 10, IRON_MAX = 6;
     private Zone zone;
     private boolean isComplete;
 
@@ -41,7 +41,9 @@ public class IntroMiningChapter extends AbstractChapter {
         LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getMining().setLevel(49.0f);
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-        sendMessage(player, "Wow, this mine has a lot of gold in it. It's probably a good idea to mine it all...\nGrab the pickaxe out of the chest.");
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+
+        sendMessage(player, "Wow, this mine has a lot of gold in it. It's probably a good idea to mine it all...\nGrab the pickaxe out of the chest.", ChapterMessageType.HOLOGRAM_TO_TEXT);
 
     }
 
@@ -82,14 +84,14 @@ public class IntroMiningChapter extends AbstractChapter {
         goldCounter++;
         if (goldCounter == GOLD_MAX) {
             if (ironCounter < IRON_MAX)
-                sendMessage(event.getPlayer(), "Get the iron ore as well!");
+                sendMessage(event.getPlayer(), "Get the iron ore as well!", ChapterMessageType.HELPER);
             else
-                sendMessage(event.getPlayer(), "Let's continue exploring.");
+                sendMessage(event.getPlayer(), "Let's continue exploring.", ChapterMessageType.HELPER);
             return;
         }
 
-        if (goldCounter >= GOLD_MAX + 5) {
-            sendMessage(event.getPlayer(), "You won't need all this gold...");
+        if (goldCounter > GOLD_MAX ) {
+            sendMessage(event.getPlayer(), "You won't need all this gold...", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }
@@ -108,15 +110,15 @@ public class IntroMiningChapter extends AbstractChapter {
         ironCounter++;
         if (ironCounter == IRON_MAX) {
             if (goldCounter < GOLD_MAX)
-                sendMessage(event.getPlayer(), "Get the gold ore as well!");
+                sendMessage(event.getPlayer(), "Get the gold ore as well!", ChapterMessageType.HELPER);
             else
-                sendMessage(event.getPlayer(), "Let's continue exploring.");
+                sendMessage(event.getPlayer(), "Let's continue exploring.",ChapterMessageType.HELPER);
 
             return;
         }
 
-        if (ironCounter >= IRON_MAX + 5) {
-            sendMessage(event.getPlayer(), "You won't need all this iron...");
+        if (ironCounter > IRON_MAX) {
+            sendMessage(event.getPlayer(), "You won't need all this iron...", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }
@@ -144,15 +146,15 @@ public class IntroMiningChapter extends AbstractChapter {
             String s = "You do not have enough to continue, you need ";
             final int startLen = s.length();
             if (ironNeeded > 0)
-                s += ironNeeded + " more iron.";
+                s += ironNeeded*2 + " more iron.";
             if (goldNeeded > 0)
                 if (startLen == s.length())
-                    s += goldNeeded + " more gold.";
+                    s += goldNeeded*2 + " more gold.";
                 else
-                    s = s.substring(0, s.length() - 1) + " and " + goldNeeded + " more gold.";
+                    s = s.substring(0, s.length() - 1) + " and " + goldNeeded*2 + " more gold.";
 
 
-            sendMessage(event.getPlayer(), s);
+            sendMessage(event.getPlayer(), s, ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }
@@ -170,7 +172,7 @@ public class IntroMiningChapter extends AbstractChapter {
         int dmg = event.getDamage() + 15;
 
         if (event.getItem().getType().getMaxDurability() <= dmg) {
-            sendMessage(event.getPlayer(), "Your pickaxe is getting low. Find a place to fix it!");
+            sendMessage(event.getPlayer(), "Your pickaxe is getting low. Find a place to fix it!", ChapterMessageType.HELPER);
         }
     }
 

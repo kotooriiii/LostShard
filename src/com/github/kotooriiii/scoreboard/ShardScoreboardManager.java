@@ -197,6 +197,12 @@ public class ShardScoreboardManager {
     }
 
     public static void updateCache(Player player) {
+        StatusPlayer statusplayer = StatusPlayer.wrap(player.getUniqueId());
+
+        if (statusplayer != null) {
+            String name = statusplayer.getStatus().getName();
+            add(player.getName(), name);
+        }
         map.remove(null);
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String playerName = entry.getKey();

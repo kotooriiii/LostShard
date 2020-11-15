@@ -4,6 +4,10 @@ package com.github.kotooriiii.tutorial;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.commands.HealCommand;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
@@ -22,9 +26,18 @@ public class TutorialBook extends Observable implements Observer {
      */
     private final UUID uuid;
     /**
+     * The Boss Bar
+     */
+    private final BossBar bar;
+    /**
+     * Namespaced boss bar key
+     */
+    private final NamespacedKey key;
+    /**
      * The story line. A collection of chapters of the book.
      */
     private final Queue<AbstractChapter> chapters;
+    private final int maxChapterSize;
     /**
      * The current chapter of the book.
      */
@@ -39,6 +52,9 @@ public class TutorialBook extends Observable implements Observer {
     public TutorialBook(UUID uuid, Queue<AbstractChapter> chapters) {
         this.uuid = uuid;
         this.chapters = chapters;
+        this.maxChapterSize = this.chapters.size();
+        this.key = new NamespacedKey(LostShardPlugin.plugin, uuid.toString() + "_BossBar");
+        this.bar = Bukkit.createBossBar(key, "Tutorial Progress", BarColor.PURPLE, BarStyle.SEGMENTED_12);
         currentChapter = null;
     }
 
@@ -74,8 +90,7 @@ public class TutorialBook extends Observable implements Observer {
 
             if (this.getCurrentChapter().isUsingHeal())
                 HealCommand.heal(player, false);
-            else
-            {
+            else {
                 player.setHealth(this.getCurrentChapter().getDefaultHealth());
                 player.setFoodLevel(this.getCurrentChapter().getDefaultFoodLevel());
             }
@@ -132,6 +147,23 @@ public class TutorialBook extends Observable implements Observer {
     }
 
     /**
+     * Boss bar of the tutorial progress
+     *
+     * @return boss bar
+     */
+    public BossBar getBossBar() {
+        return bar;
+    }
+
+    /**
+     * NamedSpaceKey of boss bar
+     * @return key
+     */
+    public NamespacedKey getBossBarKey() {
+        return key;
+    }
+
+    /**
      * Invoked when the chapter is completed.
      *
      * @param o   The chapter
@@ -143,6 +175,7 @@ public class TutorialBook extends Observable implements Observer {
             AbstractChapter chapter = (AbstractChapter) o;
             if (chapter.isActive() && getCurrentChapter() == chapter)
                 advance();
+            getBossBar().setProgress((1.0d - ((double) chapters.size()/maxChapterSize)));
         }
         return;
     }

@@ -36,8 +36,8 @@ public class ChapterManager {
     public void registerDefault() {
 
         //Volume initialization
-
         //Volume 1
+        register(IntroChapter.class);
         register(TitleChapter.class);
         register(IntroWandChapter.class);
         register(GrabStickFromChestChapter.class);

@@ -30,6 +30,8 @@ public class HelpCommandListener implements Listener {
             player.performCommand("doc");
             player.performCommand("yt");
             player.performCommand("wiki");
+            player.performCommand("discord");
+
             event.setCancelled(true);
 
         }

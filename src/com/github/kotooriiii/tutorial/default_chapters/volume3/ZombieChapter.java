@@ -4,11 +4,15 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
+import net.minecraft.server.v1_15_R1.EntityTypes;
+import net.minecraft.server.v1_15_R1.EntityZombie;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
@@ -27,6 +31,7 @@ public class ZombieChapter extends AbstractChapter {
     private List<UUID> entityList;
     private Zone cantLeaveZone;
     private boolean isPause, isHologramSetup;
+    private static final int ZOMBIES_SIZE = 5;
 
     public ZombieChapter() {
         this.counter = 0;
@@ -47,9 +52,8 @@ public class ZombieChapter extends AbstractChapter {
 
 
         if (!player.getInventory().contains(Material.DIAMOND_SWORD)) {
-            final ItemStack itemStack = player.getInventory().getItem(0);
             player.getInventory().setItem(0, new ItemStack(Material.DIAMOND_SWORD, 1));
-            player.getInventory().addItem(itemStack);
+            player.getInventory().setItem(1, new ItemStack(Material.MELON_SLICE, 64));
         }
 
         new BukkitRunnable() {
@@ -58,7 +62,7 @@ public class ZombieChapter extends AbstractChapter {
                 spawnZombies(player);
                 if (!isHologramSetup)
                     LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-                sendMessage(player, "Some zombies... these are always worth killing.");
+                sendMessage(player, "Some zombies... these are always worth killing.", ChapterMessageType.HOLOGRAM_TO_TEXT);
                 isHologramSetup = true;
 
             }
@@ -71,15 +75,20 @@ public class ZombieChapter extends AbstractChapter {
 
         player.getWorld().createExplosion(x, y, z, 6f, false, false);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < ZOMBIES_SIZE; i++) {
             //4
             //8
             //9
             //0-8
             //-4-4;
             int random = new Random().nextInt((4 * 2) + 1) - 4; //0-3
-            Location location = new Location(player.getWorld(), x + random, y, z + random);
-            Zombie zombie = (Zombie) player.getWorld().spawnEntity(location, EntityType.ZOMBIE);
+            Location location = new Location(player.getWorld(), x + random, y + 1, z + random);
+
+            CraftWorld craftWorld = ((CraftWorld) location.getWorld());
+            final EntityZombie entityZombie = new EntityZombie(EntityTypes.ZOMBIE, craftWorld.getHandle());
+            entityZombie.setPosition(location.getX(), location.getY(), location.getZ());
+            final Entity zombie = (Zombie) craftWorld.addEntity(entityZombie, CreatureSpawnEvent.SpawnReason.CUSTOM);
+
             zombie.setCustomName("[Tutorial] Zombie");
             zombie.setCustomNameVisible(true);
             entityList.add(zombie.getUniqueId());
@@ -135,12 +144,15 @@ public class ZombieChapter extends AbstractChapter {
             return;
         counter++;
 
-        if (counter == 4) {
+        if (counter == ZOMBIES_SIZE) {
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
 
-            sendMessage(Bukkit.getPlayer(getUUID()), "Zombies drop rotten flesh which is instantly eatable like melons.\nThey also drop feathers, which is a useful ingredient in casting spells.\nLet's continue to the event along the path.");
+
+            sendMessage(Bukkit.getPlayer(getUUID()), "Zombies drop rotten flesh which is instantly eatable like melons.\nThey also drop feathers, which is a useful ingredient in casting spells.\nLet's continue to the event along the path.", ChapterMessageType.HOLOGRAM_TO_TEXT);
             setComplete();
         }
 
@@ -182,7 +194,7 @@ public class ZombieChapter extends AbstractChapter {
         if (!cantLeaveZone.contains(event.getTo()))
             return;
 
-        sendMessage(event.getPlayer(), "You must defeat the zombies before being able to venture out.");
+        sendMessage(event.getPlayer(), "You must defeat the zombies before being able to venture out.", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
 

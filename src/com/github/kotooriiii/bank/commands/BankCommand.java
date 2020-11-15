@@ -1,7 +1,10 @@
 package com.github.kotooriiii.bank.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import com.github.kotooriiii.status.StatusPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatMessageType;
@@ -9,11 +12,14 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.UUID;
 
@@ -73,6 +79,26 @@ public class BankCommand implements CommandExecutor {
                                     playerSender.sendMessage(STANDARD_COLOR + "You have hired " + BANKER_COLOR + nameCreate + STANDARD_COLOR + " to handle finances in this location.");
                                     BankerNPC banker = new BankerNPC(nameCreate);
                                     banker.spawn(playerSender.getLocation());
+                                    break;
+                                case "view": // Command syntax: /bank staff view <playerName>
+                                    if (args.length != 3) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/bank staff view (username)" + ERROR_COLOR + ".");
+                                        return true;
+                                    }
+                                    // /host <arg 0/staff> <arg 1/create> ......... <arg n>
+                                    String playerName = args[2];
+                                    OfflinePlayer bankSearchedPlayer = Bukkit.getOfflinePlayer(playerName);
+                                    if(!bankSearchedPlayer.isOnline() && !bankSearchedPlayer.hasPlayedBefore())
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR + "The player you are looking has never played on the server.");
+                                        return false;
+                                    }
+
+                                    //Player exists
+
+                                    Bank bank = LostShardPlugin.getBankManager().wrap(bankSearchedPlayer.getUniqueId());
+                                    playerSender.openInventory(bank.getInventory());
+                                    playerSender.sendMessage(STANDARD_COLOR + "You have opened " + StatusPlayer.wrap(bankSearchedPlayer.getUniqueId()).getStatus().getChatColor() + " " + bankSearchedPlayer.getName() + STANDARD_COLOR + "'s bank.");
                                     break;
                                 case "delete":
                                     if (args.length == 2) {

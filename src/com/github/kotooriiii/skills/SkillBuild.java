@@ -34,6 +34,32 @@ public class SkillBuild {
         this.skills = skills;
     }
 
+    public Skill getSkill(SkillType type)
+    {
+        switch (type)
+        {
+
+            case ARCHERY:
+                return getArchery();
+            case BLACKSMITHY:
+                return getBlacksmithy();
+            case BRAWLING:
+                return getBrawling();
+            case FISHING:
+                return getFishing();
+            case MINING:
+                return getMining();
+            case SURVIVALISM:
+                return getSurvivalism();
+            case SWORDSMANSHIP:
+                return getSwordsmanship();
+            case TAMING:
+                return getTaming();
+            default:
+                return null;
+        }
+    }
+
     public Skill getArchery() {
         return skills[0];
     }

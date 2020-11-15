@@ -117,7 +117,7 @@ public class GuardCommand implements CommandExecutor {
                             }
                         }
 
-                    }.runTaskLater(LostShardPlugin.plugin, 20);
+                    }.runTaskLater(LostShardPlugin.plugin, 20*2);
 
 
                 }

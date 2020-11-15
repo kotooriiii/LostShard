@@ -2,6 +2,10 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.TeleportSpell;
+import com.github.kotooriiii.sorcery.wands.Wand;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class FallChapter extends AbstractChapter {
@@ -36,7 +41,10 @@ public class FallChapter extends AbstractChapter {
         setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 891, 54, 976, 47, 13));
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-        sendMessage(player, "Ouch, that was a hard hit!\nMaybe we'll find something on the way to heal us...");
+        sendMessage(player, "Ouch, that was a hard hit!\nMaybe we'll find something on the way to heal us...", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        player.getInventory().setItem(3, new Wand(Spell.of(SpellType.TELEPORT)).createItem());
+        player.getInventory().setItem(5, new ItemStack(Material.FEATHER, 64));
+        player.updateInventory();
     }
 
     @Override
@@ -45,31 +53,27 @@ public class FallChapter extends AbstractChapter {
     }
 
     @Override
-    public double getDefaultHealth()
-    {
+    public double getDefaultHealth() {
         return 10.0f;
     }
 
     @Override
-    public int getDefaultFoodLevel()
-    {
+    public int getDefaultFoodLevel() {
         return 17;
     }
 
     @Override
-    public boolean isUsingHeal()
-    {
+    public boolean isUsingHeal() {
         return false;
     }
 
     @EventHandler
-    public void onMelonBreak(BlockBreakEvent event)
-    {
+    public void onMelonBreak(BlockBreakEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if(event.getBlock().getType() != Material.MELON)
+        if (event.getBlock().getType() != Material.MELON)
             return;
         hasBrokenMelon = true;
     }
@@ -93,13 +97,15 @@ public class FallChapter extends AbstractChapter {
         final Player player = event.getPlayer();
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
 
-        sendMessage(player, "Some melons! Break them to collect them!\nMelons can be instantly eaten by right clicking them.\nThey instantly heal your hearts and hunger.\nThis can be very useful in combat, let's move on.");
 
+        sendMessage(player, "Some melons! Break them to collect them!\nMelons can be instantly eaten by right clicking them.\nThey instantly heal your hearts and hunger.\nThis can be very useful in combat, let's move on.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        setLocation(player.getLocation());
     }
 
     @EventHandler
-    public void onMelonAbandon(PlayerMoveEvent event){
+    public void onMelonAbandon(PlayerMoveEvent event) {
         if (hasBrokenMelon)
             return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
@@ -112,7 +118,7 @@ public class FallChapter extends AbstractChapter {
             return;
 
         final Player player = event.getPlayer();
-        sendMessage(player, "You must break some melons before continuing.");
+        sendMessage(player, "You must break some melons before continuing.", ChapterMessageType.HELPER);
         event.setCancelled(true);
 
     }

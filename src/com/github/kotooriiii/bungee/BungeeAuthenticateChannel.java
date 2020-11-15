@@ -24,15 +24,22 @@ import java.util.UUID;
  */
 public class BungeeAuthenticateChannel implements PluginMessageListener {
 
+    public static void debug(String... strings) {
+        for (String s : strings)
+            LostShardPlugin.plugin.getLogger().info(s);
+    }
+
     /*
     Sending
     LostShard->BungeeCord:Authenticate [Params: UUID playerUUID, boolean isTutorialComplete]
      */
     public void authenticate(UUID uuid, boolean isTutorialComplete) {
+        String channelOut = "ls-b:Authenticate".toLowerCase();
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(uuid.toString()); // Write the UUID
         out.writeUTF(String.valueOf(isTutorialComplete)); // Write the UUID
-        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate".toLowerCase(), out.toByteArray());
+        Bukkit.getServer().sendPluginMessage(LostShardPlugin.plugin, channelOut.toLowerCase(), out.toByteArray());
+        debug("Sending",channelOut, uuid.toString(), String.valueOf(isTutorialComplete));
     }
 
     /*
@@ -46,7 +53,10 @@ public class BungeeAuthenticateChannel implements PluginMessageListener {
             String uuidString = in.readUTF(); // Read the UUID
             UUID playerUUID = UUID.fromString(uuidString);
 
-            boolean isTutorialComplete=LostShardPlugin.getTutorialReader().hasCompletedTutorial(playerUUID);
+            boolean isTutorialComplete = LostShardPlugin.getTutorialReader().hasCompletedTutorial(playerUUID);
+
+            debug("Receiving","b-ls:Authenticate".toLowerCase(), uuidString, "" +isTutorialComplete);
+
             authenticate(playerUUID, isTutorialComplete);
 
 

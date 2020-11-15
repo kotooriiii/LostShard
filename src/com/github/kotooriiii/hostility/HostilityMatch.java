@@ -2,9 +2,7 @@ package com.github.kotooriiii.hostility;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.hostility.events.PlatformCaptureEvent;
-import com.github.kotooriiii.hostility.events.PlatformStartEvent;
-import com.github.kotooriiii.hostility.events.PlatformVictoryEvent;
+import com.github.kotooriiii.hostility.events.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
@@ -116,17 +114,22 @@ public class HostilityMatch {
 
     private void start() {
 
+        HostilityMatch match = this;
         this.capturingCountdownTask = new BukkitRunnable() {
             @Override
             public void run() {
 
                 if (capturingPlayer == null || !capturingPlayer.isOnline() || !platform.contains(capturingPlayer) || !capturingClan.isInThisClan(capturingPlayer.getUniqueId())) {
-                    broadcast(ChatColor.YELLOW + capturingClan.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks), capturingClan);
-                    capturingClan.broadcast(ChatColor.YELLOW + capturingPlayer.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks));
-                    init();
-                    this.cancel();
-                    checkForCapturer();
-                    return;
+                    PlatformLoseEvent event = new PlatformLoseEvent(match, capturingPlayer, capturingClan);
+                    LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+                    if(!event.isCancelled()) {
+                        broadcast(ChatColor.YELLOW + capturingClan.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks), capturingClan);
+                        capturingClan.broadcast(ChatColor.YELLOW + capturingPlayer.getName() + ChatColor.GOLD + " has lost control of " + platform.getName() + ". " + toMinutesSeconds(currentTicks));
+                        init();
+                        this.cancel();
+                        checkForCapturer();
+                        return;
+                    }
                 }
 
                 if (currentTicks % 20 == 0) {
@@ -176,6 +179,8 @@ public class HostilityMatch {
                         return;
                     } else {
                         //contesting
+                        Clan[] contestingClans = getContestingClans();
+                        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new PlatformContestEvent(platform, contestingClans));
                     }
                 }
 
@@ -237,9 +242,10 @@ public class HostilityMatch {
                         this.broadcast(ChatColor.YELLOW + this.capturingClan.getName() + ChatColor.GOLD + " has fully captured " + platform.getName() + ".", this.capturingClan);
                         capturingClan.broadcast(ChatColor.GOLD + "Your clan has fully captured " + platform.getName() + ".");
 
-                        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(new PlatformVictoryEvent(capturingPlayer, capturingClan, platform.getName()));
+                        PlatformVictoryEvent event = new PlatformVictoryEvent(capturingPlayer, capturingClan, platform.getName());
+                        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
 
-                        win();
+                        win(event.getMessage());
                         capturingClan.setHostilityWins(capturingClan.getHostilityWins() + 1);
 
 
@@ -352,7 +358,7 @@ public class HostilityMatch {
 
     }
 
-    private void win() {
+    private void win(String message) {
 
         String buff = "";
 
@@ -527,8 +533,14 @@ public class HostilityMatch {
             if (!player.isOnline())
                 continue;
 
-            player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
-            player.sendMessage(STANDARD_COLOR + "Your clan has gained the " + buff + " buff!");
+            if (message != null) {
+                if (message.isEmpty())
+                    return;
+                player.sendMessage(message);
+            } else {
+                player.sendMessage(STANDARD_COLOR + "Your clan captured " + platform.getName() + ". You have been awarded for your brave efforts!");
+                player.sendMessage(STANDARD_COLOR + "Your clan has gained the " + buff + " buff!");
+            }
 
         }
     }
@@ -619,6 +631,33 @@ public class HostilityMatch {
             player.sendMessage(message);
         }
 
+    }
+
+    /**
+     * Gets the contesting clans tryingt to take over this platform.
+     *
+     * @return all contesting clans except the capturing clan, empty if no clans are contesting, null if no clan has captured the platform.
+     */
+    public Clan[] getContestingClans() {
+
+        if (getCapturingClan() == null)
+            return null;
+
+        Player[] players = platform.getPlayers();
+
+        HashSet<Clan> clans = new HashSet<>();
+
+        Clan capturingClan = getCapturingClan();
+
+        for (int i = 0; i < players.length; i++) {
+            Clan clan = LostShardPlugin.getClanManager().getClan(players[i].getUniqueId());
+            if (clan == null)
+                continue;
+            if(!clan.equals(capturingClan))
+                clans.add(clan);
+
+        }
+        return clans.toArray(new Clan[clans.size()]);
     }
 
 

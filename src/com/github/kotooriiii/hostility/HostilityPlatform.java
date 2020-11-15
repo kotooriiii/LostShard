@@ -74,6 +74,7 @@ public class HostilityPlatform implements Serializable {
         return clanlessPlayers.toArray(new Player[clanlessPlayers.size()]);
     }
 
+
     public Clan getUniqueClan() {
         Player[] players = getPlayers();
 

@@ -11,6 +11,7 @@ public class PlatformVictoryEvent extends Event implements Cancellable {
     private Player player;
     private Clan clan;
     private String platformName;
+    private String message;
 
     private boolean isCancelled;
 
@@ -32,6 +33,14 @@ public class PlatformVictoryEvent extends Event implements Cancellable {
 
     public String getPlatformName() {
         return platformName;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override

@@ -23,8 +23,8 @@ public class PlotIntroChapter extends AbstractChapter {
     private boolean isFound, isHologramCreated;
     private Location location;
     private static Zone exitOrderZone = new Zone(738, 754, 72, 65, 796, 812);
-    private static Zone plotCreateZone = new Zone(999,958,83,92,767,727);
-    private static Zone abandonMissionZone = new Zone(920,1020, 0,100, 813,814);
+    private static Zone plotCreateZone = new Zone(999, 958, 83, 92, 767, 727);
+    private static Zone abandonMissionZone = new Zone(920, 1020, 0, 100, 813, 814);
 
     public PlotIntroChapter() {
         this.isFound = false;
@@ -43,7 +43,7 @@ public class PlotIntroChapter extends AbstractChapter {
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
 
 
-        sendMessage(player, "You can't stay here forever!\nGo outside and make a plot.");
+        sendMessage(player, "You can't stay here forever!\nGo outside and make a plot.", ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
     @Override
@@ -58,10 +58,10 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        if(event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockZ() == event.getTo().getBlockZ())
+        if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockZ() == event.getTo().getBlockZ())
             return;
         if (LostShardPlugin.getPlotManager().hasNearbyPlots(event.getTo())) {
-            isFound=false;
+            isFound = false;
             return;
         }
 
@@ -70,10 +70,10 @@ public class PlotIntroChapter extends AbstractChapter {
 
         isFound = true;
 
-        if(!isHologramCreated)
-        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-        isHologramCreated=true;
-       // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
+        if (!isHologramCreated)
+            LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
+        isHologramCreated = true;
+        // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -88,9 +88,8 @@ public class PlotIntroChapter extends AbstractChapter {
             event.getPlayer().sendMessage(ERROR_COLOR + "You can only create one plot in the tutorial phase.");
             return;
         }
-        if(!plotCreateZone.contains(event.getPlot().getCenter()))
-        {
-            sendMessage(event.getPlayer(), "Move closer to the elevated area by the body of water.");
+        if (!plotCreateZone.contains(event.getPlot().getCenter())) {
+            sendMessage(event.getPlayer(), "Move closer to the elevated area by the body of water.", ChapterMessageType.HELPER);
             return;
         }
 
@@ -111,7 +110,7 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         if (!abandonMissionZone.contains(event.getTo()))
             return;
-        sendMessage(event.getPlayer(), "You must create a plot with \"plot create (name)\" before continuing.");
+        sendMessage(event.getPlayer(), "You must create a plot with \"plot create (name)\" before continuing.", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
 

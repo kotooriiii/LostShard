@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -222,7 +223,7 @@ public class SurvivalismListener implements Listener {
     public void onFireCampfire(EntityDamageEvent event) {
         Entity damagedEntity = event.getEntity();
         EntityDamageEvent.DamageCause cause = event.getCause();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
         if (!(damagedEntity instanceof Player))
@@ -276,7 +277,7 @@ public class SurvivalismListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPPlayerDeath(PlayerDeathEvent event) {
         Player defenderPlayer = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
         EntityDamageEvent damagerCause = defenderPlayer.getLastDamageCause();
@@ -308,7 +309,7 @@ public class SurvivalismListener implements Listener {
     public void onXPEntityDeath(EntityDeathEvent event) {
 
         LivingEntity defenderEntity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
@@ -316,7 +317,7 @@ public class SurvivalismListener implements Listener {
         if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
 
-        if(defenderEntity instanceof ArmorStand)
+        if (defenderEntity instanceof ArmorStand)
             return;
 
         EntityDamageByEntityEvent betterDamagerCause = (EntityDamageByEntityEvent) damagerCause;
@@ -342,10 +343,35 @@ public class SurvivalismListener implements Listener {
                 if (damagerPlayer.getInventory().getItemInMainHand() != null && damagerPlayer.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS) > 0)
                     return;
 
+
+            dropsLoop:
             for (ItemStack itemStack : event.getDrops()) {
 
-                if(isBlacklisted(itemStack.getType()))
+                if (isBlacklisted(itemStack.getType()))
                     continue;
+
+                final EntityEquipment equipment = defenderEntity.getEquipment();
+                final ItemStack[] equipmentArr = new ItemStack[]
+                        {
+                                equipment.getItemInMainHand(),
+                                equipment.getItemInOffHand(),
+                                equipment.getHelmet(),
+                                equipment.getChestplate(),
+                                equipment.getLeggings(),
+                                equipment.getBoots()
+                        };
+
+                equipmentLoop:
+                for (int i = 0; i < equipmentArr.length; i++) {
+                    if (itemStack == null)
+                        break;
+                    if (equipmentArr[i] == null)
+                        continue;
+                    if (!itemStack.equals(equipmentArr[i]))
+                        continue;
+                    equipmentArr[i] = null;
+                    continue dropsLoop;
+                }
 
                 double random = Math.random();
                 if (random <= 0.75) {

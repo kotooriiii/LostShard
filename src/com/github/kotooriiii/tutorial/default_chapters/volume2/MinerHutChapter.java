@@ -32,7 +32,7 @@ public class MinerHutChapter extends AbstractChapter {
 
         player.getInventory().addItem(new ItemStack(Material.IRON_INGOT, 6));
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "A miner station!\nYour pickaxe is considerably low. You can use the Blacksmithy skill to repair it.\nHold it in your hand and type: /repair");
+        sendMessage(player, "A miner station!", ChapterMessageType.HELPER);
 
         boolean exists = false;
 
@@ -79,14 +79,14 @@ public class MinerHutChapter extends AbstractChapter {
             return;
 
         if (!event.getType().equals(BlacksmithyType.REPAIR)) {
-            sendMessage(event.getPlayer(), "This operation is not supported in the tutorial phase.");
+            sendMessage(event.getPlayer(), "This operation is not supported in the tutorial phase.", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }
 
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(event.getPlayer(), "You repaired your pickaxe!\nNow keep moving forward!");
+        sendMessage(event.getPlayer(), "You repaired your pickaxe!\nNow keep moving forward!", ChapterMessageType.HOLOGRAM_TO_TEXT);
 
         setComplete();
     }
@@ -98,7 +98,7 @@ public class MinerHutChapter extends AbstractChapter {
         if (!isActive())
             return;
 
-        sendMessage(event.getPlayer(), "You must repair your pickaxe before continuing.");
+        sendMessage(event.getPlayer(), "You must repair your pickaxe before continuing.", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
 
@@ -113,7 +113,7 @@ public class MinerHutChapter extends AbstractChapter {
             return;
 
         isFirstTime = false;
-        sendMessage(event.getPlayer(), "The Mining skill awards you extra drops when mining stone.");
+        sendMessage(event.getPlayer(), "The Mining skill awards you extra drops when mining stone.", ChapterMessageType.HELPER);
     }
 
     @EventHandler

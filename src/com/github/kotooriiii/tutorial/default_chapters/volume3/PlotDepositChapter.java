@@ -27,7 +27,7 @@ public class PlotDepositChapter extends AbstractChapter {
         Hologram h = LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         faceDirection(player, h.getLocation());
         isReady = true;
-        sendMessage(player, "No sense in keeping all that gold on you!\nDeposit the rest of it in your plot by typing: /plot deposit (amount).");
+        sendMessage(player, "No sense in keeping all that gold on you!\nDeposit the rest of it in your plot by typing: /plot deposit (amount).", ChapterMessageType.HOLOGRAM_TO_TEXT);
 
         new BukkitRunnable() {
             @Override
@@ -36,7 +36,7 @@ public class PlotDepositChapter extends AbstractChapter {
                     this.cancel();
                     return;
                 }
-                sendMessage(player, "Your entire balance is seen on the right side of your HUD.");
+                sendMessage(player, "Your entire balance is seen on the right side of your HUD.", ChapterMessageType.HELPER);
             }
         }.runTaskLater(LostShardPlugin.plugin, 20 * 5L);
 
@@ -65,7 +65,7 @@ public class PlotDepositChapter extends AbstractChapter {
         if (!isReady)
             return;
 
-        //sendMessage(event.getPlayer(), "You must deposit your entire balance to the plot before leaving: /plot deposit (amount).");
+        sendMessage(event.getPlayer(), "You must deposit your entire balance to the plot before leaving: /plot deposit (amount).", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
 
@@ -78,7 +78,7 @@ public class PlotDepositChapter extends AbstractChapter {
 
         double curr = LostShardPlugin.getBankManager().wrap(event.getPlayer().getUniqueId()).getCurrency();
         if ((int) curr - (int) event.getAmount() != 0) {
-            sendMessage(event.getPlayer(), "Deposit all your money into the plot! You can view your entire balance with /balance.");
+            sendMessage(event.getPlayer(), "Deposit all your money into the plot! You can view your entire balance with /balance.", ChapterMessageType.HOLOGRAM_TO_TEXT);
             return;
         }
         LostShardPlugin.getBankManager().wrap(getUUID()).setCurrency(0);

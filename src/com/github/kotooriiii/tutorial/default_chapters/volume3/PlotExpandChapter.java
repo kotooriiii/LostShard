@@ -29,7 +29,7 @@ public class PlotExpandChapter extends AbstractChapter {
         Hologram h = LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         faceDirection(player, h.getLocation());
         isReady = true;
-        sendMessage(player, "Expand your plot by typing: /plot expand.\nDo this multiple times to make it bigger.");
+        sendMessage(player, "Expand your plot by typing: /plot expand.\nDo this multiple times to make it bigger.", ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
     @Override
@@ -45,22 +45,6 @@ public class PlotExpandChapter extends AbstractChapter {
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent event) {
-
-        if (!event.getPlayer().getUniqueId().equals(getUUID()))
-            return;
-        if (!isActive())
-            return;
-        Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(event.getFrom());
-        if (plot == null)
-            return;
-        if (plot.contains(event.getFrom()) && !plot.contains(event.getTo())) {
-            sendMessage(event.getPlayer(), "You must expand your plot before leaving: /plot expand.");
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
     public void onMovee(PlayerMoveEvent event) {
 
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
@@ -70,7 +54,7 @@ public class PlotExpandChapter extends AbstractChapter {
         if (!isReady)
             return;
 
-        //sendMessage(event.getPlayer(), "You must deposit your entire balance to the plot before leaving: /plot deposit (amount).");
+        sendMessage(event.getPlayer(), "You must expand your plot before leaving: /plot expand.", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
 
@@ -83,14 +67,15 @@ public class PlotExpandChapter extends AbstractChapter {
             return;
         event.setCancelled(true);
         if (!event.getMessage().substring(1).equalsIgnoreCase("plot expand")) {
-            sendMessage(event.getPlayer(), "Type: \"/plot expand\" to continue.");
+            sendMessage(event.getPlayer(), "Type: \"/plot expand\" to continue.", ChapterMessageType.HELPER);
             return;
         }
         counter++;
         if (counter == COUNTER_END) {
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-            sendMessage(event.getPlayer(), "Looks like you ran out of gold!\nLet's get some more by capturing an event.");
+            sendMessage(event.getPlayer(), "Looks like you ran out of gold!\nLet's get some more by capturing an event.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+            sendMessage(event.getPlayer(), "Type: /cast mark", ChapterMessageType.HELPER);
             setComplete();
             return;
         }

@@ -1,6 +1,7 @@
 package com.github.kotooriiii.plots.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
@@ -203,7 +204,7 @@ public class BlockChangePlotListener implements Listener {
 
         final Block source = event.getSource();
         if(source.getType() != Material.VINE)
-        return;
+            return;
 
 
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
@@ -224,6 +225,32 @@ public class BlockChangePlotListener implements Listener {
             }
         }
 
+    }
+
+    @EventHandler
+    public void onFlowToPlot(BlockFromToEvent event) {
+
+
+        final Block source = event.getBlock();
+        final Block to = event.getToBlock();
+
+        PlotManager plotManager = LostShardPlugin.getPlotManager();
+
+        Plot sourcePlot = plotManager.getStandingOnPlot(source.getLocation());
+        Plot toPlot = plotManager.getStandingOnPlot(to.getLocation());
+
+        //There is a plot where the water will flow
+        if(toPlot != null)
+        {
+            //Then check if the source is inside a plot.
+
+            //If the source is not in a plot OR the plots aren't equal
+            if(sourcePlot == null || !sourcePlot.equals(toPlot))
+            {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
 

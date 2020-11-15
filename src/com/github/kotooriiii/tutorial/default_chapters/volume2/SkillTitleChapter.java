@@ -25,7 +25,7 @@ public class SkillTitleChapter extends AbstractChapter {
         new BukkitRunnable() {
             @Override
             public void run() {
-                sendMessage(player, "LostShard features a variety of fully custom McMMO skills.\nThe Survivalism skill allows you to track mobs or players.\nTo track a mob or player, type: /track (name)");
+                sendMessage(player, "LostShard features a variety of fully custom McMMO skills.\nThe Survivalism skill allows you to track mobs or players.\nTo track a mob or player, type: /track (name)", ChapterMessageType.HOLOGRAM_TO_TEXT);
                 LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
                 LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
                 setComplete();

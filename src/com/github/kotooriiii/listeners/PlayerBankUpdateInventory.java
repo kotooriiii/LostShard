@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 public class PlayerBankUpdateInventory implements Listener {
     @EventHandler
@@ -20,15 +21,23 @@ public class PlayerBankUpdateInventory implements Listener {
 
         if(inventoryCloseEvent.getView().getTitle().equalsIgnoreCase(Bank.NAME))
         {
-            HumanEntity player = inventoryCloseEvent.getPlayer();
-            if(player instanceof Player) {
-                Inventory inventory = inventoryCloseEvent.getInventory();
-                Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
+            HumanEntity humanEntity = inventoryCloseEvent.getPlayer();
+            Inventory inventory = inventoryCloseEvent.getInventory();
+            InventoryHolder holder = inventory.getHolder();
+
+            if(holder==null)
+                return;
+
+            if(humanEntity instanceof Player && holder instanceof Player) {
+
+                Bank bank = LostShardPlugin.getBankManager().wrap(((Player) holder).getUniqueId());
                 bank.setInventory(inventory);
                 FileManager.write(bank);
             }
             //save inventory
         }
+
+
     }
 
 

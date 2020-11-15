@@ -60,7 +60,7 @@ public class FreedomChapter extends AbstractChapter {
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
 
 
-        sendMessage(event.getPlayer(), "You've made it!\nMake your way to Order straight ahead.");
+        sendMessage(event.getPlayer(), "You've made it!\nMake your way to Order straight ahead.", ChapterMessageType.HOLOGRAM_TO_TEXT);
 
         ItemStack[] contents = event.getPlayer().getInventory().getContents();
         for (int i = 0; i < contents.length; i++) {
@@ -83,7 +83,7 @@ public class FreedomChapter extends AbstractChapter {
             return;
 
         isFirstTime = false;
-        sendMessage(event.getPlayer(), "The Mining skill awards you extra drops when mining stone.");
+        sendMessage(event.getPlayer(), "The Mining skill awards you extra drops when mining stone.", ChapterMessageType.HELPER);
     }
 
     @EventHandler

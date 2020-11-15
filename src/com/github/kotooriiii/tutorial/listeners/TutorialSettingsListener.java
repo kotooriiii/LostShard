@@ -2,6 +2,7 @@ package com.github.kotooriiii.tutorial.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.HealCommand;
 import com.github.kotooriiii.events.BindEvent;
@@ -13,6 +14,7 @@ import com.github.kotooriiii.plots.events.PlotDepositEvent;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import com.github.kotooriiii.tutorial.TutorialBook;
 import com.github.kotooriiii.tutorial.TutorialCompleteType;
@@ -21,6 +23,10 @@ import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,6 +34,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -39,9 +46,13 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.TimeSkipEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.swing.tree.ExpandVetoException;
 import java.lang.reflect.Method;
 import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
@@ -65,7 +76,7 @@ public class TutorialSettingsListener implements Listener {
     public void onBurn(EntityDamageEvent event) {
         if (event.getCause() != EntityDamageEvent.DamageCause.FIRE && event.getCause() != EntityDamageEvent.DamageCause.FIRE_TICK)
             return;
-        if (event.getEntity() != null && !event.getEntity().isDead() && (event.getEntity().getType() == EntityType.SKELETON || event.getEntity().getType() == EntityType.PHANTOM)) {
+        if (event.getEntity() != null && !event.getEntity().isDead() && (event.getEntity().getType() == EntityType.SKELETON || event.getEntity().getType() == EntityType.PHANTOM || event.getEntity().getType() == EntityType.ZOMBIE)) {
             event.setCancelled(true);
         }
     }
@@ -74,20 +85,52 @@ public class TutorialSettingsListener implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage().substring(1).toLowerCase();
         if (cmd.startsWith("suicide") || cmd.startsWith("kill")) {
-           // event.getPlayer().damage(20.0f);
+            // event.getPlayer().damage(20.0f);
             event.setCancelled(true);
         }
     }
-
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoinA(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
         final TutorialManager tutorialManager = LostShardPlugin.getTutorialManager();
         event.setJoinMessage(null);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20*60*5, 1, false, false, false));
+
         if (tutorialManager.hasTutorial(player.getUniqueId()))
             return;
-        tutorialManager.addTutorial(player.getUniqueId());
+        TutorialBook book = tutorialManager.addTutorial(player.getUniqueId());
+        book.getBossBar().addPlayer(player);
+
+    }
+
+    @EventHandler
+    public void onVineSpread(BlockSpreadEvent event) {
+
+        final Block source = event.getSource();
+        if (source.getType() != Material.VINE)
+            return;
+        event.setCancelled(true);
+
+    }
+
+    @EventHandler
+    public void onArmorDmg(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player))
+            return;
+        Player player = (Player) event.getEntity();
+
+        ItemStack[] armor = player.getInventory().getArmorContents();
+        for (ItemStack item : armor) {
+            if (item == null)
+                continue;
+            if (!(item.getItemMeta() instanceof Damageable))
+                return;
+            ItemMeta meta = item.getItemMeta();
+            Damageable dam = (Damageable) meta;
+            dam.setDamage(0);
+            item.setItemMeta(meta);
+        }
     }
 
 
@@ -124,11 +167,6 @@ public class TutorialSettingsListener implements Listener {
             LostShardPlugin.getClanManager().removeClan(clan);
         }
 
-    }
-
-    @EventHandler
-    public void onDrop(PlayerDropItemEvent event) {
-        event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -185,21 +223,20 @@ public class TutorialSettingsListener implements Listener {
 
             if (book.getCurrentChapter().isUsingHeal())
                 HealCommand.heal(player, false);
-            else
-            {
+            else {
                 player.setHealth(book.getCurrentChapter().getDefaultHealth());
                 player.setFoodLevel(book.getCurrentChapter().getDefaultFoodLevel());
             }
 
             for (PotionEffectType potionEffectType : PotionEffectType.values())
                 player.removePotionEffect(potionEffectType);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20*60*5, 1, false, false, false));
         }
 
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPortal(PlayerPortalEvent event)
-    {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPortal(PlayerPortalEvent event) {
         event.setCancelled(true);
     }
 
@@ -209,24 +246,11 @@ public class TutorialSettingsListener implements Listener {
         if (CitizensAPI.getNPCRegistry().isNPC(entity))
             return;
 
-
-        if (event.getEntityType() == EntityType.SPIDER || event.getEntityType() == EntityType.SKELETON || event.getEntityType() == EntityType.PHANTOM || event.getEntityType() == EntityType.ZOMBIE) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (entity != null && entity.getCustomName() != null && !entity.isDead() && entity.getCustomName().startsWith("[Tutorial]"))
-                        return;
-                    entity.teleport(new Location(entity.getWorld(), -1000, 0, -1000), PlayerTeleportEvent.TeleportCause.UNKNOWN);
-                    entity.damage(1000.0f);
-                    this.cancel();
-                    return;
-                }
-            }.runTask(LostShardPlugin.plugin);
+        if(event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.CUSTOM)
+        {
+            event.setCancelled(true);
             return;
         }
-        event.setCancelled(true);
-
-
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -462,6 +486,12 @@ public class TutorialSettingsListener implements Listener {
     }
 
     @EventHandler
+    public void onChat(ShardChatEvent event) {
+        if (!Staff.isStaff(event.getPlayer().getUniqueId()))
+            event.setCancelled(true);
+    }
+
+    @EventHandler
     public void onTP(EntityDamageEvent event) {
         Entity entity = event.getEntity();
         if (!(entity instanceof Player))
@@ -473,6 +503,8 @@ public class TutorialSettingsListener implements Listener {
             return;
         if (event.getCause() != EntityDamageEvent.DamageCause.SUFFOCATION)
             return;
+        if (entity.getLocation().getBlock().getRelative(BlockFace.UP).getType() == Material.MELON || entity.getLocation().getBlock().getRelative(BlockFace.UP).getType() == Material.OAK_TRAPDOOR)
+            return;
         HealCommand.heal(player, false);
         TutorialBook book = LostShardPlugin.getTutorialManager().wrap(player.getUniqueId());
         if (book == null)
@@ -481,6 +513,30 @@ public class TutorialSettingsListener implements Listener {
             return;
         player.teleport(book.getCurrentChapter().getLocation());
 
+
+    }
+
+    @EventHandler
+    public void onGamemode(PlayerGameModeChangeEvent event) {
+        GameMode gameMode = event.getNewGameMode();
+        if (gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR)
+            return;
+        final Player player = event.getPlayer();
+        final TutorialManager tutorialManager = LostShardPlugin.getTutorialManager();
+        if (tutorialManager.isRestartWhenLoggedOff()) {
+            tutorialManager.removeTutorial(player.getUniqueId(), TutorialCompleteType.RESET);
+        }
+        LostShardPlugin.getBankManager().wrap(player.getUniqueId()).setCurrency(0.0f);
+        for (Plot plot : ShardPlotPlayer.wrap(player.getUniqueId()).getPlotsOwned())
+            LostShardPlugin.getPlotManager().removePlot(plot);
+        MarkPlayer markPlayer = MarkPlayer.wrap(event.getPlayer().getUniqueId());
+        if (markPlayer != null)
+            markPlayer.remove();
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if (clan != null) {
+            clan.forceDisband();
+            LostShardPlugin.getClanManager().removeClan(clan);
+        }
 
     }
 
@@ -535,7 +591,6 @@ public class TutorialSettingsListener implements Listener {
 
     @EventHandler
     public void onLeashHit(HangingBreakEvent event) {
-        Entity hit = event.getEntity();
         if (event.getCause() != HangingBreakEvent.RemoveCause.ENTITY)
             event.setCancelled(true);
     }

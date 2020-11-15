@@ -255,7 +255,7 @@ public class SellCommand implements CommandExecutor {
                         break;
                     materialNames[i] = materials[i].getKey().getKey().toLowerCase();
                 }
-                String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ");
+                String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ", " or ");
                 playerSender.sendMessage(ChatColor.RED  + "Did you possibly mean one of these items?:\n" + builder);
                 return null;
             }

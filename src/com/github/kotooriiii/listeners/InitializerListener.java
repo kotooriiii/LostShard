@@ -85,6 +85,7 @@ public class InitializerListener implements Listener {
 
         if (StatusPlayer.getPlayerStatus().get(uuid) == null) {
             StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.WORTHY, 0);
+            ShardScoreboardManager.add(player.getName(), statusPlayer.getStatus().getName());
             statusPlayer.save();
         }
     }

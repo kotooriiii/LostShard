@@ -29,25 +29,28 @@ public class FireballExplodeListener implements Listener {
         if (LostShardPlugin.getPlotManager().isStandingOnPlot(location)) {
             Plot standingPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
 
+            if (standingPlot == null)
+                return;
+
             if (standingPlot.getType().isStaff())
                 return;
 
             PlayerPlot playerPlot = (PlayerPlot) standingPlot;
-            if(!playerPlot.isJointOwner(shooter.getUniqueId()) && !playerPlot.isOwner(shooter.getUniqueId()))
-                    return;
+            if (!playerPlot.isJointOwner(shooter.getUniqueId()) && !playerPlot.isOwner(shooter.getUniqueId()))
+                return;
 
         }
 
-        destroy(location, 2);
+        destroy(shooter, location, 2);;
     }
 
-    private void destroy(Location location, int RADIUS) {
+    private void destroy(Player shooter, Location location, int RADIUS) {
 
         final int firstX = location.getBlockX();
         final int firstY = location.getBlockY();
         final int firstZ = location.getBlockZ();
 
-        final double chance = 0.5;
+        final double chance = 0.75;
 
         xloop:
         for (int x = firstX - RADIUS; x < firstX + RADIUS; x++) {
@@ -55,8 +58,22 @@ public class FireballExplodeListener implements Listener {
             for (int z = firstZ - RADIUS; z < firstZ + (RADIUS); z++) {
 
                 yloop:
-                for (int y = firstY; firstY > firstY - 5; y--) {
+                for (int y = firstY + RADIUS; y > firstY - RADIUS; y--) {
                     Block block = new Location(location.getWorld(), x, y, z).getBlock();
+                    Plot standingPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(block.getLocation());
+
+
+                    if (standingPlot != null) {
+
+                        if (standingPlot.getType().isStaff())
+                            continue;
+
+                        PlayerPlot playerPlot = (PlayerPlot) standingPlot;
+                        if (!playerPlot.isJointOwner(shooter.getUniqueId()) && !playerPlot.isOwner(shooter.getUniqueId()))
+                            continue;
+                    }
+
+
 
                     if (block.getType() == Material.AIR)
                         continue yloop;
@@ -64,7 +81,6 @@ public class FireballExplodeListener implements Listener {
                     double random = Math.random();
                     if (random < chance)
                         block.setType(Material.FIRE);
-                    break yloop;
                 }
             }
         }

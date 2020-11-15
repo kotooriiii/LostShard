@@ -1,6 +1,7 @@
 package com.github.kotooriiii.bungee;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.tutorial.listeners.PlayerJoinRealServerListener;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -38,7 +39,10 @@ public class BungeeReceiveCompleteChannel implements PluginMessageListener {
             String isAuthenticString = in.readUTF();
             boolean isAuthentic= Boolean.valueOf(isAuthenticString);
 
+            BungeeAuthenticateChannel.debug("Receiving", "b-ls:Complete".toLowerCase(), uuidString, isAuthentic + "");
+
             LostShardPlugin.getTutorialReader().completeTutorial(playerUUID, isAuthentic);
+            PlayerJoinRealServerListener.verify(playerUUID);
 
         } catch (Exception ex) {
             ex.printStackTrace();

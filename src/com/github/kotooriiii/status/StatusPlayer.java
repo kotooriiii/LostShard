@@ -33,7 +33,6 @@ public class StatusPlayer {
         this.lastAtoneDate = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("America/New_York"));
         playerStatus.put(playerUUID, this);
 
-        ShardScoreboardManager.add(Bukkit.getOfflinePlayer(playerUUID), status.getName());
     }
 
     public UUID getPlayerUUID() {

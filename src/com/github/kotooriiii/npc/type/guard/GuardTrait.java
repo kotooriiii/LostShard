@@ -110,7 +110,7 @@ public class GuardTrait extends Trait {
             if (npc != null && LostShardPlugin.isTutorial()) {
                 if(!npc.hasTrait(MurdererTrait.class))
                     continue;
-                if(getOwner() == null || !npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getOwner()))
+                if(getOwner() == null || !npc.hasTrait(MurdererTrait.class) || npc.getTrait(MurdererTrait.class).getTargetTutorial() == null || !npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getOwner()))
                     continue;
 
                 isCalled = false;
@@ -256,7 +256,7 @@ public class GuardTrait extends Trait {
                     "Have any questions?",
                     "Can I help you?",
                     "Let me know if there's anything I can do for you.",
-                    "Are you interesting in becoming a guard?",
+                    "Are you interested in becoming a guard?",
                     "Welcome to the Order."};
 
             String[] negativeMessages = new String[]

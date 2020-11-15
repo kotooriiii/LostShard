@@ -48,7 +48,7 @@ public final class HelperMethods {
         return set;
     }
 
-    public static String stringBuilder(String[] args, int n, String concat, String lastConcat) {
+    public static String stringBuilder(String[] args, int n, String concat, String lastConcatMulti, String lastConcat) {
 
         String string = "";
         for (int i = n; i < args.length; i++) {
@@ -59,7 +59,12 @@ public final class HelperMethods {
             if (i == n)
                 string += args[i];
             else if (i == args.length - 1)
-                string += lastConcat + args[i];
+                if (args.length-1 - 2 >= n)
+                    string += lastConcatMulti + args[i];
+                else if (args.length-1 -1 >= n)
+                    string += lastConcat + args[i];
+                else
+                    string += args[i];
             else
                 string += concat + args[i];
         }
@@ -68,8 +73,53 @@ public final class HelperMethods {
 
     public static void playSound(Player[] players, Sound sound) {
         for (Player player : players) {
-                player.playSound(player.getLocation(), sound, 10F, 0F);
+            player.playSound(player.getLocation(), sound, 10F, 0F);
         }
+    }
+
+    public static String[] getNearest(String name, String[] collection, int maxMatches) {
+
+        HashMap<String, Double> mappedProbabilities = new HashMap<>();
+
+        for (String iname : collection) {
+            double probability = similarity(name.toUpperCase(), iname.toUpperCase());
+            if (probability < 0.25)
+                continue;
+            mappedProbabilities.put(iname, new Double(probability));
+        }
+
+        Comparator<Map.Entry<String, Double>> valueComparator = (e1, e2) -> {
+            Double v1 = e1.getValue();
+            Double v2 = e2.getValue();
+            return v2.compareTo(v1);
+        };
+
+        if (mappedProbabilities.isEmpty())
+            return new String[0];
+
+        // Sort method needs a List, so let's first convert Set to List in Java
+        List<Map.Entry<String, Double>> listOfEntries = new ArrayList<>(mappedProbabilities.entrySet());
+
+        // sorting HashMap by values using comparator
+        Collections.sort(listOfEntries, valueComparator);
+
+        if (listOfEntries.isEmpty())
+            return null;
+
+        String[] resultArray;
+        if (listOfEntries.size() < maxMatches)
+            resultArray = new String[listOfEntries.size()];
+        else
+            resultArray = new String[maxMatches];
+
+        for (int i = 0; i < listOfEntries.size(); i++) {
+            if (i == resultArray.length - 1)
+                break;
+            resultArray[i] = listOfEntries.get(i).getKey();
+        }
+
+
+        return resultArray;
     }
 
     public static Material[] getNearestMaterials(String name, int maxMaterials) {

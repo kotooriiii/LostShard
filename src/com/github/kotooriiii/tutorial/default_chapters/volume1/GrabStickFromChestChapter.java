@@ -24,7 +24,7 @@ public class GrabStickFromChestChapter extends AbstractChapter {
             return;
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "Grab a stick from the chest.\nHold the stick in your hand.\nType: /bind teleport");
+        sendMessage(player, "Grab a stick from the chest.\nHold the stick in your hand.\nType: /bind teleport", ChapterMessageType.HOLOGRAM_TO_TEXT);
 
     }
 
@@ -62,10 +62,10 @@ public class GrabStickFromChestChapter extends AbstractChapter {
             return;
 
         Location to = event.getTo();
-        if (to.getBlockZ() < WandInstructionChapter.getLimitZone())
+        if (to.getBlockZ() < 329)
             return;
 
-        sendMessage(event.getPlayer(), "You can't go past here until you bind your wand with teleport! You can do so with: /bind tp");
+        sendMessage(event.getPlayer(), "You must grab a stick from the chest!", ChapterMessageType.HELPER);
         event.setCancelled(true);
 
     }
@@ -79,7 +79,7 @@ public class GrabStickFromChestChapter extends AbstractChapter {
             return;
 
         if(event.getSpell().getType() != SpellType.TELEPORT) {
-            sendMessage(event.getPlayer(), ChatColor.RED + "You will be able to try out other spells after the tutorial.");
+            sendMessage(event.getPlayer(), ChatColor.RED + "You will be able to try out other spells after the tutorial.", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }

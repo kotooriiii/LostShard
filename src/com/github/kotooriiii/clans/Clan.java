@@ -788,7 +788,7 @@ public class Clan {
         if (tag == null || tag.isEmpty())
             return 30;
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
-            if (clan.getTag().toLowerCase().equals(tag.toLowerCase()))
+            if (clan.getTag().toLowerCase().equals(tag.toLowerCase()) && !clan.getTag().equalsIgnoreCase("null"))
                 return 21;
         }
         this.tag = tag;

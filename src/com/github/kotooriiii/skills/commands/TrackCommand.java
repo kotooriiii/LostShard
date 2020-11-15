@@ -66,8 +66,6 @@ public class TrackCommand implements CommandExecutor {
             int level = (int) survivalism.getLevel();
 
 
-
-
             if (type == EntityType.PLAYER) {
 
                 if (level < 100) {
@@ -130,7 +128,7 @@ public class TrackCommand implements CommandExecutor {
 
                 PlayerTrackEvent event = new PlayerTrackEvent(playerSender, trackedPlayer);
                 LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-                if(event.isCancelled())
+                if (event.isCancelled())
                     return false;
 
 
@@ -173,9 +171,10 @@ public class TrackCommand implements CommandExecutor {
                 Entity closestEntity = null;
 
                 boolean isTutorialTrack = LostShardPlugin.isTutorial() && type == EntityType.SPIDER;
-                Location spiderLoc = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 300, 53, 682);
+                Location spiderLoc = null;
 
                 if (isTutorialTrack) {
+                    spiderLoc=  new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 300, 53, 682);
                     distance = spiderLoc.distance(playerSender.getLocation());
                 } else {
                     for (Entity entity : playerSender.getLocation().getWorld().getNearbyEntities(playerSender.getLocation(), 2000, 256, 2000)) {
@@ -190,7 +189,6 @@ public class TrackCommand implements CommandExecutor {
                 }
 
 
-
                 //if its null we got to make sure its tutorial. if its not tutorial and its null then we dont know
                 if (closestEntity == null && !isTutorialTrack) {
                     String name = type.getKey().getKey().toLowerCase().replace("_", " ");
@@ -200,12 +198,12 @@ public class TrackCommand implements CommandExecutor {
                 }
 
                 EntityTrackEvent event;
-                if(LostShardPlugin.isTutorial())
+                if (LostShardPlugin.isTutorial())
                     event = new EntityTrackEvent(playerSender, null, EntityType.SPIDER);
                 else
                     event = new EntityTrackEvent(playerSender, closestEntity, closestEntity.getType());
                 LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-                if(event.isCancelled())
+                if (event.isCancelled())
                     return false;
 
                 survivalism.addXP(SurvivalismListener.TRACKING_XP);

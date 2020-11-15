@@ -178,4 +178,14 @@ public abstract class Plot implements Serializable {
         return uniqueID;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object == null)
+            return false;
+        if(!(object instanceof Plot))
+            return false;
+        Plot otherPlot = (Plot) object;
+        return otherPlot.getID().equals(this.getID());
+    }
+
 }

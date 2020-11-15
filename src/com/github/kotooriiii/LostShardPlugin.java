@@ -95,6 +95,7 @@ import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -274,18 +275,18 @@ public class LostShardPlugin extends JavaPlugin {
         ignoreManager = new IgnoreManager();
 
         if (isTutorial()) {
-            tutorialManager = new TutorialManager(true);
+            tutorialManager = new TutorialManager(true, true);
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new TutorialSettingsListener(), this);
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new StatusListener(), this);
             tutorialManager.getChapterManager().registerDefault();
             tutorialManager.getHologramManager().createDefaultHolograms();
-            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "TutorialLostShard->BungeeCord:Complete".toLowerCase());
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "tls-b:Complete".toLowerCase());
         } else {
             tutorialReader = new TutorialReader();
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new PlayerJoinRealServerListener(), this);
-            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "LostShard->BungeeCord:Authenticate".toLowerCase());
-            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Authenticate".toLowerCase(), BungeeAuthenticateChannel.getInstance());
-            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "BungeeCord->LostShard:Complete".toLowerCase(), BungeeReceiveCompleteChannel.getInstance());
+            getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "ls-b:Authenticate".toLowerCase());
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "b-ls:Authenticate".toLowerCase(), BungeeAuthenticateChannel.getInstance());
+            getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "b-ls:Complete".toLowerCase(), BungeeReceiveCompleteChannel.getInstance());
         }
 
 
@@ -339,6 +340,10 @@ public class LostShardPlugin extends JavaPlugin {
             LostShardPlugin.getTutorialManager().getHologramManager().deconstructHolograms();
         }
 
+        for (World world : Bukkit.getWorlds()) {
+            world.getForceLoadedChunks().forEach(c -> c.setForceLoaded(false));
+        }
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             InventoryView inventoryView = player.getOpenInventory();
             if (inventoryView == null)
@@ -350,12 +355,17 @@ public class LostShardPlugin extends JavaPlugin {
                 continue;
             if (!inventoryView.getTitle().equalsIgnoreCase(Bank.NAME))
                 continue;
-            Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());
             InventoryView view = player.getOpenInventory();
             if (view == null)
                 continue;
             if (view.getTopInventory() == null)
                 continue;
+
+            InventoryHolder holder = view.getTopInventory().getHolder();
+            if(view.getTopInventory().getHolder() == null || !(holder instanceof Player))
+                continue;
+            Bank bank = LostShardPlugin.getBankManager().wrap(((Player) holder).getUniqueId());
+
             bank.setInventory(view.getTopInventory());
             inventoryView.close();
         }
@@ -534,6 +544,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("skip").setExecutor(new SkipCommand());
         getCommand("tutorial").setExecutor(new TutorialCommand());
+        getCommand("discord").setExecutor(new DiscordCommand());
 
 
         //todo to use later -->

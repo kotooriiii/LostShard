@@ -108,7 +108,7 @@ public class MiningListener implements Listener {
             {
                 if(entry.getKey().getType() == Material.DIAMOND)
                     continue;
-                random -= 0.08;
+                random -= 0.1;
             }
 
             ItemStack item = entry.getKey();
@@ -146,7 +146,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
 
             lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
             lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
@@ -164,7 +164,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
 
             lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
             lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
@@ -182,7 +182,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
 
             lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
             lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0005);
@@ -201,7 +201,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
 
             lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
         } else if (60 <= level && level < 70) {
@@ -217,7 +217,7 @@ public class MiningListener implements Listener {
 
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
 
 
         } else if (50 <= level && level < 60) {
@@ -231,7 +231,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
             lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
         } else if (40 <= level && level < 50) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.002);
@@ -242,7 +242,7 @@ public class MiningListener implements Listener {
 
             lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.001);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
         } else if (30 <= level && level < 40) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.002);

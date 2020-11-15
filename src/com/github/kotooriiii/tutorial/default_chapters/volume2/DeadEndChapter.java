@@ -13,12 +13,17 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
 
 public class DeadEndChapter extends AbstractChapter {
 
@@ -40,26 +45,25 @@ public class DeadEndChapter extends AbstractChapter {
             return;
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "Looks like a dead end.\nMine through and see if there's anything on the other side...");
+        sendMessage(player, "Looks like a dead end.\nMine through and see if there's anything on the other side...", ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
     @Override
     public void onDestroy() {
 
     }
+
     @EventHandler
-    public void onBreak(BlockBreakEvent event)
-    {
+    public void onBreak(BlockBreakEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if(event.isCancelled())
+        if (event.isCancelled())
             return;
         ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
-        if(itemStack == null || itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED) == 0)
-        {
-            sendMessage(event.getPlayer(), "You should probably use the pickaxe in the chest...");
+        if (itemStack == null || itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED) == 0) {
+            sendMessage(event.getPlayer(), "You should probably use the pickaxe in the chest...", ChapterMessageType.HELPER);
             event.setCancelled(true);
         }
 
@@ -92,6 +96,47 @@ public class DeadEndChapter extends AbstractChapter {
     }
 
     @EventHandler
+    public void onListen2(InventoryCloseEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+
+        PlayerInventory inv = event.getPlayer().getInventory();
+
+        ArrayList<Integer> indecesToNull = new ArrayList<>();
+        boolean hasEnchantmentPick = false;
+
+        for (int i = 0; i < inv.getContents().length; i++) {
+            if (inv.getContents()[i] == null)
+                continue;
+            if (inv.getContents()[i].getType() != Material.IRON_PICKAXE)
+                continue;
+            if (inv.getContents()[i].getEnchantmentLevel(Enchantment.DIG_SPEED) == 0) {
+                indecesToNull.add(i);
+                continue;
+            }
+            hasEnchantmentPick = true;
+        }
+
+        boolean finalHasEnchantmentPick = hasEnchantmentPick;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if(finalHasEnchantmentPick)
+                {
+                    for(Integer integer : indecesToNull)
+                    {
+                        inv.setItem(integer, null);
+                    }
+                }
+            }
+        }.runTask(LostShardPlugin.plugin);
+
+    }
+
+    @EventHandler
     public void itemDmg(PlayerItemDamageEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
@@ -100,10 +145,9 @@ public class DeadEndChapter extends AbstractChapter {
         int dmg = event.getDamage() + 15;
 
         if (event.getItem().getType().getMaxDurability() <= dmg) {
-            sendMessage(event.getPlayer(), "Your pickaxe is getting low. Find a place to fix it!");
+            sendMessage(event.getPlayer(), "Your pickaxe is getting low. Find a place to fix it!", ChapterMessageType.HELPER);
         }
     }
-
 
 
     @EventHandler
@@ -117,8 +161,8 @@ public class DeadEndChapter extends AbstractChapter {
         isFirstTime = false;
 
         Player player = Bukkit.getPlayer(getUUID());
-        if(player != null)
-        sendMessage(player, "“Your mining level increases as you mine smooth stone...");
+        if (player != null)
+            sendMessage(player, "“Your mining level increases as you mine smooth stone...", ChapterMessageType.HELPER);
     }
 
     @EventHandler

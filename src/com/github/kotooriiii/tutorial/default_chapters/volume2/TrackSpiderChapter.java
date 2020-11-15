@@ -6,15 +6,16 @@ import com.github.kotooriiii.npc.ShardNMS;
 import com.github.kotooriiii.skills.events.EntityTrackEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import net.citizensnpcs.api.CitizensAPI;
+import net.minecraft.server.v1_15_R1.EntitySpider;
+import net.minecraft.server.v1_15_R1.EntityTypes;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -53,13 +54,8 @@ public class TrackSpiderChapter extends AbstractChapter {
 
         initListener();
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                sendMessage(player, "To find the spider, press F3 and use the directions (North, East, South, West) to guide you.");
-            }
-        }.runTaskLater(LostShardPlugin.plugin, 20*5);
-        sendMessage(player, "Track the spider to get to the next marker.");
+
+        sendMessage(player, "Track the spider to get to the next marker.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
@@ -74,7 +70,7 @@ public class TrackSpiderChapter extends AbstractChapter {
                     this.cancel();
                     return;
                 }
-                sendMessage(player, "Give it a go! Try typing: \"/track Spider\"");
+                sendMessage(player, "Give it a go! Try typing: \"/track Spider\"", ChapterMessageType.HOLOGRAM_TO_TEXT);
                 this.cancel();
 
             }
@@ -93,7 +89,7 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (event.getTo().getZ() < 557)
             return;
         event.setCancelled(true);
-        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.");
+        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.", ChapterMessageType.HELPER);
     }
 
     @EventHandler
@@ -107,7 +103,7 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (event.getTo().getZ() < 557)
             return;
         event.setCancelled(true);
-        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.");
+        sendMessage(event.getPlayer(), "You must type \"/track Spider\" before continuing.", ChapterMessageType.HELPER);
     }
 
     @EventHandler
@@ -121,12 +117,12 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (event.getType() != EntityType.SPIDER)
             return;
         isTracked = true;
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                sendMessage(event.getPlayer(), "To find the spider, press F3 and use the directions (North, East, South, West) to guide you.");
-//            }
-//        }.runTaskLater(LostShardPlugin.plugin, 20*5);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sendMessage(event.getPlayer(), "To find the spider, press F3 and use the directions (North, East, South, West) to guide you.", ChapterMessageType.HELPER);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20*5);
     }
 
 
@@ -142,10 +138,14 @@ public class TrackSpiderChapter extends AbstractChapter {
             return;
         isCrossed = true;
 
-        Entity entity = event.getPlayer().getWorld().spawnEntity(spiderLocation, EntityType.SPIDER);
-        entity.setCustomName("[Tutorial] Spider");
-        entity.setCustomNameVisible(true);
-        entityUUID = entity.getUniqueId();
+        CraftWorld craftWorld = ((CraftWorld) spiderLocation.getWorld());
+        final EntitySpider entitySpider = new EntitySpider(EntityTypes.SPIDER, craftWorld.getHandle());
+        entitySpider.setPosition(spiderLocation.getX(), spiderLocation.getY(), spiderLocation.getZ());
+        final Spider spider = (Spider) craftWorld.addEntity(entitySpider, CreatureSpawnEvent.SpawnReason.CUSTOM);
+
+        spider.setCustomName("[Tutorial] Spider");
+        spider.setCustomNameVisible(true);
+        entityUUID = spider.getUniqueId();
     }
 
     @Override
@@ -255,8 +255,23 @@ public class TrackSpiderChapter extends AbstractChapter {
         LivingEntity entity = (LivingEntity) Bukkit.getEntity(entityUUID);
         if (entity == null) {
             isComplete = true;
-            sendMessage(event.getPlayer(), "Great Job!");
+            sendMessage(event.getPlayer(), "Great Job!", ChapterMessageType.HOLOGRAM_TO_TEXT);
+
+            ItemStack[] contents = event.getPlayer().getInventory().getContents();
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i] == null)
+                    continue;
+                if (contents[i].getType() == Material.STICK)
+                    event.getPlayer().getInventory().setItem(i, null);
+            }
+
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    sendMessage(event.getPlayer(), "Follow the cave.", ChapterMessageType.HELPER);
+                }
+            }.runTaskLater(LostShardPlugin.plugin, 20*20);
             setComplete();
             return;
         }
@@ -265,7 +280,16 @@ public class TrackSpiderChapter extends AbstractChapter {
             return;
 
         isComplete = true;
-        sendMessage(event.getPlayer(), "Great Job!");
+        sendMessage(event.getPlayer(), "Great Job!", ChapterMessageType.HOLOGRAM_TO_TEXT);
+
+        ItemStack[] contents = event.getPlayer().getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            if (contents[i] == null)
+                continue;
+            if (contents[i].getType() == Material.STICK)
+                event.getPlayer().getInventory().setItem(i, null);
+        }
+
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         setComplete();
     }

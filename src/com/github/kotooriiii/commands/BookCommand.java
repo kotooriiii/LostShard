@@ -69,8 +69,12 @@ public class BookCommand implements CommandExecutor {
         wikiComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, WikiCommand.LINK));
         tc.addExtra(wikiComponent);
 
+        TextComponent discordComponent = new TextComponent("Click: Discord" + "\n\n");
+        discordComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official Discord server").create()));
+        discordComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DiscordCommand.LINK));
 
-        bookMeta.spigot().addPage(new BaseComponent[]{tc});
+
+        bookMeta.spigot().addPage(new BaseComponent[]{tc}, new BaseComponent[]{discordComponent});
         itemStack.setItemMeta(bookMeta);
 
         Player player = (Player) commandSender;

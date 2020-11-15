@@ -39,7 +39,13 @@ public class WandInstructionChapter extends AbstractChapter {
 
         setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 487, 65, 383, -27, 2));
 
-        sendMessage(player, "To teleport, swing the stick in the direction you want to teleport.");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sendMessage(player, "Follow the path!", ChapterMessageType.HELPER);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20*2);
+        sendMessage(player, "To teleport, swing the stick in the direction you want to teleport.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
     }
 
@@ -56,7 +62,7 @@ public class WandInstructionChapter extends AbstractChapter {
             return;
 
         isHologramSetup=true;
-        sendMessage(event.getPlayer(), "Make it past the ravine to get to the next marker!");
+        sendMessage(event.getPlayer(), "Make it past the ravine to get to the next marker!", ChapterMessageType.HOLOGRAM_TO_TEXT);
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
     }
@@ -111,10 +117,10 @@ public class WandInstructionChapter extends AbstractChapter {
             return;
 
         Location to = event.getTo();
-        if (to.getBlockZ() < WandInstructionChapter.getLimitZone())
+        if (to.getBlockZ() < WandInstructionChapter.getLimitZone()+10)
             return;
 
-        sendMessage(event.getPlayer(), "You can't go past here until you swing your wand!");
+        sendMessage(event.getPlayer(), "You can't go past here until you swing your wand!", ChapterMessageType.HELPER);
         event.setCancelled(true);
 
     }

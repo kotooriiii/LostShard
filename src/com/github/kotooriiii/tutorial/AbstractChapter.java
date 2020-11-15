@@ -1,5 +1,6 @@
 package com.github.kotooriiii.tutorial;
 
+import com.github.kotooriiii.LostShardPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -43,6 +44,10 @@ public abstract class AbstractChapter extends Observable implements Listener {
      */
     public final static  int DELAY_TICK = 120;
     public final static int TIP_DELAY = 20*10;
+
+    public enum ChapterMessageType {
+        HOLOGRAM_TO_TEXT, HELPER
+    }
 
     /**
      * The default constructor for the chapter.
@@ -159,6 +164,10 @@ public abstract class AbstractChapter extends Observable implements Listener {
         if (!isActive)
             return;
         //throw new RuntimeException("The chapter has already been completed.");
+
+        if(LostShardPlugin.getTutorialManager().wrap(uuid) == null)
+            return; //throw new RuntimeException("The player's uuid is no longer mapped");
+
         setChanged();
         notifyObservers();
         isActive = false;
@@ -168,7 +177,9 @@ public abstract class AbstractChapter extends Observable implements Listener {
     /**
      * @deprecated
      */
-    public void sendMessage(Player player, String message) {
+    public void sendMessage(Player player, String message, ChapterMessageType type) {
+        if(type == ChapterMessageType.HOLOGRAM_TO_TEXT)
+            return;
         if (player.isOnline()) {
             player.sendMessage(STANDARD_COLOR + message);
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 10.0f, 0.0f);

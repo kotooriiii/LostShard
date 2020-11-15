@@ -18,9 +18,9 @@ public class BankerIntroChapter extends AbstractChapter {
 
     private Zone zone;
     private boolean isComplete;
-    public BankerIntroChapter()
-    {
-        isComplete=false;
+
+    public BankerIntroChapter() {
+        isComplete = false;
         this.zone = new Zone(712, 703, 72, 68, 861, 874);
     }
 
@@ -30,11 +30,7 @@ public class BankerIntroChapter extends AbstractChapter {
         if (player == null)
             return;
 
-        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-
-        sendMessage(player, "Deposit your gold at the banker. It is in here somewhere...");
+        sendMessage(player, "Deposit your gold at the banker. It is in here somewhere...", ChapterMessageType.HELPER);
 
     }
 
@@ -45,7 +41,7 @@ public class BankerIntroChapter extends AbstractChapter {
 
     @EventHandler
     public void onProximity(PlayerMoveEvent event) {
-        if(isComplete)
+        if (isComplete)
             return;
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
@@ -58,34 +54,34 @@ public class BankerIntroChapter extends AbstractChapter {
         if (!zone.contains(to))
             return;
 
-        isComplete=true;
+        isComplete = true;
 
         final Player player = event.getPlayer();
-        player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 44));
+        if (!player.getInventory().contains(Material.GOLD_INGOT, 20)) {
+            player.getInventory().remove(Material.GOLD_INGOT);
+            player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, 20));
+        }
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "You found it! Let's deposit all the gold you mined.\nType: /deposit (amount)");
+        sendMessage(player, "You found it! Let's deposit all the gold you mined.\nType: /deposit (amount)", ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
     @EventHandler
-    public void onDeposit(BankDepositEvent event)
-    {
+    public void onDeposit(BankDepositEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
 
-        int counter=0;
-        for(ItemStack item : event.getPlayer().getInventory().getContents()) {
+        int counter = 0;
+        for (ItemStack item : event.getPlayer().getInventory().getContents()) {
             if (item == null)
                 continue;
-            if (item.getType() == Material.GOLD_INGOT)
-            {
+            if (item.getType() == Material.GOLD_INGOT) {
                 counter = counter + item.getAmount();
             }
         }
 
-        if(counter != 0)
-        {
+        if (counter != 0) {
             event.getPlayer().sendMessage(ERROR_COLOR + "Deposit all of your gold here!");
             return;
         }
@@ -95,15 +91,14 @@ public class BankerIntroChapter extends AbstractChapter {
 
 
     @EventHandler
-    public void onLeaveOrder(PlayerMoveEvent event)
-    {
+    public void onLeaveOrder(PlayerMoveEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
-        if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
+        if (!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
-        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.", ChapterMessageType.HELPER);
 
         event.setCancelled(true);
     }

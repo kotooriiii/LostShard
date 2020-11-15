@@ -76,7 +76,7 @@ public class EnterOrderChapter extends AbstractChapter {
             return;
         if(!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
             return;
-        sendMessage(event.getPlayer(), "It's not time to venture out just yet.");
+        sendMessage(event.getPlayer(), "It's not time to venture out just yet.", ChapterMessageType.HELPER);
 
         event.setCancelled(true);
     }
