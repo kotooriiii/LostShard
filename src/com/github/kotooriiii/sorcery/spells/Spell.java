@@ -6,6 +6,7 @@ import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.type.*;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -300,6 +301,18 @@ public abstract class Spell {
     }
 
     public boolean hasCastingRequirements(Player player) {
+
+
+        if (waitingForArgumentMap.containsKey(player.getUniqueId())) {
+            player.sendMessage(ERROR_COLOR + "You are currently casting a spell.");
+            return false;
+        }
+
+        //if a player is staff, don't check other stuff.
+        if(player.getGameMode() == GameMode.CREATIVE) {
+            return true;
+        }
+
         if (BrawlingListener.isStunned(player.getUniqueId())) {
             player.sendMessage(BrawlingListener.getStunMessage(player.getUniqueId()));
             return false;
@@ -310,10 +323,6 @@ public abstract class Spell {
             return false;
         }
 
-        if (waitingForArgumentMap.containsKey(player.getUniqueId())) {
-            player.sendMessage(ERROR_COLOR + "You are currently casting a spell.");
-            return false;
-        }
 
         if (!this.hasIngredients(player))
             return false;

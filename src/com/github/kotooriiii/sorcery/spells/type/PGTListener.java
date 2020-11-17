@@ -131,7 +131,16 @@ public class PGTListener  implements Listener {
         Location entityLocation = player.getLocation();
         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
 
+        //cancel before return
+        event.setCancelled(true);
+
+
         if (gateLocation == null) {
+            return;
+        }
+        //the portal is
+        if(entityLocation.distance(gateLocation) > 5) {
+            player.sendMessage(ERROR_COLOR + "You cannot use vanilla nether portals. Use the portal near Order or do '/cast permanent gate travel' to a mark in the nether.");
             return;
         }
 
@@ -153,7 +162,7 @@ public class PGTListener  implements Listener {
         else
             player.teleport(teleportingTo);
 
-        event.setCancelled(true);
+
     }
 
 
