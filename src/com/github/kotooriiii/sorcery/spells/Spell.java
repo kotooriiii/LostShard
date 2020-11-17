@@ -308,7 +308,7 @@ public abstract class Spell {
             return false;
         }
 
-        //if a player is staff, don't check other stuff.
+        //if a player is in creative, don't check other stuff.
         if(player.getGameMode() == GameMode.CREATIVE) {
             return true;
         }
