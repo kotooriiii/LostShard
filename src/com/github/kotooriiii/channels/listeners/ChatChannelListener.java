@@ -1,6 +1,7 @@
 package com.github.kotooriiii.channels.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.channels.CensorManager;
 import com.github.kotooriiii.channels.ChannelStatus;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
@@ -115,7 +116,8 @@ public class ChatChannelListener implements Listener {
         String name = color + player.getName();
 
         //Get message
-        String message = getFormattedPing(asyncPlayerChatEvent.getMessage(), messageColor);
+        String translatedMessage = CensorManager.getInstance().apply(asyncPlayerChatEvent.getMessage());
+        String message = getFormattedPing(translatedMessage, messageColor);
         ArrayList<Player> pingedPlayers = getPingedPlayers(asyncPlayerChatEvent.getMessage());
 
 
@@ -183,6 +185,8 @@ public class ChatChannelListener implements Listener {
             }
         }
     }
+
+
 
     public String getFormattedPing(String message, ChatColor messageColor) {
         /*

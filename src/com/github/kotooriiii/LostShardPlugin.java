@@ -75,6 +75,7 @@ import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.sorcery.wands.WandListener;
 import com.github.kotooriiii.status.shrine.AtoneCommand;
 import com.github.kotooriiii.status.shrine.ShrineManager;
+import com.github.kotooriiii.tips.TipsManager;
 import com.github.kotooriiii.tutorial.SkipCommand;
 import com.github.kotooriiii.tutorial.TutorialReader;
 import com.github.kotooriiii.tutorial.listeners.PlayerJoinRealServerListener;
@@ -124,7 +125,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
-    public static boolean isTutorial = true;
+    public static boolean isTutorial = false;
 
     public static LuckPerms luckPerms;
 
@@ -146,6 +147,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static IgnoreManager ignoreManager;
     private static TutorialManager tutorialManager;
     private static TutorialReader tutorialReader;
+    private static TipsManager tipsManager;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -274,6 +276,7 @@ public class LostShardPlugin extends JavaPlugin {
         gatheringManager = new GatheringManager();
         ignoreManager = new IgnoreManager();
 
+
         if (isTutorial()) {
             tutorialManager = new TutorialManager(true, true);
             LostShardPlugin.plugin.getServer().getPluginManager().registerEvents(new TutorialSettingsListener(), this);
@@ -287,6 +290,19 @@ public class LostShardPlugin extends JavaPlugin {
             getServer().getMessenger().registerOutgoingPluginChannel(LostShardPlugin.plugin, "ls-b:Authenticate".toLowerCase());
             getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "b-ls:Authenticate".toLowerCase(), BungeeAuthenticateChannel.getInstance());
             getServer().getMessenger().registerIncomingPluginChannel(LostShardPlugin.plugin, "b-ls:Complete".toLowerCase(), BungeeReceiveCompleteChannel.getInstance());
+
+            tipsManager = new TipsManager();
+            tipsManager.init();
+            tipsManager.loop();
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    saveData();
+                }
+            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 20 * 60, 20 * 60 * 5);
+
+
         }
 
 
@@ -362,7 +378,7 @@ public class LostShardPlugin extends JavaPlugin {
                 continue;
 
             InventoryHolder holder = view.getTopInventory().getHolder();
-            if(view.getTopInventory().getHolder() == null || !(holder instanceof Player))
+            if (view.getTopInventory().getHolder() == null || !(holder instanceof Player))
                 continue;
             Bank bank = LostShardPlugin.getBankManager().wrap(((Player) holder).getUniqueId());
 
@@ -421,6 +437,9 @@ public class LostShardPlugin extends JavaPlugin {
     }
 
     private void saveData() {
+
+        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW+ " Saving data.");
+
         for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
             LostShardPlugin.getBankManager().saveBank(bank);
         }
@@ -442,10 +461,16 @@ public class LostShardPlugin extends JavaPlugin {
             getSkillManager().saveSkillPlayer(skillPlayer);
         }
 
-        for (IgnorePlayer ignorePlayer : LostShardPlugin.getIgnoreManager().getIgnorePlayers())
-            getIgnoreManager().save(ignorePlayer);
+        for (IgnorePlayer ignorePlayer : LostShardPlugin.getIgnoreManager().getIgnorePlayers()) {
+            if (ignorePlayer.getIgnoredUUIDS() != null && ignorePlayer.getIgnoredUUIDS().length != 0)
+                getIgnoreManager().save(ignorePlayer);
+        }
+
+        //todo save tips data subs
 
         SignChangeListener.save();
+
+        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW+ " Saved data.");
     }
 
 
@@ -478,6 +503,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("addtitlegold").setExecutor(new AddTitleGoldCommand());
         getCommand("addrank").setExecutor(new AddRankCommand());
 
+        getCommand("tips").setExecutor(new TipsCommand());
         getCommand("hud").setExecutor(new HUDCommand());
         getCommand("mark").setExecutor(new MarkCommand());
         getCommand("cast").setExecutor(new CastCommand());
@@ -1075,6 +1101,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static TutorialReader getTutorialReader() {
         return tutorialReader;
+    }
+
+    public static TipsManager getTipsManager() {
+        return tipsManager;
     }
 
     public static LSBorder getBorder(String worldName) {

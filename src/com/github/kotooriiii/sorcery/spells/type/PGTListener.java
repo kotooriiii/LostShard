@@ -32,7 +32,7 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class PGTListener  implements Listener {
+public class PGTListener implements Listener {
     HashSet<UUID> map = new HashSet<>();
 
     private boolean isBrokenGate(Player player) {
@@ -130,22 +130,32 @@ public class PGTListener  implements Listener {
 
         Location entityLocation = player.getLocation();
         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+        boolean isVanillaDisabled = false;
+
+        if (false) {
+            Bukkit.broadcastMessage("Does have nearby gate to PRE-PORTAL?: " + (gateLocation != null) + ".");
+            Bukkit.broadcastMessage("Gate found on other side of portal?: " + ((LostShardPlugin.getGateManager().getGate(event.getTo()) != null || LostShardPlugin.getGateManager().getGate(event.getTo().clone().add(0, 1, 0)) != null)) + ".");
+            Bukkit.broadcastMessage("Second solution: any NEARBY on other side?: " + (LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(event.getTo()) != null) + ".");
+            Bukkit.broadcastMessage("event.getTo: " + event.getTo());
+        }
 
         //cancel before return
-        event.setCancelled(true);
+
+        if (isVanillaDisabled)
+            event.setCancelled(true);
 
 
         if (gateLocation == null) {
-            return;
-        }
-        //the portal is
-        if(entityLocation.distance(gateLocation) > 5) {
-            player.sendMessage(ERROR_COLOR + "You cannot use vanilla nether portals. Use the portal near Order or do '/cast permanent gate travel' to a mark in the nether.");
+
+            if (isVanillaDisabled)
+                player.sendMessage(ERROR_COLOR + "You cannot use vanilla nether portals. Use the portal near Order or do '/cast permanent gate travel' to a mark in the nether.");
             return;
         }
 
         Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
         if (gate == null) {
+            if (isVanillaDisabled)
+                player.sendMessage(ERROR_COLOR + "You cannot use vanilla nether portals. Use the portal near Order or do '/cast permanent gate travel' to a mark in the nether.");
             return;
         }
 
@@ -161,6 +171,8 @@ public class PGTListener  implements Listener {
             player.sendMessage(ERROR_COLOR + "The gate encountered a critical error.");
         else
             player.teleport(teleportingTo);
+
+        event.setCancelled(true);
 
 
     }
@@ -232,7 +244,7 @@ public class PGTListener  implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(entity))
+        if (CitizensAPI.getNPCRegistry().isNPC(entity))
             return;
         if (!(entity instanceof Projectile) && !(entity instanceof Explosive))
             return;
@@ -290,7 +302,7 @@ public class PGTListener  implements Listener {
         if (block == null)
             return;
 
-        if(event.getHand() != EquipmentSlot.HAND)
+        if (event.getHand() != EquipmentSlot.HAND)
             return;
 
         if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == event.getAction().RIGHT_CLICK_BLOCK))

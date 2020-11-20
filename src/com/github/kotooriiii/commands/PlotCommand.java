@@ -815,7 +815,9 @@ public class PlotCommand implements CommandExecutor {
         player.sendMessage(ChatColor.GOLD + prefix + " " + "create" + " " + ChatColor.YELLOW + "(name)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "disband");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "friend" + " " + ChatColor.YELLOW + "(username)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "unfriend" + " " + ChatColor.YELLOW + "(username)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "co" + " " + ChatColor.YELLOW + "(username)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "unco" + " " + ChatColor.YELLOW + "(username)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "deposit" + " " + ChatColor.YELLOW + "(amount)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "withdraw" + " " + ChatColor.YELLOW + "(amount)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "upgrade" + " " + ChatColor.YELLOW + "town");

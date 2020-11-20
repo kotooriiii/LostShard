@@ -915,7 +915,7 @@ public final class FileManager {
     }
 
 
-    public static void write(Clan clan) {
+    public static  synchronized void write(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
         File clanFile = new File(clans_folder + File.separator + fileName);
@@ -963,7 +963,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(HostilityPlatform platform) {
+    public static synchronized void write(HostilityPlatform platform) {
         try {
             File file = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
             if (file.exists()) {
@@ -981,7 +981,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(Bank bank) {
+    public static synchronized void write(Bank bank) {
         String fileName = bank.getPlayerUUID() + ".yml";
         File bankFile = new File(bank_folder + File.separator + fileName);
 
@@ -1002,12 +1002,11 @@ public final class FileManager {
             ItemStack item = bank.getInventory().getItem(i);
 
             boolean exists = false;
+
             if(item != null) {
-                if (item.getEnchantments() != null) {
-                    for (Enchantment enchantment : item.getEnchantments().keySet()) {
-                        if (enchantment.getKey().getKey().equals("GlowCustomEnchantment"))
-                            exists = true;
-                    }
+                for (Enchantment enchantment : item.getEnchantments().keySet()) {
+                    if (enchantment.getKey().getKey().getKey().equals("GlowCustomEnchantment"))
+                        exists = true;
                 }
             }
 
@@ -1016,7 +1015,7 @@ public final class FileManager {
             else if (exists)
                 yaml.set("chest." + i, new ItemStack(Material.STICK, 1));
             else
-                yaml.set("chest." + i, bank.getInventory().getItem(i));
+                yaml.set("chest." + i, item);
         }
         yaml.set("Currency", bank.getCurrency());
         try {
@@ -1026,7 +1025,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(StatusPlayer statusPlayer) {
+    public static synchronized void write(StatusPlayer statusPlayer) {
         String fileName = statusPlayer.getPlayerUUID() + ".yml";
         File statusFile = new File(status_folder + File.separator + fileName);
 
@@ -1049,7 +1048,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(RankPlayer rankPlayer) {
+    public static synchronized void write(RankPlayer rankPlayer) {
         String fileName = rankPlayer.getPlayerUUID() + ".yml";
         File ranksFile = new File(ranks_folder + File.separator + fileName);
 
@@ -1069,7 +1068,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(Sale sale) {
+    public static synchronized void write(Sale sale) {
         String fileName = sale.getID() + ".yml";
         File saleFile = new File(sales_folder + File.separator + fileName);
 
@@ -1092,7 +1091,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(Stat stat) {
+    public static synchronized void write(Stat stat) {
         String fileName = stat.getPlayerUUID() + ".yml";
         File statFile = new File(stats_folder + File.separator + fileName);
 
@@ -1119,7 +1118,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(HashSet<Location> buildChangersLocation) {
+    public static synchronized void write(HashSet<Location> buildChangersLocation) {
 
         String fileName = buildchanger_folder.getName() + ".yml";
         File locations = new File(buildchanger_folder + File.separator + fileName);
@@ -1146,7 +1145,7 @@ public final class FileManager {
     }
 
 
-    public static void write(Plot plot) {
+    public static synchronized  void write(Plot plot) {
         if (!plot.getType().isStaff()) {
             write((PlayerPlot) plot);
         } else {
@@ -1154,7 +1153,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(PlayerPlot playerPlot) {
+    public static synchronized void write(PlayerPlot playerPlot) {
         File file;
 
         file = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getID() + ".yml");
@@ -1211,7 +1210,7 @@ public final class FileManager {
 
     }
 
-    public static void write(StaffPlot staffPlot) {
+    public static synchronized void write(StaffPlot staffPlot) {
 
         File file;
 
@@ -1248,7 +1247,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(Gate gate) {
+    public static synchronized void write(Gate gate) {
 
         File file;
         file = new File(gates_folder + File.separator + gate.getSource() + ".yml");
@@ -1272,7 +1271,7 @@ public final class FileManager {
     }
 
 
-    public static void write(SkillPlayer skillPlayer) {
+    public static synchronized void write(SkillPlayer skillPlayer) {
         try {
             File file = new File(skills_folder + File.separator + skillPlayer.getPlayerUUID() + ".yml");
             if (file.exists()) {
@@ -1305,7 +1304,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(MarkPlayer markPlayer) {
+    public static synchronized void write(MarkPlayer markPlayer) {
         String fileName = markPlayer.getPlayerUUID() + ".yml";
         File markPlayerFile = new File(marks_folder + File.separator + fileName);
 
@@ -1332,7 +1331,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(MutedPlayer mutedPlayer) {
+    public static synchronized void write(MutedPlayer mutedPlayer) {
         String fileName = mutedPlayer.getMutedUUID() + ".yml";
         File mutedPlayerFile = new File(muted_folder + File.separator + fileName);
 
@@ -1352,7 +1351,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(BannedPlayer bannedPlayer) {
+    public static synchronized void write(BannedPlayer bannedPlayer) {
         String fileName = bannedPlayer.getPlayerUUID() + ".obj";
         File file = new File(banned_folder + File.separator + fileName);
         try {
@@ -1371,7 +1370,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(LinkPlayer linkPlayer) {
+    public static synchronized void write(LinkPlayer linkPlayer) {
         String fileName = linkPlayer.getUserSnowflake() + ".obj";
         File file = new File(links_folder + File.separator + fileName);
         try {
@@ -1391,7 +1390,7 @@ public final class FileManager {
     }
 
     @Deprecated
-    public static void write(ShardPlotPlayer shardPlotPlayer) {
+    public static synchronized void write(ShardPlotPlayer shardPlotPlayer) {
         String fileName = shardPlotPlayer.getOwnerUUID() + "";
         File file = new File(plots_players_folder + File.separator + fileName);
         file.mkdirs();
@@ -1401,7 +1400,7 @@ public final class FileManager {
 
     }
 
-    public static void write(Shrine shrine) {
+    public static synchronized void write(Shrine shrine) {
         String fileName = shrine.getType().name() + ".yml";
         File shrineFile = new File(shrines_folder + File.separator + fileName);
         if (!shrineFile.exists()) {
@@ -1421,7 +1420,7 @@ public final class FileManager {
         }
     }
 
-    public static void write(IgnorePlayer ignorePlayer) {
+    public static synchronized void write(IgnorePlayer ignorePlayer) {
         String fileName = ignoredPlayer_folder.getName() + ".yml";
         File ignorePlayerFile = new File(ignoredPlayer_folder + File.separator + fileName);
         if (!ignorePlayerFile.exists()) {

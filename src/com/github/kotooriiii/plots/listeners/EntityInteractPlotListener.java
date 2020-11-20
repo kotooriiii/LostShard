@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.EnderChest;
+import org.bukkit.block.data.Powerable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,6 +34,12 @@ public class EntityInteractPlotListener implements Listener {
         //Check entity
         Entity en = entityInteractEvent.getEntity();
 
+        if(en instanceof Player)
+        {
+            if(block.getState() instanceof Container)
+                return;
+        }
+
         //Iterate through all plots
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
 
@@ -43,6 +50,8 @@ public class EntityInteractPlotListener implements Listener {
 
                 if(!plot.getType().equals(PlotType.PLAYER))
                 {
+                    if(block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
+                        return;
                     entityInteractEvent.setCancelled(true);
                     return;
                 }
@@ -102,6 +111,8 @@ public class EntityInteractPlotListener implements Listener {
 
                 if(!plot.getType().equals(PlotType.PLAYER))
                 {
+                    if(block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
+                        return;
                     playerInteractEvent.setCancelled(true);
                     return;
                 }
