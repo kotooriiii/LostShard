@@ -34,7 +34,7 @@ public class Scroll {
         scrollMeta.setDisplayName(spell.getColor() + spell.getName() + " Scroll");
 
         // Add stick enchantment
-        Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, "GlowCustomEnchant"));
+        Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, Glow.NAME));
         scrollMeta.addEnchant(glow, 1, true);
 
         // Set stick lore

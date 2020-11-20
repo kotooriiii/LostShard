@@ -31,7 +31,7 @@ public class Wand {
         wandMeta.setDisplayName(spell.getColor() + spell.getName() + " Wand");
 
         // Add stick enchantment
-        Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, "GlowCustomEnchant"));
+        Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, Glow.NAME));
         wandMeta.addEnchant(glow, 1, true);
 
         // Set stick lore

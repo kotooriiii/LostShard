@@ -702,7 +702,7 @@ public class LostShardPlugin extends JavaPlugin {
             e.printStackTrace();
         }
         try {
-            Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, "GlowCustomEnchant"));
+            Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, Glow.NAME));
             Enchantment.registerEnchantment(glow);
         } catch (IllegalArgumentException e) {
         } catch (Exception e) {

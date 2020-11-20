@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class Glow extends Enchantment {
 
+    public static String NAME = "GlowCustomEnchant";
+
     public Glow(NamespacedKey key) {
         super(key);
     }

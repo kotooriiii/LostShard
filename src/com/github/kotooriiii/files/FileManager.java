@@ -37,6 +37,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.*;
 import java.time.Instant;
@@ -447,12 +448,33 @@ public final class FileManager {
         inventory = Bukkit.createInventory(Bukkit.getPlayer(uuid), rankPlayer.getRankType().getBankInventorySize(), Bank.NAME);
 
         for (int i = 0; i < inventory.getSize(); i++) {
-            ItemStack itemStack = yaml.getItemStack("chest." + i);
-            if (itemStack == null)
+            ItemStack item = yaml.getItemStack("chest." + i);
+            if (item == null)
                 continue;
-            if (itemStack.getType().equals(Material.AIR))
+            if (item.getType().equals(Material.AIR))
                 continue;
-            inventory.setItem(i, itemStack);
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                List<String> list = meta.getLore();
+                if (list != null && !list.isEmpty()) {
+                    String lastLine = list.get(list.size() - 1);
+                    if (lastLine.equals(Glow.NAME)) {
+                        list.remove(list.size() - 1);
+                        if (list.isEmpty())
+                            meta.setLore(null);
+                        else
+                            meta.setLore(list);
+                        Glow glow = new Glow(new NamespacedKey(LostShardPlugin.plugin, Glow.NAME));
+                        meta.addEnchant(glow, 1, true);
+                        item.setItemMeta(meta);
+
+                    }
+                }
+
+            }
+
+            inventory.setItem(i, item);
         }
 
 
@@ -915,7 +937,7 @@ public final class FileManager {
     }
 
 
-    public static  synchronized void write(Clan clan) {
+    public static synchronized void write(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
         File clanFile = new File(clans_folder + File.separator + fileName);
@@ -1001,21 +1023,43 @@ public final class FileManager {
         for (int i = 0; i < bank.getInventory().getSize(); i++) {
             ItemStack item = bank.getInventory().getItem(i);
 
-            boolean exists = false;
-
-            if(item != null) {
-                for (Enchantment enchantment : item.getEnchantments().keySet()) {
-                    if (enchantment.getKey().getKey().getKey().equals("GlowCustomEnchantment"))
-                        exists = true;
-                }
-            }
-
             if (item == null)
                 yaml.set("chest." + i, new ItemStack(Material.AIR, 1));
-            else if (exists)
-                yaml.set("chest." + i, new ItemStack(Material.STICK, 1));
-            else
-                yaml.set("chest." + i, item);
+            else {
+
+                ItemStack enchantedItem = null;
+
+                for (Enchantment enchantment : item.getEnchantments().keySet()) {
+
+                    //Custom ench
+                    if (enchantment.getKey().getKey().toLowerCase().equals(Glow.NAME.toLowerCase())) {
+                        enchantedItem = new ItemStack(item.getType(), item.getAmount());
+
+                        ItemMeta meta = item.getItemMeta();
+                        if (meta != null) {
+                            enchantedItem.setItemMeta(meta);
+                        }
+                        ItemMeta enchantedItemMeta = enchantedItem.getItemMeta();
+
+                        List<String> list = enchantedItemMeta.getLore();
+                        if (list == null) {
+                            list = new ArrayList<>();
+                        }
+
+                        list.add(Glow.NAME);
+
+                        enchantedItemMeta.setLore(list);
+                        enchantedItem.setItemMeta(enchantedItemMeta);
+                        break;
+                    }
+                }
+
+                if (enchantedItem == null)
+                    yaml.set("chest." + i, item);
+                else
+                    yaml.set("chest." + i, enchantedItem);
+
+            }
         }
         yaml.set("Currency", bank.getCurrency());
         try {
@@ -1145,7 +1189,7 @@ public final class FileManager {
     }
 
 
-    public static synchronized  void write(Plot plot) {
+    public static synchronized void write(Plot plot) {
         if (!plot.getType().isStaff()) {
             write((PlayerPlot) plot);
         } else {
