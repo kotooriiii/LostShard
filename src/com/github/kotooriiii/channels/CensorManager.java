@@ -31,6 +31,7 @@ public class CensorManager {
                 case "bedwarz":
                 case "hypyxel":
                 case "hipixel":
+                case "highpixel":
                 case "thehive":
                 case "hivemc":
                 case "mineplex":
@@ -53,7 +54,10 @@ public class CensorManager {
 
         for (char c : chars) {
             for (int i = 0; i < bannedWords.length; i++) {
+                for(char bc : bannedWords[i].toCharArray())
+                {
 
+                }
             }
         }
         return "";

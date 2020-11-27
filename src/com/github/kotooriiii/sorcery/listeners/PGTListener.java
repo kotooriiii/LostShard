@@ -1,33 +1,35 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateBlock;
-import com.github.kotooriiii.sorcery.spells.SpellType;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -54,6 +56,20 @@ public class PGTListener implements Listener {
             return true;
         }
         return false;
+    }
+
+    @EventHandler
+    public void onSpawn(CreatureSpawnEvent event) {
+        if (!event.getEntityType().equals(EntityType.PIG_ZOMBIE))
+            return;
+        if (event.getLocation().getWorld().getEnvironment() != World.Environment.NETHER)
+            return;
+        if (LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(event.getLocation()) == null)
+            return;
+
+        //is a pigzombie, not nether, and PGT nearby
+        event.setCancelled(true);
+
     }
 
     @EventHandler
@@ -220,7 +236,7 @@ public class PGTListener implements Listener {
         event.setCancelled(true);
     }
 
-    HashMap<UUID, Boolean> projectileSet = new HashMap<>();
+    HashMap<UUID, Boolean> hasHitPortalMap = new HashMap<>();
 
     /**
      * This event appears to only affect projectile  othen than players.
@@ -242,20 +258,106 @@ public class PGTListener implements Listener {
     }
 
     @EventHandler
+    public void onPGTBreak(BlockPhysicsEvent e) {
+        if (e.getChangedType() == Material.AIR)
+            return;
+        Bukkit.broadcastMessage("-------DEBUG--------");
+        Bukkit.broadcastMessage("Source block: " + (e.getSourceBlock() == null ? "null" : e.getSourceBlock().getType().getKey().getKey()));
+        Bukkit.broadcastMessage("Changed type: " + e.getChangedType().getKey().getKey());
+        Bukkit.broadcastMessage("Inherited block: " + (e.getBlock() == null ? "null" : e.getBlock().getType().getKey().getKey()));
+        Bukkit.broadcastMessage("---------------");
+
+        //If the source is not air AND we are changing portal
+        if (e.getChangedType() == Material.NETHER_PORTAL && e.getSourceBlock().getType().isInteractable()) {
+            e.setCancelled(true);
+        }
+    }
+
+    private boolean isRelativelyNearPortal(Block block) {
+        if (block.getRelative(BlockFace.UP).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.EAST).getType() == Material.NETHER_PORTAL ||
+                block.getRelative(BlockFace.WEST).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.NORTH).getType() == Material.NETHER_PORTAL ||
+                block.getRelative(BlockFace.SOUTH).getType() == Material.NETHER_PORTAL || block.getRelative(BlockFace.DOWN).getType() == Material.NETHER_PORTAL)
+            return true;
+        return false;
+    }
+
+
+    @EventHandler
+    public void onBlockCreate(BlockPlaceEvent event) {
+        if (isRelativelyNearPortal(event.getBlock())) {
+            event.setCancelled(true);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Gate.setBlockInNativeWorld(event.getBlock().getWorld(), event.getBlock().getLocation().getBlockX(), event.getBlock().getLocation().getBlockY(), event.getBlock().getLocation().getBlockZ(), event.getBlock().getType(), event.getBlock().getType().hasGravity());
+                }
+            }.runTask(LostShardPlugin.plugin);
+
+            if(event.getPlayer().getGameMode() == GameMode.CREATIVE)
+                return;
+
+            if (event.getItemInHand().getAmount() == 1) {
+                event.getPlayer().getInventory().setItemInMainHand(null);
+            } else {
+                ItemStack clone = event.getItemInHand().clone();
+                clone.setAmount(clone.getAmount() - 1);
+                event.getPlayer().getInventory().setItemInMainHand(clone);
+            }
+
+        }
+    }
+
+    @EventHandler
+    public void onBlockRemove(BlockBreakEvent event) {
+
+        if (isRelativelyNearPortal(event.getBlock())) {
+            event.setCancelled(true);
+            event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(event.getBlock().getType(), 1));
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Gate.setBlockInNativeWorld(event.getBlock().getWorld(), event.getBlock().getLocation().getBlockX(), event.getBlock().getLocation().getBlockY(), event.getBlock().getLocation().getBlockZ(), Material.AIR, Material.AIR.hasGravity());
+                }
+            }.runTask(LostShardPlugin.plugin);
+
+            ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
+
+            if(event.getPlayer().getGameMode() == GameMode.CREATIVE)
+                return;
+
+            if(itemStack!=null)
+            {
+                ItemMeta meta = itemStack.getItemMeta();
+                if(meta instanceof Damageable)
+                {
+                    final int DAMAGE = 2;
+                    if (((org.bukkit.inventory.meta.Damageable) meta).getDamage() + DAMAGE >= itemStack.getType().getMaxDurability())
+                        event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+                    else
+                        ((org.bukkit.inventory.meta.Damageable) meta).setDamage(((Damageable) meta).getDamage() + DAMAGE);
+                }
+            }
+        }
+
+    }
+
+    @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         Entity entity = event.getEntity();
         if (CitizensAPI.getNPCRegistry().isNPC(entity))
             return;
         if (!(entity instanceof Projectile) && !(entity instanceof Explosive))
             return;
-        projectileSet.put(entity.getUniqueId(), false);
-        BukkitTask task = new BukkitRunnable() {
+        hasHitPortalMap.put(entity.getUniqueId(), false);
+
+        final BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (isHittingPortal(entity.getLocation())) {
-                    Boolean objectBool = projectileSet.get(entity.getUniqueId());
-                    if (objectBool != null && !objectBool.booleanValue()) {
-                        projectileSet.put(entity.getUniqueId(), true);
+                    Boolean hasHitPortal = hasHitPortalMap.get(entity.getUniqueId());
+                    if (hasHitPortal != null && !hasHitPortal.booleanValue()) {
+                        hasHitPortalMap.put(entity.getUniqueId(), true);
 
                         Location entityLocation = event.getEntity().getLocation();
                         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
@@ -265,34 +367,45 @@ public class PGTListener implements Listener {
                         }
 
                         Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
+
+                        //check if there is a gate at location
                         if (gate == null) {
                             return;
                         }
 
+                        //if for some instance gate is not created .
                         if (!gate.isBuilt()) {
                             LostShardPlugin.getGateManager().removeGate(gate);
                             return;
                         }
 
+                        //get initial vector, teleport, re-set it
                         Vector vector = entity.getVelocity();
                         Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
-                        entity.teleport(teleportingTo.clone().add(0, 1, 0));
-                        entity.setVelocity(vector);
+
+                        //check if possible
+                        if (!entity.isDead()) {
+                            entity.teleport(teleportingTo.clone().add(0, 1, 0));
+                            entity.setVelocity(vector);
+                        }
+
+                        //reset ticks for tnt
                         if (entity instanceof TNTPrimed)
-                            ((TNTPrimed) entity).setFuseTicks(((TNTPrimed) entity).getFuseTicks() + (20 * 4));
+                            ((TNTPrimed) entity).setFuseTicks(20 * 4);
 
                     }
 
                 }
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
+
         new BukkitRunnable() {
             @Override
             public void run() {
-                projectileSet.remove(entity.getUniqueId());
                 task.cancel();
+                hasHitPortalMap.remove(entity.getUniqueId());
             }
-        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 15);
+        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 5); //arbitrary number set low to clear projectiles quickly
     }
 
 

@@ -36,37 +36,19 @@ public class SkillCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("skills")) {
                 //No arguments regarding this command
                 if (args.length == 0) {
-                    playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Skills-");
-
-                    SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID);
-                    float skillNum = 0;
-                    float maxSkillNum = skillPlayer.getActiveBuild().getMaxPoints();
-
-                    for (Skill skill : skillPlayer.getActiveBuild().getSkills()) {
-                        skillNum += skill.getLevel();
-                    }
-
-
-                    playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + new BigDecimal(skillNum).setScale(1, RoundingMode.HALF_UP).toString() + "/" + new BigDecimal(maxSkillNum).setScale(1, RoundingMode.HALF_UP).toString() + " skill points.");
-
-                    for (Skill skill : skillPlayer.getActiveBuild().getSkills()) {
-                        playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + ": " + ChatColor.WHITE + new BigDecimal(skill.getLevel()).setScale(1, RoundingMode.HALF_UP).toString());
-                    }
+                    showSkills(playerSender);
                     return false;
                 }
 
                 switch (args[0].toLowerCase()) {
 
-                    case "reduce": //skills | reduce (skillName) (amount)
-                        if (args.length != 3) {
-                            playerSender.sendMessage(STANDARD_COLOR + "To reduce a skill's level do: /skills reduce (skill) (amount)");
+                    case "unlock": //skills | lock (skillName)
+                        if (args.length != 2) {
+                            playerSender.sendMessage(STANDARD_COLOR + "To lock a skill do: /skills unlock (skill)");
                             return false;
                         }
 
-
-
-
-                        if(!SkillType.isSkill(args[1].toUpperCase())) {
+                        if (!SkillType.isSkill(args[1].toUpperCase())) {
                             SkillType[] skillTypeArr = SkillType.values();
                             String[] arr = new String[skillTypeArr.length];
                             for (int i = 0; i < arr.length; i++) {
@@ -75,7 +57,83 @@ public class SkillCommand implements CommandExecutor {
                             String[] closestArr = HelperMethods.getNearest(args[1], arr, 3);
                             String items = HelperMethods.stringBuilder(closestArr, 0, ", ", ", or ", " or ");
 
-                            playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid. Did you mean: " + items + "?");
+                            if (items.isEmpty())
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid.");
+
+                            else
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid. Did you mean: " + items + "?");
+                            return false;
+                        }
+
+                        SkillType skillTypeUnlock = SkillType.valueOf(args[1].toUpperCase());
+                        Skill skillUnlock = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSkill(skillTypeUnlock);
+
+                        if (!skillUnlock.isLocked()) {
+                            playerSender.sendMessage(ERROR_COLOR + "Your skill is already unlocked. To lock a skill do: /skills lock (skill)");
+                            return false;
+                        }
+
+                        skillUnlock.setLocked(true);
+                        playerSender.sendMessage(STANDARD_COLOR + "You have unlocked " + skillUnlock.getType().getName() + ".");
+
+                        break;
+                    case "lock": //skills | lock (skillName)
+                        if (args.length != 2) {
+                            playerSender.sendMessage(STANDARD_COLOR + "To lock a skill do: /skills lock (skill)");
+                            return false;
+                        }
+
+                        if (!SkillType.isSkill(args[1].toUpperCase())) {
+                            SkillType[] skillTypeArr = SkillType.values();
+                            String[] arr = new String[skillTypeArr.length];
+                            for (int i = 0; i < arr.length; i++) {
+                                arr[i] = skillTypeArr[i].getName();
+                            }
+                            String[] closestArr = HelperMethods.getNearest(args[1], arr, 3);
+                            String items = HelperMethods.stringBuilder(closestArr, 0, ", ", ", or ", " or ");
+
+                            if (items.isEmpty())
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid.");
+
+                            else
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid. Did you mean: " + items + "?");
+                            return false;
+                        }
+
+                        SkillType skillTypeLock = SkillType.valueOf(args[1].toUpperCase());
+                        Skill skillLock = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSkill(skillTypeLock);
+
+                        if (skillLock.isLocked()) {
+                            playerSender.sendMessage(ERROR_COLOR + "Your skill is already locked. To unlock a skill do: /skills unlock (skill)");
+                            return false;
+                        }
+
+                        skillLock.setLocked(true);
+                        playerSender.sendMessage(STANDARD_COLOR + "You have locked " + skillLock.getType().getName() + ".");
+
+                        break;
+
+                    case "reduce": //skills | reduce (skillName) (amount)
+                        if (args.length != 3) {
+                            playerSender.sendMessage(STANDARD_COLOR + "To reduce a skill's level do: /skills reduce (skill) (amount to reduce)");
+                            return false;
+                        }
+
+
+                        if (!SkillType.isSkill(args[1].toUpperCase())) {
+                            SkillType[] skillTypeArr = SkillType.values();
+                            String[] arr = new String[skillTypeArr.length];
+                            for (int i = 0; i < arr.length; i++) {
+                                arr[i] = skillTypeArr[i].getName();
+                            }
+                            String[] closestArr = HelperMethods.getNearest(args[1], arr, 3);
+                            String items = HelperMethods.stringBuilder(closestArr, 0, ", ", ", or ", " or ");
+
+                            if (items.isEmpty())
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid.");
+
+                            else
+                                playerSender.sendMessage(ERROR_COLOR + "The skill \"" + args[1] + "\" is invalid. Did you mean: " + items + "?");
                             return false;
                         }
 
@@ -109,8 +167,11 @@ public class SkillCommand implements CommandExecutor {
                         new skill cannot be below 0
                          */
                         reducedSkill.setLevel(newLevel);
-                        playerSender.sendMessage(STANDARD_COLOR + "You have reduced " + reducedSkill.getType().getName() + "'s level to " +  new BigDecimal(reducedSkill.getLevel()).setScale(1, RoundingMode.HALF_UP) + ".");
+                        playerSender.sendMessage(STANDARD_COLOR + "You have reduced " + reducedSkill.getType().getName() + "'s level to " + new BigDecimal(reducedSkill.getLevel()).setScale(1, RoundingMode.HALF_UP) + ".");
 
+                        break;
+                    case "show":
+                        showSkills(playerSender);
                         break;
                     case "staff": //skills | staff <player> <skill> <level>
 
@@ -160,6 +221,7 @@ public class SkillCommand implements CommandExecutor {
                         playerSender.sendMessage(STANDARD_COLOR + "You have set " + offlinePlayer.getName() + "'s " + type.getName() + " level to " + level + ".");
                         break;
                     default:
+                        sendHelp(playerSender);
                         break;
                 }
 
@@ -168,5 +230,37 @@ public class SkillCommand implements CommandExecutor {
             }
         }
         return true;
+    }
+
+    public void showSkills(Player playerSender) {
+        playerSender.sendMessage(ChatColor.GOLD + "-" + playerSender.getName() + "'s Skills-");
+
+        SkillPlayer skillPlayer = LostShardPlugin.getSkillManager().getSkillPlayer(playerSender.getUniqueId());
+        float skillNum = 0;
+        float maxSkillNum = skillPlayer.getActiveBuild().getMaxPoints();
+
+        for (Skill skill : skillPlayer.getActiveBuild().getSkills()) {
+            skillNum += skill.getLevel();
+        }
+
+
+        playerSender.sendMessage(ChatColor.YELLOW + "You currently have " + new BigDecimal(skillNum).setScale(1, RoundingMode.HALF_UP).toString() + "/" + new BigDecimal(maxSkillNum).setScale(1, RoundingMode.HALF_UP).toString() + " skill points.");
+
+        String isLocked = "";
+        for (Skill skill : skillPlayer.getActiveBuild().getSkills()) {
+            if (skill.isLocked())
+                isLocked = " (L)";
+            else isLocked = "";
+            playerSender.sendMessage(ChatColor.YELLOW + skill.getType().getName() + isLocked + ": " + ChatColor.WHITE + new BigDecimal(skill.getLevel()).setScale(1, RoundingMode.HALF_UP).toString());
+
+        }
+    }
+
+    public void sendHelp(Player playerSender) {
+        playerSender.sendMessage(ChatColor.GOLD + "------Skills Help------");
+        playerSender.sendMessage(COMMAND_COLOR + "/skills show");
+        playerSender.sendMessage(COMMAND_COLOR + "/skills reduce " + ChatColor.YELLOW + "(skill name) (amount to reduce)");
+        playerSender.sendMessage(COMMAND_COLOR + "/skills lock " + ChatColor.YELLOW + "(skill name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/skills unlock " + ChatColor.YELLOW + "(skill name)");
     }
 }

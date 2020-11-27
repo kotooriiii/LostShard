@@ -20,6 +20,7 @@ public class Skill {
     private final SkillType type;
     private float xp;
     private float level;
+    private boolean isLocked;
     private final static float maxLevel = 100;
     private final static int CONSTANT = 75;
 
@@ -28,8 +29,12 @@ public class Skill {
         this.type = type;
         this.xp = 0;
         this.level = 0;
+        this.isLocked = false;
     }
 
+    public boolean isLocked() {
+        return isLocked;
+    }
 
     public SkillType getType() {
         return type;
@@ -54,6 +59,10 @@ public class Skill {
         if (level == maxLevel)
             return false;
 
+        //
+        if (isLocked)
+            return false;
+
         //Total xp is reached
         if (parentBuild.isMaxBuild())
             return false;
@@ -70,7 +79,7 @@ public class Skill {
 
             SkillLevelUpEvent event = new SkillLevelUpEvent(parentBuild.getSkillPlayer().getPlayerUUID(), getType(), (int) new BigDecimal(getLevel()).setScale(1, RoundingMode.HALF_UP).floatValue());
             LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-            if(event.isCancelled())
+            if (event.isCancelled())
                 return false;
 
             if (isLeveledUp) {
@@ -84,8 +93,6 @@ public class Skill {
             sendLevelUpMessage(randomSkillPoint);
 
             if (this.xp < 0) this.xp = 0;
-
-
 
 
             return isLeveledUp;
@@ -215,4 +222,7 @@ public class Skill {
     }
 
 
+    public void setLocked(boolean isLocked) {
+        this.isLocked = isLocked;
+    }
 }

@@ -48,10 +48,11 @@ public class GateManager {
             removeGate(removedGate);
         }
 
-        gate.build();
         gateLinkedList.offer(gate);
         locationGateHashMap.put(new GateBlock(gate.getFrom()), gate);
         locationGateHashMap.put(new GateBlock(gate.getTo()), gate);
+        gate.build();
+
         if (saveToFile)
             saveGate(gate);
     }

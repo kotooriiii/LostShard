@@ -57,7 +57,9 @@ public class TipsManager {
                         "Need help? Type: '/help' to join the community.",
                         "Help the server by donating. Type: '/donate' for more information.",
                         "Every Hostility capture rewards you. Type: '/host' to view the upcoming and active matches.",
-                        "Need to reduce skill points? Type: /skill reduce <skill name> <amount to subtract>."
+                        "Need to reduce skill points? Type: /skill reduce <skill name> <amount to subtract>.",
+                        "This server has a YOUTUBE channel! https://www.youtube.com/channel/UCE0EW5M4FXWo79aiJ3TDfhQ/videos",
+                        "Need help? Check this out: https://docs.google.com/document/d/1UfFwn_xJrgPkjKC9Bs7OAFAG22IDhPg4wmk7cZtsv9c"
                 };
     }
 
@@ -82,7 +84,7 @@ public class TipsManager {
                 }
 
             }
-        }.runTaskTimer(LostShardPlugin.plugin, 0, 20 * 60 * 23); //23 mins
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 20 * 60 * 10); //23 mins
     }
 
     /**

@@ -19,7 +19,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import java.util.UUID;
 
@@ -57,6 +56,35 @@ public class BankCommand implements CommandExecutor {
                             }
 
                             switch (args[1].toLowerCase()) { //host <arg 0> <arg 1> ... <arg n>
+                                case "set": //bank staff set name 0
+                                    if(args.length != 4)
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR  + "Correct usage is: /bank staff set <username> <newBalance>");
+                                        return false;
+                                    }
+                                    OfflinePlayer playerSet = Bukkit.getOfflinePlayer(args[2]);
+                                    if (!playerSet.hasPlayedBefore() && !playerSet.isOnline()) {
+                                        playerSender.sendMessage(ERROR_COLOR + "Player could not be found.");
+                                        return false;
+                                    }
+                                    double money = Double.parseDouble(args[3]);
+                                    LostShardPlugin.getBankManager().wrap(playerUUID).setCurrency(money);
+                                    playerSender.sendMessage(STANDARD_COLOR + playerSet.getName() + "'s bank balance has been updated to " + money + ".");
+                                    break;
+                                case "get":
+                                    if(args.length != 3)
+                                    {
+                                        playerSender.sendMessage(ERROR_COLOR  + "Correct usage is: /bank staff get <username>");
+                                        return false;
+                                    }
+                                    OfflinePlayer playerGet = Bukkit.getOfflinePlayer(args[2]);
+                                    if (!playerGet.hasPlayedBefore() && !playerGet.isOnline()) {
+                                        playerSender.sendMessage(ERROR_COLOR + "Player could not be found.");
+                                        return false;
+                                    }
+                                    double moneyGetted = LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency();
+                                    playerSender.sendMessage(STANDARD_COLOR + playerGet.getName() + "'s bank balance is " + moneyGetted + ".");
+                                    break;
                                 case "create":
                                     if (args.length == 2) {
                                         playerSender.sendMessage(ERROR_COLOR + "You provided too few arguments: " + COMMAND_COLOR + "/bank staff create (name)" + ERROR_COLOR + "."); //clan staff uuid
@@ -64,8 +92,7 @@ public class BankCommand implements CommandExecutor {
                                     }
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String nameCreate = stringBuilder(args, 2, " ");
-                                    if(nameCreate.length() > 14)
-                                    {
+                                    if (nameCreate.length() > 14) {
                                         playerSender.sendMessage(ERROR_COLOR + "You can't have a name that big! Shrink it or else the game crashes.");
                                         return true;
                                     }
@@ -88,8 +115,7 @@ public class BankCommand implements CommandExecutor {
                                     // /host <arg 0/staff> <arg 1/create> ......... <arg n>
                                     String playerName = args[2];
                                     OfflinePlayer bankSearchedPlayer = Bukkit.getOfflinePlayer(playerName);
-                                    if(!bankSearchedPlayer.isOnline() && !bankSearchedPlayer.hasPlayedBefore())
-                                    {
+                                    if (!bankSearchedPlayer.isOnline() && !bankSearchedPlayer.hasPlayedBefore()) {
                                         playerSender.sendMessage(ERROR_COLOR + "The player you are looking has never played on the server.");
                                         return false;
                                     }
@@ -145,7 +171,7 @@ public class BankCommand implements CommandExecutor {
                                         int y = showBankerNPC.getStoredLocation().getBlockY();
                                         int z = showBankerNPC.getStoredLocation().getBlockZ();
                                         BaseComponent[] tc = new ComponentBuilder(BANKER_COLOR + "" + bankerTrait.getBankerName() + STANDARD_COLOR + " is positioned at x:" + STANDARD_COLOR + x + ", y:" + y + ", z:" + z + ".")
-                                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + BANKER_COLOR + bankerTrait.getBankerName()+ STANDARD_COLOR + ".").create()))
+                                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(STANDARD_COLOR + "Teleport to " + BANKER_COLOR + bankerTrait.getBankerName() + STANDARD_COLOR + ".").create()))
                                                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teleport " + playerSender.getName() + " " + x + " " + y + " " + z)).create();
 
                                         playerSender.spigot().sendMessage(ChatMessageType.CHAT, tc);
@@ -180,7 +206,9 @@ public class BankCommand implements CommandExecutor {
 
     public void sendStaffHelp(Player playerSender) {
         playerSender.sendMessage(ChatColor.GOLD + "------Bank Staff Help------");
-
+        playerSender.sendMessage(COMMAND_COLOR + "/bank staff get " + ChatColor.YELLOW + "(name)");
+        playerSender.sendMessage(COMMAND_COLOR + "/bank staff set " + ChatColor.YELLOW + "(name) (newBalance)");
+        playerSender.sendMessage(COMMAND_COLOR + "/bank staff view " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/bank staff create " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/bank staff delete " + ChatColor.YELLOW + "(name)");
         playerSender.sendMessage(COMMAND_COLOR + "/bank staff setspawn " + ChatColor.YELLOW + "(name)");

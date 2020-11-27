@@ -189,27 +189,27 @@ public class EnhanceCommand implements CommandExecutor {
             case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
-            case DIAMOND_HOE:
+            //case DIAMOND_HOE:
                 //GOLD
             case GOLDEN_PICKAXE:
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
-            case GOLDEN_HOE:
+           // case GOLDEN_HOE:
                 //IRON
             case IRON_PICKAXE:
             case IRON_AXE:
             case IRON_SHOVEL:
-            case IRON_HOE:
+          //  case IRON_HOE:
                 //STONE
             case STONE_PICKAXE:
             case STONE_AXE:
             case STONE_SHOVEL:
-            case STONE_HOE:
+         //   case STONE_HOE:
                 //WOODEN
             case WOODEN_PICKAXE:
             case WOODEN_AXE:
             case WOODEN_SHOVEL:
-            case WOODEN_HOE:
+            //case WOODEN_HOE:
                 return true;
         }
         return false;

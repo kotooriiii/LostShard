@@ -49,7 +49,7 @@ public class SmeltCommand implements CommandExecutor {
         ItemMeta meta = mainHand.getItemMeta();
 
         //If ingredients don't exist or the item isn't able to take any damage
-        if (!(meta instanceof Damageable)) {
+        if (!isSmeltable(mainHand)) {
             playerSender.sendMessage(ERROR_COLOR + "This item is not smeltable.");
             return false;
         }
@@ -88,6 +88,7 @@ public class SmeltCommand implements CommandExecutor {
                 }
             }
             playerSender.sendMessage(ChatColor.GOLD + "You smelt the item.");
+            stat.setStamina(stat.getStamina() - STAMINA_COST);
 
 
         } else {
@@ -100,7 +101,6 @@ public class SmeltCommand implements CommandExecutor {
 
         //Give xp for trying.
         blacksmithy.addXP(getXP(mainHand));
-        stat.setStamina(stat.getStamina() - STAMINA_COST);
         mainHand.setItemMeta(meta);
         playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
         playerSender.updateInventory();
@@ -356,6 +356,75 @@ public class SmeltCommand implements CommandExecutor {
 
         }
         return null;
+    }
+
+    private boolean isSmeltable(ItemStack itemStack) {
+        Material material = itemStack.getType();
+
+        switch (material) {
+
+            //BOW
+            case BOW:
+            //DIAMOND
+            case DIAMOND_AXE:
+            case DIAMOND_SWORD:
+            case DIAMOND_PICKAXE:
+            case DIAMOND_HOE:
+            case DIAMOND_SHOVEL:
+
+            case DIAMOND_BOOTS:
+            case DIAMOND_HELMET:
+            case DIAMOND_CHESTPLATE:
+            case DIAMOND_LEGGINGS:
+            case DIAMOND_HORSE_ARMOR:
+
+            //GOLD
+            case GOLDEN_AXE:
+            case GOLDEN_SWORD:
+            case GOLDEN_PICKAXE:
+            case GOLDEN_HOE:
+            case GOLDEN_SHOVEL:
+
+            case GOLDEN_BOOTS:
+            case GOLDEN_HELMET:
+            case GOLDEN_CHESTPLATE:
+            case GOLDEN_LEGGINGS:
+            case GOLDEN_HORSE_ARMOR:
+
+            //IRON
+            case IRON_AXE:
+            case IRON_SWORD:
+            case IRON_PICKAXE:
+            case IRON_HOE:
+            case IRON_SHOVEL:
+
+            case IRON_BOOTS:
+            case IRON_HELMET:
+            case IRON_CHESTPLATE:
+            case IRON_LEGGINGS:
+            case IRON_HORSE_ARMOR:
+
+            //STONE
+            case STONE_AXE:
+            case STONE_SWORD:
+            case STONE_PICKAXE:
+            case STONE_HOE:
+            case STONE_SHOVEL:
+
+            case CHAINMAIL_BOOTS:
+            case CHAINMAIL_HELMET:
+            case CHAINMAIL_CHESTPLATE:
+            case CHAINMAIL_LEGGINGS:
+
+            case WOODEN_AXE:
+            case WOODEN_SWORD:
+            case WOODEN_PICKAXE:
+            case WOODEN_HOE:
+            case WOODEN_SHOVEL:
+                return true;
+
+        }
+        return false;
     }
 
     private ItemStack getBiomeRespectiveWood(Location location) {

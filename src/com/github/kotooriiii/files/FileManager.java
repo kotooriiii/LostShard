@@ -777,8 +777,10 @@ public final class FileManager {
             for (SkillType type : SkillType.values()) {
                 float level = (float) yaml.getDouble(i + "." + type.name() + ".Level");
                 float xp = (float) yaml.getDouble(i + "." + type.name() + ".XP");
+                boolean isLocked = (boolean) yaml.getBoolean(i + "." + type.getName() + ".isLocked", false);
                 Skill skill = new Skill(skillBuild, type);
                 skill.setLevel(level, xp);
+                skill.setLocked(isLocked);
                 skills[skillIndex++] = skill;
             }
             skillBuild.setSkills(skills);
@@ -1065,6 +1067,7 @@ public final class FileManager {
         try {
             yaml.save(bankFile);
         } catch (IOException | NullPointerException e) {
+            LostShardPlugin.plugin.getLogger().severe("Error: Check the bank of player uuid '" + bank.getPlayerUUID() + "'." );
             e.printStackTrace();
         }
     }
@@ -1335,6 +1338,7 @@ public final class FileManager {
                     Skill skill = skills[j];
                     yaml.set(i + "." + skill.getType().name() + ".Level", (double) skill.getLevel());
                     yaml.set(i + "." + skill.getType().name() + ".XP", (double) skill.getXP());
+                    yaml.set(i + "." + skill.getType().name() + ".isLocked", skill.isLocked());
                 }
             }
 

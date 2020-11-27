@@ -49,19 +49,31 @@ public class ShardScoreboardManager {
 
         Team worthy = registerScoreboard.registerNewTeam(weightMap.get(Status.WORTHY.getName()) + Status.WORTHY.getName());
         worthy.setColor(Status.WORTHY.getChatColor());
+        worthy.setCanSeeFriendlyInvisibles(false);
+
         Team corrupt = registerScoreboard.registerNewTeam(weightMap.get(Status.CORRUPT.getName()) + Status.CORRUPT.getName());
         corrupt.setColor(Status.CORRUPT.getChatColor());
+        corrupt.setCanSeeFriendlyInvisibles(false);
+
         Team exiled = registerScoreboard.registerNewTeam(weightMap.get(Status.EXILED.getName()) + Status.EXILED.getName());
         exiled.setColor(Status.EXILED.getChatColor());
+        exiled.setCanSeeFriendlyInvisibles(false);
 
         Team owner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.OWNER.getName()) + StaffType.OWNER.getName());
         owner.setColor(StaffType.OWNER.getChatColor());
+        owner.setCanSeeFriendlyInvisibles(false);
+
         Team coowner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.COOWNER.getName()) + StaffType.COOWNER.getName());
         coowner.setColor(StaffType.COOWNER.getChatColor());
+        coowner.setCanSeeFriendlyInvisibles(false);
+
         Team admin = registerScoreboard.registerNewTeam(weightMap.get(StaffType.ADMIN.getName()) + StaffType.ADMIN.getName());
         admin.setColor(StaffType.ADMIN.getChatColor());
+        admin.setCanSeeFriendlyInvisibles(false);
+
         Team moderator = registerScoreboard.registerNewTeam(weightMap.get(StaffType.MODERATOR.getName()) + StaffType.MODERATOR.getName());
         moderator.setColor(StaffType.MODERATOR.getChatColor());
+        moderator.setCanSeeFriendlyInvisibles(false);
 
         player.setScoreboard(registerScoreboard);
         registerProfileObjective(player);

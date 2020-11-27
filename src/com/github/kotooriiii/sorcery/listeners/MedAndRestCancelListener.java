@@ -19,7 +19,7 @@ public class MedAndRestCancelListener implements Listener {
 
 
 
-        if (to.getX() == from.getX() && to.getY() == from.getY() && to.getZ() == from.getZ()) {
+        if (to.getBlockX() == from.getBlockX() && to.getBlockY() == from.getBlockY() && to.getBlockZ() == from.getBlockZ()) {
             return; //Did not move from the block sitting at here.
         }
 

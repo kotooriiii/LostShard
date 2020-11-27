@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class DiscordCommand implements CommandExecutor {
 
-    public static String LINK = "discord.gg/hUAfPmS";
+    public static String LINK = "https://discord.gg/hUAfPmS";
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {

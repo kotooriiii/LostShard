@@ -3,17 +3,24 @@ package com.github.kotooriiii.sorcery;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.IBlockData;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitTask;
 import sun.java2d.DisposerTarget;
 
 import java.util.UUID;
+
+import static net.minecraft.server.v1_15_R1.Block.getByCombinedId;
 
 public class Gate {
     private UUID source;
@@ -102,20 +109,38 @@ public class Gate {
         return b.getType().isAir();
     }
 
+    public static void setBlockInNativeWorld(World world, int x, int y, int z, int blockId, byte data, boolean applyPhysics) {
+        final WorldServer handle = ((CraftWorld) world).getHandle();
+        BlockPosition bp = new BlockPosition(x, y, z);
+        IBlockData ibd = getByCombinedId(blockId + (data << 12));
+        handle.setTypeAndData(bp, ibd, applyPhysics ? 3 : 2);
+    }
+
+    public static void setBlockInNativeWorld(World world, int x, int y, int z, Material type,  boolean applyPhysics) {
+        final WorldServer handle = ((CraftWorld) world).getHandle();
+        BlockPosition bp = new BlockPosition(x, y, z);
+        IBlockData ibd = ((CraftBlockData) Bukkit.createBlockData(type)).getState();
+
+        handle.setTypeAndData(bp, ibd, applyPhysics ? 3 : 2);
+    }
+
 
     public void destroy() {
         Block fromFeet = from.getBlock();
         if (fromFeet.getType() == Material.NETHER_PORTAL)
-            fromFeet.setType(Material.AIR);
+            setBlockInNativeWorld(fromFeet.getWorld(), fromFeet.getLocation().getBlockX(), fromFeet.getLocation().getBlockY(), fromFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+
         Block fromHead = fromFeet.getRelative(BlockFace.UP);
         if (fromHead.getType() == Material.NETHER_PORTAL)
-            fromHead.setType(Material.AIR);
+            setBlockInNativeWorld(fromHead.getWorld(), fromHead.getLocation().getBlockX(), fromHead.getLocation().getBlockY(), fromHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+
         Block toFeet = to.getBlock();
         if (toFeet.getType() == Material.NETHER_PORTAL)
-            toFeet.setType(Material.AIR);
+            setBlockInNativeWorld(toFeet.getWorld(), toFeet.getLocation().getBlockX(), toFeet.getLocation().getBlockY(), toFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+
         Block toHead = toFeet.getRelative(BlockFace.UP);
         if (toHead.getType() == Material.NETHER_PORTAL)
-            toHead.setType(Material.AIR);
+            setBlockInNativeWorld(toHead.getWorld(), toHead.getLocation().getBlockX(), toHead.getLocation().getBlockY(), toHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
     }
 
     @Override

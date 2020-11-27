@@ -84,6 +84,7 @@ public class RepairCommand implements CommandExecutor {
             //Repair item
             ((Damageable) meta).setDamage(0);
             playerSender.sendMessage(ChatColor.GOLD + "You repair the item.");
+            stat.setStamina(stat.getStamina() - STAMINA_COST);
 
         } else {
 
@@ -101,7 +102,6 @@ public class RepairCommand implements CommandExecutor {
 
         //Give xp for trying.
         blacksmithy.addXP(getXP(mainHand));
-        stat.setStamina(stat.getStamina() - STAMINA_COST);
         mainHand.setItemMeta(meta);
         invHelper.removeIngredients();
         playerSender.updateInventory();

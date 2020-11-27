@@ -14,6 +14,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -41,7 +42,7 @@ public class SellCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("sell")) {
                 //No arguments regarding this command
                 if (args.length != 3) {
-                    playerSender.sendMessage(ChatColor.RED + "Did you mean " + "/sell (amount) (item) (price)"  + "?");
+                    playerSender.sendMessage(ChatColor.RED + "Did you mean " + "/sell (amount) (item) (price)" + "?");
                     return false;
                 }
 
@@ -61,7 +62,7 @@ public class SellCommand implements CommandExecutor {
                 }
 
                 //Check second argument
-                ItemStack ingredient = getItem(playerSender, args[1].substring(0,1).toUpperCase() + args[1].substring(1).toLowerCase());
+                ItemStack ingredient = getItem(playerSender, args[1].substring(0, 1).toUpperCase() + args[1].substring(1).toLowerCase());
                 if (ingredient == null)
                     return false;
 
@@ -80,10 +81,20 @@ public class SellCommand implements CommandExecutor {
                 double totalPriceRaw = Double.parseDouble(args[2]);
                 BigDecimal totalPrice = new BigDecimal(args[2]).setScale(2, BigDecimal.ROUND_HALF_UP);
 
+                if (totalPriceRaw < 0.001) {
+                    playerSender.sendMessage(ChatColor.RED + "The minimum price to sell is 0.001. Enter a larger price value.");
+                    return false;
+                }
+
                 ingredient.setAmount(amount);
                 ItemStack[] ingredients = new ItemStack[]{ingredient};
-                if (!hasIngredients(playerSender, ingredients))
+                if (!hasIngredients(playerSender, ingredients)) {
+                    if (ingredient.getItemMeta() instanceof Damageable && ingredient.getType().getMaxDurability() != 0) {
+
+                        playerSender.sendMessage(ChatColor.RED + "Note: Item must not be damaged.");
+                    }
                     return false;
+                }
 
                 removeIngredients(playerSender, ingredients);
 
@@ -92,16 +103,16 @@ public class SellCommand implements CommandExecutor {
 
 
                 String name = ingredient.getType().name().replace("_", " ").toLowerCase() + " ";
-                name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
-                if(ingredient.getItemMeta() instanceof PotionMeta) {
+                name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+                if (ingredient.getItemMeta() instanceof PotionMeta) {
                     name = ((PotionMeta) ingredient.getItemMeta()).getBasePotionData().getType().name();
-                    name = name.substring(0,1).toUpperCase() + name.substring(1).toUpperCase() + " ";
-                    if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
+                    name = name.substring(0, 1).toUpperCase() + name.substring(1).toUpperCase() + " ";
+                    if (((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isExtended())
                         name += "extended ";
-                    else if(((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
+                    else if (((PotionMeta) ingredient.getItemMeta()).getBasePotionData().isUpgraded())
                         name += "2 Potion ";
                     else
-                        name+= "Potion ";
+                        name += "Potion ";
                 }
 
                 playerSender.sendMessage(ChatColor.GRAY + "You have put " + amount + " " + name + "on the market for " + totalPriceRaw + " gold.");// In simpler terms, you're selling 1 " + name + "for " + individualRawPrice + ".");
@@ -192,6 +203,11 @@ public class SellCommand implements CommandExecutor {
                 continue;
             if (itemStack.getType().equals(Material.SHULKER_BOX))
                 continue;
+            if (meta instanceof Damageable) {
+                Damageable dam = (Damageable) meta;
+                if (dam.getDamage() != 0)
+                    continue;
+            }
 
 
             int iteratingCount = iteratingItem.getAmount();
@@ -209,7 +225,7 @@ public class SellCommand implements CommandExecutor {
         }
 
         if (counterMoney < amountRequired) {
-            player.sendMessage(ChatColor.RED + "You only have " + counterMoney + " " + materialType.getKey().getKey().substring(0,1).toUpperCase() +materialType.getKey().getKey().substring(1).toLowerCase() + ".");
+            player.sendMessage(ChatColor.RED + "You only have " + counterMoney + " " + materialType.getKey().getKey().substring(0, 1).toUpperCase() + materialType.getKey().getKey().substring(1).toLowerCase() + ".");
             return null;
         }
         return hashmap;
@@ -256,7 +272,7 @@ public class SellCommand implements CommandExecutor {
                     materialNames[i] = materials[i].getKey().getKey().toLowerCase();
                 }
                 String builder = HelperMethods.stringBuilder(materialNames, 0, ", ", ", or ", " or ");
-                playerSender.sendMessage(ChatColor.RED  + "Did you possibly mean one of these items?:\n" + builder);
+                playerSender.sendMessage(ChatColor.RED + "Did you possibly mean one of these items?:\n" + builder);
                 return null;
             }
         }
@@ -281,7 +297,7 @@ public class SellCommand implements CommandExecutor {
 
         if (!suffix.isEmpty()) {
             if (suffix.equalsIgnoreCase("e")) {
-                if(potionMeta.getBasePotionData().getType().isExtendable())
+                if (potionMeta.getBasePotionData().getType().isExtendable())
                     potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), true, false));
             }
             if (suffix.equalsIgnoreCase("2")) {
@@ -319,8 +335,8 @@ public class SellCommand implements CommandExecutor {
 
         if (!suffix.isEmpty()) {
             if (suffix.equalsIgnoreCase("e")) {
-                if(potionMeta.getBasePotionData().getType().isExtendable())
-                potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), true, false));
+                if (potionMeta.getBasePotionData().getType().isExtendable())
+                    potionMeta.setBasePotionData(new PotionData(potionMeta.getBasePotionData().getType(), true, false));
             }
             if (suffix.equalsIgnoreCase("2")) {
                 if (potionMeta.getBasePotionData().getType().isUpgradeable())
