@@ -259,16 +259,9 @@ public class PGTListener implements Listener {
 
     @EventHandler
     public void onPGTBreak(BlockPhysicsEvent e) {
-        if (e.getChangedType() == Material.AIR)
-            return;
-        Bukkit.broadcastMessage("-------DEBUG--------");
-        Bukkit.broadcastMessage("Source block: " + (e.getSourceBlock() == null ? "null" : e.getSourceBlock().getType().getKey().getKey()));
-        Bukkit.broadcastMessage("Changed type: " + e.getChangedType().getKey().getKey());
-        Bukkit.broadcastMessage("Inherited block: " + (e.getBlock() == null ? "null" : e.getBlock().getType().getKey().getKey()));
-        Bukkit.broadcastMessage("---------------");
 
         //If the source is not air AND we are changing portal
-        if (e.getChangedType() == Material.NETHER_PORTAL && e.getSourceBlock().getType().isInteractable()) {
+        if (isRelativelyNearPortal(e.getSourceBlock()) && LostShardPlugin.getGateManager().hasGateNearby(e.getSourceBlock().getLocation())) {
             e.setCancelled(true);
         }
     }
@@ -281,66 +274,6 @@ public class PGTListener implements Listener {
         return false;
     }
 
-
-    @EventHandler
-    public void onBlockCreate(BlockPlaceEvent event) {
-        if (isRelativelyNearPortal(event.getBlock())) {
-            event.setCancelled(true);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Gate.setBlockInNativeWorld(event.getBlock().getWorld(), event.getBlock().getLocation().getBlockX(), event.getBlock().getLocation().getBlockY(), event.getBlock().getLocation().getBlockZ(), event.getBlock().getType(), event.getBlock().getType().hasGravity());
-                }
-            }.runTask(LostShardPlugin.plugin);
-
-            if(event.getPlayer().getGameMode() == GameMode.CREATIVE)
-                return;
-
-            if (event.getItemInHand().getAmount() == 1) {
-                event.getPlayer().getInventory().setItemInMainHand(null);
-            } else {
-                ItemStack clone = event.getItemInHand().clone();
-                clone.setAmount(clone.getAmount() - 1);
-                event.getPlayer().getInventory().setItemInMainHand(clone);
-            }
-
-        }
-    }
-
-    @EventHandler
-    public void onBlockRemove(BlockBreakEvent event) {
-
-        if (isRelativelyNearPortal(event.getBlock())) {
-            event.setCancelled(true);
-            event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(event.getBlock().getType(), 1));
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Gate.setBlockInNativeWorld(event.getBlock().getWorld(), event.getBlock().getLocation().getBlockX(), event.getBlock().getLocation().getBlockY(), event.getBlock().getLocation().getBlockZ(), Material.AIR, Material.AIR.hasGravity());
-                }
-            }.runTask(LostShardPlugin.plugin);
-
-            ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
-
-            if(event.getPlayer().getGameMode() == GameMode.CREATIVE)
-                return;
-
-            if(itemStack!=null)
-            {
-                ItemMeta meta = itemStack.getItemMeta();
-                if(meta instanceof Damageable)
-                {
-                    final int DAMAGE = 2;
-                    if (((org.bukkit.inventory.meta.Damageable) meta).getDamage() + DAMAGE >= itemStack.getType().getMaxDurability())
-                        event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                    else
-                        ((org.bukkit.inventory.meta.Damageable) meta).setDamage(((Damageable) meta).getDamage() + DAMAGE);
-                }
-            }
-        }
-
-    }
 
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {

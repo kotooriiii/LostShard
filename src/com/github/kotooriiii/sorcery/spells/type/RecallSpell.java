@@ -10,6 +10,8 @@ import com.github.kotooriiii.stats.Stat;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -82,13 +84,12 @@ public class RecallSpell extends Spell implements Listener {
     @EventHandler
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
-        if(!(entity instanceof Player))
+        if (!(entity instanceof Player))
             return;
         Player player = (Player) entity;
-
 
 
         //not casting spell
@@ -199,6 +200,11 @@ public class RecallSpell extends Spell implements Listener {
                 if (counter == 0) {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
+                    if (isObstructed(mark)) {
+                        if (player.isOnline())
+                            player.sendMessage(ERROR_COLOR + "Cannot recall there. Your mark has been obstructed.");
+                        return;
+                    }
                     postCast(player, mark);
                     return;
                 }
@@ -218,7 +224,9 @@ public class RecallSpell extends Spell implements Listener {
     private void postCast(Player playerSender, MarkPlayer.Mark mark) {
         SuccessfulRecallEvent event = new SuccessfulRecallEvent(playerSender);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
+            return;
+        if(!playerSender.isOnline())
             return;
         playerSender.teleport(mark.getLocation());
         playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
@@ -233,6 +241,17 @@ public class RecallSpell extends Spell implements Listener {
 
         mark.getLocation().getWorld().strikeLightningEffect(mark.getLocation());
 
+    }
+
+    private boolean isObstructed(MarkPlayer.Mark mark) {
+        Block toFeet = mark.getLocation().getBlock();
+        Block toHead = mark.getLocation().getBlock().getRelative(BlockFace.UP);
+
+        return !isAvailable(toFeet) || !isAvailable(toHead);
+    }
+
+    private boolean isAvailable(Block block) {
+        return block.getType() == Material.NETHER_PORTAL || block.getType().isAir() || block.getType() == Material.WATER || block.getType() == Material.LAVA || block.getType() == Material.LADDER;
     }
 
 
