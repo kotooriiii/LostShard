@@ -7,9 +7,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCDamageByEntityEvent;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.npc.NPC;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -19,7 +17,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 public class StatusListener implements Listener {
 
@@ -27,13 +24,13 @@ public class StatusListener implements Listener {
     private Location spawnA, spawnA2, spawnB, spawnB2;
 
     public StatusListener() {
-        this.a2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Elise");
+        this.a2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Elise");
         a2.addTrait(new TutorialTrait());
         a2.setProtected(false);
         spawnA2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 663.5, 66, 875.5, -90, 0);
         a2.spawn(spawnA2);
 
-        this.a1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Jackie");
+        this.a1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Jackie");
         a1.addTrait(new TutorialTrait());
         spawnA = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 665.5, 66, 875.5, 90, 0);
         a1.spawn(spawnA);
@@ -53,13 +50,13 @@ public class StatusListener implements Listener {
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
 
 
-        this.b2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.WORTHY.getChatColor() + "[NPC] Arizona");
+        this.b2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Arizona");
         b2.addTrait(new TutorialTrait());
         b2.setProtected(false);
         spawnB2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 665.5, 66, 733.5, 90, 0);
         b2.spawn(spawnB2);
 
-        this.b1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.CORRUPT.getChatColor() + "[NPC] Clover");
+        this.b1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.CRIMINAL.getChatColor() + "[NPC] Clover");
         b1.addTrait(new TutorialTrait());
         spawnB = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 663.5, 66, 733.5, -90, 0);
         b1.spawn(spawnB);
@@ -100,7 +97,7 @@ public class StatusListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    a1.setName(Status.CORRUPT.getChatColor() + "[NPC] Jackie");
+                    a1.setName(Status.CRIMINAL.getChatColor() + "[NPC] Jackie");
                     a1.teleport(spawnA, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     a1.getNavigator().cancelNavigation();
                     a2.teleport(spawnA2, PlayerTeleportEvent.TeleportCause.PLUGIN);
@@ -110,7 +107,7 @@ public class StatusListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    a1.setName(Status.WORTHY.getChatColor() + "[NPC] Jackie");
+                    a1.setName(Status.LAWFUL.getChatColor() + "[NPC] Jackie");
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -146,7 +143,7 @@ public class StatusListener implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                b1.setName(Status.EXILED.getChatColor() + "[NPC] Clover");
+                b1.setName(Status.MURDERER.getChatColor() + "[NPC] Clover");
             }
         }.runTask(LostShardPlugin.plugin);
 
@@ -155,7 +152,7 @@ public class StatusListener implements Listener {
             public void run() {
 
                 event.getNPC().spawn(spawnB2);
-                b1.setName(Status.CORRUPT.getChatColor() + "[NPC] Clover");
+                b1.setName(Status.CRIMINAL.getChatColor() + "[NPC] Clover");
 
                 new BukkitRunnable() {
                     @Override

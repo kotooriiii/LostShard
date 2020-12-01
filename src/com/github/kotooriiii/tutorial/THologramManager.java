@@ -56,7 +56,7 @@ public class THologramManager {
         createHologram(504, 68, 787, "Before you go in, you should craft some chain armor.\nChain armor is crafted like any other armor, just using cobblestone!\nCraft it at the crafting tables to your right.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(502, 67, 751, "Keep following the path!").getVisibilityManager().setVisibleByDefault(false);
         createHologram(502, 67, 796, "Good job! You’re ready to head to Order.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(588, 67, 804, "This is Order. It is where all the Worthy players spawn.\nOrder protects Worthy players with guards.\nIf you see a murderer, type: /guards.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        createHologram(588, 67, 804, "This is Order. It is where all the Lawful players spawn.\nOrder protects Lawful players with guards.\nIf you see a murderer, type: /guards.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(603, 67, 804, "Watch out! A murderer!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
 
         createHologram(615, 67, 801, "Good job! You killed the murderer using guards".split("\n")).getVisibilityManager().setVisibleByDefault(false);

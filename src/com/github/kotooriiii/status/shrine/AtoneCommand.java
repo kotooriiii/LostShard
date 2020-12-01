@@ -2,12 +2,10 @@ package com.github.kotooriiii.status.shrine;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -19,8 +17,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,7 +58,7 @@ public class AtoneCommand implements CommandExecutor {
                 return false;
             }
 
-            if(statusPlayer.getStatus() != Status.EXILED)
+            if(statusPlayer.getStatus() != Status.MURDERER)
             {
                 player.sendMessage(ERROR_COLOR + "You must be a Murderer to atone for your sins.");
                 return false;
@@ -100,9 +96,9 @@ public class AtoneCommand implements CommandExecutor {
                         bank.addCurrency(cost);
                         return;
                     }
-                    statusPlayer.setStatus(Status.WORTHY);
+                    statusPlayer.setStatus(Status.LAWFUL);
                     statusPlayer.setKills(4);
-                    player.sendMessage(ChatColor.GOLD + "You have atoned for your sins. You are now Worthy again.");
+                    player.sendMessage(ChatColor.GOLD + "You have atoned for your sins. You are now Lawful again.");
                     statusPlayer.setLastAtoneDate(ZonedDateTime.now(ZoneId.of("America/New_York")));
 
                 }

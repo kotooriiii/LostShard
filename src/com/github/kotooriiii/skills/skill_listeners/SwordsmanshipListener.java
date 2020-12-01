@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -251,10 +252,16 @@ public class SwordsmanshipListener implements Listener {
         boolean isCrit = isCrit(damager);
 
         if (isCrit) {
-            damage/=1.5f;
+            damage*=1.25f;
         }
 
         damage -= 4;
+
+        if(damager.getInventory().getItemInMainHand().getType() != Material.GOLDEN_SWORD)
+        {
+            damage -= 2;
+
+        }
 
         if (level >= 100) {
             damage += 4;

@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.UUID;
@@ -37,7 +36,7 @@ public class TipsManager {
                         "Hold a stick in your hand and type '/bind (spell name)' to bind a spell to your stick.",
                         "Eating rotten flesh, melons, and soup instantly heals your heart and hunger.",
                         "Deposit your gold at the banker at Order or Chaos. Type: '/deposit (amount)'.",
-                        "Can't find the banker or build the build changer? Type: '/plot info' to see their locations.",
+                        "Can't find the banker or build changer? Type: '/plot info' to see their locations.",
                         "Plots keep your builds safe. To create a plot, type: '/plot create (name)'. You need a diamond and 10 gold deposited at the banker.",
                         "Spells use reagents. Teleport = 1 feather. Web field = 1 string.",
                         "Don't know all the spells? Type: '/cast' for a list of all of them.",
@@ -79,7 +78,7 @@ public class TipsManager {
                 String prefix = tipColor + "[Tip] ";
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
-                    if (!isSubscribed(player.getUniqueId()))
+                    if (!isBlacklist(player.getUniqueId()))
                         player.sendMessage(prefix + tips[index]);
                 }
 
@@ -93,7 +92,7 @@ public class TipsManager {
      * @param uuid player uuid
      * @return if subscribe was successful, returns false if already subscribed
      */
-    public boolean subscribe(UUID uuid) {
+    public boolean blacklist(UUID uuid) {
         return set.add(uuid);
     }
 
@@ -103,7 +102,7 @@ public class TipsManager {
      * @param uuid player uuid
      * @return if unsub was successful, returns false if not found in this list.
      */
-    public boolean unsubcribe(UUID uuid) {
+    public boolean unblacklist(UUID uuid) {
         return set.remove(uuid);
     }
 
@@ -113,7 +112,7 @@ public class TipsManager {
      * @param uuid player uuid
      * @return true if subscribed, false otherwise
      */
-    public boolean isSubscribed(UUID uuid) {
+    public boolean isBlacklist(UUID uuid) {
         return set.contains(uuid);
     }
 

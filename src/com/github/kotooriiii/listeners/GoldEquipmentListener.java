@@ -1,7 +1,9 @@
 package com.github.kotooriiii.listeners;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import net.citizensnpcs.api.CitizensAPI;
+import net.minecraft.server.v1_15_R1.EnumItemSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -24,33 +26,32 @@ public class GoldEquipmentListener implements Listener {
             return;
         Entity damager = event.getDamager();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()) || CitizensAPI.getNPCRegistry().isNPC(damager))
             return;
 
 
         if (!(damager instanceof Player))
             return;
 
-        if(!(event.getEntity() instanceof LivingEntity))
+        if (!(event.getEntity() instanceof LivingEntity))
             return;
 
         Player player = (Player) damager;
         ItemStack mainHand = player.getInventory().getItemInMainHand();
-        if(mainHand == null)
+        if (mainHand == null)
             return;
 
-        if(!mainHand.getType().equals(Material.GOLDEN_SWORD))
+        if (!mainHand.getType().equals(Material.GOLDEN_SWORD))
             return;
 
         //Player damaging an entity with a gold sword
         final int damage = 5;
 
         event.getEntity().getLocation().getWorld().strikeLightningEffect(event.getEntity().getLocation());
-        for(Entity entity : player.getLocation().getWorld().getNearbyEntities(player.getLocation(), 1, 1, 1))
-        {
-            if(!(entity instanceof LivingEntity))
+        for (Entity entity : player.getLocation().getWorld().getNearbyEntities(player.getLocation(), 1, 1, 1)) {
+            if (!(entity instanceof LivingEntity))
                 continue;
-            if(player.equals(entity))
+            if (player.equals(entity))
                 continue;
 
             LivingEntity livingEntity = (LivingEntity) entity;
@@ -63,7 +64,7 @@ public class GoldEquipmentListener implements Listener {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
             return;
 
         //must be player
@@ -88,7 +89,7 @@ public class GoldEquipmentListener implements Listener {
     public void onSuffocate(EntityDamageEvent entityDamageEvent) {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
-        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
             return;
 
         //must be player
@@ -104,6 +105,18 @@ public class GoldEquipmentListener implements Listener {
         if (chestplate == null || chestplate.getType() != Material.GOLDEN_CHESTPLATE)
             return;
 
+        LostShardPlugin.LSBorder border = LostShardPlugin.getBorder(player.getWorld().getName());
+
+        if (border != null) {
+            int cX = border.getX();
+            int cZ = border.getZ();
+            int rX = border.getRadiusX();
+            int rZ = border.getRadiusZ();
+
+            if (!((cX - rX <= player.getLocation().getBlockX() && player.getLocation().getBlockX() <= cX + rX)
+                    && (cZ - rZ <= player.getLocation().getBlockZ() && player.getLocation().getBlockZ() <= cZ + rZ)))
+                return;
+        }
         //Code if anything else wants to be added
         entityDamageEvent.setCancelled(true);
 
@@ -114,7 +127,7 @@ public class GoldEquipmentListener implements Listener {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
             return;
 
 
@@ -140,7 +153,7 @@ public class GoldEquipmentListener implements Listener {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
             return;
 
 

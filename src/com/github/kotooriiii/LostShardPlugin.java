@@ -82,6 +82,7 @@ import com.github.kotooriiii.tutorial.listeners.PlayerJoinRealServerListener;
 import com.github.kotooriiii.tutorial.listeners.StatusListener;
 import com.github.kotooriiii.tutorial.listeners.TutorialSettingsListener;
 import com.github.kotooriiii.tutorial.TutorialManager;
+import com.github.kotooriiii.util.HelperMethods;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.citizensnpcs.api.CitizensAPI;
@@ -328,8 +329,10 @@ public class LostShardPlugin extends JavaPlugin {
         registerGlow();
         //Register for crash-related incidents
         registerBuff();
-        registerCorrupts();
+        registerCriminals();
         registerStaff();
+
+        HelperMethods.initLookingSet();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
@@ -685,6 +688,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new FFAListener(), this);
 
         pm.registerEvents(new PlayerConnectServerEvent(), this);
+        pm.registerEvents(new DisableEnchantedGoldenAppleListener(), this);
 
         registerCustomEventListener();
 
@@ -866,28 +870,28 @@ public class LostShardPlugin extends JavaPlugin {
         }
     }
 
-    public void registerCorrupts() {
+    public void registerCriminals() {
 
-        for (StatusPlayer statusPlayer : StatusPlayer.getCorrupts()) {
+        for (StatusPlayer statusPlayer : StatusPlayer.getCriminals()) {
             UUID uuid = statusPlayer.getPlayerUUID();
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             if (offlinePlayer.isOnline())
-                offlinePlayer.getPlayer().sendMessage(STANDARD_COLOR + "The server crashed while you were Corrupt. The timer has reset to 5 minutes.");
+                offlinePlayer.getPlayer().sendMessage(STANDARD_COLOR + "The server crashed while you were a Criminal. The timer has reset to 5 minutes.");
 
             BukkitTask task = new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (isCancelled())
                         return;
-                    if (StatusUpdateListener.getPlayersCorrupt().get(uuid) == null)
+                    if (StatusUpdateListener.getPlayersCriminals().get(uuid) == null)
                         return;
-                    StatusPlayer.wrap(uuid).setStatus(Status.WORTHY);
-                    StatusUpdateListener.getPlayersCorrupt().remove(uuid);
+                    StatusPlayer.wrap(uuid).setStatus(Status.LAWFUL);
+                    StatusUpdateListener.getPlayersCriminals().remove(uuid);
                 }
             }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 5);
 
-            StatusUpdateListener.getPlayersCorrupt().put(uuid, task);
+            StatusUpdateListener.getPlayersCriminals().put(uuid, task);
         }
     }
 

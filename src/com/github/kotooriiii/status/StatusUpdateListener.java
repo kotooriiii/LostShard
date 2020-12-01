@@ -1,10 +1,6 @@
 package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.plots.struct.Plot;
-import com.github.kotooriiii.ranks.RankPlayer;
-import com.github.kotooriiii.ranks.RankType;
-import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -13,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -25,11 +20,11 @@ import static com.github.kotooriiii.util.HelperMethods.isPlayerInduced;
 
 public class StatusUpdateListener implements Listener {
 
-    private static HashMap<UUID, BukkitTask> playersCorrupt = new HashMap<>();
+    private static HashMap<UUID, BukkitTask> playersCriminal = new HashMap<>();
 
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onCorruptTimer(EntityDamageByEntityEvent event) {
+    public void onCriminalTimer(EntityDamageByEntityEvent event) {
 
         if(event.isCancelled())
             return;
@@ -60,30 +55,30 @@ public class StatusUpdateListener implements Listener {
         Status defenderStatus = StatusPlayer.wrap(defenderPlayer.getUniqueId()).getStatus();
         Status damagerStatus = StatusPlayer.wrap(damagerPlayer.getUniqueId()).getStatus();
 
-        //The defender must be worthy
-        if (!defenderStatus.equals(Status.WORTHY)) //If defender is not worthy ignore.
+        //The defender must be lawful
+        if (!defenderStatus.equals(Status.LAWFUL)) //If defender is not lawful ignore.
             return;
-        //The damager must be corrupt or worthy
-        if (damagerStatus.equals(Status.EXILED))
+        //The damager must be a criminal or lawful
+        if (damagerStatus.equals(Status.MURDERER))
             return;
 
-        StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.CORRUPT);
+        StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.CRIMINAL);
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (this.isCancelled())
                     return;
-                if (playersCorrupt.get(damagerPlayer.getUniqueId()) == null)
+                if (playersCriminal.get(damagerPlayer.getUniqueId()) == null)
                     return;
-                StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.WORTHY);
-                playersCorrupt.remove(damagerPlayer.getUniqueId());
+                StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.LAWFUL);
+                playersCriminal.remove(damagerPlayer.getUniqueId());
             }
         }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 5);
 
-        if (playersCorrupt.get(damagerPlayer.getUniqueId()) != null) {
-            playersCorrupt.get(damagerPlayer.getUniqueId()).cancel();
+        if (playersCriminal.get(damagerPlayer.getUniqueId()) != null) {
+            playersCriminal.get(damagerPlayer.getUniqueId()).cancel();
         }
-        playersCorrupt.put(damagerPlayer.getUniqueId(), task);
+        playersCriminal.put(damagerPlayer.getUniqueId(), task);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -115,20 +110,20 @@ public class StatusUpdateListener implements Listener {
         Status defenderStatus = StatusPlayer.wrap(defenderPlayer.getUniqueId()).getStatus();
         Status damagerStatus = damagerStatusPlayer.getStatus();
 
-        if (damagerStatus.equals(Status.WORTHY) && (defenderStatus.equals(Status.EXILED) || defenderStatus.equals(Status.CORRUPT)))
+        if (damagerStatus.equals(Status.LAWFUL) && (defenderStatus.equals(Status.MURDERER) || defenderStatus.equals(Status.CRIMINAL)))
             return;
 
         int newKills = damagerStatusPlayer.getKills() + 1;
 
         if (newKills == 5) {
-            damagerStatusPlayer.setStatus(Status.EXILED);
-            playersCorrupt.remove(damagerPlayer.getUniqueId());
+            damagerStatusPlayer.setStatus(Status.MURDERER);
+            playersCriminal.remove(damagerPlayer.getUniqueId());
         }
         damagerStatusPlayer.setKills(newKills);
 
     }
 
-    public static HashMap<UUID, BukkitTask> getPlayersCorrupt() {
-        return playersCorrupt;
+    public static HashMap<UUID, BukkitTask> getPlayersCriminals() {
+        return playersCriminal;
     }
 }

@@ -126,7 +126,7 @@ public class StatusPlayer {
 
             if (player.getLocation().distance(playerOnline.getLocation()) <= range) {
                 StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
-                if (!statusPlayer.getStatus().equals(Status.WORTHY))
+                if (!statusPlayer.getStatus().equals(Status.LAWFUL))
                     return true;
             }
         }
@@ -137,12 +137,12 @@ public class StatusPlayer {
         return playerStatus;
     }
 
-    public static ArrayList<StatusPlayer> getCorrupts() {
-        ArrayList<StatusPlayer> corrupts = new ArrayList<>();
+    public static ArrayList<StatusPlayer> getCriminals() {
+        ArrayList<StatusPlayer> criminals = new ArrayList<>();
         for (StatusPlayer statusPlayer : getPlayerStatus().values()) {
-            if (statusPlayer.getStatus().equals(Status.CORRUPT))
-                corrupts.add(statusPlayer);
+            if (statusPlayer.getStatus().equals(Status.CRIMINAL))
+                criminals.add(statusPlayer);
         }
-        return corrupts;
+        return criminals;
     }
 }

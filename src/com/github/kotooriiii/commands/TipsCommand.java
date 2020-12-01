@@ -23,13 +23,13 @@ public class TipsCommand implements CommandExecutor {
                 //No arguments regarding this command
                 if (args.length == 0) {
                     TipsManager manager = LostShardPlugin.getTipsManager();
-                    if(manager.isSubscribed(playerUUID))
+                    if(manager.isBlacklist(playerUUID))
                     {
                         playerSender.sendMessage(STANDARD_COLOR + "You have toggled tips on.");
-                        manager.unsubcribe(playerUUID);
+                        manager.unblacklist(playerUUID);
                     } else {
                         playerSender.sendMessage(STANDARD_COLOR + "You have toggled tips off.");
-                        manager.subscribe(playerUUID);
+                        manager.blacklist(playerUUID);
                     }
 
                 } else {

@@ -3,16 +3,25 @@ package com.github.kotooriiii.sorcery.spells.type;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -34,6 +43,21 @@ public class FireballSpell extends Spell {
                 2.0f,
                 15,
                 true, true, false);
+    }
+
+    @EventHandler
+    public void onFireballReflect(PlayerInteractEvent event) {
+        if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_AIR)
+            return;
+        RayTraceResult res = event.getPlayer().getWorld().rayTraceEntities(event.getPlayer().getEyeLocation(), event.getPlayer().getLocation().getDirection(), 5, entity -> entity.getType() == EntityType.FIREBALL);
+        if (res == null)
+            return;
+        Entity entity = res.getHitEntity();
+        if (entity == null || entity.getType() != EntityType.FIREBALL)
+            return;
+
+        Fireball fireball = (Fireball) entity;
+        fireball.setDirection(fireball.getDirection().multiply(-1));
     }
 
     @Override
@@ -69,8 +93,7 @@ public class FireballSpell extends Spell {
     }
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         fireballSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {

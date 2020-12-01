@@ -2,7 +2,6 @@ package com.github.kotooriiii.scoreboard;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
-import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
@@ -31,9 +30,9 @@ public class ShardScoreboardManager {
         weightMap.put(StaffType.COOWNER.getName(), 1);
         weightMap.put(StaffType.ADMIN.getName(), 2);
         weightMap.put(StaffType.MODERATOR.getName(), 3);
-        weightMap.put(Status.EXILED.getName(), 7);
-        weightMap.put(Status.CORRUPT.getName(), 8);
-        weightMap.put(Status.WORTHY.getName(), 9);
+        weightMap.put(Status.MURDERER.getName(), 7);
+        weightMap.put(Status.CRIMINAL.getName(), 8);
+        weightMap.put(Status.LAWFUL.getName(), 9);
 
         for (Map.Entry entry : weightMap.entrySet())
             LostShardPlugin.logger.log(Level.WARNING, entry.getKey() + " -> " + entry.getValue());
@@ -47,17 +46,17 @@ public class ShardScoreboardManager {
         Scoreboard registerScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
 
-        Team worthy = registerScoreboard.registerNewTeam(weightMap.get(Status.WORTHY.getName()) + Status.WORTHY.getName());
-        worthy.setColor(Status.WORTHY.getChatColor());
-        worthy.setCanSeeFriendlyInvisibles(false);
+        Team lawful = registerScoreboard.registerNewTeam(weightMap.get(Status.LAWFUL.getName()) + Status.LAWFUL.getName());
+        lawful.setColor(Status.LAWFUL.getChatColor());
+        lawful.setCanSeeFriendlyInvisibles(false);
 
-        Team corrupt = registerScoreboard.registerNewTeam(weightMap.get(Status.CORRUPT.getName()) + Status.CORRUPT.getName());
-        corrupt.setColor(Status.CORRUPT.getChatColor());
-        corrupt.setCanSeeFriendlyInvisibles(false);
+        Team criminal = registerScoreboard.registerNewTeam(weightMap.get(Status.CRIMINAL.getName()) + Status.CRIMINAL.getName());
+        criminal.setColor(Status.CRIMINAL.getChatColor());
+        criminal.setCanSeeFriendlyInvisibles(false);
 
-        Team exiled = registerScoreboard.registerNewTeam(weightMap.get(Status.EXILED.getName()) + Status.EXILED.getName());
-        exiled.setColor(Status.EXILED.getChatColor());
-        exiled.setCanSeeFriendlyInvisibles(false);
+        Team murderer = registerScoreboard.registerNewTeam(weightMap.get(Status.MURDERER.getName()) + Status.MURDERER.getName());
+        murderer.setColor(Status.MURDERER.getChatColor());
+        murderer.setCanSeeFriendlyInvisibles(false);
 
         Team owner = registerScoreboard.registerNewTeam(weightMap.get(StaffType.OWNER.getName()) + StaffType.OWNER.getName());
         owner.setColor(StaffType.OWNER.getChatColor());

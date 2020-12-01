@@ -62,38 +62,64 @@ public class SmeltCommand implements CommandExecutor {
         }
 
         //Get the skill object
-        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
+        Skill blacksmithy = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
         double chance = getChanceOfSmelt(mainHand, level);
-        double random = Math.random();
-
 
         BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.SMELT);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
-        //If won!
-        if (random < chance) {
+        boolean inventoryFull = false;
+        boolean failedToRecover = false;
+        boolean atLeastOneSuccess = false;
 
-            ItemStack[] rewardItems = getRewards(mainHand, playerSender.getLocation());
-            HashMap<Integer, ItemStack> items = playerSender.getInventory().addItem(rewardItems);
+        for (int i = 0; i < mainHand.getAmount(); i++) {
+            double random = Math.random();
 
-            if (!items.isEmpty()) {
-                playerSender.sendMessage(STANDARD_COLOR + "Your inventory is full. The resources have been dropped on the ground.");
-                for (ItemStack itemStack : items.values()) {
-                    playerSender.getWorld().dropItemNaturally(playerSender.getLocation(), itemStack);
+            //If won!
+            if (random < chance) {
+
+                ItemStack[] rewardItems = getRewards(mainHand, playerSender.getLocation());
+                HashMap<Integer, ItemStack> items = playerSender.getInventory().addItem(rewardItems);
+
+                if (!items.isEmpty()) {
+                    inventoryFull = true;
+                    for (ItemStack itemStack : items.values()) {
+                        playerSender.getWorld().dropItemNaturally(playerSender.getLocation(), itemStack);
+                    }
                 }
+                atLeastOneSuccess = true;
+
+
+            } else {
+                //Breaks item at the end
+                failedToRecover = true;
             }
-            playerSender.sendMessage(ChatColor.GOLD + "You smelt the item.");
-            stat.setStamina(stat.getStamina() - STAMINA_COST);
 
+        }
 
+        if (mainHand.getAmount() > 1) {
+            if (inventoryFull)
+                playerSender.sendMessage(STANDARD_COLOR + "Your inventory is full. Some of the resources have been dropped on the ground.");
+            if (failedToRecover)
+                playerSender.sendMessage(ChatColor.GRAY + "You smelted some items but failed to recover some materials.");
+            if (atLeastOneSuccess) {
+                playerSender.sendMessage(ChatColor.GOLD + "You smelt the items.");
+                stat.setStamina(stat.getStamina() - STAMINA_COST);
+            }
         } else {
-            //Breaks item at the end
-            playerSender.sendMessage(ChatColor.GRAY + "You smelted the item but failed to recover any usable material.");
+            if (inventoryFull)
+                playerSender.sendMessage(STANDARD_COLOR + "Your inventory is full. Some of the resources have been dropped on the ground.");
+            if (failedToRecover)
+                playerSender.sendMessage(ChatColor.GRAY + "You smelted the item but failed to recover any usable material.");
+            if (atLeastOneSuccess) {
+                playerSender.sendMessage(ChatColor.GOLD + "You smelt the item.");
+                stat.setStamina(stat.getStamina() - STAMINA_COST);
+            }
         }
 
 
@@ -137,6 +163,8 @@ public class SmeltCommand implements CommandExecutor {
             case GOLDEN_HELMET:
             case GOLDEN_CHESTPLATE:
             case GOLDEN_LEGGINGS:
+
+            case GOLDEN_APPLE:
                 return 100;
 
             //IRON
@@ -228,6 +256,9 @@ public class SmeltCommand implements CommandExecutor {
             case GOLDEN_HELMET:
             case GOLDEN_CHESTPLATE:
             case GOLDEN_LEGGINGS:
+
+            case GOLDEN_APPLE:
+
                 if (level < 60)
                     return 0;
                 else if (level > 80)
@@ -303,6 +334,9 @@ public class SmeltCommand implements CommandExecutor {
             case DIAMOND_HORSE_ARMOR:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, 3)};
 
+            //GOLD APPLE
+            case GOLDEN_APPLE:
+                return new ItemStack[]{new ItemStack(Material.GOLD_INGOT, 5)};
             //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
@@ -365,7 +399,7 @@ public class SmeltCommand implements CommandExecutor {
 
             //BOW
             case BOW:
-            //DIAMOND
+                //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -378,7 +412,7 @@ public class SmeltCommand implements CommandExecutor {
             case DIAMOND_LEGGINGS:
             case DIAMOND_HORSE_ARMOR:
 
-            //GOLD
+                //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
             case GOLDEN_PICKAXE:
@@ -391,7 +425,9 @@ public class SmeltCommand implements CommandExecutor {
             case GOLDEN_LEGGINGS:
             case GOLDEN_HORSE_ARMOR:
 
-            //IRON
+            case GOLDEN_APPLE:
+
+                //IRON
             case IRON_AXE:
             case IRON_SWORD:
             case IRON_PICKAXE:
@@ -404,7 +440,7 @@ public class SmeltCommand implements CommandExecutor {
             case IRON_LEGGINGS:
             case IRON_HORSE_ARMOR:
 
-            //STONE
+                //STONE
             case STONE_AXE:
             case STONE_SWORD:
             case STONE_PICKAXE:

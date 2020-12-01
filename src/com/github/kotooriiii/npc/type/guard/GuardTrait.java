@@ -19,6 +19,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -48,6 +50,7 @@ public class GuardTrait extends Trait {
     private boolean isBusy = false;
     private boolean isCalled = false;
     private UUID owner;
+    private String cachedOwnerName;
 
     public GuardTrait() {
         super("GuardTrait");
@@ -86,7 +89,7 @@ public class GuardTrait extends Trait {
 
         StatusPlayer statusPlayer = StatusPlayer.wrap(clicker.getUniqueId());
 
-        if (!statusPlayer.getStatus().equals(Status.WORTHY))
+        if (!statusPlayer.getStatus().equals(Status.LAWFUL))
             return;
 
         sendMessage(clicker, event.getNPC());
@@ -108,9 +111,9 @@ public class GuardTrait extends Trait {
 
             //NPC exists and is tutorial.
             if (npc != null && LostShardPlugin.isTutorial()) {
-                if(!npc.hasTrait(MurdererTrait.class))
+                if (!npc.hasTrait(MurdererTrait.class))
                     continue;
-                if(getOwner() == null || !npc.hasTrait(MurdererTrait.class) || npc.getTrait(MurdererTrait.class).getTargetTutorial() == null || !npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getOwner()))
+                if (getOwner() == null || !npc.hasTrait(MurdererTrait.class) || npc.getTrait(MurdererTrait.class).getTargetTutorial() == null || !npc.getTrait(MurdererTrait.class).getTargetTutorial().getUniqueId().equals(getOwner()))
                     continue;
 
                 isCalled = false;
@@ -120,14 +123,14 @@ public class GuardTrait extends Trait {
             }
 
             //Player AND not a "madeup" player from Citizens
-            else if (entity instanceof Player && !CitizensAPI.getNPCRegistry().isNPC(entity)){
+            else if (entity instanceof Player && !CitizensAPI.getNPCRegistry().isNPC(entity)) {
 
                 Player player = (Player) entity;
                 if (player.isDead())
                     continue;
                 if (Staff.isStaff(player.getUniqueId()))
                     continue;
-                if (StatusPlayer.wrap(player.getUniqueId()).getStatus().equals(Status.WORTHY))
+                if (StatusPlayer.wrap(player.getUniqueId()).getStatus().equals(Status.LAWFUL))
                     continue;
 
                 Location loc = entity.getLocation();
@@ -231,9 +234,16 @@ public class GuardTrait extends Trait {
         this.owner = owner;
     }
 
-    public UUID getOwner()
-    {
+    public UUID getOwner() {
         return this.owner;
+    }
+
+    public void setCachedOwnerName(String name) {
+        this.cachedOwnerName = name;
+    }
+
+    public String getCachedOwnerName() {
+        return cachedOwnerName;
     }
 
     //END OF BASIC GETTERS/SETTERS
@@ -296,9 +306,14 @@ public class GuardTrait extends Trait {
         w.spawnParticle(Particle.CRIT, playerLocation, 50, 0.3, 0.3, 0.3);
         w.spawnParticle(Particle.DRAGON_BREATH, playerLocation, 50, 2, 2, 2);
 
-        if (player.isOnline() && !player.isDead())
+        if (player.isOnline() && !player.isDead()) {
+           player.setLastDamageCause(new EntityDamageByEntityEvent(npc.getEntity(), player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, player.getHealth()));
             player.setHealth(0);
+        }
 
+        if (!LostShardPlugin.getTipsManager().isBlacklist(player.getUniqueId())) {
+            player.sendMessage(ChatColor.GREEN + "You were killed by guards! Be careful attacking blue names in Order, the guards will come!");
+        }
 
         new BukkitRunnable() {
             @Override
@@ -331,8 +346,8 @@ public class GuardTrait extends Trait {
         npcParam.getEntity().getWorld().spawnParticle(Particle.FIREWORKS_SPARK, npcParam.getStoredLocation(), 3, 0, 0f, 0f);
         npcParam.getEntity().getWorld().playSound(npcParam.getStoredLocation(), Sound.ENTITY_PLAYER_DEATH, 10.0f, 3.0f);
         npcParam.setProtected(false);
-        if(npcParam.getEntity() instanceof LivingEntity)
-        ((LivingEntity) npcParam.getEntity()).damage(20.0f);
+        if (npcParam.getEntity() instanceof LivingEntity)
+            ((LivingEntity) npcParam.getEntity()).damage(20.0f);
 
         new BukkitRunnable() {
             @Override

@@ -56,7 +56,7 @@ public class MurdererChapter extends AbstractChapter {
     public void sendIntro(Player player) {
         if (!isHologramSetup)
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        sendMessage(player, "This is Order. It is where all worthy players spawn.\nOrder protects Worthy players with Guards.\nIf you see a murderer, type /guards.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        sendMessage(player, "This is Order. It is where all Lawful players spawn.\nOrder protects Lawful players with Guards.\nIf you see a murderer, type /guards.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         isHologramSetup = true;
     }
 

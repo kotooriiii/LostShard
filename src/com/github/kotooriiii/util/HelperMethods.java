@@ -37,14 +37,91 @@ public final class HelperMethods {
         return string;
     }
 
-    public static Set getLookingSet() {
+    private static Set<Material> set = new HashSet<>();
 
-        HashSet set = new HashSet<>();
+    public static void initLookingSet()
+    {
+        //air and liquids
         set.add(Material.AIR);
         set.add(Material.CAVE_AIR);
         set.add(Material.VOID_AIR);
         set.add(Material.WATER);
         set.add(Material.LAVA);
+
+        //sapling
+        set.add(Material.ACACIA_SAPLING);
+        set.add(Material.BAMBOO_SAPLING);
+        set.add(Material.BIRCH_SAPLING);
+        set.add(Material.DARK_OAK_SAPLING);
+        set.add(Material.JUNGLE_SAPLING);
+        set.add(Material.OAK_SAPLING);
+        set.add(Material.SPRUCE_SAPLING);
+        set.add(Material.GRASS);
+        set.add(Material.FERN);
+        set.add(Material.DEAD_BUSH);
+        set.add(Material.SEAGRASS);
+        set.add(Material.DANDELION);
+        set.add(Material.POPPY);
+        set.add(Material.BLUE_ORCHID);
+        set.add(Material.ALLIUM);
+        set.add(Material.AZURE_BLUET);
+        set.add(Material.RED_TULIP);
+        set.add(Material.ORANGE_TULIP);
+        set.add(Material.WHITE_TULIP);
+        set.add(Material.PINK_TULIP);
+        set.add(Material.OXEYE_DAISY);
+        set.add(Material.CORNFLOWER);
+        set.add(Material.LILY_OF_THE_VALLEY);
+        set.add(Material.WITHER_ROSE);
+        set.add(Material.BROWN_MUSHROOM);
+        set.add(Material.RED_MUSHROOM);
+        set.add(Material.TORCH);
+        set.add(Material.SUNFLOWER);
+        set.add(Material.LILAC);
+        set.add(Material.ROSE_BUSH);
+        set.add(Material.PEONY);
+        set.add(Material.TALL_GRASS);
+        set.add(Material.LARGE_FERN);
+        set.add(Material.TALL_SEAGRASS);
+
+        //redstone
+        set.add(Material.COMPARATOR);
+        set.add(Material.REPEATER);
+        set.add(Material.REDSTONE_TORCH);
+        set.add(Material.REDSTONE_WIRE);
+
+        //some farm
+        set.add(Material.SUGAR_CANE);
+        set.add(Material.WHEAT);
+        set.add(Material.WHEAT_SEEDS);
+        set.add(Material.PUMPKIN_STEM);
+        set.add(Material.PUMPKIN_SEEDS);
+        set.add(Material.POTATO);
+        set.add(Material.BEETROOT_SEEDS);
+        set.add(Material.BEETROOT);
+        set.add(Material.MELON_SEEDS);
+        set.add(Material.MELON_STEM);
+
+        set.add(Material.VINE);
+
+        //banners
+        for(Material material : Material.values())
+        {
+
+            if(material.getKey().getKey().toLowerCase().endsWith("_banner"))
+                set.add(material);
+            else if(material.getKey().getKey().toLowerCase().endsWith("_coral"))
+                set.add(material);
+            else  if (material.getKey().getKey().toLowerCase().endsWith("_coral_fan"))
+                set.add(material);
+            else  if (material.getKey().getKey().toLowerCase().endsWith("_pressure_plate"))
+                set.add(material);
+            else  if (material.getKey().getKey().toLowerCase().endsWith("_button"))
+                set.add(material);
+        }
+    }
+
+    public static Set getLookingSet() {
         return set;
     }
 
@@ -59,9 +136,9 @@ public final class HelperMethods {
             if (i == n)
                 string += args[i];
             else if (i == args.length - 1)
-                if (args.length-1 - 2 >= n)
+                if (args.length - 1 - 2 >= n)
                     string += lastConcatMulti + args[i];
-                else if (args.length-1 -1 >= n)
+                else if (args.length - 1 - 1 >= n)
                     string += lastConcat + args[i];
                 else
                     string += args[i];

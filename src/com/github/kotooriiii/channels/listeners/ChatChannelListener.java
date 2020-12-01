@@ -91,7 +91,7 @@ public class ChatChannelListener implements Listener {
         if (!title.isEmpty())
             title = ChatColor.WHITE + title;
 
-        //Color of status player is in [worthy,exiled,etc]
+        //Color of status player is in [lawful,murderer,etc]
         ChatColor color = StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor();
 
         //Staff prefix

@@ -3,11 +3,7 @@ package com.github.kotooriiii.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.channels.IgnorePlayer;
-import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
-import com.github.kotooriiii.plots.struct.Plot;
-import com.github.kotooriiii.plots.struct.SpawnPlot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
@@ -84,7 +80,7 @@ public class InitializerListener implements Listener {
         UUID uuid = player.getUniqueId();
 
         if (StatusPlayer.getPlayerStatus().get(uuid) == null) {
-            StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.WORTHY, 0);
+            StatusPlayer statusPlayer = new StatusPlayer(uuid, Status.LAWFUL, 0);
             ShardScoreboardManager.add(player.getName(), statusPlayer.getStatus().getName());
             statusPlayer.save();
         }

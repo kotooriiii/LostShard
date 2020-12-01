@@ -57,7 +57,7 @@ public class TamingListener implements Listener {
                     return;
                 }
             }
-            addXP(breederPlayer, entity, 50);
+            addXP(breederPlayer, entity, 100);
         } else {
             breederPlayer.sendMessage(ERROR_COLOR + "You can not breed animals until Taming level 25.");
 
@@ -93,7 +93,7 @@ public class TamingListener implements Listener {
                 event.setCancelled(true);
                 return;
             } else {
-                addXP(player, entity);
+                addXP(player, entity, 50);
 
             }
 
@@ -289,7 +289,7 @@ public class TamingListener implements Listener {
 
         applyPokeball(shooter, livingEntity, egg, chance);
         shooter.setLevel(shooter.getLevel() - 30);
-        addXP(shooter, entity, 100);
+        addXP(shooter, entity, 150);
     }
 
     private void applyPokeball(Player shooter, LivingEntity entity, Egg egg, double chance) {
@@ -1164,7 +1164,7 @@ public class TamingListener implements Listener {
 
         }
 
-        return 10;
+        return 100;
     }
 
 }

@@ -4,15 +4,27 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 public enum Status {
+    LAWFUL("Lawful", ChatColor.BLUE), CRIMINAL("Criminal", ChatColor.GRAY), MURDERER("Murderer", ChatColor.RED),
     WORTHY("Worthy", ChatColor.BLUE), CORRUPT("Corrupt", ChatColor.GRAY), EXILED("Exiled", ChatColor.RED);
 
     private String name;
     private ChatColor chatColor;
 
-    private Status(String name, ChatColor chatColor)
-    {
+    private Status(String name, ChatColor chatColor) {
         this.name = name;
         this.chatColor = chatColor;
+    }
+
+    public static Status newStatuses(Status status) {
+        switch (status) {
+            case EXILED:
+                return MURDERER;
+            case CORRUPT:
+                return CRIMINAL;
+            case WORTHY:
+                return LAWFUL;
+        }
+        return status;
     }
 
     public String getName() {
@@ -23,26 +35,21 @@ public enum Status {
         return chatColor;
     }
 
-    public static Status matchStatus(String name)
-    {
-        for(Status status : Status.values())
-        {
-            if(status.getName().equals(name))
-            {
-               return status;
+    public static Status matchStatus(String name) {
+        for (Status status : Status.values()) {
+            if (status.getName().equals(name)) {
+                return status;
             }
         }
         return null;
     }
 
-    public String getOrganization()
-    {
-        switch (this.getName().toLowerCase())
-        {
-            case "worthy":
+    public String getOrganization() {
+        switch (this.getName().toLowerCase()) {
+            case "lawful":
                 return "Order";
-            case "corrupt":
-            case "exiled":
+            case "criminal":
+            case "murderer":
                 return "Chaos";
             default:
                 return "";

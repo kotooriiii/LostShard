@@ -15,6 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -81,8 +82,11 @@ public class RecallSpell extends Spell implements Listener {
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
+
+        if(event.isCancelled())
+            return;
         Entity entity = event.getEntity();
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;

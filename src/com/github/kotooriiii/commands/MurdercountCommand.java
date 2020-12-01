@@ -1,10 +1,7 @@
 package com.github.kotooriiii.commands;
 
-import com.github.kotooriiii.ranks.RankPlayer;
-import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
-import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -59,9 +56,9 @@ public class MurdercountCommand implements CommandExecutor {
 
                 if(killsNum < 5)
                 {
-                    statusPlayer.setStatus(Status.WORTHY);
+                    statusPlayer.setStatus(Status.LAWFUL);
                 } else {
-                    statusPlayer.setStatus(Status.EXILED);
+                    statusPlayer.setStatus(Status.MURDERER);
                 }
 
                 statusPlayer.setKills(killsNum);

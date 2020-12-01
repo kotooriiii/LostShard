@@ -1,22 +1,20 @@
 package com.github.kotooriiii.combatlog;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.npc.type.guard.GuardTrait;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
 import net.citizensnpcs.api.CitizensAPI;
-import net.minecraft.server.v1_15_R1.CommandGamemode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -38,16 +36,65 @@ public class CombatLogListener implements Listener {
 
     }
 
+    private boolean isGuard(Entity killer) {
+
+        return killer != null && killer instanceof Player
+                && CitizensAPI.getNPCRegistry().isNPC(killer) && CitizensAPI.getNPCRegistry().getNPC(killer).hasTrait(GuardTrait.class);
+    }
+
+    private boolean isLastDamageCauseFromGuard(Player playerDead) {
+        if (playerDead.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+            return isGuard(((EntityDamageByEntityEvent) playerDead.getLastDamageCause()).getDamager());
+        }
+
+        Bukkit.broadcastMessage("debug: " + playerDead.getLastDamageCause().getEventName());
+
+        return false;
+    }
+
+    public Entity getGuardKiller(Player playerDead)
+    {
+        if(isGuard(playerDead.getKiller()))
+            return playerDead.getKiller();
+
+        if(isLastDamageCauseFromGuard(playerDead))
+            return ((EntityDamageByEntityEvent) playerDead.getLastDamageCause()).getDamager();
+        return null;
+    }
+
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
 
-        Player player = event.getEntity();
-        CombatLogManager combatLogManager = LostShardPlugin.getCombatLogManager();
-        if (!combatLogManager.isTagged(player.getUniqueId()))
+        //is npc
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
-        CombatTaggedPlayer taggedPlayer = combatLogManager.wrap(player.getUniqueId());
+        Player player = event.getEntity();
+        CombatLogManager combatLogManager = LostShardPlugin.getCombatLogManager();
+        StatusPlayer sp = StatusPlayer.wrap(player.getUniqueId());
+        Player killer = event.getEntity().getKiller();
 
+
+        //if not tagged, its possible a guard was called or a guard just found him.
+        if (!combatLogManager.isTagged(player.getUniqueId())) {
+
+            if (isGuard(killer) || isLastDamageCauseFromGuard(event.getEntity())) {
+                Entity realKiller = getGuardKiller(event.getEntity());
+
+                GuardTrait guardTrait = CitizensAPI.getNPCRegistry().getNPC(realKiller).getTrait(GuardTrait.class);
+                if (guardTrait.getOwner() == null) {
+                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred" + ChatColor.WHITE + ".");
+                } else {
+                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred " + ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
+                }
+            }
+            LostShardPlugin.getCombatLogManager().remove(player.getUniqueId());
+            return;
+        }
+
+        //Organize tagged players and ADD the killer
+        CombatTaggedPlayer taggedPlayer = combatLogManager.wrap(player.getUniqueId());
 
         Set<OfflinePlayer> attackersSet = new LinkedHashSet<>();
         OfflinePlayer[] attackers = taggedPlayer.getAttackers();
@@ -56,8 +103,24 @@ public class CombatLogListener implements Listener {
             attackersSet.add(offlinePlayer);
         }
 
-        Player killer = event.getEntity().getKiller();
-        if(killer != null) {
+
+        //What if the killer was the guard?
+        if (isGuard(killer) || isLastDamageCauseFromGuard(event.getEntity())) {
+
+            Entity realKiller = getGuardKiller(event.getEntity());
+
+            GuardTrait guardTrait = CitizensAPI.getNPCRegistry().getNPC(realKiller).getTrait(GuardTrait.class);
+            if (guardTrait.getOwner() == null) {
+                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred" + ChatColor.WHITE + ".");
+            } else {
+                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred " + ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
+            }
+            LostShardPlugin.getCombatLogManager().remove(player.getUniqueId());
+            return;
+        }
+
+
+        if (killer != null) {
             attackersSet.add(Bukkit.getOfflinePlayer(killer.getUniqueId()));
         }
 
@@ -73,9 +136,9 @@ public class CombatLogListener implements Listener {
         int counter = 0;
         for (int i = attackers.length - 1; i >= 0; i--) {
             OfflinePlayer offlinePlayer = attackers[i];
-            if(offlinePlayer == null || (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()))
+            if (offlinePlayer == null || (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()))
                 continue;
-            StatusPlayer statusPlayer =  StatusPlayer.wrap(offlinePlayer.getUniqueId());
+            StatusPlayer statusPlayer = StatusPlayer.wrap(offlinePlayer.getUniqueId());
             Status status = statusPlayer.getStatus();
             ChatColor color = status.getChatColor();
             if (counter == 3) {
@@ -89,11 +152,10 @@ public class CombatLogListener implements Listener {
                 //Not last
                 message += ChatColor.WHITE + ", " + color + offlinePlayer.getName();
 
-            } else if (i==0){
+            } else if (i == 0) {
                 //On the last element
-                if(attackers.length == 2)
-                {
-                    message += ChatColor.WHITE + " and " + color + offlinePlayer.getName() ;
+                if (attackers.length == 2) {
+                    message += ChatColor.WHITE + " and " + color + offlinePlayer.getName();
 
                 } else {
                     message += ChatColor.WHITE + ", and " + color + offlinePlayer.getName();
@@ -118,7 +180,7 @@ public class CombatLogListener implements Listener {
 
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(defender) || CitizensAPI.getNPCRegistry().isNPC(damager))
+        if (CitizensAPI.getNPCRegistry().isNPC(defender) || CitizensAPI.getNPCRegistry().isNPC(damager))
             return;
 
         if (!isPlayerInduced(defender, damager))

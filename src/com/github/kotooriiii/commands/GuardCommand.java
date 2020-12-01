@@ -57,8 +57,8 @@ public class GuardCommand implements CommandExecutor {
 
 
                     StatusPlayer statusPlayer = StatusPlayer.wrap(playerUUID);
-                    if (!statusPlayer.getStatus().equals(Status.WORTHY)) {
-                        playerSender.sendMessage(ERROR_COLOR + "You must be a Worthy player to call a guard.");
+                    if (!statusPlayer.getStatus().equals(Status.LAWFUL)) {
+                        playerSender.sendMessage(ERROR_COLOR + "You must be a Lawful player to call a guard.");
                         return true;
                     }
 
@@ -77,6 +77,7 @@ public class GuardCommand implements CommandExecutor {
 
                     guardTrait.setCalled(true);
                     guardTrait.setOwner(playerUUID);
+                    guardTrait.setCachedOwnerName(playerSender.getName());
                     guardNPC.teleport(playerLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
 
                     new BukkitRunnable() {
@@ -114,6 +115,7 @@ public class GuardCommand implements CommandExecutor {
                                 guardNPC.teleport(guardTrait.getGuardingLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
                                 guardTrait.setCalled(false);
                                 guardTrait.setOwner(null);
+                                guardTrait.setCachedOwnerName("");
                             }
                         }
 

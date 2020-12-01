@@ -309,7 +309,7 @@ public abstract class Spell {
         }
 
         //if a player is in creative, don't check other stuff.
-        if(player.getGameMode() == GameMode.CREATIVE) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return true;
         }
 
@@ -365,21 +365,47 @@ public abstract class Spell {
         SpellCastEvent spellCastEvent = new SpellCastEvent(player, this);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(spellCastEvent);
 
-        if(spellCastEvent.isCancelled())
+        if (spellCastEvent.isCancelled())
             return false;
 
         if (!hasCastingRequirements(player))
             return false;
 
-        // Run the wand action
-        localBroadcast(player, this.getLatin());
+        switch (this.getType())
+        {
 
-        if (!executeSpell(player))
-            return false;
+            case FIREBALL:
+            case HEAL:
+            case ICE:
+            case LIGHTNING:
+            case WEB_FIELD:
+            case CLONE:
+            case CLANTP:
+            case MARK:
+            case PERMANENT_GATE_TRAVEL:
+            case CHRONOPORT:
+            case RECALL:
+            default:
+
+                localBroadcast(player, this.getLatin());
+
+                if (!executeSpell(player))
+                    return false;
+                break;
+            case TELEPORT:
+
+                if (!executeSpell(player))
+                    return false;
+                localBroadcast(player, this.getLatin());
+
+                break;
+        }
+
 
         Stat stat = Stat.wrap(player.getUniqueId());
         stat.setMana(stat.getMana() - this.getManaCost());
-        removeIngredients(player);
+        if (player.getGameMode() != GameMode.CREATIVE)
+            removeIngredients(player);
         updateCooldown(player);
         return true;
     }
