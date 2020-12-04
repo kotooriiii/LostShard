@@ -58,7 +58,8 @@ public class TipsManager {
                         "Every Hostility capture rewards you. Type: '/host' to view the upcoming and active matches.",
                         "Need to reduce skill points? Type: /skill reduce <skill name> <amount to subtract>.",
                         "This server has a YOUTUBE channel! https://www.youtube.com/channel/UCE0EW5M4FXWo79aiJ3TDfhQ/videos",
-                        "Need help? Check this out: https://docs.google.com/document/d/1UfFwn_xJrgPkjKC9Bs7OAFAG22IDhPg4wmk7cZtsv9c"
+                        "Need help? Check this out: https://docs.google.com/document/d/1UfFwn_xJrgPkjKC9Bs7OAFAG22IDhPg4wmk7cZtsv9c",
+                        "Vote for the server for gold & diamonds! /vote"
                 };
     }
 

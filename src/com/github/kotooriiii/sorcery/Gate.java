@@ -116,7 +116,7 @@ public class Gate {
         handle.setTypeAndData(bp, ibd, applyPhysics ? 3 : 2);
     }
 
-    public static void setBlockInNativeWorld(World world, int x, int y, int z, Material type,  boolean applyPhysics) {
+    public static void setBlockInNativeWorld(World world, int x, int y, int z, Material type, boolean applyPhysics) {
         final WorldServer handle = ((CraftWorld) world).getHandle();
         BlockPosition bp = new BlockPosition(x, y, z);
         IBlockData ibd = ((CraftBlockData) Bukkit.createBlockData(type)).getState();
@@ -127,20 +127,44 @@ public class Gate {
 
     public void destroy() {
         Block fromFeet = from.getBlock();
-        if (fromFeet.getType() == Material.NETHER_PORTAL)
-            setBlockInNativeWorld(fromFeet.getWorld(), fromFeet.getLocation().getBlockX(), fromFeet.getLocation().getBlockY(), fromFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+
+        final float OFFSET = 0.5f;
+        final int AMOUNT = 60;
+        final Particle PARTICLE = Particle.DRAGON_BREATH;
+        final int VOLUME = 6;
+        final float PITCH = 1.5f;
+
+
+        if (fromFeet.getType() == Material.NETHER_PORTAL) {
+            //setBlockInNativeWorld(fromFeet.getWorld(), fromFeet.getLocation().getBlockX(), fromFeet.getLocation().getBlockY(), fromFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+            fromFeet.breakNaturally();
+            fromFeet.getWorld().playSound(fromFeet.getLocation(), Sound.BLOCK_GLASS_BREAK, VOLUME, PITCH);
+            fromFeet.getWorld().spawnParticle(PARTICLE, fromFeet.getLocation(), AMOUNT, OFFSET, OFFSET, OFFSET);
+        }
 
         Block fromHead = fromFeet.getRelative(BlockFace.UP);
-        if (fromHead.getType() == Material.NETHER_PORTAL)
-            setBlockInNativeWorld(fromHead.getWorld(), fromHead.getLocation().getBlockX(), fromHead.getLocation().getBlockY(), fromHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+        if (fromHead.getType() == Material.NETHER_PORTAL) {
+            //   setBlockInNativeWorld(fromHead.getWorld(), fromHead.getLocation().getBlockX(), fromHead.getLocation().getBlockY(), fromHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+            fromHead.breakNaturally();
+            fromHead.getWorld().playSound(fromHead.getLocation(), Sound.BLOCK_GLASS_BREAK, VOLUME, PITCH);
+            fromHead.getWorld().spawnParticle(PARTICLE, fromHead.getLocation(),  AMOUNT, OFFSET, OFFSET, OFFSET);
+        }
 
         Block toFeet = to.getBlock();
-        if (toFeet.getType() == Material.NETHER_PORTAL)
-            setBlockInNativeWorld(toFeet.getWorld(), toFeet.getLocation().getBlockX(), toFeet.getLocation().getBlockY(), toFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+        if (toFeet.getType() == Material.NETHER_PORTAL) {
+            //   setBlockInNativeWorld(toFeet.getWorld(), toFeet.getLocation().getBlockX(), toFeet.getLocation().getBlockY(), toFeet.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+            toFeet.breakNaturally();
+            toFeet.getWorld().playSound(toFeet.getLocation(), Sound.BLOCK_GLASS_BREAK, VOLUME, PITCH);
+            toFeet.getWorld().spawnParticle(PARTICLE, toFeet.getLocation(),  AMOUNT, OFFSET, OFFSET, OFFSET);
+        }
 
         Block toHead = toFeet.getRelative(BlockFace.UP);
-        if (toHead.getType() == Material.NETHER_PORTAL)
-            setBlockInNativeWorld(toHead.getWorld(), toHead.getLocation().getBlockX(), toHead.getLocation().getBlockY(), toHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+        if (toHead.getType() == Material.NETHER_PORTAL) {
+         //   setBlockInNativeWorld(toHead.getWorld(), toHead.getLocation().getBlockX(), toHead.getLocation().getBlockY(), toHead.getLocation().getBlockZ(), 0, (byte) 0, Material.AIR.hasGravity());
+            toHead.breakNaturally();
+            toHead.getWorld().playSound(toHead.getLocation(), Sound.BLOCK_GLASS_BREAK, VOLUME, PITCH);
+            toHead.getWorld().spawnParticle(PARTICLE, toHead.getLocation(),  AMOUNT, OFFSET, OFFSET, OFFSET);
+        }
     }
 
     @Override

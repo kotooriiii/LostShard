@@ -1,6 +1,7 @@
 package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.Bukkit;
@@ -8,6 +9,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -45,7 +48,7 @@ public class LightningSpell extends Spell {
 
         // Get target block (last block in line of sight)
         Location lightningLocation = lineOfSightLightning.get(lineOfSightLightning.size() - 1).getLocation();
-        player.getWorld().strikeLightning(lightningLocation);
+        player.getLocation().getWorld().strikeLightningEffect(lightningLocation);
         callPlayerEvent(player, lightningLocation);
         return true;
     }
@@ -100,10 +103,18 @@ public class LightningSpell extends Spell {
 
 
     private void callPlayerEvent(Player attacker, Location location) {
-        for (Player defender : Bukkit.getOnlinePlayers()) {
-            if (defender.getLocation().getBlock().equals(location.getBlock()))
-                Bukkit.getPluginManager().callEvent(new EntityDamageByEntityEvent(attacker
-                        , defender, EntityDamageEvent.DamageCause.CUSTOM, 7));
+        Clan clan =LostShardPlugin.getClanManager().getClan(attacker.getUniqueId());
+
+        for (Entity entity : attacker.getLocation().getWorld().getNearbyEntities(location, 2, 2, 2)) {
+            if (!(entity instanceof LivingEntity))
+                continue;
+            if (attacker.equals(entity))
+                continue;
+            if(clan != null && entity instanceof  Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
+                continue;
+
+            LivingEntity livingEntity = (LivingEntity) entity;
+            livingEntity.damage(3.0f, attacker);
         }
     }
 }

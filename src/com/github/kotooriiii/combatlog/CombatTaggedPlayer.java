@@ -28,6 +28,8 @@ public class CombatTaggedPlayer {
     public OfflinePlayer[] getAttackers() {
         ArrayList<OfflinePlayer> attackersOffline = new ArrayList();
         for (UUID uuid : attackersUUIDSet) {
+            if (uuid == null)
+                continue;
             attackersOffline.add(Bukkit.getOfflinePlayer(uuid));
         }
 

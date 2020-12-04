@@ -17,9 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.activeHostilityGames;
@@ -27,6 +25,12 @@ import static com.github.kotooriiii.data.Maps.activeHostilityGames;
 public class IceSpell extends Spell {
 
     private static HashMap<UUID, Double> iceSpellCooldownMap = new HashMap<UUID, Double>();
+
+    private static HashMap<UUID, HashSet<Location>> uuidBlockPlacedMap = new HashMap<>();
+
+    public static HashMap<UUID, HashSet<Location>> getUuidBlockPlacedMap() {
+        return uuidBlockPlacedMap;
+    }
 
     public IceSpell() {
         super(SpellType.ICE,
@@ -46,7 +50,12 @@ public class IceSpell extends Spell {
         List<Block> lineOfSightBlocks = player.getLineOfSight(null, rangeIce);
 
         // Get target block (last block in line of sight)
-        final Location centerBlock = lineOfSightBlocks.get(lineOfSightBlocks.size() - 1).getLocation();
+        Location centerBlock = lineOfSightBlocks.get(lineOfSightBlocks.size() - 1).getLocation();
+        centerBlock.setX(centerBlock.getBlockX());
+        centerBlock.setY(centerBlock.getBlockY());
+        centerBlock.setZ(centerBlock.getBlockZ());
+        centerBlock.setPitch(0);
+        centerBlock.setYaw(0);
         //Should make it unable to spawn in the air
         if (centerBlock.getBlock().isEmpty()) {
             player.sendMessage(ERROR_COLOR + "Invalid target.");
@@ -61,21 +70,20 @@ public class IceSpell extends Spell {
             player.sendMessage(ERROR_COLOR + "You can not cast Ice Ball on hostility platforms.");
             return false;
         }
-        setIceShape(centerBlock, Material.SNOW_BLOCK, block -> block.isEmpty() || block.getType() == Material.LEGACY_LONG_GRASS);
+        setIceShape(player.getUniqueId(), centerBlock, Material.SNOW_BLOCK, block -> block.isEmpty() || block.getType() == Material.LEGACY_LONG_GRASS);
 
         // This runnable will remove the player from cooldown list after a given time
         new BukkitRunnable() {
             @Override
             public void run() {
-                setIceShape(centerBlock, Material.AIR, block -> block.getType() == Material.SNOW_BLOCK);
+                setIceShape(player.getUniqueId(), centerBlock, Material.AIR, block -> block.getType() == Material.SNOW_BLOCK);
             }
         }.runTaskLater(LostShardPlugin.plugin, 20 * despawnDelayIce);
         return true;
     }
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         iceSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -98,6 +106,7 @@ public class IceSpell extends Spell {
         };
         runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
+
     public boolean isCooldown(Player player) {
         if (iceSpellCooldownMap.containsKey(player.getUniqueId())) {
 
@@ -167,7 +176,9 @@ public class IceSpell extends Spell {
         return true;
     }
 
-    private void setIceShape(Location centerBlock, Material material, Function<Block, Boolean> shouldReplace) {
+    private void setIceShape(UUID uuid, Location centerBlock, Material material, Function<Block, Boolean> shouldReplace) {
+
+        HashSet<Location> set = new HashSet<>();
 
         //Layer 0 and 2
         Location bottomLeft = centerBlock.clone().add(-1, 0, -1);
@@ -177,12 +188,16 @@ public class IceSpell extends Spell {
                     Boolean shouldReplaceBlock = shouldReplace.apply(bottomLeft.getBlock());
                     Boolean isEdge = (x == 0 && z == 0) || (x == 0 && z == 2) || (x == 2 && z == 0) || (x == 2 && z == 2);
 
-                    if (shouldReplaceBlock && !isEdge)
+                    if (shouldReplaceBlock && !isEdge) {
                         bottomLeft.getBlock().setType(material);
-                    bottomLeft.add(0, 0, 1);
+                        if (material != Material.AIR) {
+                            set.add(bottomLeft);
+                        }
+                    }
+                    bottomLeft = bottomLeft.clone().add(0, 0, 1);
 
                 }
-                bottomLeft.add(1, 0, -3);
+                bottomLeft = bottomLeft.clone().add(1, 0, -3);
             }
             bottomLeft = centerBlock.clone().add(-1, 2, -1);
         }
@@ -193,14 +208,23 @@ public class IceSpell extends Spell {
             for (int z = 0; z < 3; z++) {
                 Boolean shouldReplaceBlock = shouldReplace.apply(bottomLeft.getBlock());
 
-                if (shouldReplaceBlock)
+                if (shouldReplaceBlock) {
                     bottomLeft.getBlock().setType(material);
-                bottomLeft.add(0, 0, 1);
+                    if (material != Material.AIR) {
+                        set.add(bottomLeft);
+                    }
+                }
+                bottomLeft = bottomLeft.clone().add(0, 0, 1);
 
             }
-            bottomLeft.add(1, 0, -3);
+           bottomLeft = bottomLeft.clone().add(1, 0, -3);
         }
 
+        if (material == Material.AIR) {
+            uuidBlockPlacedMap.remove(uuid, set);
+        } else {
+            uuidBlockPlacedMap.put(uuid, set);
+        }
 
     }
 

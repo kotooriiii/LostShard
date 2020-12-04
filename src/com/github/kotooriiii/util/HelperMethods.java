@@ -121,7 +121,7 @@ public final class HelperMethods {
         }
     }
 
-    public static Set getLookingSet() {
+    public static Set<Material> getLookingSet() {
         return set;
     }
 

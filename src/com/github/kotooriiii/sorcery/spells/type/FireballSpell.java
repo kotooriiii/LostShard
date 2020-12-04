@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.platforms;
 
 public class FireballSpell extends Spell {
 
@@ -50,8 +51,9 @@ public class FireballSpell extends Spell {
         if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_AIR)
             return;
         RayTraceResult res = event.getPlayer().getWorld().rayTraceEntities(event.getPlayer().getEyeLocation(), event.getPlayer().getLocation().getDirection(), 5, entity -> entity.getType() == EntityType.FIREBALL);
-        if (res == null)
+        if (res == null) {
             return;
+        }
         Entity entity = res.getHitEntity();
         if (entity == null || entity.getType() != EntityType.FIREBALL)
             return;

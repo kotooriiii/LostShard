@@ -10,18 +10,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
 import static com.github.kotooriiii.util.HelperMethods.isPlayerInduced;
 
@@ -36,6 +40,25 @@ public class CombatLogListener implements Listener {
 
     }
 
+    @EventHandler
+    public void throwEnderpearl(ProjectileLaunchEvent event)
+    {
+        Entity entityLaunched = event.getEntity();
+        if(entityLaunched == null || !(entityLaunched instanceof Projectile) || entityLaunched.getType() != EntityType.ENDER_PEARL)
+            return;
+        Projectile projectile = (Projectile) entityLaunched;
+        if(projectile.getShooter() == null || !(projectile.getShooter() instanceof Player))
+            return;
+
+        Player shooterPlayer = (Player) projectile.getShooter();
+
+        if(!LostShardPlugin.getCombatLogManager().isTagged(shooterPlayer.getUniqueId()))
+            return;
+
+        shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled while in combat.");
+        event.setCancelled(true);
+    }
+
     private boolean isGuard(Entity killer) {
 
         return killer != null && killer instanceof Player
@@ -46,8 +69,6 @@ public class CombatLogListener implements Listener {
         if (playerDead.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
             return isGuard(((EntityDamageByEntityEvent) playerDead.getLastDamageCause()).getDamager());
         }
-
-        Bukkit.broadcastMessage("debug: " + playerDead.getLastDamageCause().getEventName());
 
         return false;
     }
@@ -190,13 +211,14 @@ public class CombatLogListener implements Listener {
         Player damagerPlayer = getPlayerInduced(defender, damager);
         Player defenderPlayer = (Player) defender;
 
+        if(damagerPlayer.equals(defenderPlayer))
+            return;
+
         //
         //The code for each skill will follow on the bottom
         //
 
         LostShardPlugin.getCombatLogManager().add(damagerPlayer.getUniqueId(), defender.getUniqueId());
         LostShardPlugin.getCombatLogManager().add(defenderPlayer.getUniqueId(), damager.getUniqueId());
-
-
     }
 }

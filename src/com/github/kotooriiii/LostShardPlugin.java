@@ -85,6 +85,8 @@ import com.github.kotooriiii.tutorial.TutorialManager;
 import com.github.kotooriiii.util.HelperMethods;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
+import fr.neatmonster.nocheatplus.NoCheatPlus;
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.luckperms.api.LuckPerms;
@@ -689,6 +691,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new PlayerConnectServerEvent(), this);
         pm.registerEvents(new DisableEnchantedGoldenAppleListener(), this);
+
+        pm.registerEvents(new IceBallSuffocationListener(), this);
 
         registerCustomEventListener();
 

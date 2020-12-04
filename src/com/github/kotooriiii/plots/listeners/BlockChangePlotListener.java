@@ -268,6 +268,7 @@ public class BlockChangePlotListener implements Listener {
         if (block == null)
             return;
 
+
               /*
         So far it's a LEFT CLICK event
         It's a block event

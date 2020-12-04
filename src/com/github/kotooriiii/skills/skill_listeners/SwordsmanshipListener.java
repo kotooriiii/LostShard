@@ -251,10 +251,6 @@ public class SwordsmanshipListener implements Listener {
 
         boolean isCrit = isCrit(damager);
 
-        if (isCrit) {
-            damage*=1.25f;
-        }
-
         damage -= 4;
 
         if(damager.getInventory().getItemInMainHand().getType() != Material.GOLDEN_SWORD)
@@ -281,7 +277,7 @@ public class SwordsmanshipListener implements Listener {
 
 
         if(isCrit)
-            damage*=1.5f;
+            damage*=1.3f;
 
         double sharpnessLevel = damager.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.DAMAGE_ALL);
         double sharpnessDamage = 0.5 * sharpnessLevel + 0.5;

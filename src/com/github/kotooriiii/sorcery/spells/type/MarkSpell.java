@@ -2,18 +2,21 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.sorcery.events.MarkCreateEvent;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,30 +31,99 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class MarkSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Double> markSpellCooldownMap = new HashMap<>();
+    private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
+
 
     public MarkSpell() {
-        super(SpellType.MARK, ChatColor.DARK_PURPLE,  new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},  2.0f , 15, true,  true, false);
+        super(SpellType.MARK, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 15, true, true, false);
     }
 
     @EventHandler
-    public void onChatArg(ShardChatEvent event)
-    {
+    public void onChatArg(ShardChatEvent event) {
         Player player = event.getPlayer();
         SpellType type = waitingForArgumentMap.get(player.getUniqueId());
-        if(type == null)
+        if (type == null)
             return;
-        if(!type.equals(getType()))
+        if (!type.equals(getType()))
             return;
 
         waitingForArgumentMap.remove(player.getUniqueId());
-        mark(player, event.getMessage());
+        receiveArgument(event.getPlayer(), event.getMessage());
         event.setCancelled(true);
 
     }
 
+    /**
+     * recalls a player to a mark
+     */
+    private void receiveArgument(Player playerSender, String message) {
+        if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
+            return;
+
+        Location markLocation = playerSender.getLocation();
+
+        if (!hasMarkRequirements(playerSender, message)) {
+            refund(playerSender);
+            return;
+        }
+
+        //success
+        mark(playerSender, message, markLocation);
+    }
+
+    @EventHandler
+    public void onWaitToRecall(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+
+        //not casting spell
+        if (!waitingToRecallMap.containsKey(player.getUniqueId()))
+            return;
+
+
+        int fX = event.getFrom().getBlockX();
+        int fY = event.getFrom().getBlockY();
+        int fZ = event.getFrom().getBlockZ();
+
+        int tX = event.getTo().getBlockX();
+        int tY = event.getTo().getBlockY();
+        int tZ = event.getTo().getBlockZ();
+
+        if (fX == tX && fY == tY && fZ == tZ)
+            return;
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
+        refund(player);
+        waitingToRecallMap.remove(player.getUniqueId());
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onWaitToRecall(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+
+        if (!(entity instanceof Player))
+            return;
+        Player player = (Player) entity;
+
+
+        //not casting spell
+        if (!waitingToRecallMap.containsKey(player.getUniqueId()))
+            return;
+
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
+        refund(player);
+        waitingToRecallMap.remove(player.getUniqueId());
+    }
+
+
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         markSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -101,50 +173,92 @@ public class MarkSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.AQUA +  "What would you like to name your Mark?");
+        player.sendMessage(ChatColor.AQUA + "What would you like to name your Mark?");
         return true;
     }
 
     /**
      * teleports player to clan member
      */
-    private void mark(Player playerSender, String message) {
-        if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
-            return;
+    private void mark(Player player, String message, Location markLocation) {
 
-        Location markLocation = playerSender.getLocation();
+        final int WAITING_TO_RECALL_PERIOD = 3;
+        player.sendMessage(ChatColor.GOLD + "You begin to cast mark...");
+        waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
 
-        if (!hasMarkRequirements(playerSender, message))
-            return;
+        new BukkitRunnable() {
+            int counter = WAITING_TO_RECALL_PERIOD;
 
+            @Override
+            public void run() {
+
+
+                if (!waitingToRecallMap.containsKey(player.getUniqueId())) {
+                    this.cancel();
+                    return;
+                }
+
+
+                if (counter == 0) {
+                    this.cancel();
+                    waitingToRecallMap.remove(player.getUniqueId());
+
+                    if (!(HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()) && HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()))) {
+                        player.sendMessage(ERROR_COLOR + "You cannot create a mark in an obstructed location. Find a more open area!");
+                        refund(player);
+                        return;
+                    }
+
+
+                    if (!postCast(player, markLocation, message)) {
+                        if (player.isOnline())
+                            refund(player);
+
+                    }
+                    return;
+                }
+
+                counter--;
+                waitingToRecallMap.put(player.getUniqueId(), counter);
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
         //success
-        postCast(playerSender, markLocation, message);
     }
 
 
     /**
      * after the successful tp
+     *
      * @return
      */
-    private void postCast(Player playerSender, Location location, String name)
-    {
+    private boolean postCast(Player playerSender, Location location, String name) {
+
+        if (!playerSender.isOnline())
+            return false;
+
+        if (isLapisNearby(location, DEFAULT_LAPIS_NEARBY)) {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
+            return false;
+        }
+
         MarkCreateEvent event = new MarkCreateEvent(playerSender, location, name);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
         //message
         playerSender.sendMessage(ChatColor.GOLD + "You have created a mark called \"" + name + "\".");
         //add mark
         MarkPlayer.wrap(playerSender.getUniqueId()).addMark(name, location);
+        return true;
 
     }
 
 
     /**
      * checks if you are able to create a mark with said name
+     *
      * @param playerSender
      * @return
      */
-    private boolean hasMarkRequirements(Player playerSender, String name)
-    {
+    private boolean hasMarkRequirements(Player playerSender, String name) {
         UUID playerUUID = playerSender.getUniqueId();
 
         MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
@@ -162,8 +276,7 @@ public class MarkSpell extends Spell implements Listener {
             return false;
         }
 
-        if(markPlayer.isPremadeMark(name))
-        {
+        if (markPlayer.isPremadeMark(name)) {
             playerSender.sendMessage(ERROR_COLOR + "You cannot name your mark \"" + name + "\". This is a server-made mark for your use.");
             return false;
         }

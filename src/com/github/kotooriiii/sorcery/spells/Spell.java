@@ -35,6 +35,8 @@ public abstract class Spell {
     protected final static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
     protected final static HashMap<UUID, SpellType> waitingForArgumentMap = new HashMap<>();
 
+    protected static final int DEFAULT_LAPIS_NEARBY = 5;
+
     public static HashMap<UUID, SpellType> getWaitingForArgumentMap() {
         return waitingForArgumentMap;
     }
@@ -128,6 +130,10 @@ public abstract class Spell {
 
         }
         return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static int getDefaultLapisNearbyValue() {
+        return DEFAULT_LAPIS_NEARBY;
     }
 
 
@@ -318,7 +324,7 @@ public abstract class Spell {
             return false;
         }
 
-        if (this.isLapisNearby(player.getLocation(), 5)) {
+        if (this.isLapisNearby(player.getLocation(), DEFAULT_LAPIS_NEARBY)) {
             player.sendMessage(ERROR_COLOR + "You cannot seem to cast a spell here...");
             return false;
         }
@@ -360,6 +366,10 @@ public abstract class Spell {
 
     public abstract void updateCooldown(Player player);
 
+    public final void refund(Player player) {
+        player.getInventory().addItem(this.getIngredients());
+    }
+
     public boolean cast(Player player) {
 
         SpellCastEvent spellCastEvent = new SpellCastEvent(player, this);
@@ -371,8 +381,7 @@ public abstract class Spell {
         if (!hasCastingRequirements(player))
             return false;
 
-        switch (this.getType())
-        {
+        switch (this.getType()) {
 
             case FIREBALL:
             case HEAL:

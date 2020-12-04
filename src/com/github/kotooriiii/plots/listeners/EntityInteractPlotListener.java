@@ -16,8 +16,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import sun.text.resources.cldr.ka.FormatData_ka;
 
 import java.util.UUID;
 
@@ -95,6 +97,8 @@ public class EntityInteractPlotListener implements Listener {
         final UUID playerUUID = playerInteracting.getUniqueId();
 
         if(playerInteracting.hasPermission(STAFF_PERMISSION))
+            return;
+        if(!block.getType().isInteractable() && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
             return;
 
         if(block.getState() instanceof Container)

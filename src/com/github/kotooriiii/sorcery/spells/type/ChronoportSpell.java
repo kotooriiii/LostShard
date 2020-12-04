@@ -101,6 +101,13 @@ public class ChronoportSpell extends Spell implements Listener {
                     return;
                 }
 
+                if(isLapisNearby(location, DEFAULT_LAPIS_NEARBY))
+                {
+                    player.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
+                    refund(player);
+                    return;
+                }
+
                 player.teleport(location);
 
             }

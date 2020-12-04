@@ -3,7 +3,6 @@ package com.github.kotooriiii.sorcery.spells.type;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
@@ -14,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -35,12 +35,11 @@ public class ClanTPSpell extends Spell implements Listener {
 
 
     public ClanTPSpell() {
-        super(SpellType.CLANTP, ChatColor.GREEN,  new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f , 15, true,  true, false);
+        super(SpellType.CLANTP, ChatColor.GREEN, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
     }
 
     @EventHandler
-    public void onChatArg(ShardChatEvent event)
-    {
+    public void onChatArg(ShardChatEvent event) {
         Player player = event.getPlayer();
 
         SpellType type = waitingForArgumentMap.get(player.getUniqueId());
@@ -78,19 +77,19 @@ public class ClanTPSpell extends Spell implements Listener {
         //Is casting a spell and moved a block
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
+        refund(player);
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
-        if(!(entity instanceof Player))
+        if (!(entity instanceof Player))
             return;
         Player player = (Player) entity;
-
 
 
         //not casting spell
@@ -101,13 +100,13 @@ public class ClanTPSpell extends Spell implements Listener {
         //Is casting a spell and moved a block
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
+        refund(player);
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         clanTpSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -163,17 +162,25 @@ public class ClanTPSpell extends Spell implements Listener {
 
     /**
      * after the successful tp
+     *
      * @return
      */
-    private void postCast(Player playerSender, UUID clanMemberPlayerUUID, String justInCaseNameTheyLogOut)
-    {
+    private boolean postCast(Player playerSender, UUID clanMemberPlayerUUID, String justInCaseNameTheyLogOut) {
 
         Player clanMemberPlayer = Bukkit.getPlayer(clanMemberPlayerUUID);
 
-        if(clanMemberPlayer == null || !clanMemberPlayer.isOnline())
-        {
+        if (!playerSender.isOnline())
+            return false;
+
+        if (clanMemberPlayer == null || !clanMemberPlayer.isOnline()) {
             playerSender.sendMessage(ERROR_COLOR + "Player has logged out, can not clan teleport to " + justInCaseNameTheyLogOut);
-            return;
+            return false;
+        }
+
+        if(isLapisNearby(clanMemberPlayer.getLocation(), DEFAULT_LAPIS_NEARBY))
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
+            return false;
         }
 
         playerSender.teleport(clanMemberPlayer.getLocation());
@@ -182,6 +189,7 @@ public class ClanTPSpell extends Spell implements Listener {
         Stat stat = Stat.wrap(playerSender.getUniqueId());
         stat.setMana(0);
         stat.setStamina(0);
+        return true;
 
     }
 
@@ -192,8 +200,10 @@ public class ClanTPSpell extends Spell implements Listener {
         if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
             return;
 
-        if (!hasClanTPRequirements(playerSender, message))
+        if (!hasClanTPRequirements(playerSender, message)) {
+            refund(playerSender);
             return;
+        }
 
         Player clanMemberPlayer = Bukkit.getPlayer(message);
 
@@ -227,7 +237,10 @@ public class ClanTPSpell extends Spell implements Listener {
                 if (counter == 0) {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
-                    postCast(player, clanMemberPlayer.getUniqueId(), clanMemberPlayer.getName());
+                    if (!postCast(player, clanMemberPlayer.getUniqueId(), clanMemberPlayer.getName()))
+                        if (player.isOnline())
+                            refund(player);
+
                     return;
                 }
 
@@ -240,6 +253,7 @@ public class ClanTPSpell extends Spell implements Listener {
 
     /**
      * checks if you are able to teleport to this supposed player
+     *
      * @param playerSender
      * @return
      */
@@ -267,8 +281,7 @@ public class ClanTPSpell extends Spell implements Listener {
             return false;
         }
 
-        if(Stat.wrap(clanMemberPlayer.getUniqueId()).isPrivate())
-        {
+        if (Stat.wrap(clanMemberPlayer.getUniqueId()).isPrivate()) {
             playerSender.sendMessage(ChatColor.GOLD + "Can't teleport to that player, they are set to private");
             return false;
         }

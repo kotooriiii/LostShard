@@ -47,6 +47,7 @@ public class TeleportSpell extends Spell {
             player.sendMessage(ERROR_COLOR + "You need more room to cast this spell!");
             return false;
         }
+
         if (!isAcceptableBlock(getBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
             player.sendMessage(ERROR_COLOR + "Invalid target.");
             return false;
@@ -54,7 +55,15 @@ public class TeleportSpell extends Spell {
             teleportLocation.add(0, -1, 0);
         }
 
-        player.teleport(new Location(teleportLocation.getWorld(), teleportLocation.getBlockX() + 0.5, teleportLocation.getBlockY(), teleportLocation.getBlockZ() + 0.5, player.getLocation().getYaw(), player.getLocation().getPitch()));
+        final Location finalTeleportLocation = new Location(teleportLocation.getWorld(), teleportLocation.getBlockX() + 0.5, teleportLocation.getBlockY(), teleportLocation.getBlockZ() + 0.5, player.getLocation().getYaw(), player.getLocation().getPitch());
+
+        if(isLapisNearby(finalTeleportLocation, DEFAULT_LAPIS_NEARBY))
+        {
+            player.sendMessage(ERROR_COLOR + "You cannot seem to cast " + getName() + " here...");
+            return false;
+        }
+
+        player.teleport(finalTeleportLocation);
         return true;
     }
 

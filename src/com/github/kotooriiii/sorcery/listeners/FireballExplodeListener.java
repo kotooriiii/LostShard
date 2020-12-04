@@ -1,30 +1,31 @@
 package com.github.kotooriiii.sorcery.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.status.StatusUpdateListener;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-
-import java.awt.*;
 
 public class FireballExplodeListener implements Listener {
 
 
     private void explode(Fireball fireball) {
         Location location = fireball.getLocation();
-        final int RADIUS = 2;
+        final int RADIUS = 5;
         final int DAMAGE = 10;
 
         Player shooter = (Player) fireball.getShooter();
 
 
-        damage(location, DAMAGE, RADIUS);
+        damage(location, shooter, DAMAGE, RADIUS);
 
         if (LostShardPlugin.getPlotManager().isStandingOnPlot(location)) {
             Plot standingPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
@@ -41,7 +42,8 @@ public class FireballExplodeListener implements Listener {
 
         }
 
-        destroy(shooter, location, 2);;
+        destroy(shooter, location, 2);
+        ;
     }
 
     private void destroy(Player shooter, Location location, int RADIUS) {
@@ -74,25 +76,35 @@ public class FireballExplodeListener implements Listener {
                     }
 
 
-
                     if (block.getType() == Material.AIR)
                         continue yloop;
 
                     double random = Math.random();
-                    if (random < chance)
-                        block.setType(Material.FIRE);
+                    if (random < chance) {
+                        if (block.getType() != Material.BEDROCK)
+                            block.setType(Material.FIRE);
+                    }
                 }
             }
         }
     }
 
-    private void damage(Location location, int damage, int RADIUS) {
+    private void damage(Location location, Player shooter, int damage, int RADIUS) {
+
+        Clan clan =LostShardPlugin.getClanManager().getClan(shooter.getUniqueId());
 
         for (Entity entity : location.getWorld().getNearbyEntities(location, RADIUS, RADIUS, RADIUS)) {
             if (!(entity instanceof Damageable))
-                return;
+                continue;
+            if(entity.equals(shooter))
+                continue;
+            if(clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
+                continue;
 
-            ((Damageable) entity).damage(damage);
+            ((Damageable) entity).damage(damage, shooter);
+
+
+
         }
     }
 

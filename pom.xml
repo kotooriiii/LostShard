@@ -139,6 +139,20 @@
         </dependency>
 
         <dependency>
+            <groupId>nocheatplus</groupId>
+            <artifactId>nocheatplus-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/NoCheatPlus.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>packetlistener</groupId>
             <artifactId>packetlistener-api</artifactId>
             <version>1.0</version>

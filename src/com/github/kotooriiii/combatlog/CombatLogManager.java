@@ -2,8 +2,10 @@ package com.github.kotooriiii.combatlog;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.status.StatusPlayer;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -11,6 +13,9 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
+import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
+import static com.github.kotooriiii.util.HelperMethods.isPlayerInduced;
 
 public class CombatLogManager {
 
@@ -24,6 +29,27 @@ public class CombatLogManager {
 
     public CombatLogManager() {
 
+    }
+
+    public boolean combat(Entity defender, Entity damager)
+    {
+        if (CitizensAPI.getNPCRegistry().isNPC(defender) || CitizensAPI.getNPCRegistry().isNPC(damager))
+            return false;
+
+        if (!isPlayerInduced(defender, damager))
+            return false;
+
+        //Entties are players
+        Player damagerPlayer = getPlayerInduced(defender, damager);
+        Player defenderPlayer = (Player) defender;
+
+        //
+        //The code for each skill will follow on the bottom
+        //
+
+        add(damagerPlayer.getUniqueId(), defender.getUniqueId());
+        add(defenderPlayer.getUniqueId(), damager.getUniqueId());
+        return true;
     }
 
     public void remove(UUID playerUUID) {

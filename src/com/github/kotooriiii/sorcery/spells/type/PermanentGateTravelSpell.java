@@ -9,10 +9,13 @@ import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.status.Staff;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -74,6 +77,30 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
         //Is casting a spell and moved a block
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
+        refund(player);
+        waitingToRecallMap.remove(player.getUniqueId());
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onWaitToRecall(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+
+        if (!(entity instanceof Player))
+            return;
+        Player player = (Player) entity;
+
+
+        //not casting spell
+        if (!waitingToRecallMap.containsKey(player.getUniqueId()))
+            return;
+
+
+        //Is casting a spell and moved a block
+
+        player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
+        refund(player);
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
@@ -142,8 +169,10 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
         MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getMark(message);
 
-        if (!hasGateRequirements(playerSender, message))
+        if (!hasGateRequirements(playerSender, message)) {
+            refund(playerSender);
             return;
+        }
 
         Gate gate = new Gate(playerSender.getUniqueId(), playerSender.getLocation(), mark.getLocation());
 
@@ -179,7 +208,11 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
                 if (counter == 0) {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
-                    postCast(player, gate);
+
+                    if (!postCast(player, gate)) {
+                        if (player.isOnline())
+                            refund(player);
+                    }
                     return;
                 }
 
@@ -195,43 +228,60 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
      *
      * @return
      */
-    private void postCast(Player playerSender, Gate gate) {
+    private boolean postCast(Player playerSender, Gate gate) {
 
         boolean existingGateFrom = LostShardPlugin.getGateManager().isGate(gate.getFrom());
         boolean existingGateTo = LostShardPlugin.getGateManager().isGate(gate.getTo());
 
         boolean existingGate = existingGateFrom || existingGateTo;
 
+        if (!playerSender.isOnline())
+            return false;
+
+
+        if (isLapisNearby(gate.getFrom(), DEFAULT_LAPIS_NEARBY)) {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " here...");
+            return false;
+        }
+
+        if(isLapisNearby(gate.getTo(), DEFAULT_LAPIS_NEARBY))
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
+            return false;
+        }
+
         if (LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
             playerSender.sendMessage(ERROR_COLOR + "You've removed your previous gate to this location.");
             LostShardPlugin.getGateManager().deleteExistingGateIfAny(gate);
         } else if (!LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
             playerSender.sendMessage(ERROR_COLOR + "A portal has already been set up here by another player.");
-            return;
+            return false;
         }
 
 
         if (!gate.isBuildable()) {
             playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
-            return;
+            return false;
         } else if (LostShardPlugin.getGateManager().hasGateNearby(gate.getFrom()) || LostShardPlugin.getGateManager().hasGateNearby(gate.getTo())) {
             playerSender.sendMessage(ERROR_COLOR + "There's another gate too close to this one.");
-            return;
+            return false;
         } else if (gate.getFrom().getWorld().equals(gate.getTo().getWorld()) && gate.getFrom().distance(gate.getTo()) <= Gate.PORTAL_DISTANCE) {
             playerSender.sendMessage(ERROR_COLOR + "The gates must be farther than " + Gate.PORTAL_DISTANCE + " blocks away.");
-            return;
+            return false;
         }
 
         Plot fromPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getFrom());
         Plot toPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getTo());
 
         if (!Staff.isStaff(playerSender.getUniqueId()) && !hasPlotBuildingPerms(playerSender, fromPlot, toPlot))
-            return;
+            return false;
 
 
         if (gate.isBuildable()) {
             LostShardPlugin.getGateManager().addGate(gate, true);
+            return true;
         }
+        return false;
     }
 
     private boolean hasPlotBuildingPerms(Player player, Plot... plots) {

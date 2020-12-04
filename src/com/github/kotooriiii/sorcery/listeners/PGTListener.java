@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateBlock;
+import com.github.kotooriiii.sorcery.spells.Spell;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -10,10 +11,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
@@ -137,6 +135,38 @@ public class PGTListener implements Listener {
     @EventHandler
     public void onQuit(PlayerGameModeChangeEvent event) {
         map.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onLapisPlace(BlockPlaceEvent event)
+    {
+        final Block blockPlaced = event.getBlockPlaced();
+
+        if(blockPlaced.getType() != Material.LAPIS_BLOCK)
+            return;
+
+        final Location location = blockPlaced.getLocation();
+        final int RANGE = Spell.getDefaultLapisNearbyValue();
+
+        int xmin = location.getBlockX() - RANGE;
+        int xmax = location.getBlockX() + RANGE;
+        int ymin = location.getBlockY() - RANGE;
+        int ymax = location.getBlockY() + RANGE;
+        int zmin = location.getBlockZ() - RANGE;
+        int zmax = location.getBlockZ() + RANGE;
+
+        for (int x = xmin; x <= xmax; x++) {
+            for (int y = ymin; y <= ymax; y++) {
+                for (int z = zmin; z <= zmax; z++) {
+                    Location iteratingLocation = new Location(location.getWorld(),x,y,z);
+                    if(LostShardPlugin.getGateManager().isGate(iteratingLocation))
+                    {
+                        LostShardPlugin.getGateManager().removeGate(LostShardPlugin.getGateManager().getGate(new Location(location.getWorld(),x,y,z)));
+
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler

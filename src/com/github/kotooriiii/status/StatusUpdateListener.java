@@ -1,7 +1,9 @@
 package com.github.kotooriiii.status;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -62,6 +64,11 @@ public class StatusUpdateListener implements Listener {
         if (damagerStatus.equals(Status.MURDERER))
             return;
 
+        Clan clan = LostShardPlugin.getClanManager().getClan(damagerPlayer.getUniqueId());
+        //if clan is not null and other guy is in clan
+        if (clan != null && clan.isInThisClan(defenderPlayer.getUniqueId()))
+            return;
+
         StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.CRIMINAL);
         BukkitTask task = new BukkitRunnable() {
             @Override
@@ -113,6 +120,11 @@ public class StatusUpdateListener implements Listener {
         if (damagerStatus.equals(Status.LAWFUL) && (defenderStatus.equals(Status.MURDERER) || defenderStatus.equals(Status.CRIMINAL)))
             return;
 
+        Clan clan = LostShardPlugin.getClanManager().getClan(damagerPlayer.getUniqueId());
+        //if clan is not null and other guy is in clan
+        if (clan != null && clan.isInThisClan(defenderPlayer.getUniqueId()))
+            return;
+
         int newKills = damagerStatusPlayer.getKills() + 1;
 
         if (newKills == 5) {
@@ -121,6 +133,98 @@ public class StatusUpdateListener implements Listener {
         }
         damagerStatusPlayer.setKills(newKills);
 
+    }
+
+    public static void onHit(Entity defender, Entity damager)
+    {
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
+
+        if (!isPlayerInduced(defender, damager))
+            return;
+
+        //Entties are players
+        Player damagerPlayer = getPlayerInduced(defender, damager);
+        Player defenderPlayer = (Player) defender;
+
+        if(damagerPlayer.equals(defenderPlayer))
+            return;
+
+        if (Staff.isStaff(damagerPlayer.getUniqueId()) || Staff.isStaff(defenderPlayer.getUniqueId()))
+            return;
+
+        if (defender.isDead())
+            return;
+
+        //Get each players' status
+        Status defenderStatus = StatusPlayer.wrap(defenderPlayer.getUniqueId()).getStatus();
+        Status damagerStatus = StatusPlayer.wrap(damagerPlayer.getUniqueId()).getStatus();
+
+        //The defender must be lawful
+        if (!defenderStatus.equals(Status.LAWFUL)) //If defender is not lawful ignore.
+            return;
+        //The damager must be a criminal or lawful
+        if (damagerStatus.equals(Status.MURDERER))
+            return;
+
+        StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.CRIMINAL);
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (this.isCancelled())
+                    return;
+                if (playersCriminal.get(damagerPlayer.getUniqueId()) == null)
+                    return;
+                StatusPlayer.wrap(damagerPlayer.getUniqueId()).setStatus(Status.LAWFUL);
+                playersCriminal.remove(damagerPlayer.getUniqueId());
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20 * 60 * 5);
+
+        if (playersCriminal.get(damagerPlayer.getUniqueId()) != null) {
+            playersCriminal.get(damagerPlayer.getUniqueId()).cancel();
+        }
+        playersCriminal.put(damagerPlayer.getUniqueId(), task);
+    }
+
+    public static void onDeath(Entity defender)
+    {
+        if (!(defender instanceof Player)) //Must be a player
+            return;
+
+        Player defenderPlayer = (Player) defender;
+        if (defenderPlayer.getKiller() == null)
+            return;
+        Entity damager = defenderPlayer.getKiller();
+
+        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+            return;
+
+        if (!isPlayerInduced(defender, damager))
+            return;
+        Player damagerPlayer = getPlayerInduced(defender, damager);
+
+        if(defenderPlayer.equals(damagerPlayer))
+            return;
+
+        if (Staff.isStaff(damagerPlayer.getUniqueId()) || Staff.isStaff(defenderPlayer.getUniqueId()))
+            return;
+
+
+        StatusPlayer damagerStatusPlayer = StatusPlayer.wrap(damagerPlayer.getUniqueId());
+        Status defenderStatus = StatusPlayer.wrap(defenderPlayer.getUniqueId()).getStatus();
+        Status damagerStatus = damagerStatusPlayer.getStatus();
+
+        if (damagerStatus.equals(Status.LAWFUL) && (defenderStatus.equals(Status.MURDERER) || defenderStatus.equals(Status.CRIMINAL)))
+            return;
+
+        int newKills = damagerStatusPlayer.getKills() + 1;
+
+        if (newKills == 5) {
+            damagerStatusPlayer.setStatus(Status.MURDERER);
+            playersCriminal.remove(damagerPlayer.getUniqueId());
+        }
+        damagerStatusPlayer.setKills(newKills);
     }
 
     public static HashMap<UUID, BukkitTask> getPlayersCriminals() {
