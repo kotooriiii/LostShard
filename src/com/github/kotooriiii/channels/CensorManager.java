@@ -5,8 +5,7 @@ import com.github.kotooriiii.util.HelperMethods;
 public class CensorManager {
 
     private static CensorManager instance;
-    private static char[] skipCharsArray = new char[]{' ', '_', '-'};
-    private static String[] bannedWords = new String[]{"hypixel"};
+    private static String[] bannedWords = new String[]{"nigger", "nigga"};
 
     private CensorManager() {
     }
@@ -16,6 +15,7 @@ public class CensorManager {
 
         //basic word filter
         result = translateWord(result);
+        result = translateIncludes(result);
 
         //
 
@@ -26,23 +26,36 @@ public class CensorManager {
         String[] args = message.split(" ");
         for (int i = 0; i < args.length; i++) {
             switch (args[i].toLowerCase()) {
-                case "hypixel":
-                case "bedwars":
-                case "bedwarz":
-                case "hypyxel":
-                case "hipixel":
-                case "highpixel":
-                case "thehive":
-                case "hivemc":
-                case "mineplex":
-                case "antiac":
-                    args[i] = "lostshard";
+                case "nigger":
+                case "nigga":
+                    args[i] = stars(args[i].toLowerCase());
             }
         }
 
         String built = HelperMethods.stringBuilder(args, 0, " ");
 
         return built;
+    }
+
+    private String translateIncludes(String message) {
+        String[] args = message.split(" ");
+        for (int i = 0; i < args.length; i++)
+            for (String bannedWord : bannedWords)
+                if (args[i].toLowerCase().contains(bannedWord))
+                    args[i] = stars(args[i]);
+
+
+        String built = HelperMethods.stringBuilder(args, 0, " ");
+
+        return built;
+    }
+
+    private String stars(String message) {
+        String stars = "";
+        for (char c : message.toCharArray()) {
+            stars += "*";
+        }
+        return stars;
     }
 
     private String translateWordOccurences(String message) {
@@ -54,8 +67,7 @@ public class CensorManager {
 
         for (char c : chars) {
             for (int i = 0; i < bannedWords.length; i++) {
-                for(char bc : bannedWords[i].toCharArray())
-                {
+                for (char bc : bannedWords[i].toCharArray()) {
 
                 }
             }

@@ -30,15 +30,14 @@ public class EntityInteractPlotListener implements Listener {
     public void onEntityInteractPlot(EntityInteractEvent entityInteractEvent) {
         final Block block = entityInteractEvent.getBlock();
         final Location location = block.getLocation();
-        if(block == null)
+        if (block == null)
             return;
 
         //Check entity
         Entity en = entityInteractEvent.getEntity();
 
-        if(en instanceof Player)
-        {
-            if(block.getState() instanceof Container)
+        if (en instanceof Player) {
+            if (block.getState() instanceof Container)
                 return;
         }
 
@@ -47,12 +46,10 @@ public class EntityInteractPlotListener implements Listener {
 
 
             //If the block being interacted is in the location of a plot
-            if(plot.contains(location))
-            {
+            if (plot.contains(location)) {
 
-                if(!plot.getType().equals(PlotType.PLAYER))
-                {
-                    if(block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
+                if (!plot.getType().equals(PlotType.PLAYER)) {
+                    if (block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
                         return;
                     entityInteractEvent.setCancelled(true);
                     return;
@@ -60,8 +57,7 @@ public class EntityInteractPlotListener implements Listener {
 
 
                 //If entity is not a player then cancel it
-                if(!(en instanceof Player))
-                {
+                if (!(en instanceof Player)) {
                     entityInteractEvent.setCancelled(true);
                     return;
                 }
@@ -69,13 +65,12 @@ public class EntityInteractPlotListener implements Listener {
                 final Player playerInteracting = (Player) en;
                 final UUID playerUUID = playerInteracting.getUniqueId();
 
-                if(playerInteracting.hasPermission(STAFF_PERMISSION))
+                if (playerInteracting.hasPermission(STAFF_PERMISSION))
                     return;
                 //If don't have permissions
 
                 PlayerPlot playerPlot = (PlayerPlot) plot;
-                if(!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID)))
-                {
+                if (!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     entityInteractEvent.setCancelled(true);
                     return;
                 }
@@ -90,18 +85,20 @@ public class EntityInteractPlotListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent playerInteractEvent) {
         final Block block = playerInteractEvent.getClickedBlock();
-        if(block == null)
+        if (block == null)
             return;
         final Location location = block.getLocation();
         final Player playerInteracting = playerInteractEvent.getPlayer();
         final UUID playerUUID = playerInteracting.getUniqueId();
 
-        if(playerInteracting.hasPermission(STAFF_PERMISSION))
+        if (playerInteracting.hasPermission(STAFF_PERMISSION))
             return;
-        if(!block.getType().isInteractable() && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
+        if (block.getType().getKey().getKey().toLowerCase().endsWith("stairs") && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
+            return;
+        if (!block.getType().isInteractable() && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
             return;
 
-        if(block.getState() instanceof Container)
+        if (block.getState() instanceof Container)
             return;
 
 
@@ -110,12 +107,10 @@ public class EntityInteractPlotListener implements Listener {
 
 
             //If the block being interacted is in the location of a plot
-            if(plot.contains(location))
-            {
+            if (plot.contains(location)) {
 
-                if(!plot.getType().equals(PlotType.PLAYER))
-                {
-                    if(block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
+                if (!plot.getType().equals(PlotType.PLAYER)) {
+                    if (block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
                         return;
                     playerInteractEvent.setCancelled(true);
                     return;
@@ -125,8 +120,7 @@ public class EntityInteractPlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if(!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID)))
-                {
+                if (!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     playerInteractEvent.setCancelled(true);
                     return;
                 }

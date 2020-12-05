@@ -4,15 +4,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 public enum Status {
-    LAWFUL("Lawful", ChatColor.BLUE), CRIMINAL("Criminal", ChatColor.GRAY), MURDERER("Murderer", ChatColor.RED),
-    WORTHY("Worthy", ChatColor.BLUE), CORRUPT("Corrupt", ChatColor.GRAY), EXILED("Exiled", ChatColor.RED);
+    LAWFUL("Lawful", ChatColor.BLUE, 1), CRIMINAL("Criminal", ChatColor.GRAY, 2), MURDERER("Murderer", ChatColor.RED, 3),
+    WORTHY("Worthy", ChatColor.BLUE, 1), CORRUPT("Corrupt", ChatColor.GRAY, 2), EXILED("Exiled", ChatColor.RED, 3);
 
     private String name;
     private ChatColor chatColor;
+    private int weight;
 
-    private Status(String name, ChatColor chatColor) {
+    private Status(String name, ChatColor chatColor, int weight) {
         this.name = name;
         this.chatColor = chatColor;
+        this.weight = weight;
     }
 
     public static Status newStatuses(Status status) {
@@ -54,6 +56,10 @@ public enum Status {
             default:
                 return "";
         }
+    }
+
+    public int getWeight() {
+        return weight;
     }
 
     @Override

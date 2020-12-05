@@ -117,6 +117,7 @@ public class ChatChannelListener implements Listener {
 
         //Get message
         String translatedMessage = asyncPlayerChatEvent.getMessage();
+        translatedMessage = CensorManager.getInstance().apply(translatedMessage);
         String message = getFormattedPing(translatedMessage, messageColor);
         ArrayList<Player> pingedPlayers = getPingedPlayers(asyncPlayerChatEvent.getMessage());
 

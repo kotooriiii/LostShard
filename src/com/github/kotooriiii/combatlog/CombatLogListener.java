@@ -8,6 +8,7 @@ import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -19,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.LinkedHashSet;
@@ -41,16 +43,11 @@ public class CombatLogListener implements Listener {
     }
 
     @EventHandler
-    public void throwEnderpearl(ProjectileLaunchEvent event)
+    public void throwEnderpearl(PlayerInteractEvent event)
     {
-        Entity entityLaunched = event.getEntity();
-        if(entityLaunched == null || !(entityLaunched instanceof Projectile) || entityLaunched.getType() != EntityType.ENDER_PEARL)
+        if(event.getItem().getType() != Material.ENDER_PEARL)
             return;
-        Projectile projectile = (Projectile) entityLaunched;
-        if(projectile.getShooter() == null || !(projectile.getShooter() instanceof Player))
-            return;
-
-        Player shooterPlayer = (Player) projectile.getShooter();
+        Player shooterPlayer = event.getPlayer();
 
         if(!LostShardPlugin.getCombatLogManager().isTagged(shooterPlayer.getUniqueId()))
             return;
@@ -58,6 +55,26 @@ public class CombatLogListener implements Listener {
         shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled while in combat.");
         event.setCancelled(true);
     }
+
+
+//    @EventHandler
+//    public void throwEnderpearl(ProjectileLaunchEvent event)
+//    {
+//        Entity entityLaunched = event.getEntity();
+//        if(entityLaunched == null || !(entityLaunched instanceof Projectile) || entityLaunched.getType() != EntityType.ENDER_PEARL)
+//            return;
+//        Projectile projectile = (Projectile) entityLaunched;
+//        if(projectile.getShooter() == null || !(projectile.getShooter() instanceof Player))
+//            return;
+//
+//        Player shooterPlayer = (Player) projectile.getShooter();
+//
+//        if(!LostShardPlugin.getCombatLogManager().isTagged(shooterPlayer.getUniqueId()))
+//            return;
+//
+//        shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled while in combat.");
+//        event.setCancelled(true);
+//    }
 
     private boolean isGuard(Entity killer) {
 

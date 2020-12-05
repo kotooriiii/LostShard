@@ -443,7 +443,7 @@ public class LostShardPlugin extends JavaPlugin {
 
     private void saveData() {
 
-        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW+ " Saving data.");
+        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW + " Saving data.");
 
         for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
             LostShardPlugin.getBankManager().saveBank(bank);
@@ -475,7 +475,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         SignChangeListener.save();
 
-        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW+ " Saved data.");
+        LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW + " Saved data.");
     }
 
 
@@ -576,6 +576,9 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("skip").setExecutor(new SkipCommand());
         getCommand("tutorial").setExecutor(new TutorialCommand());
         getCommand("discord").setExecutor(new DiscordCommand());
+
+        getCommand("announce").setExecutor(new AnnounceCommand());
+        getCommand("who").setExecutor(new WhoCommand());
 
 
         //todo to use later -->
@@ -983,10 +986,6 @@ public class LostShardPlugin extends JavaPlugin {
                     }
                 }
 
-                //Save all skills
-                for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
-                    LostShardPlugin.getSkillManager().saveSkillPlayer(skillPlayer);
-                }
 
                 new BukkitRunnable() {
                     @Override

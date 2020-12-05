@@ -143,7 +143,7 @@ public class SkillCommand implements CommandExecutor {
                             playerSender.sendMessage(ERROR_COLOR + "You must choose a number to reduce the skill's level.");
                             return false;
                         }
-                        float amount = new BigDecimal(NumberUtils.createDouble(args[2]).floatValue()).setScale(1, RoundingMode.FLOOR).floatValue();
+                        float amount = new BigDecimal(NumberUtils.createFloat(args[2]).floatValue()).setScale(1, RoundingMode.HALF_UP).floatValue();
 
                         if (!(0 <= amount && amount <= 100)) {
                             playerSender.sendMessage(ERROR_COLOR + "You must choose a number between 0 to 100.");
@@ -153,7 +153,8 @@ public class SkillCommand implements CommandExecutor {
 
                         Skill reducedSkill = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSkill(skillTypeReduced);
 
-                        float newLevel = reducedSkill.getLevel() - amount;
+                        float newLevel = new BigDecimal(new BigDecimal(reducedSkill.getLevel()).setScale(1, RoundingMode.HALF_UP).floatValue() - amount).setScale(1, RoundingMode.HALF_UP).floatValue();
+
 
                         if (newLevel < 0) {
                             playerSender.sendMessage(ERROR_COLOR + "You must choose a smaller number. Your skill level cannot be negative.");

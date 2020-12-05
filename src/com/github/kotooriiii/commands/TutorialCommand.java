@@ -7,8 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
+import static com.github.kotooriiii.data.Maps.*;
 
 public class TutorialCommand implements CommandExecutor {
 
@@ -24,7 +23,10 @@ public class TutorialCommand implements CommandExecutor {
 
 
         if (args.length == 0) {
-            playerSender.sendMessage("You've already completed the tutorial.");
+            if(!LostShardPlugin.isTutorial())
+            playerSender.performCommand("server tutorial");
+            else
+                playerSender.sendMessage(STANDARD_COLOR + "You're already on the tutorial server.");
             return false;
         }
 

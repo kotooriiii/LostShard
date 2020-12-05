@@ -85,7 +85,6 @@ public class ShardScoreboardManager {
 
         //Objective register
         Objective objective = scoreboard.registerNewObjective("profile", "dummy", "", RenderType.INTEGER);
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatColor.GOLD + "-" + player.getName() + "'s Stats-");
 
 
@@ -116,6 +115,7 @@ public class ShardScoreboardManager {
         Team murderCountValue = scoreboard.registerNewTeam("murderCount");
         murderCountValue.addEntry(ChatColor.RED + "" + ChatColor.DARK_RED);
         objective.getScore(ChatColor.RED + "" + ChatColor.DARK_RED).setScore(9);
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
     }
 
