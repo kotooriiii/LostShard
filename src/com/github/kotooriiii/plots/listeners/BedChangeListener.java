@@ -49,7 +49,8 @@ public class BedChangeListener implements Listener {
             return;
         UUID uuid = event.getPlayer().getUniqueId();
         if (!(playerPlot.isFriend(uuid) || playerPlot.isJointOwner(uuid) || playerPlot.isOwner(uuid))) {
-    event.getPlayer().sendMessage(ERROR_COLOR + "You can not set your spawn here. This Town is private.");
+            event.getPlayer().sendMessage(ERROR_COLOR + "You can not set your spawn here. This Town is private.");
+            return;
         }
         event.getPlayer().sendMessage(ChatColor.GOLD + "Your spawnpoint has been set to the Town \"" + playerPlot.getName() + "\".");
         saveSpawn(event.getPlayer(), block.getLocation());
@@ -134,52 +135,62 @@ public class BedChangeListener implements Listener {
         stat.setSpawn(location);
     }
 
-    private void removeSpawn(Location location) {
-        location = transform(location);
+    public static void fixBug() {
         for (Stat stat : Stat.getStatMap().values()) {
-            Location loc = stat.getSpawn();
-            if (loc == null)
+            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(stat.getSpawn());
+            UUID uuid = stat.getPlayerUUID();
+            if (plot != null && plot instanceof PlayerPlot && ((PlayerPlot) plot).isTown() && (((PlayerPlot) plot).isFriend(uuid) || ((PlayerPlot) plot).isJointOwner(uuid) || ((PlayerPlot) plot).isOwner(uuid)))
                 continue;
+            stat.setSpawn(null);
+        }
+    }
 
-            if (loc.equals(location)) {
-
-                stat.setSpawn(null);
-                Player player = Bukkit.getPlayer(stat.getPlayerUUID());
-                if (player == null)
+        private void removeSpawn (Location location){
+            location = transform(location);
+            for (Stat stat : Stat.getStatMap().values()) {
+                Location loc = stat.getSpawn();
+                if (loc == null)
                     continue;
-                player.sendMessage(ERROR_COLOR + "Your spawnpoint has been reset because your bed has been broken.");
+
+                if (loc.equals(location)) {
+
+                    stat.setSpawn(null);
+                    Player player = Bukkit.getPlayer(stat.getPlayerUUID());
+                    if (player == null)
+                        continue;
+                    player.sendMessage(ERROR_COLOR + "Your spawnpoint has been reset because your bed has been broken.");
+                }
             }
         }
-    }
 
-    private Block getHeadOfBed(Block tryingForBed) {
-        if (tryingForBed == null)
-            return null;
-        if (!(tryingForBed.getBlockData() instanceof Bed))
-            return null;
-        Bed bed = (Bed) tryingForBed.getBlockData();
+        private Block getHeadOfBed (Block tryingForBed){
+            if (tryingForBed == null)
+                return null;
+            if (!(tryingForBed.getBlockData() instanceof Bed))
+                return null;
+            Bed bed = (Bed) tryingForBed.getBlockData();
 
-        if (bed.getPart().equals(Bed.Part.HEAD)) {
-            return tryingForBed;
+            if (bed.getPart().equals(Bed.Part.HEAD)) {
+                return tryingForBed;
+            }
+
+            Location actualHead = null;
+            switch (bed.getFacing()) {
+                case NORTH:
+                    actualHead = tryingForBed.getLocation().add(0, 0, -1);
+                    break;
+                case EAST:
+                    actualHead = tryingForBed.getLocation().add(1, 0, 0);
+                    break;
+                case SOUTH:
+                    actualHead = tryingForBed.getLocation().add(0, 0, 1);
+                    break;
+                case WEST:
+                    actualHead = tryingForBed.getLocation().add(-1, 0, 0);
+                    break;
+            }
+            return actualHead.getBlock();
         }
 
-        Location actualHead = null;
-        switch (bed.getFacing()) {
-            case NORTH:
-                actualHead = tryingForBed.getLocation().add(0, 0, -1);
-                break;
-            case EAST:
-                actualHead = tryingForBed.getLocation().add(1, 0, 0);
-                break;
-            case SOUTH:
-                actualHead = tryingForBed.getLocation().add(0, 0, 1);
-                break;
-            case WEST:
-                actualHead = tryingForBed.getLocation().add(-1, 0, 0);
-                break;
-        }
-        return actualHead.getBlock();
+
     }
-
-
-}

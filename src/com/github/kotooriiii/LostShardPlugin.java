@@ -308,6 +308,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         }
 
+        //Register custom enchantment
+        registerGlow();
 
         //Read files (some onto the managers)
         FileManager.init();
@@ -323,12 +325,14 @@ public class LostShardPlugin extends JavaPlugin {
         registerEvents();
         // registerDiscord();
 
+        //fix bug previously made from beds
+        BedChangeListener.fixBug();
+
         //Init custom recipes
         CraftingRecipes.initRecipes();
 
 
-        //Register custom enchantment
-        registerGlow();
+
         //Register for crash-related incidents
         registerBuff();
         registerCriminals();

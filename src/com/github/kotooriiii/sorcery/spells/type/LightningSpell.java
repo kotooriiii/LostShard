@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -30,8 +31,7 @@ public class LightningSpell extends Spell {
 
     private static HashMap<UUID, Double> lightningSpellCooldownMap = new HashMap<UUID, Double>();
 
-    public LightningSpell()
-    {
+    public LightningSpell() {
         super(SpellType.LIGHTNING,
                 ChatColor.GOLD,
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},
@@ -43,19 +43,27 @@ public class LightningSpell extends Spell {
 
     @Override
     public boolean executeSpell(Player player) {
-        final int lightningRange = 50;
-        List<Block> lineOfSightLightning = player.getLineOfSight(null, lightningRange);
+        final int LIGHTNING_RANGE = 50, RADIUS = 2;
+        List<Block> lineOfSightLightning = player.getLineOfSight(null, LIGHTNING_RANGE);
 
         // Get target block (last block in line of sight)
         Location lightningLocation = lineOfSightLightning.get(lineOfSightLightning.size() - 1).getLocation();
         player.getLocation().getWorld().strikeLightningEffect(lightningLocation);
-        callPlayerEvent(player, lightningLocation);
+        callPlayerEvent(player, lightningLocation, RADIUS);
+
+        for (int x = lightningLocation.getBlockX() - RADIUS; x < lightningLocation.getBlockX() + RADIUS; x++)
+            for (int z = lightningLocation.getBlockZ() - RADIUS; z < lightningLocation.getBlockZ() + RADIUS; z++)
+                if (Math.random() <= 0.90d)
+                    lightningLocation.getWorld()
+                            .getBlockAt(new Location(lightningLocation.getWorld(), x, lightningLocation.getBlockY() + 1, z))
+                            .setType(Material.FIRE);
+
+
         return true;
     }
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         lightningSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -102,15 +110,15 @@ public class LightningSpell extends Spell {
     }
 
 
-    private void callPlayerEvent(Player attacker, Location location) {
-        Clan clan =LostShardPlugin.getClanManager().getClan(attacker.getUniqueId());
+    private void callPlayerEvent(Player attacker, Location location, int RADIUS) {
+        Clan clan = LostShardPlugin.getClanManager().getClan(attacker.getUniqueId());
 
-        for (Entity entity : attacker.getLocation().getWorld().getNearbyEntities(location, 2, 2, 2)) {
+        for (Entity entity : attacker.getLocation().getWorld().getNearbyEntities(location, RADIUS, RADIUS, RADIUS)) {
             if (!(entity instanceof LivingEntity))
                 continue;
             if (attacker.equals(entity))
                 continue;
-            if(clan != null && entity instanceof  Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
+            if (clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 
             LivingEntity livingEntity = (LivingEntity) entity;

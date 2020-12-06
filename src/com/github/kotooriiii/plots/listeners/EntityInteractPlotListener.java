@@ -26,6 +26,11 @@ import java.util.UUID;
 import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class EntityInteractPlotListener implements Listener {
+
+    /**
+     * Called when an Entity attemp
+     * @param entityInteractEvent
+     */
     @EventHandler
     public void onEntityInteractPlot(EntityInteractEvent entityInteractEvent) {
         final Block block = entityInteractEvent.getBlock();
@@ -62,20 +67,20 @@ public class EntityInteractPlotListener implements Listener {
                     return;
                 }
 
-                final Player playerInteracting = (Player) en;
-                final UUID playerUUID = playerInteracting.getUniqueId();
-
-                if (playerInteracting.hasPermission(STAFF_PERMISSION))
-                    return;
-                //If don't have permissions
-
-                PlayerPlot playerPlot = (PlayerPlot) plot;
-                if (!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
-                    entityInteractEvent.setCancelled(true);
-                    return;
-                }
-
-                //ALLOWED
+//                final Player playerInteracting = (Player) en;
+//                final UUID playerUUID = playerInteracting.getUniqueId();
+//
+//                if (playerInteracting.hasPermission(STAFF_PERMISSION))
+//                    return;
+//                //If don't have permissions
+//
+//                PlayerPlot playerPlot = (PlayerPlot) plot;
+//                if (!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+//                    entityInteractEvent.setCancelled(true);
+//                    return;
+//                }
+//
+//                //ALLOWED
 
                 break;
             }

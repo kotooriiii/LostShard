@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,12 +23,18 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.*;
 
 public class BlockChangePlotListener implements Listener {
+
+    /**
+     * Called when an Enderman changes a block in a plot.
+     * @param entityChangeBlockEvent The event being called
+     */
     @EventHandler
     public void onBlockChangePlot(EntityChangeBlockEvent entityChangeBlockEvent) {
         final Block block = entityChangeBlockEvent.getBlock();
@@ -54,6 +61,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a Player breaks a block in a staff plot OR in a plot they don't have permissions to build.
+     * @param blockBreakEvent Event being called
+     */
     @EventHandler
     public void onBlockChangePlot(BlockBreakEvent blockBreakEvent) {
         final Block block = blockBreakEvent.getBlock();
@@ -95,6 +106,11 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a living Vehicle takes damage ( horse, mule, donkey, pig with saddle) in a staff plot OR in a plot
+     * they don't have permission in building.
+     * @param vehicleDamageEvent The event being called.
+     */
     @EventHandler
     public void onEntityDamage(VehicleDamageEvent vehicleDamageEvent) {
         final Vehicle vehicle = vehicleDamageEvent.getVehicle();
@@ -146,6 +162,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when an Armor Stand is being broken by a player at a staff plot or plot with no building permissions.
+     * @param event The event being called.
+     */
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         final Entity entity = event.getEntity();
@@ -199,6 +219,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a vine grows at a staff plot.
+     * @param event
+     */
     @EventHandler
     public void onVineSpread(BlockSpreadEvent event) {
 
@@ -254,7 +278,10 @@ public class BlockChangePlotListener implements Listener {
     }
 
 
-
+    /**
+     * Called when a Player left clicks a block (attempt to break) on a staff plot or plot with no permissions..
+     * @param playerInteractEvent
+     */
     @EventHandler
     public void onBlockChangePlot(PlayerInteractEvent playerInteractEvent) {
 
@@ -311,6 +338,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a Player empties a bucket at a staff plot or plot with no permissions.
+     * @param event
+     */
     @EventHandler
     public void onBucketfill(PlayerBucketEmptyEvent event) {
         final Location location = event.getPlayer().getLocation();
@@ -352,6 +383,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a Player fills a bucket at a staff plot or plot with no building permissions.
+     * @param event
+     */
     @EventHandler
     public void onBucketfill(PlayerBucketFillEvent event) {
         final Location location = event.getPlayer().getLocation();
@@ -394,6 +429,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when an Item Frame is broken by a Player at a staff plot or plot with no building permissions.
+     * @param event
+     */
     @EventHandler
     public void onItemFrameItemStack(EntityDamageByEntityEvent event) {
 
@@ -449,6 +488,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     * @param event
+     */
     @EventHandler
     public void onItemFrameItemStack(PlayerInteractEntityEvent event) {
         final Location location = event.getRightClicked().getLocation();
@@ -494,6 +537,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     * @param event
+     */
     @EventHandler
     public void onItemBreakEvent(HangingBreakByEntityEvent event) {
         final Location location = event.getEntity().getLocation();
@@ -542,6 +589,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when an Entity is spawned on a staff plot and that said entity is hostile.
+     * @param entitySpawnEvent
+     */
     @EventHandler
     public void onSpawn(EntitySpawnEvent entitySpawnEvent) {
         if(LostShardPlugin.isTutorial())
@@ -565,6 +616,10 @@ public class BlockChangePlotListener implements Listener {
 
     }
 
+    /**
+     * Called when a block explodes and is inside a plot.
+     * @param event
+     */
     @EventHandler
     public void onExplosion(BlockExplodeEvent event) {
         List<Block> blocksExploding = event.blockList();
@@ -578,6 +633,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
+    /**
+     * Called when an entity explodes and blocks which should be removed are inside a plot.
+     * @param event
+     */
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         List<Block> blocksExploding = event.blockList();
@@ -591,16 +650,19 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
-
+    /**
+     * Called when a block is ignited and trying to spread inside a plot
+     * @param event
+     */
     @EventHandler
     public void onIgnite(BlockIgniteEvent event) {
         final Block block = event.getBlock();
         final Location location = block.getLocation();
         final BlockIgniteEvent.IgniteCause cause = event.getCause();
         //Iterate through all plots
-        final Block source = event.getIgnitingBlock();
-        if (source == null)
-            return;
+//        final Block source = event.getIgnitingBlock();
+//        if (source == null)
+//            return;
         if(!cause.equals(BlockIgniteEvent.IgniteCause.SPREAD))
             return;
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
@@ -612,7 +674,10 @@ public class BlockChangePlotListener implements Listener {
         }
     }
 
-
+    /**
+     * Called when a Player tries to place a block on a staff plot or a plot with no building permissions.
+     * @param blockPlaceEvent
+     */
     @EventHandler
     public void onBlockPlaceChangePlot(BlockPlaceEvent blockPlaceEvent) {
         final Block block = blockPlaceEvent.getBlock();
@@ -648,6 +713,80 @@ public class BlockChangePlotListener implements Listener {
                 //ALLOWED
 
                 break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+
+        final Block pistonBlock = event.getBlock();
+        final List<Block> blocks = event.getBlocks();
+        final BlockFace directionMoved = event.getDirection();
+
+        //Iterate through all plots
+        plotLoop:
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+
+            //If the plot contains the piston block, continue
+            if(plot.contains(pistonBlock.getLocation()))
+                continue;
+
+            //The plot does not contain the piston block
+
+            final Iterator<Block> iterator = blocks.iterator();
+
+            blockLoop:
+            while(iterator.hasNext())
+            {
+                Block blockWhichWillBeMoved = iterator.next();
+                Block movedBlock = blockWhichWillBeMoved.getRelative(directionMoved);
+
+//          Add this if slime block attachments are not detected.
+//                if(movedBlock.getType() == Material.SLIME_BLOCK)
+//                {
+//                    Block grabbedBlock = movedBlock.getRelative(directionMoved);
+//                    if
+//                }
+
+                if(plot.contains(movedBlock.getLocation()))
+                {
+                    event.setCancelled(true);
+                    break plotLoop;
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+
+        final Block pistonBlock = event.getBlock();
+        final List<Block> blocks = event.getBlocks();
+        final BlockFace directionMoved = event.getDirection();
+
+        //Iterate through all plots
+        plotLoop:
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+
+            //If the plot contains the piston block, continue
+            if(plot.contains(pistonBlock.getLocation()))
+                continue;
+
+            //The plot does not contain the piston block
+
+            final Iterator<Block> iterator = blocks.iterator();
+
+            blockLoop:
+            while(iterator.hasNext())
+            {
+                Block blockWhichWillBeMoved = iterator.next();
+
+                if(plot.contains(blockWhichWillBeMoved.getLocation()))
+                {
+                    event.setCancelled(true);
+                    break plotLoop;
+                }
             }
         }
     }

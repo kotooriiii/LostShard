@@ -182,7 +182,7 @@ public class ArcheryListener implements Listener {
 
             Vector vec = arrow.getVelocity();
             Vector norm = vec.normalize();
-            Vector finalized =norm.multiply(7);
+            Vector finalized = norm.multiply(new Vector(7,2.5,7));
             defender.setVelocity(finalized);
 
             damager.sendMessage(ChatColor.GREEN + defender.getName() + " has been knocked back!");
