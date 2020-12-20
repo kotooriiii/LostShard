@@ -122,8 +122,8 @@ public class SignChangeListener implements Listener {
         if (plot != null) {
             boolean isAllowedToRotateInPlayerPlot = isAllowedToRotateInPlayerPlot(plot, event.getPlayer());
             if (plot.getClass().equals(SpawnPlot.class) || isAllowedToRotateInPlayerPlot) {
-                event.getPlayer().sendMessage(STANDARD_COLOR + "You rotated your build.");
                 LostShardPlugin.getSkillManager().getSkillPlayer(event.getPlayer().getUniqueId()).rotate();
+                event.getPlayer().sendMessage(STANDARD_COLOR + "You rotated to build " + LostShardPlugin.getSkillManager().getSkillPlayer(event.getPlayer().getUniqueId()).getActiveIndex() + ".");
                 event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
                 event.getPlayer().setHealth(0);
                 return;

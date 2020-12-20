@@ -71,14 +71,14 @@ public class MiningListener implements Listener {
             case ANDESITE:
             case DIORITE:
             case GRANITE:
-//            case GOLD_ORE:
-//            case IRON_ORE:
-//            case COAL_ORE:
-//            case EMERALD_ORE:
-//            case REDSTONE_ORE:
-//            case LAPIS_ORE:
-//            case DIAMOND_ORE:
-//            case NETHER_QUARTZ_ORE:
+            case GOLD_ORE:
+            case IRON_ORE:
+            case COAL_ORE:
+            case EMERALD_ORE:
+            case REDSTONE_ORE:
+            case LAPIS_ORE:
+            case DIAMOND_ORE:
+            case NETHER_QUARTZ_ORE:
                 return true;
         }
         return false;
@@ -136,7 +136,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.008);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
@@ -146,15 +146,15 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00035);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00035);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0004);
         } else if (90 <= level && level < 100) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.008);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
@@ -164,15 +164,15 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0002);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00075);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00075);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0002);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.00025);
         } else if (80 <= level && level < 90) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.008);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
@@ -182,16 +182,16 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00015);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
-            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00015);
+            lootTable.put(new ItemStack(Material.DIAMOND_ORE, 1), 0.0002);
 
         } else if (70 <= level && level < 80) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.008);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
@@ -201,14 +201,14 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
             lootTable.put(new ItemStack(Material.LAPIS_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00015);
 
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.00015);
         } else if (60 <= level && level < 70) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.002);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.005);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
@@ -217,37 +217,37 @@ public class MiningListener implements Listener {
 
             lootTable.put(new ItemStack(Material.LAPIS_LAZULI, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00015);
 
 
         } else if (50 <= level && level < 60) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.001);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.005);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.001);
 
             lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
             lootTable.put(new ItemStack(Material.REDSTONE_ORE, 1), 0.001);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00015);
         } else if (40 <= level && level < 50) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.005);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
 
             lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.0005);
+            lootTable.put(new ItemStack(Material.EMERALD_ORE, 1), 0.00015);
         } else if (30 <= level && level < 40) {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.002);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.005);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.003);
 
@@ -256,7 +256,7 @@ public class MiningListener implements Listener {
             lootTable.put(new ItemStack(Material.COAL_ORE, 1), 0.002);
             lootTable.put(new ItemStack(Material.COAL, 1), 0.003);
 
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.003);
+            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.005);
 
             lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.002);
         } else if (10 <= level && level < 20) {

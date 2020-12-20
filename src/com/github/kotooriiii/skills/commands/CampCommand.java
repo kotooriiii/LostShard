@@ -28,7 +28,7 @@ public class CampCommand implements CommandExecutor {
             final UUID playerUUID = playerSender.getUniqueId();
             if (cmd.getName().equalsIgnoreCase("camp")) {
 
-                int level = (int)  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSurvivalism().getLevel();
+                int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getSurvivalism().getLevel();
                 if (level < SurvivalismListener.Campfire.LEVEL) {
                     playerSender.sendMessage(ERROR_COLOR + "You must be at least level 25 to place a camp.");
                     return false;
@@ -92,24 +92,31 @@ public class CampCommand implements CommandExecutor {
 
     private Location getLocation(Player player, int range) {
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
-        Block targetBlock = lastTwoTargetBlocks.get(1);
+        Block targetBlock = null;
+        if (lastTwoTargetBlocks.size() > 1) {
+            targetBlock = lastTwoTargetBlocks.get(1);
+
+
+        } else {
+            targetBlock = lastTwoTargetBlocks.get(0);
+        }
         Block adjacentBlock = lastTwoTargetBlocks.get(0);
 
+
         if (targetBlock.getType() == Material.AIR) {
-            //         Bukkit.broadcastMessage("The campfire spot is in air. Cannot be placed here.");
+            player.sendMessage(ERROR_COLOR + "The campfire spot is in air. Cannot be placed here.");
             return null;
         }
-
 
         if (adjacentBlock.getType() != Material.AIR) {
             //Bukkit.broadcastMessage("The campfire spot block is already taken by something not air. Cannot be placed here.");
             return null;
         }
 
-        if (adjacentBlock.getY() < targetBlock.getY()) {
-            // Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
-            return null;
-        }
+//        if (adjacentBlock.getY() < targetBlock.getY()) {
+//            // Bukkit.broadcastMessage("The campfire spot is less than what you are looking at. Cannot be placed here.");
+//            return null;
+//        }
 
         if (new Location(adjacentBlock.getWorld(), adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()).getBlock().getType() == Material.AIR) {
             adjacentBlock = new Location(adjacentBlock.getWorld(), targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()).getBlock();

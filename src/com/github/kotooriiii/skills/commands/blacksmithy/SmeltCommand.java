@@ -109,7 +109,6 @@ public class SmeltCommand implements CommandExecutor {
                 playerSender.sendMessage(ChatColor.GRAY + "You smelted some items but failed to recover some materials.");
             if (atLeastOneSuccess) {
                 playerSender.sendMessage(ChatColor.GOLD + "You smelt the items.");
-                stat.setStamina(stat.getStamina() - STAMINA_COST);
             }
         } else {
             if (inventoryFull)
@@ -118,7 +117,6 @@ public class SmeltCommand implements CommandExecutor {
                 playerSender.sendMessage(ChatColor.GRAY + "You smelted the item but failed to recover any usable material.");
             if (atLeastOneSuccess) {
                 playerSender.sendMessage(ChatColor.GOLD + "You smelt the item.");
-                stat.setStamina(stat.getStamina() - STAMINA_COST);
             }
         }
 
@@ -126,6 +124,7 @@ public class SmeltCommand implements CommandExecutor {
 //        playerSender.playSound(playerSender.getLocation());
 
         //Give xp for trying.
+        stat.setStamina(stat.getStamina() - STAMINA_COST);
         blacksmithy.addXP(getXP(mainHand));
         mainHand.setItemMeta(meta);
         playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));

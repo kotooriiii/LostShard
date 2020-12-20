@@ -7,6 +7,8 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.io.Serializable;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public abstract class Plot implements Serializable {
@@ -42,6 +44,11 @@ public abstract class Plot implements Serializable {
      */
     protected Zone zone;
 
+    /**
+     * The milliseconds date at which the plot was created in.
+     */
+    protected long creationMillisecondsDate;
+
     public Plot(World world, String name) {
         this.name = name;
         this.world = world;
@@ -49,6 +56,8 @@ public abstract class Plot implements Serializable {
         //This is empty, must be calculated by subclass.
         this.zone = new Zone(0, 0, 0, 0, 0, 0);
         this.id = generateID();
+        creationMillisecondsDate = ZonedDateTime.now(ZoneId.of("America/New_York")).toInstant().toEpochMilli();
+
     }
 
     /**
@@ -157,6 +166,14 @@ public abstract class Plot implements Serializable {
     public void setID(UUID uuid) {
         this.id = uuid;
         LostShardPlugin.getPlotManager().savePlot(this);
+    }
+
+    public long getCreationMillisecondsDate() {
+        return creationMillisecondsDate;
+    }
+
+    public void setCreationMillisecondsDate(long creationMillisecondsDate) {
+        this.creationMillisecondsDate = creationMillisecondsDate;
     }
 
     public UUID generateID() {

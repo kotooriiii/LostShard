@@ -28,7 +28,7 @@ public class IceBallSuffocationListener implements Listener {
             return;
 
         Location location = entity.getLocation();
-        location = location.add(0,1,0);
+        location = location.add(0, 1, 0);
         location.setPitch(0);
         location.setYaw(0);
         location.setX(location.getBlockX());
@@ -42,7 +42,15 @@ public class IceBallSuffocationListener implements Listener {
             if (set.contains(location)) {
                 Player damagerPlayer = Bukkit.getPlayer(playerPlaced);
                 if (damagerPlayer.isOnline()) {
-                    ((Player) entity).damage(2.0f, damagerPlayer);
+
+
+                    if (entity.getUniqueId().equals(playerPlaced))
+
+                        ((Player) entity).damage(2.0f);
+
+                    else
+                        ((Player) entity).damage(2.0f, damagerPlayer);
+
                     event.setCancelled(true);
                 }
             }

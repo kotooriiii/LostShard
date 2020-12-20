@@ -16,12 +16,11 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class MovingWhileCastArgumentListener implements Listener {
     @EventHandler
-    public void onMove(PlayerMoveEvent event)
-    {
+    public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
         //not casting spell
-        if(!Spell.getWaitingForArgumentMap().containsKey(player.getUniqueId()))
+        if (!Spell.getWaitingForArgumentMap().containsKey(player.getUniqueId()))
             return;
 
 
@@ -33,20 +32,23 @@ public class MovingWhileCastArgumentListener implements Listener {
         int tY = event.getTo().getBlockY();
         int tZ = event.getTo().getBlockZ();
 
-        if(fX == tX && fY == tY && fZ == tZ)
+        if (fX == tX && fY == tY && fZ == tZ)
             return;
 
         //Is casting a spell and moved a block
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to movement.");
-        SpellType type  = Spell.getWaitingForArgumentMap().get(player.getUniqueId());
+        SpellType type = Spell.getWaitingForArgumentMap().get(player.getUniqueId());
         Spell.of(type).refund(player);
         Spell.getWaitingForArgumentMap().remove(player.getUniqueId());
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDmg(EntityDamageEvent event) {
         Entity entity = event.getEntity();
+
+        if (event.isCancelled())
+            return;
 
         if (!(entity instanceof Player))
             return;
@@ -57,14 +59,14 @@ public class MovingWhileCastArgumentListener implements Listener {
         Player player = (Player) entity;
 
         //not casting spell
-        if(!Spell.getWaitingForArgumentMap().containsKey(player.getUniqueId()))
+        if (!Spell.getWaitingForArgumentMap().containsKey(player.getUniqueId()))
             return;
 
 
         //Is casting a spell and took dmg
 
         player.sendMessage(ERROR_COLOR + "Your spell was interrupted due to damage.");
-        SpellType type  = Spell.getWaitingForArgumentMap().get(player.getUniqueId());
+        SpellType type = Spell.getWaitingForArgumentMap().get(player.getUniqueId());
         Spell.of(type).refund(player);
         Spell.getWaitingForArgumentMap().remove(player.getUniqueId());
     }

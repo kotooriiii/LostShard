@@ -24,7 +24,7 @@ public class TutorialCommand implements CommandExecutor {
 
         if (args.length == 0) {
             if(!LostShardPlugin.isTutorial())
-            playerSender.performCommand("server tutorial");
+                playerSender.sendMessage(STANDARD_COLOR + "Want to give the tutorial another try? Type: /server tutorial.");
             else
                 playerSender.sendMessage(STANDARD_COLOR + "You're already on the tutorial server.");
             return false;

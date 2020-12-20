@@ -4,11 +4,13 @@ import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -629,6 +631,48 @@ public final class HelperMethods {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(message);
         }
+    }
+
+    public static BlockFace getClosestFace(Location start, Location finish) {
+
+        org.bukkit.util.Vector startVector = start.toVector();
+        org.bukkit.util.Vector finishVector = finish.toVector();
+        Vector angleVector = finishVector.subtract(startVector);
+
+        double angle = Math.atan2(angleVector.getX(), angleVector.getZ()); // Math.atan(angleVector.getX()/(angleVector.getZ()*-1));
+
+        double yaw = (angle * 180) / Math.PI;
+
+        yaw += 270;
+
+        if (yaw > 360) {
+            yaw = yaw - 360;
+        }
+
+
+        BlockFace compassDir = null;
+
+
+        if (0 <= yaw && yaw < 22.5) {
+            compassDir = BlockFace.EAST;
+        } else if (22.5 <= yaw && yaw < 67.5) {
+            compassDir = BlockFace.NORTH_EAST;
+        } else if (67.5 <= yaw && yaw < 112.5) {
+            compassDir = BlockFace.NORTH;
+        } else if (112.5 <= yaw && yaw < 157.5) {
+            compassDir = BlockFace.NORTH_WEST;
+        } else if (157.5 <= yaw && yaw < 202.5) {
+            compassDir = BlockFace.WEST;
+        } else if (202.5 <= yaw && yaw < 247.5) {
+            compassDir = BlockFace.SOUTH_WEST;
+        } else if (247.5 <= yaw && yaw < 292.5) {
+            compassDir = BlockFace.SOUTH;
+        } else if (292.5 <= yaw && yaw < 337.5) {
+            compassDir = BlockFace.SOUTH_EAST;
+        } else if (337.5 <= yaw && yaw <= 360) {
+            compassDir = BlockFace.EAST;
+        }
+        return compassDir;
     }
 
 }

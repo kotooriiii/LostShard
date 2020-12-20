@@ -1,14 +1,17 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.files.FileManager;
+import com.github.kotooriiii.google.TutorialSheet;
 import io.netty.handler.codec.redis.ErrorRedisMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
-import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
+import java.util.Random;
+import java.util.UUID;
+
+import static com.github.kotooriiii.data.Maps.*;
 
 public class LostShardCommand implements CommandExecutor {
 
@@ -28,13 +31,18 @@ public class LostShardCommand implements CommandExecutor {
 
             switch (args[0].toLowerCase()) {
                 case "reset":
-                    if(!(commandSender instanceof ConsoleCommandSender))
-                    {
+                    if (!(commandSender instanceof ConsoleCommandSender)) {
                         commandSender.sendMessage(ERROR_COLOR + "This command is only allowed to console.");
-                        return  false;
+                        return false;
                     }
                     FileManager.reset();
                     break;
+                case "tutorial-append":
+                    Random ran = new Random();
+                    TutorialSheet.getInstance().append(UUID.randomUUID(), "DummyName", ran.nextBoolean(), "DummyChapter", ran.nextInt(500), ran.nextInt(500), ran.nextInt(500), true, true, ran.nextInt(500));
+                    commandSender.sendMessage(STANDARD_COLOR + "Appended to sheets.");
+                    break;
+
                 default:
             }
         }

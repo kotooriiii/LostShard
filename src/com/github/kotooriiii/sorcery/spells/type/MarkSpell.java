@@ -101,6 +101,10 @@ public class MarkSpell extends Spell implements Listener {
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
+
+        if(event.isCancelled())
+            return;
+
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
@@ -173,7 +177,7 @@ public class MarkSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.AQUA + "What would you like to name your Mark?");
+        player.sendMessage(ChatColor.YELLOW + "What would you like to name your Mark?");
         return true;
     }
 
@@ -182,7 +186,7 @@ public class MarkSpell extends Spell implements Listener {
      */
     private void mark(Player player, String message, Location markLocation) {
 
-        final int WAITING_TO_RECALL_PERIOD = 3;
+        final int WAITING_TO_RECALL_PERIOD = 2;
         player.sendMessage(ChatColor.GOLD + "You begin to cast mark...");
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
 

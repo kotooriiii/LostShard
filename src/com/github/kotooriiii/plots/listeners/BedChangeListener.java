@@ -137,6 +137,8 @@ public class BedChangeListener implements Listener {
 
     public static void fixBug() {
         for (Stat stat : Stat.getStatMap().values()) {
+            if(stat.getSpawn() == null)
+                continue;
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(stat.getSpawn());
             UUID uuid = stat.getPlayerUUID();
             if (plot != null && plot instanceof PlayerPlot && ((PlayerPlot) plot).isTown() && (((PlayerPlot) plot).isFriend(uuid) || ((PlayerPlot) plot).isJointOwner(uuid) || ((PlayerPlot) plot).isOwner(uuid)))

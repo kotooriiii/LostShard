@@ -20,6 +20,7 @@ import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
 import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
+import com.github.kotooriiii.google.TutorialSheet;
 import com.github.kotooriiii.hostility.commands.HostilityCommand;
 import com.github.kotooriiii.hostility.listeners.HostilityCreateListener;
 import com.github.kotooriiii.hostility.listeners.HostilityNamePreprocessListener;
@@ -85,8 +86,6 @@ import com.github.kotooriiii.tutorial.TutorialManager;
 import com.github.kotooriiii.util.HelperMethods;
 import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
-import fr.neatmonster.nocheatplus.NoCheatPlus;
-import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.luckperms.api.LuckPerms;
@@ -662,7 +661,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new WeatherManagerListener(), this);
         pm.registerEvents(new PlayerFirstTimeJoinListener(), this);
 
-        pm.registerEvents(new RemovePhantomListener(), this);
+        pm.registerEvents(new RemoveVanillaThings(), this);
 
         pm.registerEvents(new ScrollListener(), this);
 
@@ -700,6 +699,10 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new DisableEnchantedGoldenAppleListener(), this);
 
         pm.registerEvents(new IceBallSuffocationListener(), this);
+
+        pm.registerEvents(new FallOnWoolBlockListener(), this);
+
+        pm.registerEvents(new PlotBannerListener(), this);
 
         registerCustomEventListener();
 
@@ -966,8 +969,13 @@ public class LostShardPlugin extends JavaPlugin {
 
                 //Set murder count less than one
                 for (StatusPlayer statusPlayer : StatusPlayer.getPlayerStatus().values()) {
-                    if (statusPlayer.getKills() > 0)
+                    if (statusPlayer.getKills() > 0) {
                         statusPlayer.setKills(statusPlayer.getKills() - 1);
+                        if(statusPlayer.getKills() <= 4 && statusPlayer.getStatus() == Status.MURDERER)
+                        {
+                            statusPlayer.setStatus(Status.LAWFUL);
+                        }
+                    }
                 }
 
                 //Taxes every day

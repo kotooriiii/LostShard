@@ -84,6 +84,10 @@ public class ClanTPSpell extends Spell implements Listener {
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
+
+        if(event.isCancelled())
+            return;
+
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
@@ -155,7 +159,7 @@ public class ClanTPSpell extends Spell implements Listener {
     @Override
     public boolean executeSpell(Player player) {
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.AQUA + "Who would you like to teleport to?");
+        player.sendMessage(ChatColor.YELLOW + "Who would you like to teleport to?");
         return true;
     }
 

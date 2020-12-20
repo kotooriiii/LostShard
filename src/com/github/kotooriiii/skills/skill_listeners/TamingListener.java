@@ -96,6 +96,8 @@ public class TamingListener implements Listener {
                 addXP(player, entity, 50);
 
             }
+        else
+            addXP(player, entity, 30);
 
     }
 
@@ -226,7 +228,11 @@ public class TamingListener implements Listener {
         if (tameable.isTamed())
             return;
 
-        addXP((Player) livingEntity, vehicle);
+        if(!(vehicle instanceof AbstractHorse))
+            return;
+        AbstractHorse horse = (AbstractHorse) vehicle;
+
+    //    addXP((Player) livingEntity, vehicle);
     }
 
 

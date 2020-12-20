@@ -96,8 +96,10 @@ public class FireballExplodeListener implements Listener {
         for (Entity entity : location.getWorld().getNearbyEntities(location, RADIUS, RADIUS, RADIUS)) {
             if (!(entity instanceof Damageable))
                 continue;
-            if(entity.equals(shooter))
+            if(entity.equals(shooter)) {
+                ((Damageable) entity).damage(damage);
                 continue;
+            }
             if(clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 

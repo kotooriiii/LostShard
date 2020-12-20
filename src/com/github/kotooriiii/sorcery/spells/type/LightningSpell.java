@@ -2,6 +2,9 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.Bukkit;
@@ -48,15 +51,31 @@ public class LightningSpell extends Spell {
 
         // Get target block (last block in line of sight)
         Location lightningLocation = lineOfSightLightning.get(lineOfSightLightning.size() - 1).getLocation();
-        player.getLocation().getWorld().strikeLightningEffect(lightningLocation);
+        player.getLocation().getWorld().strikeLightning(lightningLocation);
         callPlayerEvent(player, lightningLocation, RADIUS);
 
         for (int x = lightningLocation.getBlockX() - RADIUS; x < lightningLocation.getBlockX() + RADIUS; x++)
             for (int z = lightningLocation.getBlockZ() - RADIUS; z < lightningLocation.getBlockZ() + RADIUS; z++)
                 if (Math.random() <= 0.90d)
+                {
+                   Location burnLocation =  new Location(lightningLocation.getWorld(), x, lightningLocation.getBlockY() + 1, z);
+                    Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(burnLocation);
+                    if(plot != null)
+                    {
+                        if(plot instanceof PlayerPlot)
+                        {
+                            if(!(((PlayerPlot) plot).isJointOwner(player.getUniqueId()) || ((PlayerPlot) plot).isOwner(player.getUniqueId())))
+                                continue;
+
+                        }
+
+
+                    }
                     lightningLocation.getWorld()
-                            .getBlockAt(new Location(lightningLocation.getWorld(), x, lightningLocation.getBlockY() + 1, z))
+                            .getBlockAt(burnLocation)
                             .setType(Material.FIRE);
+                }
+
 
 
         return true;
@@ -116,8 +135,10 @@ public class LightningSpell extends Spell {
         for (Entity entity : attacker.getLocation().getWorld().getNearbyEntities(location, RADIUS, RADIUS, RADIUS)) {
             if (!(entity instanceof LivingEntity))
                 continue;
-            if (attacker.equals(entity))
+            if (attacker.equals(entity)) {
+                attacker.damage(3.0f);
                 continue;
+            }
             if (clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 

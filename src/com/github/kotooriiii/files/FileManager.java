@@ -112,9 +112,9 @@ public final class FileManager {
         buildchanger_folder.mkdirs();
         ignoredPlayer_folder.mkdirs();
 
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "clanREADME.txt", clans_folder, true);
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
-        saveResource("com" + File.separator + "github" + File.separator + "kotooriiii" + File.separator + "files" + File.separator + "bankREADME.txt", bank_folder, true);
+        saveResource("resources" + File.separator + "clanREADME.txt", clans_folder, true);
+        saveResource("resources" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
+        saveResource("resources" + File.separator + "bankREADME.txt", bank_folder, true);
 
         load();
 
@@ -641,6 +641,7 @@ public final class FileManager {
         Location center = yaml.getLocation("Center");
         boolean isTown = yaml.getBoolean("Town");
         boolean isDungeon = yaml.getBoolean("Dungeon");
+        long millis = yaml.getLong("CreationDateEpochMillis", ZonedDateTime.of(2020, 10, 29, 12 + 3, 0, 0, 0, ZoneId.of("America/New_York")).toInstant().toEpochMilli());
 
         List<String> friendsList = yaml.getStringList("Friends");
         ArrayList<UUID> friendsUUIDList = new ArrayList<UUID>();
@@ -669,6 +670,7 @@ public final class FileManager {
         playerPlot.setJointOwners(jointOwnerUUIDList);
         playerPlot.setTown(isTown);
         playerPlot.setDungeon(isDungeon);
+        playerPlot.setCreationMillisecondsDate(millis);
 
 
         return playerPlot;
@@ -1068,7 +1070,7 @@ public final class FileManager {
         try {
             yaml.save(bankFile);
         } catch (IOException | NullPointerException e) {
-            LostShardPlugin.plugin.getLogger().severe("Error: Check the bank of player uuid '" + bank.getPlayerUUID() + "'." );
+            LostShardPlugin.plugin.getLogger().severe("Error: Check the bank of player uuid '" + bank.getPlayerUUID() + "'.");
             e.printStackTrace();
         }
     }
@@ -1236,6 +1238,8 @@ public final class FileManager {
         yaml.set("Town", playerPlot.isTown());
         yaml.set("Dungeon", playerPlot.isDungeon());
 
+        yaml.set("CreationDateEpochMillis", playerPlot.getCreationMillisecondsDate());
+
         ArrayList<String> friendsList = new ArrayList<>(friends.length);
         for (UUID uuid : friends)
             friendsList.add(uuid.toString());
@@ -1287,6 +1291,9 @@ public final class FileManager {
             yaml.set("SpawnB", arenaPlot.getSpawnB());
 
         }
+
+        yaml.set("CreationDateEpochMillis", staffPlot.getCreationMillisecondsDate());
+
 
         try {
             yaml.save(file);

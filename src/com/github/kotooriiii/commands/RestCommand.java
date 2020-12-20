@@ -28,7 +28,7 @@ public class RestCommand implements CommandExecutor {
                         playerSender.sendMessage(ChatColor.GOLD + "You are already resting...");
                         return true;
                     }
-                    playerSender.sendMessage(ChatColor.GOLD + "You have begun to rest.");
+                    playerSender.sendMessage(ChatColor.GOLD + "You begin resting.");
                     Stat.getRestingPlayers().add(playerUUID);
 
                 } else {

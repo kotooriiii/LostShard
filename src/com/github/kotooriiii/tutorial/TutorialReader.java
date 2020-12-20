@@ -22,6 +22,7 @@ public class TutorialReader {
         this.id = "playersWithTutorialCompleted";
         if (!file.exists()) {
             try {
+                file.mkdirs();
                 file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();

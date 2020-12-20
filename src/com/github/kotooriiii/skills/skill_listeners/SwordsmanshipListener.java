@@ -277,7 +277,7 @@ public class SwordsmanshipListener implements Listener {
 
 
         if(isCrit)
-            damage*=1.3f;
+            damage+= 0;
 
         double sharpnessLevel = damager.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.DAMAGE_ALL);
         double sharpnessDamage = 0.5 * sharpnessLevel + 0.5;
@@ -288,7 +288,7 @@ public class SwordsmanshipListener implements Listener {
     }
 
     private boolean addXP(Player player, Entity entity) {
-        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSwordsmanship().addXP(getXP(entity));
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSwordsmanship().addXP(getXP(entity) + 25);
     }
 
     private float getXP(Entity entity) {
@@ -467,7 +467,7 @@ public class SwordsmanshipListener implements Listener {
             case BEE:
                 break;
             case PLAYER:
-                break;
+                return 50;
 
         }
 

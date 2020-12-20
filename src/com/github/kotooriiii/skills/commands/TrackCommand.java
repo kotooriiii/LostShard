@@ -106,6 +106,12 @@ public class TrackCommand implements CommandExecutor {
                     return false;
                 }
 
+                if(trackedPlayer.isDead())
+                {
+                    playerSender.sendMessage(ERROR_COLOR + "The player is dead...");
+                    return false;
+                }
+
 
                 double chanceToBeTracked = -1;
                 if (trackedPlayerLevel >= 100)

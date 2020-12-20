@@ -97,6 +97,7 @@ public class AtoneCommand implements CommandExecutor {
                         return;
                     }
                     statusPlayer.setStatus(Status.LAWFUL);
+
                     statusPlayer.setKills(4);
                     player.sendMessage(ChatColor.GOLD + "You have atoned for your sins. You are now Lawful again.");
                     statusPlayer.setLastAtoneDate(ZonedDateTime.now(ZoneId.of("America/New_York")));

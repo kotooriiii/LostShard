@@ -84,6 +84,10 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
+
+        if(event.isCancelled())
+            return;
+
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 

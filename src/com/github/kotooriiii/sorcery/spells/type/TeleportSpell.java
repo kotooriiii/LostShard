@@ -49,8 +49,9 @@ public class TeleportSpell extends Spell {
         }
 
         if (!isAcceptableBlock(getBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
-            player.sendMessage(ERROR_COLOR + "Invalid target.");
-            return false;
+//            player.sendMessage(ERROR_COLOR + "Invalid target.");
+//            return false;
+          //  teleportLocation.add(0, -1, 0);
         } else if (new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
             teleportLocation.add(0, -1, 0);
         }

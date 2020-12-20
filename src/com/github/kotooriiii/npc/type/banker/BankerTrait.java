@@ -12,6 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+
 //This is your trait that will be applied to a npc using the /trait mytraitname command. Each NPC gets its own instance of this class.
 //the Trait class has a reference to the attached NPC class through the protected field 'npc' or getNPC().
 //The Trait class also implements Listener so you can add EventHandlers directly to your trait.
@@ -65,6 +67,27 @@ public class BankerTrait extends Trait {
 
         clicker.performCommand("bank help");
     }
+
+    // An example event handler. All traits will be registered automatically as Bukkit Listeners.
+    @EventHandler
+    public void click(net.citizensnpcs.api.event.NPCLeftClickEvent event) {
+        //Handle a click on a NPC. The event has a getNPC() method.
+        //Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on this NPC!
+        if (!event.getNPC().equals(this.getNPC()))
+            return;
+
+        Player clicker = event.getClicker();
+
+       ItemStack mainHand =  clicker.getInventory().getItemInMainHand();
+        if(mainHand==null || mainHand.getType() != Material.GOLD_INGOT)
+        {
+            clicker.sendMessage(ERROR_COLOR + "You must have gold in your hand to deposit it.");
+            return;
+        }
+
+        clicker.performCommand("deposit " + mainHand.getAmount());
+    }
+
 
     // Called every tick
     @Override

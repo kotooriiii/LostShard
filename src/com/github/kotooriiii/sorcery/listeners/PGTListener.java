@@ -342,22 +342,36 @@ public class PGTListener implements Listener {
                             return;
                         }
 
-                        //get initial vector, teleport, re-set it
-                        Vector vector = entity.getVelocity();
-                        Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
-
                         //check if possible
-                        if (!entity.isDead()) {
-                            entity.teleport(teleportingTo.clone().add(0, 1, 0));
-                            entity.setVelocity(vector);
+                        if (entity.isValid()) {
+
+                            //get initial vector, teleport, re-set it
+                            Vector vector = entity.getVelocity();
+                            Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+
+                            if(teleportingTo==null)
+                                return;
+
+                            Location clone = teleportingTo.clone().add(0, 1, 0);
+
+                            if(clone != null) {
+                                entity.teleport(clone);
+                                entity.setVelocity(vector);
+                            }
+
+                            //reset ticks for tnt
+                            if (entity instanceof TNTPrimed)
+                                ((TNTPrimed) entity).setFuseTicks(20 * 4);
+
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    hasHitPortalMap.remove(entity.getUniqueId());
+                                }
+                            }.runTaskLater(LostShardPlugin.plugin, 10);
+
                         }
-
-                        //reset ticks for tnt
-                        if (entity instanceof TNTPrimed)
-                            ((TNTPrimed) entity).setFuseTicks(20 * 4);
-
                     }
-
                 }
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
@@ -368,7 +382,7 @@ public class PGTListener implements Listener {
                 task.cancel();
                 hasHitPortalMap.remove(entity.getUniqueId());
             }
-        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 5); //arbitrary number set low to clear projectiles quickly
+        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 4); //arbitrary number set low to clear projectiles quickly
     }
 
 

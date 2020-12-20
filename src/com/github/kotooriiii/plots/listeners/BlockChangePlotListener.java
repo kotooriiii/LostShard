@@ -4,9 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
-import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -318,7 +316,7 @@ public class BlockChangePlotListener implements Listener {
                 //Staff no permission
                 if (plot.getType().isStaff()) {
 
-                    //   playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot interact with blocks here, " + plot.getName() + " is protected.");
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
                     playerInteractEvent.setCancelled(true);
                     return;
                 }
@@ -327,6 +325,7 @@ public class BlockChangePlotListener implements Listener {
 
                 //If don't have permissions
                 if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
                     playerInteractEvent.setCancelled(true);
                     return;
                 }

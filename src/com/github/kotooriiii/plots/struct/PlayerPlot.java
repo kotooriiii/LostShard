@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ public class PlayerPlot extends Plot {
 
         isTown = false;
         isDungeon = false;
+
     }
 
     @Override
@@ -241,6 +243,21 @@ public class PlayerPlot extends Plot {
         if (!RankPlayer.wrap(ownerUUID).getRankType().isObligatedRent())
             return true;
 
+
+        ZoneId id = ZoneId.of("America/New_York");
+
+        ZonedDateTime now = ZonedDateTime.now(id);
+        ZonedDateTime creationDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationMillisecondsDate),id);
+
+        ZonedDateTime week1FromCreationDate =  creationDate.plusWeeks(1);
+
+
+        //If today's time is LESS THAN a week
+        if (now.compareTo(week1FromCreationDate) <= 0)
+        {
+            //A week grace period for no tax
+            return true;
+        }
 
         if (getBalance() < getTax()) {
             this.balance = 0;

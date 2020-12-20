@@ -255,8 +255,10 @@ public class BrawlingListener implements Listener {
     }
 
     private boolean addXP(Player player, Entity entity) {
-        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getBrawling().addXP(getXP(entity));
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getBrawling().addXP(getXP(entity) + getXP(entity)*0.3f);
     }
+
+
 
     private float getXP(Entity entity) {
 

@@ -28,7 +28,7 @@ public class InstaEatListener implements Listener {
 
         Player player = playerInteractEvent.getPlayer();
 
-        if(!playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_AIR) && !playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+        if (!playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_AIR) && !playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK))
             return;
 
         //Check if it is an insta eat item
@@ -65,34 +65,37 @@ public class InstaEatListener implements Listener {
                 return;
 
 
+        //If it's health/regen pot OR if its not a splash potion
+        if (instaEatType.isHealOrRegen(player.getInventory().getItemInMainHand()) || !instaEatType.isSplashPotion()) {
 
+            //If you dont have enough mana stop
+            if (currentStamina < staminaCost) {
 
-        //If you dont have enough mana stop
-        if (currentStamina < staminaCost) {
-            if (instaEatType.isSplashPotion()) {
-                player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
-                playerInteractEvent.setCancelled(true);
-            } else {
-                player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
-                playerInteractEvent.setCancelled(true);
+                //only health potions cost stamina
 
+                if (instaEatType.isSplashPotion()) {
+                    player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
+                    playerInteractEvent.setCancelled(true);
+                } else {
+                    player.sendMessage(ERROR_COLOR + "You do not have enough stamina. You need " + (int) staminaCost + " stamina for that.");
+                    playerInteractEvent.setCancelled(true);
+
+                }
+                return;
             }
-            return;
+
+            stat.setStamina(currentStamina - staminaCost);
+
         }
-
-
-        stat.setStamina(currentStamina - staminaCost);
 
 
         double newHealth = currentHealth + replenishedHealth;
         double newFoodLevel = currentFoodLevel + replenishedFoodLevel;
 
         //if has perk
-        if((int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel() >= 50)
-        {
+        if ((int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel() >= 50) {
             //if its a survivalist food
-            if(SurvivalismListener.SurvivalistFood.isSurvivalistFood(instaEatType.getMaterial()))
-            {
+            if (SurvivalismListener.SurvivalistFood.isSurvivalistFood(instaEatType.getMaterial())) {
                 SurvivalismListener.SurvivalistFood survivalistFood = SurvivalismListener.SurvivalistFood.getSurvivalistFood(instaEatType.getMaterial());
                 //add food attribute
                 newFoodLevel += survivalistFood.getFoodLevel();

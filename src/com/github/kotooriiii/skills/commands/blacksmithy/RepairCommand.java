@@ -84,7 +84,6 @@ public class RepairCommand implements CommandExecutor {
             //Repair item
             ((Damageable) meta).setDamage(0);
             playerSender.sendMessage(ChatColor.GOLD + "You repair the item.");
-            stat.setStamina(stat.getStamina() - STAMINA_COST);
 
         } else {
 
@@ -101,6 +100,7 @@ public class RepairCommand implements CommandExecutor {
         }
 
         //Give xp for trying.
+        stat.setStamina(stat.getStamina() - STAMINA_COST);
         blacksmithy.addXP(getXP(mainHand));
         mainHand.setItemMeta(meta);
         invHelper.removeIngredients();
@@ -351,8 +351,7 @@ public class RepairCommand implements CommandExecutor {
             case WOODEN_PICKAXE:
             case WOODEN_HOE:
             case WOODEN_SHOVEL:
-                return new ItemStack[]{new ItemStack(Material.OAK_PLANKS, 1), new ItemStack(Material.ACACIA_PLANKS, 1), new ItemStack(Material.BIRCH_PLANKS, 1), new ItemStack(Material.DARK_OAK_PLANKS, 1),
-                        new ItemStack(Material.JUNGLE_PLANKS, 1), new ItemStack(Material.SPRUCE_PLANKS, 1)};
+                return new ItemStack[]{new ItemStack(Material.OAK_PLANKS, 1)};
 
         }
         return null;

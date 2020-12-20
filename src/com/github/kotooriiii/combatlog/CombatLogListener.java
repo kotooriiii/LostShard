@@ -4,24 +4,21 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
-import jdk.internal.org.objectweb.asm.commons.SerialVersionUIDAdder;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,14 +42,20 @@ public class CombatLogListener implements Listener {
     @EventHandler
     public void throwEnderpearl(PlayerInteractEvent event)
     {
+        //enderpearl disable enderpearl
+        if(event.getItem() == null)
+            return;
+        if(event.getHand() != EquipmentSlot.HAND)
+            return;
         if(event.getItem().getType() != Material.ENDER_PEARL)
             return;
         Player shooterPlayer = event.getPlayer();
 
-        if(!LostShardPlugin.getCombatLogManager().isTagged(shooterPlayer.getUniqueId()))
-            return;
+        //Permanent disable
+//        if(!LostShardPlugin.getCombatLogManager().isTagged(shooterPlayer.getUniqueId()))
+//            return;
 
-        shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled while in combat.");
+        shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled.");
         event.setCancelled(true);
     }
 

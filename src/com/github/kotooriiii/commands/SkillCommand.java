@@ -73,7 +73,7 @@ public class SkillCommand implements CommandExecutor {
                             return false;
                         }
 
-                        skillUnlock.setLocked(true);
+                        skillUnlock.setLocked(false);
                         playerSender.sendMessage(STANDARD_COLOR + "You have unlocked " + skillUnlock.getType().getName() + ".");
 
                         break;
@@ -157,8 +157,7 @@ public class SkillCommand implements CommandExecutor {
 
 
                         if (newLevel < 0) {
-                            playerSender.sendMessage(ERROR_COLOR + "You must choose a smaller number. Your skill level cannot be negative.");
-                            return false;
+                            newLevel = 0.0f;
                         }
 
                         /*

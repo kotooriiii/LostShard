@@ -52,6 +52,11 @@ public class PlayerJoinRealServerListener implements Listener {
             player.getInventory().addItem(rewards);
             player.sendMessage(ChatColor.GOLD + "Your rewards for completing the tutorial are in your inventory.");
         }
+
+        player.getInventory().addItem(new ItemStack(Material.FEATHER, 32));
+        player.getInventory().addItem(new ItemStack(Material.REDSTONE, 32));
+        player.getInventory().addItem(new ItemStack(Material.MELON_SLICE, 16));
+//todo plot banner
         LostShardPlugin.getTutorialReader().award(player.getUniqueId());
     }
 

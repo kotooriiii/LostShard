@@ -43,7 +43,7 @@ public class InventoryUtil {
                 hasIngredients = false;
                 continue;
             } else {
-                isUnique=true;
+                isUnique = true;
             }
             pendingRemovalItems.add(indeces);
 
@@ -107,10 +107,23 @@ public class InventoryUtil {
         //Inventory slot index , int amount
         HashMap<Integer, Integer> hashmap = new HashMap<>();
 
+        //used for regex
+        final String nameOfItem = materialType.getKey().getKey().toUpperCase();
+
         for (int i = 0; i < contents.length; i++) {
             ItemStack iteratingItem = contents[i];
-            if (iteratingItem == null || !materialType.equals(iteratingItem.getType()))
+            if (iteratingItem == null)
                 continue;
+
+            if (nameOfItem.endsWith("_PLANKS")) {
+                if (!iteratingItem.getType().getKey().getKey().toUpperCase().endsWith("_PLANKS"))
+                    continue;
+            } else {
+                if (!materialType.equals(iteratingItem.getType()))
+                    continue;
+            }
+
+
             int iteratingCount = iteratingItem.getAmount();
             int tempTotal = iteratingCount + counterMoney;
 
@@ -128,7 +141,11 @@ public class InventoryUtil {
         if (isRemoving) {
             if (counterMoney < amountRequired) {
                 if (message)
-                    player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
+                    if (nameOfItem.endsWith("_PLANKS"))
+                        player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + "wooden plank of any kind " + this.message + ".");
+
+                    else
+                        player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
                 return null;
 
             }
@@ -137,7 +154,11 @@ public class InventoryUtil {
             if (counterMoney < amountRequired && counter < maxCounter) {
 
                 if (message)
-                    player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
+                    if (nameOfItem.endsWith("_PLANKS"))
+                        player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + "wooden plank of any kind " + this.message + ".");
+                    else
+
+                        player.sendMessage(ERROR_COLOR + "You need " + amountRequired + " " + materialType.getKey().getKey().toLowerCase().replace("_", " ") + " " + this.message + ".");
                 counter++;
                 return null;
 
@@ -146,6 +167,6 @@ public class InventoryUtil {
 
 
         return hashmap;
-}
+    }
 
 }

@@ -2,6 +2,7 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
@@ -526,6 +527,10 @@ public class PlotCommand implements CommandExecutor {
                             String staffSupply = stringBuilder(args, 2, " ");
 
                             switch (args[1]) {
+                                case "banner":
+                                    playerSender.sendMessage(STANDARD_COLOR + "A banner has been sent to your inventory.");
+                                    playerSender.getInventory().addItem(PlotBanner.getInstance().getItem());
+                                    break;
                                 case "create":
 
                                     if (args.length == 2) {
