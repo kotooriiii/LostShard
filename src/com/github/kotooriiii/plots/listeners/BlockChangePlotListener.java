@@ -31,6 +31,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when an Enderman changes a block in a plot.
+     *
      * @param entityChangeBlockEvent The event being called
      */
     @EventHandler
@@ -61,6 +62,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player breaks a block in a staff plot OR in a plot they don't have permissions to build.
+     *
      * @param blockBreakEvent Event being called
      */
     @EventHandler
@@ -93,6 +95,7 @@ public class BlockChangePlotListener implements Listener {
 
                 //If don't have permissions
                 if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
                     blockBreakEvent.setCancelled(true);
                     return;
                 }
@@ -107,13 +110,14 @@ public class BlockChangePlotListener implements Listener {
     /**
      * Called when a living Vehicle takes damage ( horse, mule, donkey, pig with saddle) in a staff plot OR in a plot
      * they don't have permission in building.
+     *
      * @param vehicleDamageEvent The event being called.
      */
     @EventHandler
     public void onEntityDamage(VehicleDamageEvent vehicleDamageEvent) {
         final Vehicle vehicle = vehicleDamageEvent.getVehicle();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(vehicle))
+        if (CitizensAPI.getNPCRegistry().isNPC(vehicle))
             return;
 
 
@@ -162,6 +166,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when an Armor Stand is being broken by a player at a staff plot or plot with no building permissions.
+     *
      * @param event The event being called.
      */
     @EventHandler
@@ -172,7 +177,7 @@ public class BlockChangePlotListener implements Listener {
         //Check entity
         final Entity damagerEntity = event.getDamager();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(entity) || CitizensAPI.getNPCRegistry().isNPC(damagerEntity))
+        if (CitizensAPI.getNPCRegistry().isNPC(entity) || CitizensAPI.getNPCRegistry().isNPC(damagerEntity))
             return;
 
 
@@ -219,13 +224,14 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a vine grows at a staff plot.
+     *
      * @param event
      */
     @EventHandler
     public void onVineSpread(BlockSpreadEvent event) {
 
         final Block source = event.getSource();
-        if(source.getType() != Material.VINE)
+        if (source.getType() != Material.VINE)
             return;
 
 
@@ -262,13 +268,11 @@ public class BlockChangePlotListener implements Listener {
         Plot toPlot = plotManager.getStandingOnPlot(to.getLocation());
 
         //There is a plot where the water will flow
-        if(toPlot != null)
-        {
+        if (toPlot != null) {
             //Then check if the source is inside a plot.
 
             //If the source is not in a plot OR the plots aren't equal
-            if(sourcePlot == null || !sourcePlot.equals(toPlot))
-            {
+            if (sourcePlot == null || !sourcePlot.equals(toPlot)) {
                 event.setCancelled(true);
                 return;
             }
@@ -278,6 +282,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player left clicks a block (attempt to break) on a staff plot or plot with no permissions..
+     *
      * @param playerInteractEvent
      */
     @EventHandler
@@ -316,7 +321,90 @@ public class BlockChangePlotListener implements Listener {
                 //Staff no permission
                 if (plot.getType().isStaff()) {
 
-                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+                    //playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+                  //  playerInteractEvent.setCancelled(true);
+                    return;
+                }
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
+                //If don't have permissions
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    //  playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+                  //  playerInteractEvent.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Called when a Player right clicks a block (attempt to spawn entity) on a staff plot or plot with no permissions..
+     *
+     * @param playerInteractEvent
+     */
+    @EventHandler
+    public void onSpawn(PlayerInteractEvent playerInteractEvent) {
+
+        final Action action = playerInteractEvent.getAction();
+
+        if (action != Action.RIGHT_CLICK_BLOCK)
+            return;
+
+        final Block block = playerInteractEvent.getClickedBlock();
+
+        if (block == null)
+            return;
+
+        if (playerInteractEvent.getItem() != null) {
+            Material[] mats = new Material[]
+                    {
+                            Material.ACACIA_BOAT, Material.BIRCH_BOAT, Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT,
+                            Material.SPRUCE_BOAT, Material.MINECART
+                    };
+
+            boolean exists = false;
+            for (Material mat : mats) {
+                if (playerInteractEvent.getItem().getType() == mat) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (playerInteractEvent.getItem().getType().getKey().getKey().toUpperCase().endsWith("_SPAWN_EGG"))
+                exists = true;
+
+            if (!exists)
+                return;
+        }
+
+
+              /*
+        So far it's a RIGHT CLICK event
+        It's a block event
+         */
+
+        final Location location = block.getLocation();
+        //Check entity
+        final Player playerBlockBreak = playerInteractEvent.getPlayer();
+        //If entity is not a player then cancel it
+        final UUID playerUUID = playerBlockBreak.getUniqueId();
+
+        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.getType().isStaff()) {
+
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot spawn this here, " + plot.getName() + " is protected.");
                     playerInteractEvent.setCancelled(true);
                     return;
                 }
@@ -325,7 +413,7 @@ public class BlockChangePlotListener implements Listener {
 
                 //If don't have permissions
                 if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
-                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot spawn this here, " + plot.getName() + " is protected.");
                     playerInteractEvent.setCancelled(true);
                     return;
                 }
@@ -339,6 +427,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player empties a bucket at a staff plot or plot with no permissions.
+     *
      * @param event
      */
     @EventHandler
@@ -384,6 +473,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player fills a bucket at a staff plot or plot with no building permissions.
+     *
      * @param event
      */
     @EventHandler
@@ -430,6 +520,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when an Item Frame is broken by a Player at a staff plot or plot with no building permissions.
+     *
      * @param event
      */
     @EventHandler
@@ -437,7 +528,7 @@ public class BlockChangePlotListener implements Listener {
 
         final Location location = event.getEntity().getLocation();
         //If entity is not a player then cancel it
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
 
@@ -489,6 +580,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     *
      * @param event
      */
     @EventHandler
@@ -538,6 +630,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     *
      * @param event
      */
     @EventHandler
@@ -590,15 +683,16 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when an Entity is spawned on a staff plot and that said entity is hostile.
+     *
      * @param entitySpawnEvent
      */
     @EventHandler
     public void onSpawn(EntitySpawnEvent entitySpawnEvent) {
-        if(LostShardPlugin.isTutorial())
+        if (LostShardPlugin.isTutorial())
             return;
         if (entitySpawnEvent.getEntity() instanceof Player)
             return;
-        if(CitizensAPI.getNPCRegistry().isNPC(entitySpawnEvent.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(entitySpawnEvent.getEntity()))
             return;
         Location spawnedLocation = entitySpawnEvent.getLocation();
         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(spawnedLocation);
@@ -617,6 +711,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a block explodes and is inside a plot.
+     *
      * @param event
      */
     @EventHandler
@@ -634,6 +729,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when an entity explodes and blocks which should be removed are inside a plot.
+     *
      * @param event
      */
     @EventHandler
@@ -651,6 +747,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a block is ignited and trying to spread inside a plot
+     *
      * @param event
      */
     @EventHandler
@@ -662,7 +759,7 @@ public class BlockChangePlotListener implements Listener {
 //        final Block source = event.getIgnitingBlock();
 //        if (source == null)
 //            return;
-        if(!cause.equals(BlockIgniteEvent.IgniteCause.SPREAD))
+        if (!cause.equals(BlockIgniteEvent.IgniteCause.SPREAD))
             return;
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
             //If the block being interacted is in the location of a plot
@@ -675,6 +772,7 @@ public class BlockChangePlotListener implements Listener {
 
     /**
      * Called when a Player tries to place a block on a staff plot or a plot with no building permissions.
+     *
      * @param blockPlaceEvent
      */
     @EventHandler
@@ -728,7 +826,7 @@ public class BlockChangePlotListener implements Listener {
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
 
             //If the plot contains the piston block, continue
-            if(plot.contains(pistonBlock.getLocation()))
+            if (plot.contains(pistonBlock.getLocation()))
                 continue;
 
             //The plot does not contain the piston block
@@ -736,8 +834,7 @@ public class BlockChangePlotListener implements Listener {
             final Iterator<Block> iterator = blocks.iterator();
 
             blockLoop:
-            while(iterator.hasNext())
-            {
+            while (iterator.hasNext()) {
                 Block blockWhichWillBeMoved = iterator.next();
                 Block movedBlock = blockWhichWillBeMoved.getRelative(directionMoved);
 
@@ -748,8 +845,7 @@ public class BlockChangePlotListener implements Listener {
 //                    if
 //                }
 
-                if(plot.contains(movedBlock.getLocation()))
-                {
+                if (plot.contains(movedBlock.getLocation())) {
                     event.setCancelled(true);
                     break plotLoop;
                 }
@@ -769,7 +865,7 @@ public class BlockChangePlotListener implements Listener {
         for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
 
             //If the plot contains the piston block, continue
-            if(plot.contains(pistonBlock.getLocation()))
+            if (plot.contains(pistonBlock.getLocation()))
                 continue;
 
             //The plot does not contain the piston block
@@ -777,12 +873,10 @@ public class BlockChangePlotListener implements Listener {
             final Iterator<Block> iterator = blocks.iterator();
 
             blockLoop:
-            while(iterator.hasNext())
-            {
+            while (iterator.hasNext()) {
                 Block blockWhichWillBeMoved = iterator.next();
 
-                if(plot.contains(blockWhichWillBeMoved.getLocation()))
-                {
+                if (plot.contains(blockWhichWillBeMoved.getLocation())) {
                     event.setCancelled(true);
                     break plotLoop;
                 }

@@ -16,11 +16,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class PlotIntroChapter extends AbstractChapter {
-    private boolean isFound, isHologramCreated;
+    private boolean isFound, isHologramCreated, exited;
     private Location location;
     private static Zone exitOrderZone = new Zone(738, 754, 72, 65, 796, 812);
     private static Zone plotCreateZone = new Zone(999, 958, 83, 92, 767, 727);
@@ -51,6 +53,22 @@ public class PlotIntroChapter extends AbstractChapter {
 
     }
 
+
+    @EventHandler
+    public void onLeaveOrder(PlayerMoveEvent event) {
+        if (exited)
+            return;
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (!PlotIntroChapter.getExitOrderZone().contains(event.getTo()))
+            return;
+
+        exited = true;
+        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60*5, 3, false, false, false));
+    }
+
     @EventHandler
     public void onAppropiatePlot(PlayerMoveEvent event) {
 
@@ -73,6 +91,8 @@ public class PlotIntroChapter extends AbstractChapter {
         if (!isHologramCreated)
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         isHologramCreated = true;
+        event.getPlayer().removePotionEffect(PotionEffectType.SPEED);
+
         // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
     }
 

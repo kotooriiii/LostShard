@@ -21,6 +21,8 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.inventivetalent.packetlistener.PacketListenerAPI;
 import org.inventivetalent.packetlistener.handler.PacketHandler;
@@ -117,6 +119,8 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (event.getType() != EntityType.SPIDER)
             return;
         isTracked = true;
+
+       event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60*5, 3, false, false, false));
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -162,8 +166,6 @@ public class TrackSpiderChapter extends AbstractChapter {
         if (packetHandler != null) {
             PacketListenerAPI.removePacketHandler(packetHandler);
         }
-
-
     }
 
     public void initListener() {

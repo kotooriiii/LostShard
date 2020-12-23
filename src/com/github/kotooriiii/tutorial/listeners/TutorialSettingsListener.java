@@ -35,10 +35,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -79,6 +76,17 @@ public class TutorialSettingsListener implements Listener {
         if (event.getEntity() != null && !event.getEntity().isDead() && (event.getEntity().getType() == EntityType.SKELETON || event.getEntity().getType() == EntityType.PHANTOM || event.getEntity().getType() == EntityType.ZOMBIE)) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onSpiderDeath(EntityDeathEvent event)
+    {
+        if(event.getEntity() == null)
+            return;
+        if(event.getEntity().getType() != EntityType.SPIDER)
+            return;
+        event.getDrops().clear();
+        event.setDroppedExp(1000);
     }
 
     @EventHandler

@@ -40,15 +40,14 @@ public final class HelperMethods {
     }
 
     private static Set<Material> set = new HashSet<>();
+    private static Set<Material> ignoreLiquidsSet = new HashSet<>();
 
-    public static void initLookingSet()
-    {
+
+    public static void initLookingSet() {
         //air and liquids
         set.add(Material.AIR);
         set.add(Material.CAVE_AIR);
         set.add(Material.VOID_AIR);
-        set.add(Material.WATER);
-        set.add(Material.LAVA);
 
         //sapling
         set.add(Material.ACACIA_SAPLING);
@@ -107,24 +106,109 @@ public final class HelperMethods {
         set.add(Material.VINE);
 
         //banners
-        for(Material material : Material.values())
-        {
+        for (Material material : Material.values()) {
 
-            if(material.getKey().getKey().toLowerCase().endsWith("_banner"))
+            if (material.getKey().getKey().toLowerCase().endsWith("_banner"))
                 set.add(material);
-            else if(material.getKey().getKey().toLowerCase().endsWith("_coral"))
+            else if (material.getKey().getKey().toLowerCase().endsWith("_coral"))
                 set.add(material);
-            else  if (material.getKey().getKey().toLowerCase().endsWith("_coral_fan"))
+            else if (material.getKey().getKey().toLowerCase().endsWith("_coral_fan"))
                 set.add(material);
-            else  if (material.getKey().getKey().toLowerCase().endsWith("_pressure_plate"))
+            else if (material.getKey().getKey().toLowerCase().endsWith("_pressure_plate"))
                 set.add(material);
-            else  if (material.getKey().getKey().toLowerCase().endsWith("_button"))
+            else if (material.getKey().getKey().toLowerCase().endsWith("_button"))
                 set.add(material);
         }
     }
 
+    public static void initIgnoreLiquids() {
+        //air and liquids
+        ignoreLiquidsSet.add(Material.AIR);
+        ignoreLiquidsSet.add(Material.CAVE_AIR);
+        ignoreLiquidsSet.add(Material.VOID_AIR);
+
+        ignoreLiquidsSet.add(Material.WATER);
+        ignoreLiquidsSet.add(Material.LAVA);
+
+
+        //sapling
+        ignoreLiquidsSet.add(Material.ACACIA_SAPLING);
+        ignoreLiquidsSet.add(Material.BAMBOO_SAPLING);
+        ignoreLiquidsSet.add(Material.BIRCH_SAPLING);
+        ignoreLiquidsSet.add(Material.DARK_OAK_SAPLING);
+        ignoreLiquidsSet.add(Material.JUNGLE_SAPLING);
+        ignoreLiquidsSet.add(Material.OAK_SAPLING);
+        ignoreLiquidsSet.add(Material.SPRUCE_SAPLING);
+        ignoreLiquidsSet.add(Material.GRASS);
+        ignoreLiquidsSet.add(Material.FERN);
+        ignoreLiquidsSet.add(Material.DEAD_BUSH);
+        ignoreLiquidsSet.add(Material.SEAGRASS);
+        ignoreLiquidsSet.add(Material.DANDELION);
+        ignoreLiquidsSet.add(Material.POPPY);
+        ignoreLiquidsSet.add(Material.BLUE_ORCHID);
+        ignoreLiquidsSet.add(Material.ALLIUM);
+        ignoreLiquidsSet.add(Material.AZURE_BLUET);
+        ignoreLiquidsSet.add(Material.RED_TULIP);
+        ignoreLiquidsSet.add(Material.ORANGE_TULIP);
+        ignoreLiquidsSet.add(Material.WHITE_TULIP);
+        ignoreLiquidsSet.add(Material.PINK_TULIP);
+        ignoreLiquidsSet.add(Material.OXEYE_DAISY);
+        ignoreLiquidsSet.add(Material.CORNFLOWER);
+        ignoreLiquidsSet.add(Material.LILY_OF_THE_VALLEY);
+        ignoreLiquidsSet.add(Material.WITHER_ROSE);
+        ignoreLiquidsSet.add(Material.BROWN_MUSHROOM);
+        ignoreLiquidsSet.add(Material.RED_MUSHROOM);
+        ignoreLiquidsSet.add(Material.TORCH);
+        ignoreLiquidsSet.add(Material.SUNFLOWER);
+        ignoreLiquidsSet.add(Material.LILAC);
+        ignoreLiquidsSet.add(Material.ROSE_BUSH);
+        ignoreLiquidsSet.add(Material.PEONY);
+        ignoreLiquidsSet.add(Material.TALL_GRASS);
+        ignoreLiquidsSet.add(Material.LARGE_FERN);
+        ignoreLiquidsSet.add(Material.TALL_SEAGRASS);
+
+        //redstone
+        ignoreLiquidsSet.add(Material.COMPARATOR);
+        ignoreLiquidsSet.add(Material.REPEATER);
+        ignoreLiquidsSet.add(Material.REDSTONE_TORCH);
+        ignoreLiquidsSet.add(Material.REDSTONE_WIRE);
+
+        //some farm
+        ignoreLiquidsSet.add(Material.SUGAR_CANE);
+        ignoreLiquidsSet.add(Material.WHEAT);
+        ignoreLiquidsSet.add(Material.WHEAT_SEEDS);
+        ignoreLiquidsSet.add(Material.PUMPKIN_STEM);
+        ignoreLiquidsSet.add(Material.PUMPKIN_SEEDS);
+        ignoreLiquidsSet.add(Material.POTATO);
+        ignoreLiquidsSet.add(Material.BEETROOT_SEEDS);
+        ignoreLiquidsSet.add(Material.BEETROOT);
+        ignoreLiquidsSet.add(Material.MELON_SEEDS);
+        ignoreLiquidsSet.add(Material.MELON_STEM);
+
+        ignoreLiquidsSet.add(Material.VINE);
+
+        //banners
+        for (Material material : Material.values()) {
+
+            if (material.getKey().getKey().toLowerCase().endsWith("_banner"))
+                ignoreLiquidsSet.add(material);
+            else if (material.getKey().getKey().toLowerCase().endsWith("_coral"))
+                ignoreLiquidsSet.add(material);
+            else if (material.getKey().getKey().toLowerCase().endsWith("_coral_fan"))
+                ignoreLiquidsSet.add(material);
+            else if (material.getKey().getKey().toLowerCase().endsWith("_pressure_plate"))
+                ignoreLiquidsSet.add(material);
+            else if (material.getKey().getKey().toLowerCase().endsWith("_button"))
+                ignoreLiquidsSet.add(material);
+        }
+    }
+
     public static Set<Material> getLookingSet() {
-        return set;
+        return getLookingSet(true);
+    }
+
+    public static Set<Material> getLookingSet(boolean ignoreLiquids) {
+        return ignoreLiquids ? ignoreLiquidsSet : set;
     }
 
     public static String stringBuilder(String[] args, int n, String concat, String lastConcatMulti, String lastConcat) {

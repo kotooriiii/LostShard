@@ -37,44 +37,50 @@ public class BookCommand implements CommandExecutor {
         tc.setBold(false);
         tc.setColor(ChatColor.BLACK);
 
-        TextComponent suggestions = new TextComponent("Suggestions:\n");
-        suggestions.setColor(net.md_5.bungee.api.ChatColor.RED);
-        suggestions.setBold(true);
-        tc.addExtra(suggestions);
+        TextComponent welcomeComponent = new TextComponent("Welcome to Lostshard!\n");
+        welcomeComponent.setColor(net.md_5.bungee.api.ChatColor.DARK_PURPLE);
+        welcomeComponent.setBold(true);
+        tc.addExtra(welcomeComponent);
 
-        TextComponent beginning = new TextComponent("1) Escape spawn\n");
+        TextComponent beginning = new TextComponent("Go outside of Order and use the Plot Banner in\n");
+        beginning.setColor(ChatColor.BLACK);
         tc.addExtra(beginning);
-        tc.addExtra(new TextComponent("2) Build a base\n"));
-        tc.addExtra(new TextComponent("3) Claim your base\n"));
-        tc.addExtra(new TextComponent("4) Make a clan\n"));
-        tc.addExtra(new TextComponent("5) Capture Hostility\n\n"));
 
-        TextComponent helpComponent = new TextComponent("For help:\n");
-        helpComponent.setColor(net.md_5.bungee.api.ChatColor.RED);
-        helpComponent.setBold(true);
-        tc.addExtra(helpComponent);
+        TextComponent beginning2 = new TextComponent("your inventory to claim your base!\n");
+        beginning2.setColor(ChatColor.BLACK);
+        tc.addExtra(beginning2);
 
-        TextComponent youtubeComponent = new TextComponent("Click: Youtube" + "\n\n");
-        youtubeComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official LostShard Youtube Channel").create()));
-        youtubeComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, YoutubeCommand.LINK));
+        TextComponent forHelp = new TextComponent("For help:\n");
+        forHelp.setColor(net.md_5.bungee.api.ChatColor.DARK_PURPLE);
+        forHelp.setBold(true);
+        tc.addExtra(forHelp);
+
+        TextComponent youtubeComponent = new TextComponent("Click: Getting Started Video" + "\n\n");
+        youtubeComponent.setColor(ChatColor.BLACK);
+        youtubeComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official LostShard 'Quick Start Guide' Video").create()));
+        youtubeComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.youtube.com/watch?v=CEEuxxRv2Lw"));
         tc.addExtra(youtubeComponent);
 
-        TextComponent wikiDocComponent = new TextComponent("Click: Doc" + "\n\n");
-        wikiDocComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official LostShard Google Doc").create()));
-        wikiDocComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DocCommand.LINK));
-        tc.addExtra(wikiDocComponent);
-
-        TextComponent wikiComponent = new TextComponent("Click: Wiki" + "\n\n");
+        TextComponent wikiComponent = new TextComponent("Click: Wiki" + "\n");
+        wikiComponent.setColor(ChatColor.BLACK);
         wikiComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official LostShard Wiki").create()));
         wikiComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, WikiCommand.LINK));
         tc.addExtra(wikiComponent);
 
-        TextComponent discordComponent = new TextComponent("Click: Discord" + "\n\n");
+        TextComponent discordComponent = new TextComponent("Click: Discord" + "\n");
+        discordComponent.setColor(ChatColor.BLACK);
         discordComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official Discord server").create()));
         discordComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DiscordCommand.LINK));
+        tc.addExtra(discordComponent);
+
+        TextComponent wikiDocComponent = new TextComponent("Click: Help Page (Doc)" + "\n");
+        wikiDocComponent.setColor(ChatColor.BLACK);
+        wikiDocComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the official LostShard Google Doc").create()));
+        wikiDocComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DocCommand.LINK));
+        tc.addExtra(wikiDocComponent);
 
 
-        bookMeta.spigot().addPage(new BaseComponent[]{tc}, new BaseComponent[]{discordComponent});
+        //bookMeta.spigot().addPage(new BaseComponent[]{tc}, new BaseComponent[]{discordComponent});
         itemStack.setItemMeta(bookMeta);
 
         Player player = (Player) commandSender;

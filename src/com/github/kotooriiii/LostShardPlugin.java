@@ -338,6 +338,7 @@ public class LostShardPlugin extends JavaPlugin {
         registerStaff();
 
         HelperMethods.initLookingSet();
+        HelperMethods.initIgnoreLiquids();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");

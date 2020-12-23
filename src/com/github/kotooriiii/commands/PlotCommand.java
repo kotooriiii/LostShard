@@ -818,6 +818,7 @@ public class PlotCommand implements CommandExecutor {
         String prefix = "/plot";
         player.sendMessage(ChatColor.GOLD + "-Plot Help-");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "create" + " " + ChatColor.YELLOW + "(name)");
+        player.sendMessage(ChatColor.GOLD + prefix + " " + "expand");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "disband");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "friend" + " " + ChatColor.YELLOW + "(username)");
         player.sendMessage(ChatColor.GOLD + prefix + " " + "unfriend" + " " + ChatColor.YELLOW + "(username)");

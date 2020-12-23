@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -15,6 +16,8 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class IntroMiningChapter extends AbstractChapter {
 
@@ -38,6 +41,8 @@ public class IntroMiningChapter extends AbstractChapter {
         if (player == null)
             return;
 
+        player.removePotionEffect(PotionEffectType.SPEED);
+
         LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getMining().setLevel(49.0f);
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
@@ -57,7 +62,7 @@ public class IntroMiningChapter extends AbstractChapter {
         if (event.isCancelled())
             return;
 
-        final String name = ChatColor.GRAY + "Iron Pickaxe Holder";
+        final String name = ChatColor.MAGIC + "" + ChatColor.LIGHT_PURPLE + "l" + ChatColor.RESET + "" + ChatColor.DARK_PURPLE + "Super Iron Pickaxe Holder" + ChatColor.RESET + "" + ChatColor.MAGIC + ChatColor.LIGHT_PURPLE + "l";
 
         if (event.getView().getTitle().equals(name))
             return;
@@ -66,7 +71,10 @@ public class IntroMiningChapter extends AbstractChapter {
         event.setCancelled(true);
 
         Inventory inventory = Bukkit.createInventory(event.getPlayer(), 9, name);
-        inventory.addItem(new ItemStack(Material.IRON_PICKAXE, 1));
+        ItemStack itemStack = new ItemStack(Material.IRON_PICKAXE, 1);
+        itemStack.addEnchantment(Enchantment.DIG_SPEED, 5);
+        itemStack.addEnchantment(Enchantment.DURABILITY, 1);
+        inventory.addItem(itemStack);
         event.getPlayer().openInventory(inventory);
     }
 
@@ -90,7 +98,7 @@ public class IntroMiningChapter extends AbstractChapter {
             return;
         }
 
-        if (goldCounter > GOLD_MAX ) {
+        if (goldCounter > GOLD_MAX) {
             sendMessage(event.getPlayer(), "You won't need all this gold...", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
@@ -112,7 +120,7 @@ public class IntroMiningChapter extends AbstractChapter {
             if (goldCounter < GOLD_MAX)
                 sendMessage(event.getPlayer(), "Get the gold ore as well!", ChapterMessageType.HELPER);
             else
-                sendMessage(event.getPlayer(), "Let's continue exploring.",ChapterMessageType.HELPER);
+                sendMessage(event.getPlayer(), "Let's continue exploring.", ChapterMessageType.HELPER);
 
             return;
         }
@@ -146,12 +154,12 @@ public class IntroMiningChapter extends AbstractChapter {
             String s = "You do not have enough to continue, you need ";
             final int startLen = s.length();
             if (ironNeeded > 0)
-                s += ironNeeded*2 + " more iron.";
+                s += ironNeeded * 2 + " more iron.";
             if (goldNeeded > 0)
                 if (startLen == s.length())
-                    s += goldNeeded*2 + " more gold.";
+                    s += goldNeeded * 2 + " more gold.";
                 else
-                    s = s.substring(0, s.length() - 1) + " and " + goldNeeded*2 + " more gold.";
+                    s = s.substring(0, s.length() - 1) + " and " + goldNeeded * 2 + " more gold.";
 
 
             sendMessage(event.getPlayer(), s, ChapterMessageType.HELPER);

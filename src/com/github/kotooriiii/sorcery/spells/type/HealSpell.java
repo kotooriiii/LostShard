@@ -27,7 +27,7 @@ public class HealSpell extends Spell {
         super(SpellType.HEAL,
                 ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
-                1.0f,
+                0.0d,
                 20,
                 true, true, false);
     }

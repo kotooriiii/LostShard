@@ -415,7 +415,8 @@ public abstract class Spell {
         stat.setMana(stat.getMana() - this.getManaCost());
         if (player.getGameMode() != GameMode.CREATIVE)
             removeIngredients(player);
-        updateCooldown(player);
+        if (getCooldown() != 0.0d)
+            updateCooldown(player);
         return true;
     }
 

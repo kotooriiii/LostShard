@@ -176,7 +176,7 @@ public class TeleportSpell extends Spell {
 
     public Location teleportLocation(Player player, final int range) {
 
-        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(), range);
+        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(false), range);
 
 //        for(int i = 0; i < lastTwoTargetBlocks.size(); i++)
 //        Bukkit.broadcastMessage("i: " + i + " | " + "material: " + lastTwoTargetBlocks.get(i).getType().getKey().getKey());

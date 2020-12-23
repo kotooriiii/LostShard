@@ -21,15 +21,22 @@ public class MarkPlayer {
     private UUID playerUUID;
     private ArrayList<Mark> marks;
 
+
     private static HashMap<UUID, MarkPlayer> markPlayerHashMap = new HashMap<>();
 
     public static class Mark {
 
         private String name;
         private Location location;
+        private MarkType type;
 
-        public Mark(String name, Location location) {
+        public enum MarkType {
+            RANDOM,SPAWN,PLAYER
+        }
+
+        public Mark(String name, Location location, MarkType type) {
             this.name = name;
+            this.type = type;
             this.location = location;
         }
 
@@ -40,6 +47,10 @@ public class MarkPlayer {
         public Location getLocation() {
 
             return location;
+        }
+
+        public MarkType getType() {
+            return type;
         }
     }
 
@@ -63,7 +74,7 @@ public class MarkPlayer {
     }
 
     public void addMark(String name, Location loc) {
-        marks.add(new Mark(name, loc));
+        marks.add(new Mark(name, loc, Mark.MarkType.PLAYER));
         save();
     }
 
@@ -111,6 +122,16 @@ public class MarkPlayer {
         return null;
     }
 
+    public Mark getAnyMark(Mark.MarkType type) {
+        for (Mark mark : getMarks())
+            if (mark.getType() == type)
+                return mark;
+        for (Mark mark : getPremadeMarks())
+            if (mark.getType() == type)
+                return mark;
+        return null;
+    }
+
     public MarkPlayer.Mark[] getPremadeMarks() {
         return new MarkPlayer.Mark[]{getRandomMark(), getSpawnMark()};
     }
@@ -140,7 +161,7 @@ public class MarkPlayer {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
         if (!offlinePlayer.isOnline())
             return null;
-        return new MarkPlayer.Mark("Spawn", ((SpawnPlot) LostShardPlugin.getPlotManager().getPlot(StatusPlayer.wrap(playerUUID).getStatus().getOrganization())).getSpawn());
+        return new MarkPlayer.Mark("Spawn", ((SpawnPlot) LostShardPlugin.getPlotManager().getPlot(StatusPlayer.wrap(playerUUID).getStatus().getOrganization())).getSpawn(), Mark.MarkType.SPAWN);
     }
 
     public MarkPlayer.Mark getRandomMark() {
@@ -148,7 +169,7 @@ public class MarkPlayer {
         if (!offlinePlayer.isOnline())
             return null;
         Location location = randomRecall(offlinePlayer.getPlayer());
-        return new MarkPlayer.Mark("Random", location);
+        return new MarkPlayer.Mark("Random", location, Mark.MarkType.RANDOM);
     }
 
     private Location randomRecall(Player player) {

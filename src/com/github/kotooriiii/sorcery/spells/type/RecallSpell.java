@@ -2,6 +2,7 @@ package com.github.kotooriiii.sorcery.spells.type;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.sorcery.events.SuccessfulRecallEvent;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
@@ -10,6 +11,7 @@ import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -176,10 +178,31 @@ public class RecallSpell extends Spell implements Listener {
             return;
         }
 
-        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getAnyMark(message);
+        MarkPlayer markPlayer = MarkPlayer.wrap(playerSender.getUniqueId());
+
+        MarkPlayer.Mark mark = markPlayer.getAnyMark(message);
+
+        if (mark.getType() == MarkPlayer.Mark.MarkType.RANDOM) {
+            while (isObstructed(mark) || !isOnPlotFamily(markPlayer.getPlayerUUID(), mark.getLocation())) {
+                mark = markPlayer.getAnyMark(message);
+
+            }
+        }
 
         //wait for time to tp
         recall(playerSender, mark);
+    }
+
+    private boolean isOnPlotFamily(UUID uuid, Location location) {
+        return LostShardPlugin.getPlotManager().getStandingOnPlot(location) != null
+                && LostShardPlugin.getPlotManager().getStandingOnPlot(location) instanceof PlayerPlot
+                && !(
+                ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isFriend(uuid) ||
+                        ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isJointOwner(uuid) ||
+                        ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isOwner(uuid)
+        );
+
+
     }
 
 
@@ -249,7 +272,7 @@ public class RecallSpell extends Spell implements Listener {
         playerSender.teleport(mark.getLocation());
         playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
 
-        if (mark.getName().equalsIgnoreCase("spawn")) {
+        if (mark.getType() == MarkPlayer.Mark.MarkType.SPAWN) {
             Stat stat = Stat.wrap(playerSender);
             stat.setStamina(0);
             stat.setMana(0);

@@ -250,6 +250,13 @@ public class SellCommand implements CommandExecutor {
         if (material == null) {
             if (itemName.equalsIgnoreCase("cobble")) //key premade
                 material = Material.COBBLESTONE;
+            else if(itemName.equalsIgnoreCase("flesh"))
+                material = Material.ROTTEN_FLESH;
+            else if(itemName.equalsIgnoreCase("melon"))
+                material = Material.MELON_SLICE;
+            else if (itemName.equalsIgnoreCase("melon_block"))
+                material = Material.MELON;
+
 
             //If still null keep going
             if (material == null) //If not key words we previously made then search all material system
