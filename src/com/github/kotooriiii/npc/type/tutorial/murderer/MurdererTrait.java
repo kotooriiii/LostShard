@@ -78,7 +78,7 @@ public class MurdererTrait extends Trait {
                 nav.setTarget(entity, true);
             }
             nav.getLocalParameters().range(169);
-            nav.getLocalParameters().speedModifier(1.6f);
+            nav.getLocalParameters().speedModifier(1.2f);
             nav.getLocalParameters().stuckAction((npc, navigator) -> true);
             nav.getLocalParameters().attackDelayTicks(10);
         }

@@ -127,7 +127,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
-    public static boolean isTutorial = false;
+    public static boolean isTutorial = true;
 
     public static LuckPerms luckPerms;
 
@@ -450,29 +450,59 @@ public class LostShardPlugin extends JavaPlugin {
         LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW + " Saving data.");
 
         for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
-            LostShardPlugin.getBankManager().saveBank(bank);
+            try {
+                LostShardPlugin.getBankManager().saveBank(bank);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
-            LostShardPlugin.getClanManager().saveClan(clan);
+            try {
+                LostShardPlugin.getClanManager().saveClan(clan);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         for (Stat stat : Stat.getStatMap().values()) {
-            FileManager.write(stat);
+            try {
+                FileManager.write(stat);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         for (Plot plot : getPlotManager().getAllPlots()) {
-            FileManager.write(plot);
+            try {
+                FileManager.write(plot);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         //Save all skills
         for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
-            getSkillManager().saveSkillPlayer(skillPlayer);
+            try {
+                getSkillManager().saveSkillPlayer(skillPlayer);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         for (IgnorePlayer ignorePlayer : LostShardPlugin.getIgnoreManager().getIgnorePlayers()) {
-            if (ignorePlayer.getIgnoredUUIDS() != null && ignorePlayer.getIgnoredUUIDS().length != 0)
-                getIgnoreManager().save(ignorePlayer);
+            try {
+                if (ignorePlayer.getIgnoredUUIDS() != null && ignorePlayer.getIgnoredUUIDS().length != 0)
+                    getIgnoreManager().save(ignorePlayer);            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
 
         //todo save tips data subs
@@ -583,6 +613,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("announce").setExecutor(new AnnounceCommand());
         getCommand("who").setExecutor(new WhoCommand());
+
+        getCommand("enchant").setExecutor(new EnchantCommand());
 
 
         //todo to use later -->
@@ -704,6 +736,9 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new FallOnWoolBlockListener(), this);
 
         pm.registerEvents(new PlotBannerListener(), this);
+        pm.registerEvents(new LightningListener(), this);
+        pm.registerEvents(new MountListener(), this);
+        pm.registerEvents(new PlayerHitListener(), this);
 
         registerCustomEventListener();
 

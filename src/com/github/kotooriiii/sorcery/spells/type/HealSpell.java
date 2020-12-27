@@ -27,7 +27,7 @@ public class HealSpell extends Spell {
         super(SpellType.HEAL,
                 ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
-                0.0d,
+                0.5d,
                 20,
                 true, true, false);
     }
@@ -75,13 +75,13 @@ public class HealSpell extends Spell {
             Double cooldownTimeTicks = healSpellCooldownMap.get(player.getUniqueId());
             DecimalFormat df = new DecimalFormat("##.##");
             double cooldownTimeSeconds = cooldownTimeTicks / 20;
-            BigDecimal bd = new BigDecimal(cooldownTimeSeconds).setScale(0, RoundingMode.UP);
-            int value = bd.intValue();
+            BigDecimal bd = new BigDecimal(cooldownTimeSeconds).setScale(1, RoundingMode.HALF_UP);
+            float value = bd.floatValue();
             if (value == 0)
-                value = 1;
+                value = 0.1f;
 
             String time = "seconds";
-            if (value == 1) {
+            if (value <= 1) {
                 time = "second";
             }
 

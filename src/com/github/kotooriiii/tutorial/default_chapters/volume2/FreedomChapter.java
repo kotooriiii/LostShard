@@ -66,7 +66,7 @@ public class FreedomChapter extends AbstractChapter {
         for (int i = 0; i < contents.length; i++) {
             if (contents[i] == null)
                 continue;
-            if (contents[i].getType() == Material.IRON_PICKAXE || contents[i].getType() == Material.DIAMOND || contents[i].getType().getKey().getKey().toLowerCase().contains("ore") || contents[i].getType() == Material.STICK || contents[i].getType() == Material.FEATHER)
+            if (contents[i].getType() != Material.COBBLESTONE)
                 event.getPlayer().getInventory().setItem(i, null);
         }
 

@@ -15,7 +15,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 
 public class FallChapter extends AbstractChapter {
 
@@ -24,11 +29,13 @@ public class FallChapter extends AbstractChapter {
     private boolean hasBrokenMelon;
     private Zone zone;
     private Zone completeZone;
+    private int melonCounter;
 
 
     public FallChapter() {
         this.isComplete = this.isCompleteToLeave = this.hasBrokenMelon = false;
         this.zone = new Zone(753, 691, 48, 75, 1066, 1131);
+        melonCounter = 0;
         completeZone = new Zone(561, 486, 78, 30, 1132, 1160);
     }
 
@@ -45,6 +52,8 @@ public class FallChapter extends AbstractChapter {
         player.getInventory().setItem(3, new Wand(Spell.of(SpellType.TELEPORT)).createItem());
         player.getInventory().setItem(5, new ItemStack(Material.FEATHER, 64));
         player.updateInventory();
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 5, 3, false, false, false));
+
     }
 
     @Override
@@ -69,12 +78,33 @@ public class FallChapter extends AbstractChapter {
 
     @EventHandler
     public void onMelonBreak(BlockBreakEvent event) {
+        if(hasBrokenMelon) {
+            event.getPlayer().sendMessage(ERROR_COLOR + "You don't need any more melons.");
+            event.setCancelled(true);
+            return;
+        }
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
         if (event.getBlock().getType() != Material.MELON)
             return;
+        if(melonCounter++ < 3)
+        {
+            switch (melonCounter)
+            {
+                case 1:
+                    event.getPlayer().sendMessage(STANDARD_COLOR + "Break 2 more melons!");
+                    break;
+                case 2:
+                    event.getPlayer().sendMessage(STANDARD_COLOR + "Break 1 more melon!");
+                    break;
+            }
+            return;
+        }
+        event.getPlayer().sendMessage(STANDARD_COLOR + "Perfect! Let's keep walking...");
+        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 5, 3, false, false, false));
+        event.setCancelled(true);
         hasBrokenMelon = true;
     }
 
@@ -102,6 +132,8 @@ public class FallChapter extends AbstractChapter {
 
         sendMessage(player, "Some melons! Break them to collect them!\nMelons can be instantly eaten by right clicking them.\nThey instantly heal your hearts and hunger.\nThis can be very useful in combat, let's move on.", ChapterMessageType.HOLOGRAM_TO_TEXT);
         setLocation(player.getLocation());
+        event.getPlayer().removePotionEffect(PotionEffectType.SPEED);
+
     }
 
     @EventHandler

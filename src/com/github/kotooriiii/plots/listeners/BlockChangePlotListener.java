@@ -364,7 +364,8 @@ public class BlockChangePlotListener implements Listener {
             Material[] mats = new Material[]
                     {
                             Material.ACACIA_BOAT, Material.BIRCH_BOAT, Material.DARK_OAK_BOAT, Material.JUNGLE_BOAT, Material.OAK_BOAT,
-                            Material.SPRUCE_BOAT, Material.MINECART
+                            Material.SPRUCE_BOAT, Material.MINECART, Material.CHEST_MINECART, Material.COMMAND_BLOCK_MINECART, Material.FURNACE_MINECART,
+                            Material.TNT_MINECART, Material.HOPPER_MINECART
                     };
 
             boolean exists = false;

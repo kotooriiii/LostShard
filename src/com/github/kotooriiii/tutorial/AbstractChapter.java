@@ -58,6 +58,11 @@ public abstract class AbstractChapter extends Observable implements Listener {
         this.isActive = false;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName();
+    }
+
     /**
      * Initializes the chapter at runtime with the player object and marks it as available.
      *

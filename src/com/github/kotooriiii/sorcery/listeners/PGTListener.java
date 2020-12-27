@@ -138,11 +138,10 @@ public class PGTListener implements Listener {
     }
 
     @EventHandler
-    public void onLapisPlace(BlockPlaceEvent event)
-    {
+    public void onLapisPlace(BlockPlaceEvent event) {
         final Block blockPlaced = event.getBlockPlaced();
 
-        if(blockPlaced.getType() != Material.LAPIS_BLOCK)
+        if (blockPlaced.getType() != Material.LAPIS_BLOCK)
             return;
 
         final Location location = blockPlaced.getLocation();
@@ -158,10 +157,9 @@ public class PGTListener implements Listener {
         for (int x = xmin; x <= xmax; x++) {
             for (int y = ymin; y <= ymax; y++) {
                 for (int z = zmin; z <= zmax; z++) {
-                    Location iteratingLocation = new Location(location.getWorld(),x,y,z);
-                    if(LostShardPlugin.getGateManager().isGate(iteratingLocation))
-                    {
-                        LostShardPlugin.getGateManager().removeGate(LostShardPlugin.getGateManager().getGate(new Location(location.getWorld(),x,y,z)));
+                    Location iteratingLocation = new Location(location.getWorld(), x, y, z);
+                    if (LostShardPlugin.getGateManager().isGate(iteratingLocation)) {
+                        LostShardPlugin.getGateManager().removeGate(LostShardPlugin.getGateManager().getGate(new Location(location.getWorld(), x, y, z)));
 
                     }
                 }
@@ -235,8 +233,6 @@ public class PGTListener implements Listener {
         Entity entity = event.getEntity();
         if (entity instanceof Player)
             return;
-        if (entity instanceof Projectile || entity instanceof Explosive)
-            return;
 
         Location entityLocation = event.getEntity().getLocation();
         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
@@ -250,11 +246,14 @@ public class PGTListener implements Listener {
             return;
         }
 
+        event.setCancelled(true);
+
+
         if (!gate.isBuilt()) {
             LostShardPlugin.getGateManager().removeGate(gate);
-            event.setCancelled(true);
             return;
         }
+
         Vector vector = entity.getVelocity();
         Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
 
@@ -262,8 +261,6 @@ public class PGTListener implements Listener {
             entity.teleport(new Location(teleportingTo.getWorld(), teleportingTo.getBlockX(), teleportingTo.getBlockY(), teleportingTo.getBlockZ(), entity.getLocation().getYaw(), entity.getLocation().getPitch()));
             entity.setVelocity(vector);
         }
-
-        event.setCancelled(true);
     }
 
     HashMap<UUID, Boolean> hasHitPortalMap = new HashMap<>();
@@ -345,16 +342,19 @@ public class PGTListener implements Listener {
                         //check if possible
                         if (entity.isValid()) {
 
+                            // hasHitPortalMap.remove(entity.getUniqueId());
+
+
                             //get initial vector, teleport, re-set it
                             Vector vector = entity.getVelocity();
                             Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
 
-                            if(teleportingTo==null)
+                            if (teleportingTo == null)
                                 return;
 
                             Location clone = teleportingTo.clone().add(0, 1, 0);
 
-                            if(clone != null) {
+                            if (clone != null) {
                                 entity.teleport(clone);
                                 entity.setVelocity(vector);
                             }
@@ -363,12 +363,6 @@ public class PGTListener implements Listener {
                             if (entity instanceof TNTPrimed)
                                 ((TNTPrimed) entity).setFuseTicks(20 * 4);
 
-                            new BukkitRunnable() {
-                                @Override
-                                public void run() {
-                                    hasHitPortalMap.remove(entity.getUniqueId());
-                                }
-                            }.runTaskLater(LostShardPlugin.plugin, 10);
 
                         }
                     }

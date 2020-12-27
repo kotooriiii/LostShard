@@ -35,8 +35,6 @@ public class WhoCommand implements CommandExecutor {
         if (!command.getName().equalsIgnoreCase("who"))
             return false;
 
-        Player playerSender = (Player) commandSender;
-
 
         final ArrayList<? extends Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
@@ -63,6 +61,10 @@ public class WhoCommand implements CommandExecutor {
         String finalResult = prefix + "\n" + ChatColor.WHITE + "(" + onlinePlayers.size() + "/" + Bukkit.getServer().getMaxPlayers() + ChatColor.WHITE + ") [";
         for (int i = 0; i < onlinePlayers.size(); i++) {
             Player player = onlinePlayers.get(i);
+
+            if(player.hasMetadata("vanished"))
+                continue;
+
             if (!Staff.isStaff(player.getUniqueId()))
                 finalResult += StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor() + player.getName();
             else
@@ -72,7 +74,7 @@ public class WhoCommand implements CommandExecutor {
                 finalResult += ChatColor.WHITE + ", ";
         }
         finalResult += ChatColor.WHITE + "]";
-        playerSender.sendMessage(finalResult);
+        commandSender.sendMessage(finalResult);
 
 
         return true;

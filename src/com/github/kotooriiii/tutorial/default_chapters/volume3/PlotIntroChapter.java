@@ -66,7 +66,7 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
 
         exited = true;
-        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60*5, 3, false, false, false));
+        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 5, 3, false, false, false));
     }
 
     @EventHandler
@@ -118,7 +118,7 @@ public class PlotIntroChapter extends AbstractChapter {
         ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
         event.getPlayer().getInventory().remove(ingredients[0]);
         event.getPlayer().sendMessage(ChatColor.GOLD + "You have created the plot \"" + event.getPlot().getName() + "\", it cost $" + PlayerPlot.CREATE_COST + " and 1 diamond.");
-
+        LostShardPlugin.getTutorialManager().wrap(getUUID()).setPlot(true);
         setComplete();
     }
 

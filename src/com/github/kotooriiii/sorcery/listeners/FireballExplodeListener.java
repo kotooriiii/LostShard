@@ -68,11 +68,11 @@ public class FireballExplodeListener implements Listener {
                     if (standingPlot != null) {
 
                         if (standingPlot.getType().isStaff())
-                            continue;
+                            continue zloop;
 
                         PlayerPlot playerPlot = (PlayerPlot) standingPlot;
                         if (!playerPlot.isJointOwner(shooter.getUniqueId()) && !playerPlot.isOwner(shooter.getUniqueId()))
-                            continue;
+                            continue zloop;
                     }
 
 
@@ -103,8 +103,12 @@ public class FireballExplodeListener implements Listener {
             if(clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 
-            ((Damageable) entity).damage(damage, shooter);
-
+            final float DAMAGE = damage;
+            //      ((Player) entity).damage(0.1f);
+            EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(shooter, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
+            entity.setLastDamageCause(damageByEntityEvent);
+            Bukkit.getPluginManager().callEvent(damageByEntityEvent);
+            ((Player) entity).setHealth(((Player) entity).getHealth() - DAMAGE);
 
 
         }

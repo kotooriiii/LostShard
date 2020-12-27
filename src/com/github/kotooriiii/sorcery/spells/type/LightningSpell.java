@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -41,7 +42,6 @@ public class LightningSpell extends Spell {
                 2.0f,
                 20,
                 true, true, false);
-
     }
 
     @Override
@@ -62,14 +62,15 @@ public class LightningSpell extends Spell {
                     Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(burnLocation);
                     if(plot != null)
                     {
+                        if(plot.getType().isStaff())
+                            continue;
+                        
                         if(plot instanceof PlayerPlot)
                         {
                             if(!(((PlayerPlot) plot).isJointOwner(player.getUniqueId()) || ((PlayerPlot) plot).isOwner(player.getUniqueId())))
                                 continue;
 
                         }
-
-
                     }
                     lightningLocation.getWorld()
                             .getBlockAt(burnLocation)

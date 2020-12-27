@@ -1,6 +1,7 @@
 package com.github.kotooriiii.skills;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.skills.events.SkillLevelUpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

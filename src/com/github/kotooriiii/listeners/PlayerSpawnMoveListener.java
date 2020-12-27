@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -38,7 +39,7 @@ public class PlayerSpawnMoveListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler  (priority =  EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
         Entity entity = event.getEntity();
         if(!(entity instanceof Player))
@@ -50,7 +51,6 @@ public class PlayerSpawnMoveListener implements Listener {
         //not casting spell
         if (!spawnTimer.contains(player.getUniqueId()))
             return;
-
 
         //Is casting a spell and moved a block
 

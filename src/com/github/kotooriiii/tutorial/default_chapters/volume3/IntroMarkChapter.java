@@ -84,6 +84,7 @@ public class IntroMarkChapter extends AbstractChapter {
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         sendMessage(event.getPlayer(), "Awesome job! Now follow the path to get to the event.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        LostShardPlugin.getTutorialManager().wrap(getUUID()).setMark(true);
         setComplete();
         return;
     }

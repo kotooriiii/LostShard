@@ -11,6 +11,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
+import java.time.ZonedDateTime;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
@@ -42,6 +43,11 @@ public class TutorialBook extends Observable implements Observer {
      * The current chapter of the book.
      */
     private AbstractChapter currentChapter;
+
+    private boolean hasMark, hasPlot;
+    private ZonedDateTime initDate;
+    private boolean isComplete;
+
 
     /**
      * Constructs the object with the player's UUID and the specified storyline.
@@ -163,6 +169,30 @@ public class TutorialBook extends Observable implements Observer {
         return key;
     }
 
+    public boolean hasMark() {
+        return hasMark;
+    }
+
+    public void setMark(boolean hasMark) {
+        this.hasMark = hasMark;
+    }
+
+    public boolean hasPlot() {
+        return hasPlot;
+    }
+
+    public void setPlot(boolean hasPlot) {
+        this.hasPlot = hasPlot;
+    }
+
+    public ZonedDateTime getInitDate() {
+        return initDate;
+    }
+
+    public void setInitDate(ZonedDateTime initDate) {
+        this.initDate = initDate;
+    }
+
     /**
      * Invoked when the chapter is completed.
      *
@@ -178,5 +208,13 @@ public class TutorialBook extends Observable implements Observer {
             getBossBar().setProgress((1.0d - ((double) chapters.size()/maxChapterSize)));
         }
         return;
+    }
+
+    public void setComplete(boolean b) {
+        this.isComplete = b;
+    }
+
+    public boolean isComplete() {
+        return isComplete;
     }
 }

@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -40,14 +41,13 @@ public class CombatLogListener implements Listener {
     }
 
     @EventHandler
-    public void throwEnderpearl(PlayerInteractEvent event)
-    {
+    public void throwEnderpearl(PlayerInteractEvent event) {
         //enderpearl disable enderpearl
-        if(event.getItem() == null)
+        if (event.getItem() == null)
             return;
-        if(event.getHand() != EquipmentSlot.HAND)
+        if (event.getHand() != EquipmentSlot.HAND)
             return;
-        if(event.getItem().getType() != Material.ENDER_PEARL)
+        if (event.getItem().getType() != Material.ENDER_PEARL)
             return;
         Player shooterPlayer = event.getPlayer();
 
@@ -93,12 +93,11 @@ public class CombatLogListener implements Listener {
         return false;
     }
 
-    public Entity getGuardKiller(Player playerDead)
-    {
-        if(isGuard(playerDead.getKiller()))
+    public Entity getGuardKiller(Player playerDead) {
+        if (isGuard(playerDead.getKiller()))
             return playerDead.getKiller();
 
-        if(isLastDamageCauseFromGuard(playerDead))
+        if (isLastDamageCauseFromGuard(playerDead))
             return ((EntityDamageByEntityEvent) playerDead.getLastDamageCause()).getDamager();
         return null;
     }
@@ -195,7 +194,9 @@ public class CombatLogListener implements Listener {
 
             } else if (i == 0) {
                 //On the last element
-                if (attackers.length == 2) {
+                if (attackers.length == 1) {
+                    message += color + offlinePlayer.getName();
+                } else if (attackers.length == 2) {
                     message += ChatColor.WHITE + " and " + color + offlinePlayer.getName();
 
                 } else {
@@ -231,7 +232,7 @@ public class CombatLogListener implements Listener {
         Player damagerPlayer = getPlayerInduced(defender, damager);
         Player defenderPlayer = (Player) defender;
 
-        if(damagerPlayer.equals(defenderPlayer))
+        if (damagerPlayer.equals(defenderPlayer))
             return;
 
         //

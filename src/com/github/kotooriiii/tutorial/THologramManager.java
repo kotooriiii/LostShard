@@ -62,8 +62,8 @@ public class THologramManager {
         createHologram(615, 67, 801, "Good job! You killed the murderer using guards".split("\n")).getVisibilityManager().setVisibleByDefault(false);
 
         createHologram(624, 67, 778, "Follow the path to get to the next marker.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(664, 68.5f, 733, "A player becomes a murderer when they kill 5 times.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(663, 68.5f, 875, "A player becomes a criminal when they hit another player.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        createHologram(664.5f, 68.5f, 749.5f, "A player becomes a murderer when they kill 5 times.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        createHologram(659.5f, 68.5f, 853f, "A player becomes a criminal when they hit another player.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
 
         createHologram(666, 67.5f, 860, "Follow the path and deposit all your gold at the banker!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(692, 67.5f, 847, "Go inside the bank.".split("\n")).getVisibilityManager().setVisibleByDefault(false);

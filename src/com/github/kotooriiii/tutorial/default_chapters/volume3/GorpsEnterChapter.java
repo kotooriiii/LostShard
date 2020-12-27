@@ -79,6 +79,7 @@ public class GorpsEnterChapter extends AbstractChapter {
         LostShardPlugin.getClanManager().addClan(clan, true);
 
         sendMessage(player, "You've made it to Gorps!\nHead to the center to capture it.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        player.removePotionEffect(PotionEffectType.SPEED);
 
         new BukkitRunnable() {
             @Override

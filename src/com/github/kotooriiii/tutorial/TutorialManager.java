@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -107,6 +108,7 @@ public class TutorialManager implements Observer {
         book.addObserver(this);
         playerProgressions.put(uuid, book);
         book.advance();
+        book.setInitDate(ZonedDateTime.now());
         return book;
     }
 

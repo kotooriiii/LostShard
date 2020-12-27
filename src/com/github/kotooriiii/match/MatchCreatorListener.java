@@ -212,6 +212,8 @@ public class MatchCreatorListener implements Listener {
                 } else {
                     banmatch.setUnbannedTime(HelperMethods.toZDT(toProperties(message)));
                 }
+
+                banmatch.setInitTime(ZonedDateTime.now());
                 player.sendMessage(STANDARD_COLOR + "When does this " + match.getName() + " begin? (0-60 minutes)");
                 return;
             }

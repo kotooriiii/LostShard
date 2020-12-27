@@ -61,7 +61,7 @@ public class TutorialSheet {
         return null;
     }
 
-    public void append(UUID uuid, String name, boolean isTutorialComplete, String chapterName, int x, int y, int z, boolean hasPlotBannerUse, boolean hasMarkCreate, float duration) {
+    public void append(UUID uuid, String name, boolean isTutorialComplete, String chapterName, int x, int y, int z, boolean hasPlotBannerUse, boolean hasMarkCreate, long duration) {
 
 
         try {
@@ -112,7 +112,7 @@ public class TutorialSheet {
         }
     }
 
-    public void append(UUID uuid, String name, boolean isTutorialComplete, String chapterName, Location location, boolean hasPlotBannerUse, boolean hasMarkCreate, float duration) {
+    public void append(UUID uuid, String name, boolean isTutorialComplete, String chapterName, Location location, boolean hasPlotBannerUse, boolean hasMarkCreate, long duration) {
 
 
         try {

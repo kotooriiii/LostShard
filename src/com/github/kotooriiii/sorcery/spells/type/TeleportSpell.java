@@ -29,6 +29,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class TeleportSpell extends Spell {
 
     private static HashMap<UUID, Double> teleportSpellCooldownMap = new HashMap<UUID, Double>();
+    final private static boolean isDebug = false;
 
     public TeleportSpell() {
         super(SpellType.TELEPORT,
@@ -48,29 +49,40 @@ public class TeleportSpell extends Spell {
             return false;
         }
 
+        if (teleportLocation.getBlockX() == player.getLocation().getBlockX() && teleportLocation.getBlockY() == player.getLocation().getBlockY() && teleportLocation.getBlockZ() == player.getLocation().getBlockZ() && player.getLocation().getWorld().equals(teleportLocation.getWorld())) {
+            if(!HelperMethods.getLookingSet(false).contains(teleportLocation.getBlock())) {
+                player.sendMessage(ERROR_COLOR + "Invalid target.");
+                return false;
+            }
+        }
+
         if (!isAcceptableBlock(getBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
 //            player.sendMessage(ERROR_COLOR + "Invalid target.");
 //            return false;
-          //  teleportLocation.add(0, -1, 0);
+            //  teleportLocation.add(0, -1, 0);
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Invoke 1");
+
         } else if (new Location(teleportLocation.getWorld(), teleportLocation.getX(), teleportLocation.getY() - 1, teleportLocation.getBlockZ()).getBlock().getType().equals(Material.AIR)) {
             teleportLocation.add(0, -1, 0);
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Invoke 2");
         }
 
         final Location finalTeleportLocation = new Location(teleportLocation.getWorld(), teleportLocation.getBlockX() + 0.5, teleportLocation.getBlockY(), teleportLocation.getBlockZ() + 0.5, player.getLocation().getYaw(), player.getLocation().getPitch());
 
-        if(isLapisNearby(finalTeleportLocation, DEFAULT_LAPIS_NEARBY))
-        {
+        if (isLapisNearby(finalTeleportLocation, DEFAULT_LAPIS_NEARBY)) {
             player.sendMessage(ERROR_COLOR + "You cannot seem to cast " + getName() + " here...");
             return false;
         }
 
+        player.setFallDistance(0.0f);
         player.teleport(finalTeleportLocation);
         return true;
     }
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         teleportSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
@@ -116,30 +128,41 @@ public class TeleportSpell extends Spell {
         return false;
     }
 
+
     private boolean isAcceptableBlock(BlockFace facing, Block block, boolean isStrict) {
 
-        if (block.getType().equals(Material.AIR))
+        if (block.getType().equals(Material.AIR)) {
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: isAcceptableBlock -> AIR");
             return true;
+        }
 
-        if(block.getBoundingBox().contains(new BoundingBox(block.getX() + 0.45,block.getY() + 0.45,block.getZ() + 0.45,block.getX() + 0.55,block.getY() + 0.55,block.getZ() + 0.55)))
-        {
-            if (!block.getType().isSolid())
+        float HALF = 0.5f;
+        float SIZE = 0.075f;
+
+        if (block.getBoundingBox().contains(new BoundingBox(block.getX() + HALF - SIZE, block.getY() + HALF - SIZE, block.getZ() + HALF - SIZE, block.getX() + HALF + SIZE, block.getY() + HALF + SIZE, block.getZ() + HALF + SIZE))) {
+            if (!block.getType().isSolid()) {
+                if (isDebug)
+                    Bukkit.broadcastMessage("DEBUG: Invoke not solid AND bounding box is at least a certain size");
                 return true;
+            }
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Invoke bounding box is at least a certain size");
             return false;
         }
 
-        if (!block.getType().isSolid() && !isStrict && !block.getType().equals(Material.SNOW))
+        if (!block.getType().isSolid() && !isStrict && !block.getType().equals(Material.SNOW)) {
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Invoke not solid and not strict and not snow");
             return true;
+        }
 
 
-        if(block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().endsWith("door") && !block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().contains("trap"))
-        {
+        if (block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().endsWith("door") && !block.getState().getBlockData().getMaterial().getKey().getKey().toLowerCase().contains("trap")) {
             Door door = (Door) block.getState().getBlockData();
             BlockFace face = door.getFacing();
-            if(door.isOpen())
-            {
-                switch (face)
-                {
+            if (door.isOpen()) {
+                switch (face) {
                     case EAST:
                         face = BlockFace.SOUTH;
                         break;
@@ -155,22 +178,31 @@ public class TeleportSpell extends Spell {
                 }
             }
 
-            if(face.equals(facing))
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Invoke isDoor");
+
+            if (face.equals(facing))
                 return true;
         }
 
         if (facing.equals(BlockFace.WEST) || facing.equals(BlockFace.EAST)) {
             if (block.getBoundingBox().getWidthZ() < 0.5) {
+                if (isDebug)
+                    Bukkit.broadcastMessage("DEBUG: Invoke bounding box widthZ is less than size");
                 return true;
             }
         }
 
         if (facing.equals(BlockFace.NORTH) || facing.equals(BlockFace.SOUTH)) {
             if (block.getBoundingBox().getWidthX() < 0.5) {
+                if (isDebug)
+                    Bukkit.broadcastMessage("DEBUG: Invoke bounding box widthX is less than size");
                 return true;
             }
         }
 
+        if (isDebug)
+            Bukkit.broadcastMessage("DEBUG: Invoke height less than size");
         return block.getBoundingBox().getHeight() < 0.5;
     }
 

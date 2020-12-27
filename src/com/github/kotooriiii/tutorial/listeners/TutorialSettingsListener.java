@@ -6,6 +6,7 @@ import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.HealCommand;
 import com.github.kotooriiii.events.BindEvent;
+import com.github.kotooriiii.google.TutorialSheet;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.hostility.events.PlatformCaptureEvent;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
@@ -52,6 +53,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import javax.swing.tree.ExpandVetoException;
 import java.lang.reflect.Method;
 import java.security.acl.LastOwnerException;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,6 +163,18 @@ public class TutorialSettingsListener implements Listener {
         final Player player = event.getPlayer();
         final TutorialManager tutorialManager = LostShardPlugin.getTutorialManager();
         event.setQuitMessage(null);
+
+        final TutorialBook book = tutorialManager.wrap(player.getUniqueId());
+
+        if(book != null)
+        {
+            ZonedDateTime timeMoved = ZonedDateTime.now().minus(book.getInitDate().toInstant().toEpochMilli(), ChronoUnit.MILLIS);
+
+            TutorialSheet.getInstance().append(player.getUniqueId(), player.getName(), book.isComplete(), (book.getCurrentChapter() == null ? "N/A" : book.getCurrentChapter().toString()), player.getLocation(), book.hasPlot(), book.hasMark(), timeMoved.toEpochSecond());
+        }
+
+
+
         if (tutorialManager.isRestartWhenLoggedOff()) {
             tutorialManager.removeTutorial(player.getUniqueId(), TutorialCompleteType.RESET);
         }

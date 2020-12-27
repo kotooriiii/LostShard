@@ -10,6 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.PLAYER_COLOR;
@@ -22,17 +25,19 @@ public class Banmatch extends Match {
 
     private final static String INDEFINITE_BAN_IDENTIFIER = "Indefinite";
     private final static String BAN_MESSAGE = "You have been banned.";
+    private ZonedDateTime zonedDateTime;
 
     public Banmatch(UUID fighterA, UUID fighterB) {
-      super(fighterA, fighterB);
-      super.NAME = "Banmatch";
-      unbannedTime = null;
-      consequentMessage = null;
+        super(fighterA, fighterB);
+        super.NAME = "Banmatch";
+        unbannedTime = null;
+        consequentMessage = null;
     }
 
     @Override
-    public void initializer()
-    {super.initializer();}
+    public void initializer() {
+        super.initializer();
+    }
 
     @Override
     public void win(OfflinePlayer offlinePlayer) {
@@ -40,22 +45,13 @@ public class Banmatch extends Match {
 
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
-        if (offlinePlayer.isOnline()) {
 
-            new BukkitRunnable()
-            {
-                @Override
-                public void run() {
-                    offlinePlayer.getPlayer().kickPlayer(BAN_MESSAGE);
-
-                }
-            }.runTaskLater(LostShardPlugin.plugin, 20*5);
-        }
-        BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(), getUnbannedTime(), BAN_MESSAGE);
-        FileManager.write(bannedPlayer);
+        ZonedDateTime unbannedDate = ZonedDateTime.now().plus(getUnbannedTime().minus(getInitTime().toInstant().toEpochMilli(), ChronoUnit.MILLIS).toInstant().toEpochMilli(), ChronoUnit.MILLIS);
+        BannedPlayer bannedPlayer = new BannedPlayer(offlinePlayer.getUniqueId(),unbannedDate, BAN_MESSAGE);
+        LostShardPlugin.getBanManager().ban(bannedPlayer, true, true);
 
 
-            sendToAll(PLAYER_COLOR +  offlinePlayer.getName() + ChatColor.GREEN + " has been banned.");
+        sendToAll(PLAYER_COLOR + offlinePlayer.getName() + ChatColor.GREEN + " has been banned.");
     }
 
     public ZonedDateTime getUnbannedTime() {
@@ -66,13 +62,20 @@ public class Banmatch extends Match {
         this.unbannedTime = unbannedTime;
     }
 
-    public String  getConsequentMessage()
+    public void setInitTime(ZonedDateTime zonedDateTime)
     {
+        this.zonedDateTime = zonedDateTime;
+    }
+
+    public ZonedDateTime getInitTime() {
+        return zonedDateTime;
+    }
+
+    public String getConsequentMessage() {
         return consequentMessage;
     }
 
-    public void setConsequentMessage(String consequentMessage)
-    {
+    public void setConsequentMessage(String consequentMessage) {
         this.consequentMessage = consequentMessage;
     }
 
@@ -84,9 +87,8 @@ public class Banmatch extends Match {
         ChatColor IDENTITY = ChatColor.BLUE;
 
         String banTermLift = "";
-        if(getUnbannedTime().getYear() == 0)
-        {
-         banTermLift = Banmatch.getIndefiniteBanIdentifier();
+        if (getUnbannedTime().getYear() == 0) {
+            banTermLift = Banmatch.getIndefiniteBanIdentifier();
         } else {
             banTermLift = HelperMethods.until(getUnbannedTime());
         }
@@ -112,8 +114,7 @@ public class Banmatch extends Match {
         return INDEFINITE_BAN_IDENTIFIER;
     }
 
-    public static String getBanMessage()
-    {
+    public static String getBanMessage() {
         return BAN_MESSAGE;
     }
 }

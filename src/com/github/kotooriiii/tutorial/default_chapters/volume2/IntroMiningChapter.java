@@ -11,6 +11,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -22,7 +23,7 @@ import org.bukkit.potion.PotionEffectType;
 public class IntroMiningChapter extends AbstractChapter {
 
     private int goldCounter, ironCounter;
-    private static int GOLD_MAX = 10, IRON_MAX = 6;
+    private static int GOLD_MAX = 20, IRON_MAX = 12;
     private Zone zone;
     private boolean isComplete;
 
@@ -80,53 +81,65 @@ public class IntroMiningChapter extends AbstractChapter {
 
 
     @EventHandler
-    public void onGold(BlockBreakEvent event) {
-        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+    public void onGold(EntityPickupItemEvent event) {
+
+        if(!(event.getEntity() instanceof Player))
+            return;
+
+        Player player = (Player) event.getEntity();
+
+        if (!player.getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
 
-        if (!event.getBlock().getType().equals(Material.GOLD_ORE))
-            return;
+        ItemStack itemStack = event.getItem().getItemStack();
 
-        goldCounter++;
-        if (goldCounter == GOLD_MAX) {
+
+        goldCounter += itemStack.getAmount();
+
+        if (goldCounter >= GOLD_MAX && !player.getInventory().contains(Material.GOLD_INGOT, GOLD_MAX)) {
             if (ironCounter < IRON_MAX)
-                sendMessage(event.getPlayer(), "Get the iron ore as well!", ChapterMessageType.HELPER);
+                sendMessage(player, "Get the iron ore as well!", ChapterMessageType.HELPER);
             else
-                sendMessage(event.getPlayer(), "Let's continue exploring.", ChapterMessageType.HELPER);
+                sendMessage(player, "Let's continue exploring.", ChapterMessageType.HELPER);
             return;
         }
 
         if (goldCounter > GOLD_MAX) {
-            sendMessage(event.getPlayer(), "You won't need all this gold...", ChapterMessageType.HELPER);
+            sendMessage(player, "You won't need all this gold...", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }
     }
 
     @EventHandler
-    public void onIron(BlockBreakEvent event) {
-        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+    public void onIron(EntityPickupItemEvent event) {
+        if(!(event.getEntity() instanceof Player))
+            return;
+
+        Player player = (Player) event.getEntity();
+
+        if (!player.getUniqueId().equals(getUUID()))
             return;
         if (!isActive())
             return;
 
-        if (!event.getBlock().getType().equals(Material.IRON_ORE))
-            return;
+        ItemStack itemStack = event.getItem().getItemStack();
 
-        ironCounter++;
-        if (ironCounter == IRON_MAX) {
+        ironCounter += itemStack.getAmount();
+
+        if (ironCounter >= IRON_MAX && !player.getInventory().contains(Material.IRON_INGOT, IRON_MAX)) {
             if (goldCounter < GOLD_MAX)
-                sendMessage(event.getPlayer(), "Get the gold ore as well!", ChapterMessageType.HELPER);
+                sendMessage(player, "Get the gold ore as well!", ChapterMessageType.HELPER);
             else
-                sendMessage(event.getPlayer(), "Let's continue exploring.", ChapterMessageType.HELPER);
+                sendMessage(player, "Let's continue exploring.", ChapterMessageType.HELPER);
 
             return;
         }
 
         if (ironCounter > IRON_MAX) {
-            sendMessage(event.getPlayer(), "You won't need all this iron...", ChapterMessageType.HELPER);
+            sendMessage(player, "You won't need all this iron...", ChapterMessageType.HELPER);
             event.setCancelled(true);
             return;
         }

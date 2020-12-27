@@ -207,7 +207,7 @@ public class MarkSpell extends Spell implements Listener {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
 
-                    if (!(HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()) && HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()))) {
+                    if (!HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()) && !markLocation.getBlock().getType().getKey().getKey().toUpperCase().endsWith("_SLAB")) {
                         player.sendMessage(ERROR_COLOR + "You cannot create a mark in an obstructed location. Find a more open area!");
                         refund(player);
                         return;

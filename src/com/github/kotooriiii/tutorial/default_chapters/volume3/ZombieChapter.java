@@ -18,6 +18,8 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class ZombieChapter extends AbstractChapter {
         final Player player = Bukkit.getPlayer(getUUID());
         if (player == null)
             return;
-
+        player.removePotionEffect(PotionEffectType.SPEED);
         setLocation(new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 540, 58, 1160, 126, 3));
 
 
@@ -153,6 +155,8 @@ public class ZombieChapter extends AbstractChapter {
 
 
             sendMessage(Bukkit.getPlayer(getUUID()), "Zombies drop rotten flesh which is instantly eatable like melons.\nThey also drop feathers, which is a useful ingredient in casting spells.\nLet's continue to the event along the path.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+            Bukkit.getPlayer(getUUID()).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 5, 3, false, false, false));
+
             setComplete();
         }
 
