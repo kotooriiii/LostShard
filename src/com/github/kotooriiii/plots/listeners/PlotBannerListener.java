@@ -24,6 +24,7 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -33,6 +34,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -102,12 +104,14 @@ public class PlotBannerListener implements Listener {
     @EventHandler
     public void onPlotBannerPlaced(BlockPlaceEvent event) {
         Block block = event.getBlockPlaced();
-
+        if (event.isCancelled())
+            return;
         if (block == null || event.getItemInHand() == null)
             return;
 
         if (!(event.getBlockPlaced().getState() instanceof Banner))
             return;
+
 
         /*
         Block is a banner at this point.
@@ -170,7 +174,7 @@ public class PlotBannerListener implements Listener {
 
         LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
         player.sendMessage(ChatColor.GOLD + "You have successfully created the plot \"" + playerPlot.getName() + "\".");
-        build(location);
+        build(location, player);
 
         BlockFace face = HelperMethods.getClosestFace(initPlace, location);
 
@@ -215,6 +219,36 @@ public class PlotBannerListener implements Listener {
         }
         chestBlock = location.getBlock().getRelative(blockToChest);
 
+        chestBlock.breakNaturally();
+        if (!LostShardPlugin.isTutorial()) {
+            chestBlock.setType(Material.CHEST);
+
+            Chest chest = (Chest) chestBlock.getState();
+            chest.getBlockInventory().addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), getChestBook());
+
+            Directional directional = (Directional) chestBlock.getState().getBlockData();
+            directional.setFacing(chestFacing.getOppositeFace());
+            chestBlock.setBlockData(directional);
+        } else {
+            BlockData data = Material.CHEST.createBlockData();
+
+            Directional directional = (Directional) data;
+            directional.setFacing(chestFacing.getOppositeFace());
+
+            event.getPlayer().sendBlockChange(chestBlock.getLocation(), data);
+
+
+        }
+    }
+
+    public static Inventory getInventory(Player player) {
+        Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, "Tutorial Plot Chest");
+        inv.addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), getChestBook());
+        return inv;
+    }
+
+
+    public static ItemStack getChestBook() {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 
@@ -265,19 +299,7 @@ public class PlotBannerListener implements Listener {
 
         bookMeta.spigot().addPage(new BaseComponent[]{tc}, new BaseComponent[]{discordComponent});
         book.setItemMeta(bookMeta);
-
-
-        chestBlock.breakNaturally();
-        chestBlock.setType(Material.CHEST);
-        Chest chest = (Chest) chestBlock.getState();
-        chest.getBlockInventory().addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), book);
-
-        Directional directional = (Directional) chestBlock.getState().getBlockData();
-
-        directional.setFacing(chestFacing.getOppositeFace());
-        chestBlock.setBlockData(directional);
-
-
+        return book;
     }
 
     /**
@@ -285,7 +307,7 @@ public class PlotBannerListener implements Listener {
      *
      * @param location Location of Banner block
      */
-    public void build(final Location location) {
+    public void build(final Location location, final Player player) {
         if (location == null)
             return;
 
@@ -301,10 +323,18 @@ public class PlotBannerListener implements Listener {
 
             cloneLoc.setY(y);
 
-            if (x == location.getBlockX() - PlayerPlot.getDefaultRadius() || x == location.getBlockX() + PlayerPlot.getDefaultRadius())
-                cloneLoc.getBlock().setType(Material.REDSTONE_TORCH);
-            else
-                cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            if (x == location.getBlockX() - PlayerPlot.getDefaultRadius() || x == location.getBlockX() + PlayerPlot.getDefaultRadius()) {
+                if (!LostShardPlugin.isTutorial())
+                    cloneLoc.getBlock().setType(Material.REDSTONE_TORCH);
+                else
+                    player.sendBlockChange(cloneLoc, Material.REDSTONE_TORCH.createBlockData());
+
+            } else {
+                if (!LostShardPlugin.isTutorial())
+                    cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+                else
+                    player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+            }
             cloneLoc.setY(location.getBlockY());
 
         }
@@ -319,10 +349,17 @@ public class PlotBannerListener implements Listener {
 
             cloneLoc.setY(y);
 
-            if (x == location.getBlockX() - PlayerPlot.getDefaultRadius() || x == location.getBlockX() + PlayerPlot.getDefaultRadius())
-                cloneLoc.getBlock().setType(Material.REDSTONE_TORCH);
-            else
-                cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            if (x == location.getBlockX() - PlayerPlot.getDefaultRadius() || x == location.getBlockX() + PlayerPlot.getDefaultRadius()) {
+                if (!LostShardPlugin.isTutorial())
+                    cloneLoc.getBlock().setType(Material.REDSTONE_TORCH);
+                else
+                    player.sendBlockChange(cloneLoc, Material.REDSTONE_TORCH.createBlockData());
+            } else {
+                if (!LostShardPlugin.isTutorial())
+                    cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+                else
+                    player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+            }
             cloneLoc.setY(location.getBlockY());
 
         }
@@ -340,7 +377,10 @@ public class PlotBannerListener implements Listener {
                 continue;
 
             cloneLoc.setY(y);
-            cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            if (!LostShardPlugin.isTutorial())
+                cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            else
+                player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
             cloneLoc.setY(location.getBlockY());
         }
         cloneLoc.setX(location.getBlockX() - PlayerPlot.getDefaultRadius());
@@ -356,12 +396,21 @@ public class PlotBannerListener implements Listener {
                 continue;
 
             cloneLoc.setY(y);
-            cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            if (!LostShardPlugin.isTutorial())
+                cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
+            else
+                player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
             cloneLoc.setY(location.getBlockY());
         }
 
-        location.getWorld().spawnParticle(Particle.TOTEM, location, 100, 5, 10, 5);
-        location.getWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 0f);
+        if (LostShardPlugin.isTutorial()) {
+            player.spawnParticle(Particle.TOTEM, location, 100, 5, 10, 5);
+            player.playSound(location, Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 0f);
+        } else {
+            location.getWorld().spawnParticle(Particle.TOTEM, location, 100, 5, 10, 5);
+            location.getWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 0f);
+        }
+
     }
 
     public int getRedstoneY(Location location) {
@@ -413,6 +462,7 @@ public class PlotBannerListener implements Listener {
         if (!map.containsKey(event.getPlayer().getUniqueId()))
             return;
         Block bannerBlock = map.get(event.getPlayer().getUniqueId())[1].getBlock();
+        map.remove(event.getPlayer().getUniqueId());
         remove(bannerBlock, event.getPlayer(), true);
     }
 

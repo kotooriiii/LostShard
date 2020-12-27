@@ -70,18 +70,26 @@ public class THologramManager {
         createHologram(712, 70, 867, "You found it!\nLet’s deposit all the gold you mined.\nType: /deposit (amount)".split("\n")).getVisibilityManager().setVisibleByDefault(false);
 
         createHologram(712, 70.5f, 867, "To access your bank, type /bank.\nNo one else has access to your bank.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+        //PlotIntroChapter onBegin
         createHologram(707, 70.5f, 862, "You can’t stay here forever!\nGo outside and make a plot.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(502, 67, 751, "Follow the path to make a plot!").getVisibilityManager().setVisibleByDefault(false);
         createHologram(726, 67, 804, "Follow the path outside to make a plot.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(847, 66, 797, "No good spots yet! Keep following the path!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(950f, 82.5f, 767f, "Up ahead to the left!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 86.5f, 747, "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name), to create your plot.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 86, 747, "Good job!\nNo sense in keeping all that gold on you.\nDeposit the rest by typing: /plot deposit (amount)".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 86, 747, "Expand your plot by typing /plot expand.\nDo this multiple times to make your plot bigger!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 86, 747, "Looks like you ran out of gold!\nLet’s get some more by capturing an event.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 86, 757, "Before we leave, we should set a mark here so we can teleport back.\nTo set a mark, type: /cast mark.\nName the mark something easy to remember, like ‘home’.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(977, 85, 766, "Awesome job!\nNow follow the path to get to the event.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
-        createHologram(965, 97.5f, 887, "Keep following the path!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+        createHologram(977, 86.5f, 747, "This is a good spot for a plot.\nPlace your plot banner on the yellow wool to claim this area!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+        createHologram(977, 86, 747, "Good job!\nYou've claimed your first plot.\nLook in the chest and grab the feather and redstone.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        createHologram(977, 86, 747, "Use the feather and redstone to cast a mark here.\nA mark is a place you can warp back to when you are away from your base.\nType: '/cast mark'".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+        //createHologram(977, 86, 747, "Expand your plot by typing /plot expand.\nDo this multiple times to make your plot bigger!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+       // createHologram(977, 86, 747, "Looks like you ran out of gold!\nLet’s get some more by capturing an event.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        //createHologram(977, 86, 757, "Before we leave, we should set a mark here so we can teleport back.\nTo set a mark, type: /cast mark.\nName the mark something easy to remember, like ‘home’.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+
+        createHologram(977, 85, 766, "Great job! Continue forward and finish the tutorial!".split("\n")).getVisibilityManager().setVisibleByDefault(false);
+        createHologram(965, 97.5f, 887, "Keep following the path.".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(903, 98, 956, "That’s a setback.\nLooks like the only way to keep moving forward is to jump...".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(887, 55, 979, "Ouch! That was a hard hit!\nMaybe we’ll find something on the way to heal us...".split("\n")).getVisibilityManager().setVisibleByDefault(false);
         createHologram(806, 50, 1027, "We’re getting close to something...".split("\n")).getVisibilityManager().setVisibleByDefault(false);

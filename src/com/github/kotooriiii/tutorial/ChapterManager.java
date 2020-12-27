@@ -1,6 +1,7 @@
 package com.github.kotooriiii.tutorial;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.tutorial.default_chapters.volume1.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume2.*;
 import com.github.kotooriiii.tutorial.default_chapters.volume3.*;
@@ -60,8 +61,11 @@ public class ChapterManager {
         register(BankerIntroChapter.class);
         register(BankChestChapter.class);
         register(PlotIntroChapter.class);
-        register(PlotDepositChapter.class);
-        register(PlotExpandChapter.class);
+
+        register(PlotGrabChestChapter.class);
+      // register(PlotDepositChapter.class);
+       // register(PlotExpandChapter.class);
+
         register(IntroMarkChapter.class);
         register(PathToEventChapter.class);
         register(FallChapter.class);

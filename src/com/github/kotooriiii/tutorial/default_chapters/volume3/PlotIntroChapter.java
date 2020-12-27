@@ -11,9 +11,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Banner;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -96,6 +99,9 @@ public class PlotIntroChapter extends AbstractChapter {
         // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
     }
 
+
+
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlotCreate(PlotCreateEvent event) {
         if (!event.getPlayer().getUniqueId().equals(getUUID()))
@@ -104,20 +110,8 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         if (event.isCancelled())
             return;
-        if (ShardPlotPlayer.wrap(event.getPlayer().getUniqueId()).getPlotsOwned().length > 0) {
-            event.getPlayer().sendMessage(ERROR_COLOR + "You can only create one plot in the tutorial phase.");
-            return;
-        }
-        if (!plotCreateZone.contains(event.getPlot().getCenter())) {
-            sendMessage(event.getPlayer(), "Move closer to the elevated area by the body of water.", ChapterMessageType.HELPER);
-            return;
-        }
 
-        Bank bank = LostShardPlugin.getBankManager().wrap(event.getPlayer().getUniqueId());
-        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
-        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
-        event.getPlayer().getInventory().remove(ingredients[0]);
-        event.getPlayer().sendMessage(ChatColor.GOLD + "You have created the plot \"" + event.getPlot().getName() + "\", it cost $" + PlayerPlot.CREATE_COST + " and 1 diamond.");
+        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().wrap(getUUID()).setPlot(true);
         setComplete();
     }
@@ -130,9 +124,45 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         if (!abandonMissionZone.contains(event.getTo()))
             return;
-        sendMessage(event.getPlayer(), "You must create a plot with \"plot create (name)\" before continuing.", ChapterMessageType.HELPER);
+        sendMessage(event.getPlayer(), "You must place the plot banner before continuing.", ChapterMessageType.HELPER);
         event.setCancelled(true);
     }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBannerPlace(BlockPlaceEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if (event.isCancelled())
+            return;
+
+        event.setCancelled(true);
+
+        if (ShardPlotPlayer.wrap(event.getPlayer().getUniqueId()).getPlotsOwned().length > 0) {
+            event.getPlayer().sendMessage(ERROR_COLOR + "You can only create one plot in the tutorial phase.");
+            return;
+        }
+        if (!plotCreateZone.contains(event.getBlockPlaced().getLocation())) {
+            sendMessage(event.getPlayer(), "Move the plot banner closer to the elevated area by the body of water.", ChapterMessageType.HELPER);
+            return;
+        }
+
+        if (!(event.getBlockPlaced().getState() instanceof Banner
+                && event.getBlockPlaced().getRelative(BlockFace.DOWN).getType().getKey().getKey().toUpperCase().endsWith("_WOOL"))) {
+            sendMessage(event.getPlayer(), "Place the plot banner on the wool block.", ChapterMessageType.HELPER);
+            return;
+        }
+        event.setCancelled(false);
+        event.getPlayer().getInventory().setItemInMainHand(null);
+        event.getPlayer().sendBlockChange(event.getBlockPlaced().getLocation(), event.getBlockPlaced().getBlockData());
+//        Bank bank = LostShardPlugin.getBankManager().wrap(event.getPlayer().getUniqueId());
+//        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
+//        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+//        event.getPlayer().getInventory().remove(ingredients[0]);
+    }
+
+
 
     public static Zone getExitOrderZone() {
         return exitOrderZone;

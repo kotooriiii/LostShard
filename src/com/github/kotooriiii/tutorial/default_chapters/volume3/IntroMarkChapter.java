@@ -21,7 +21,7 @@ public class IntroMarkChapter extends AbstractChapter {
         final Player player = Bukkit.getPlayer(getUUID());
         if (player == null)
             return;
-        player.getInventory().addItem(new ItemStack(Material.FEATHER, 10), new ItemStack(Material.REDSTONE, 10));
+       // player.getInventory().addItem(new ItemStack(Material.FEATHER, 10), new ItemStack(Material.REDSTONE, 10));
         sendMessage(player, "Before we leave, we should set a mark here so we can teleport back.\nTo set a mark, type: /cast mark\nName the mark something easy to remember, like 'Home'.", ChapterMessageType.HOLOGRAM_TO_TEXT);
     }
 
@@ -83,7 +83,7 @@ public class IntroMarkChapter extends AbstractChapter {
 
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
         LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
-        sendMessage(event.getPlayer(), "Awesome job! Now follow the path to get to the event.", ChapterMessageType.HOLOGRAM_TO_TEXT);
+        sendMessage(event.getPlayer(), "Great job! Continue forward and finish the tutorial!", ChapterMessageType.HOLOGRAM_TO_TEXT);
         LostShardPlugin.getTutorialManager().wrap(getUUID()).setMark(true);
         setComplete();
         return;

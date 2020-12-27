@@ -23,6 +23,7 @@ import com.github.kotooriiii.tutorial.TutorialManager;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.boss.BarColor;
@@ -563,12 +564,13 @@ public class TutorialSettingsListener implements Listener {
 
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlace(BlockPlaceEvent event) {
         if (event.getPlayer().getGameMode() == GameMode.CREATIVE)
             return;
         event.setCancelled(true);
     }
+
 
     @EventHandler
     public void onBlockBreak(BlockDropItemEvent event) {
