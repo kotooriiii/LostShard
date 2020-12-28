@@ -424,6 +424,7 @@ public class LostShardPlugin extends JavaPlugin {
                                     yaml.set("MaxStamina", 100.0f);
                                     yaml.set("Private", false);
                                     yaml.set("Spawn", null);
+                                    yaml.set("EpochMillis", 0);
                                     yaml.save(statFile);
                                     continue;
                                 }

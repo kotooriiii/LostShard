@@ -68,11 +68,6 @@ public class TutorialSettingsListener implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onPlotCreate2(PlotCreateEvent event) {
-        event.setCancelled(true);
-    }
-
     @EventHandler
     public void onBurn(EntityDamageEvent event) {
         if (event.getCause() != EntityDamageEvent.DamageCause.FIRE && event.getCause() != EntityDamageEvent.DamageCause.FIRE_TICK)
@@ -90,7 +85,8 @@ public class TutorialSettingsListener implements Listener {
         if(event.getEntity().getType() != EntityType.SPIDER)
             return;
         event.getDrops().clear();
-        event.setDroppedExp(1000);
+        event.getEntity().getWorld().spawnEntity(event.getEntity().getLocation(), EntityType.EXPERIENCE_ORB);
+        event.setDroppedExp(10000);
     }
 
     @EventHandler

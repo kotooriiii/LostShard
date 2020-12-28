@@ -3,6 +3,7 @@ package com.github.kotooriiii.tutorial.default_chapters.volume3;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.events.PlotCreateEvent;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
@@ -95,7 +96,7 @@ public class PlotIntroChapter extends AbstractChapter {
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         isHologramCreated = true;
         event.getPlayer().removePotionEffect(PotionEffectType.SPEED);
-
+        event.getPlayer().getInventory().addItem(PlotBanner.getInstance().getItem());
         // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
     }
 
@@ -154,8 +155,9 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         }
         event.setCancelled(false);
-        event.getPlayer().getInventory().setItemInMainHand(null);
         event.getPlayer().sendBlockChange(event.getBlockPlaced().getLocation(), event.getBlockPlaced().getBlockData());
+        event.getPlayer().getInventory().setItemInMainHand(null);
+
 //        Bank bank = LostShardPlugin.getBankManager().wrap(event.getPlayer().getUniqueId());
 //        bank.setCurrency(bank.getCurrency() - PlayerPlot.CREATE_COST);
 //        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};

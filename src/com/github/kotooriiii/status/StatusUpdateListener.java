@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.npc.type.guard.GuardNPC;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.stats.Stat;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -18,11 +19,10 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
@@ -63,11 +63,15 @@ public class StatusUpdateListener implements Listener {
         Stat stat = Stat.wrap(damagerPlayer.getUniqueId());
         if (stat.getMillisInit() != 0 && ZonedDateTime.now().toInstant().toEpochMilli() - stat.getMillisInit() < 1000 * 60 * 60 * 24 * 7) {
 
-            guardKnockback(damagerPlayer);
-            stat.setMillisInit(0);
-            damager.sendMessage(ChatColor.GOLD + "[Guard]" + ERROR_COLOR + " DO NOT HIT OTHER BLUE NAMES IN ORDER OR YOU WILL BECOME CRIMINAL AND THE GUARDS WILL KILL YOU. THIS IS YOUR ONLY WARNING. ");
-            event.setCancelled(true);
-            return;
+           Plot plot=  LostShardPlugin.getPlotManager().getStandingOnPlot(defenderPlayer.getLocation());
+            if(plot != null && plot.getName().equalsIgnoreCase("order"))
+            {
+                guardKnockback(damagerPlayer);
+                stat.setMillisInit(0);
+                damager.sendMessage(ChatColor.GOLD + "[Guard]" + ERROR_COLOR + " DO NOT HIT OTHER BLUE NAMES IN ORDER OR YOU WILL BECOME CRIMINAL AND THE GUARDS WILL KILL YOU. THIS IS YOUR ONLY WARNING. ");
+                event.setCancelled(true);
+                return;
+            }
         }
 
         //Get each players' status
@@ -132,9 +136,28 @@ public class StatusUpdateListener implements Listener {
                 {
                     if(guardNPC.getEntity() instanceof Player)
                     {
-                        player.setVelocity(guardNPC.getEntity().getLocation().getDirection());
+                        int height=3,range=20;
+                        Vector vector;
+                        switch (new Random().nextInt(4))
+                        {
+                            case 0:
+                               vector = new Vector(range,height,range);
+                                break;
+                            case 1:
+                                vector = new Vector(-range,height,range);
+                                break;
+                            case 2:
+                                vector = new Vector(range,height,-range);
+                                break;
+                            case 3:
+                            default:
+                                vector = new Vector(-range,height,-range);
+                        }
+
+                        player.setVelocity(vector);
                     }
                 }
+
                 int curX = guardNPC.getStoredLocation().getBlockX();
                 int postX = guardTrait.getGuardingLocation().getBlockX();
                 int curY = guardNPC.getStoredLocation().getBlockY();

@@ -172,6 +172,7 @@ public class PlotBannerListener implements Listener {
         if (event.isCancelled())
             return;
 
+        if(!LostShardPlugin.isTutorial())
         LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
         player.sendMessage(ChatColor.GOLD + "You have successfully created the plot \"" + playerPlot.getName() + "\".");
         build(location, player);

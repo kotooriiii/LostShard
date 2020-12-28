@@ -60,7 +60,7 @@ public abstract class AbstractChapter extends Observable implements Listener {
 
     @Override
     public String toString() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 
     /**

@@ -162,7 +162,7 @@ public class DeadEndChapter extends AbstractChapter {
 
         Player player = Bukkit.getPlayer(getUUID());
         if (player != null)
-            sendMessage(player, "“Your mining level increases as you mine smooth stone...", ChapterMessageType.HELPER);
+            sendMessage(player, "Your mining level increases as you mine smooth stone...", ChapterMessageType.HELPER);
     }
 
     @EventHandler

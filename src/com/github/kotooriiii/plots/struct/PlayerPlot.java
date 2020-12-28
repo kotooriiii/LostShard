@@ -36,7 +36,7 @@ public class PlayerPlot extends Plot {
     /**
      * The default radius of a plot when first created
      */
-    private final static int defaultRadius = LostShardPlugin.isTutorial() ? 3 : 5;
+    private final static int defaultRadius = LostShardPlugin.isTutorial() ? 5 : 5;
     /**
      * The plot's current radius.
      */

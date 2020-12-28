@@ -119,19 +119,23 @@ public class TutorialSheet {
             ValueRange response = service.spreadsheets().values().get(sheetsID, RANGE).execute();
             List<List<Object>> values = response.getValues();
 
-            row:
-            for (List<Object> row : values) {
-                column:
-                for (Object column : row) {
-                    if (column.toString().equals(uuid.toString()))
-                        return;
-                    continue row;
+            if(values != null) {
+
+                row:
+                for (List<Object> row : values) {
+                    column:
+                    for (Object column : row) {
+                        if (column.toString().equals(uuid.toString()))
+                            return;
+                        continue row;
+                    }
                 }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
 
         ValueRange contentToAddValueRange = new ValueRange();
