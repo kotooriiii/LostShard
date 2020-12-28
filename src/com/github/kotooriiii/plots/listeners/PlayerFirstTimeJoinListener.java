@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.SpawnPlot;
+import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,6 +32,7 @@ public class PlayerFirstTimeJoinListener implements Listener {
         if(spawnPlot == null || spawnPlot.getSpawn() == null)
             return;
 
+        Stat.wrap(player.getUniqueId()).setMillisInit(ZonedDateTime.now().toInstant().toEpochMilli());
         Location spawnLocation = spawnPlot.getSpawn();
         spawnLocation.getChunk().load(true);
         player.teleport(spawnLocation);

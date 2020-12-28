@@ -29,6 +29,8 @@ public class Stat {
     private boolean isPrivate;
     private Location spawn;
 
+    private long millisInit;
+
     private static HashMap<UUID, Stat> statMap = new HashMap<>();
 
     private static HashSet<UUID> restingPlayers = new HashSet<>();
@@ -100,6 +102,14 @@ public class Stat {
     public boolean hasSpawn()
     {
         return  spawn != null;
+    }
+
+    public long getMillisInit() {
+        return millisInit;
+    }
+
+    public void setMillisInit(long millisInit) {
+        this.millisInit = millisInit;
     }
 
     public void setMaxStamina(double maxStamina) {

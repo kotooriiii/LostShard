@@ -563,6 +563,7 @@ public final class FileManager {
         boolean isGold = yaml.getBoolean("isGold");
         boolean isPrivate = yaml.getBoolean("Private");
         Location spawn = yaml.getLocation("Spawn");
+        long millis = yaml.getLong("EpochMillis", 0);
 
         UUID playerUUID = UUID.fromString(uuidString);
 
@@ -578,6 +579,7 @@ public final class FileManager {
         stat.setPrivate(isPrivate);
         stat.setTitle(title);
         stat.setSpawn(spawn);
+        stat.setMillisInit(millis);
         return stat;
     }
 
@@ -1161,6 +1163,8 @@ public final class FileManager {
         yaml.set("isGold", stat.isGold());
         yaml.set("Private", stat.isPrivate());
         yaml.set("Spawn", stat.getSpawn());
+        yaml.set("EpochMillis", stat.getMillisInit());
+
         try {
             yaml.save(statFile);
         } catch (IOException e) {
