@@ -26,6 +26,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.RedstoneWire;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -231,6 +232,7 @@ public class PlotBannerListener implements Listener {
             directional.setFacing(chestFacing.getOppositeFace());
             chestBlock.setBlockData(directional);
         } else {
+
             BlockData data = Material.CHEST.createBlockData();
 
             Directional directional = (Directional) data;
@@ -312,6 +314,12 @@ public class PlotBannerListener implements Listener {
         if (location == null)
             return;
 
+        final BlockFace faceA = BlockFace.EAST;
+        final BlockFace faceB = BlockFace.NORTH;
+
+        final RedstoneWire.Connection connectionA = RedstoneWire.Connection.SIDE;
+        final RedstoneWire.Connection connectionB = RedstoneWire.Connection.SIDE;
+
         Location cloneLoc = location.clone();
 
         cloneLoc.setZ(location.getBlockZ() + PlayerPlot.getDefaultRadius());
@@ -327,14 +335,19 @@ public class PlotBannerListener implements Listener {
             if (x == location.getBlockX() - PlayerPlot.getDefaultRadius() || x == location.getBlockX() + PlayerPlot.getDefaultRadius()) {
                 if (!LostShardPlugin.isTutorial())
                     cloneLoc.getBlock().setType(Material.REDSTONE_TORCH);
-                else
+                else {
+
                     player.sendBlockChange(cloneLoc, Material.REDSTONE_TORCH.createBlockData());
+                }
 
             } else {
                 if (!LostShardPlugin.isTutorial())
                     cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
-                else
-                    player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+                else {
+                    RedstoneWire redstoneWire = (RedstoneWire) Material.REDSTONE_WIRE.createBlockData();
+                    redstoneWire.setFace(faceA, connectionA);
+                    player.sendBlockChange(cloneLoc, redstoneWire);
+                }
             }
             cloneLoc.setY(location.getBlockY());
 
@@ -358,8 +371,10 @@ public class PlotBannerListener implements Listener {
             } else {
                 if (!LostShardPlugin.isTutorial())
                     cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
-                else
-                    player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+                else {
+                    RedstoneWire redstoneWire = (RedstoneWire) Material.REDSTONE_WIRE.createBlockData();
+                    redstoneWire.setFace(faceA, connectionA);
+                    player.sendBlockChange(cloneLoc, redstoneWire);                }
             }
             cloneLoc.setY(location.getBlockY());
 
@@ -380,8 +395,11 @@ public class PlotBannerListener implements Listener {
             cloneLoc.setY(y);
             if (!LostShardPlugin.isTutorial())
                 cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
-            else
-                player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+            else {
+                RedstoneWire redstoneWire = (RedstoneWire) Material.REDSTONE_WIRE.createBlockData();
+                redstoneWire.setFace(faceB, connectionB);
+                player.sendBlockChange(cloneLoc, redstoneWire);
+            }
             cloneLoc.setY(location.getBlockY());
         }
         cloneLoc.setX(location.getBlockX() - PlayerPlot.getDefaultRadius());
@@ -399,8 +417,11 @@ public class PlotBannerListener implements Listener {
             cloneLoc.setY(y);
             if (!LostShardPlugin.isTutorial())
                 cloneLoc.getBlock().setType(Material.REDSTONE_WIRE);
-            else
-                player.sendBlockChange(cloneLoc, Material.REDSTONE_WIRE.createBlockData());
+            else {
+                RedstoneWire redstoneWire = (RedstoneWire) Material.REDSTONE_WIRE.createBlockData();
+                redstoneWire.setFace(faceB, connectionB);
+                player.sendBlockChange(cloneLoc, redstoneWire);
+            }
             cloneLoc.setY(location.getBlockY());
         }
 

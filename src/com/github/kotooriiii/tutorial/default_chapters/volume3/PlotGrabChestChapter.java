@@ -77,7 +77,8 @@ public class PlotGrabChestChapter extends AbstractChapter {
 
         }
         if (!isEmpty) {
-            sendMessage((Player) event.getPlayer(), "Take the redstone and feather from the chest!", ChapterMessageType.HELPER);
+            event.getPlayer().getInventory().addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1));
+           // sendMessage((Player) event.getPlayer(), "Take the redstone and feather from the chest!", ChapterMessageType.HELPER);
             return;
         }
 
