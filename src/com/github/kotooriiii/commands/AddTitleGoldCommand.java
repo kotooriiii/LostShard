@@ -54,6 +54,7 @@ public class AddTitleGoldCommand implements CommandExecutor {
                     playerSender.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " will now be referred to " + ChatColor.GOLD +  title +  STANDARD_COLOR + ".");
                 } else {
                     stat.setTitle("");
+                    stat.setGold(false);
                     playerSender.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + "'s title has been removed.");
                 }
 

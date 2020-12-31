@@ -6,6 +6,7 @@ import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.events.PlotCreateEvent;
+import com.github.kotooriiii.plots.listeners.PlotBannerListener;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
@@ -14,6 +15,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,6 +25,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
@@ -95,12 +99,15 @@ public class PlotIntroChapter extends AbstractChapter {
         if (!isHologramCreated)
             LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
         isHologramCreated = true;
-        event.getPlayer().removePotionEffect(PotionEffectType.SPEED);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                event.getPlayer().removePotionEffect(PotionEffectType.SPEED);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 40);
         event.getPlayer().getInventory().addItem(PlotBanner.getInstance().getItem());
         // sendMessage(event.getPlayer(), "This is a good spot for a plot.\nPlots cost 10 gold and 1 diamond to create.\nType /plot create (name) to create your plot.");
     }
-
-
 
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -155,7 +162,17 @@ public class PlotIntroChapter extends AbstractChapter {
             return;
         }
         event.setCancelled(false);
-        event.getPlayer().sendBlockChange(event.getBlockPlaced().getLocation(), event.getBlockPlaced().getBlockData());
+
+        Rotatable data = (Rotatable) Material.LEGACY_STANDING_BANNER.createBlockData();
+        data.setRotation(BlockFace.SOUTH);
+
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                event.getPlayer().sendBlockChange(event.getBlockPlaced().getLocation(), data);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 5);
         event.getPlayer().getInventory().setItemInMainHand(null);
 
 //        Bank bank = LostShardPlugin.getBankManager().wrap(event.getPlayer().getUniqueId());
@@ -163,7 +180,6 @@ public class PlotIntroChapter extends AbstractChapter {
 //        ItemStack[] ingredients = new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
 //        event.getPlayer().getInventory().remove(ingredients[0]);
     }
-
 
 
     public static Zone getExitOrderZone() {

@@ -38,6 +38,7 @@ public class StatusUpdateListener implements Listener {
         if (event.isCancelled())
             return;
 
+
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
@@ -61,14 +62,17 @@ public class StatusUpdateListener implements Listener {
             return;
 
         Stat stat = Stat.wrap(damagerPlayer.getUniqueId());
-        if (stat.getMillisInit() != 0 && ZonedDateTime.now().toInstant().toEpochMilli() - stat.getMillisInit() < 1000 * 60 * 60 * 24 * 7) {
+
+        if (stat.getMillisInit() != 0 && ZonedDateTime.now().minusDays(7).toInstant().toEpochMilli() < stat.getMillisInit()) {
+
+
 
            Plot plot=  LostShardPlugin.getPlotManager().getStandingOnPlot(defenderPlayer.getLocation());
             if(plot != null && plot.getName().equalsIgnoreCase("order"))
             {
                 guardKnockback(damagerPlayer);
+                damager.sendMessage(ChatColor.GOLD + "[Guard]" + ERROR_COLOR + " DO NOT HIT OTHER BLUE NAMES IN ORDER OR YOU WILL BECOME CRIMINAL AND THE GUARDS WILL KILL YOU. THIS IS YOUR ONLY WARNING.");
                 stat.setMillisInit(0);
-                damager.sendMessage(ChatColor.GOLD + "[Guard]" + ERROR_COLOR + " DO NOT HIT OTHER BLUE NAMES IN ORDER OR YOU WILL BECOME CRIMINAL AND THE GUARDS WILL KILL YOU. THIS IS YOUR ONLY WARNING. ");
                 event.setCancelled(true);
                 return;
             }
@@ -113,10 +117,6 @@ public class StatusUpdateListener implements Listener {
         NPC guardNPC = GuardNPC.getNearestGuard(player.getLocation());
         GuardTrait guardTrait = guardNPC.getTrait(GuardTrait.class);
         if (guardNPC == null) {
-            return;
-        }
-
-        if (!StatusPlayer.wrap(player.getUniqueId()).hasNearbyEnemyRange(5)) {
             return;
         }
 

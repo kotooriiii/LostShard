@@ -173,8 +173,8 @@ public class PlotBannerListener implements Listener {
         if (event.isCancelled())
             return;
 
-        if(!LostShardPlugin.isTutorial())
-        LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
+        if (!LostShardPlugin.isTutorial())
+            LostShardPlugin.getPlotManager().addPlot(playerPlot, true);
         player.sendMessage(ChatColor.GOLD + "You have successfully created the plot \"" + playerPlot.getName() + "\".");
         build(location, player);
 
@@ -221,8 +221,9 @@ public class PlotBannerListener implements Listener {
         }
         chestBlock = location.getBlock().getRelative(blockToChest);
 
-        chestBlock.breakNaturally();
         if (!LostShardPlugin.isTutorial()) {
+            chestBlock.breakNaturally();
+
             chestBlock.setType(Material.CHEST);
 
             Chest chest = (Chest) chestBlock.getState();
@@ -244,8 +245,13 @@ public class PlotBannerListener implements Listener {
         }
     }
 
+    public static String getTitle()
+    {
+        return "Tutorial Plot Chest";
+    }
+
     public static Inventory getInventory(Player player) {
-        Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, "Tutorial Plot Chest");
+        Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, getTitle());
         inv.addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), getChestBook());
         return inv;
     }

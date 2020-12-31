@@ -30,7 +30,7 @@ public class MeditateCommand implements CommandExecutor {
                         playerSender.sendMessage(ChatColor.GOLD + "You are already meditating...");
                         return true;
                     }
-                    playerSender.sendMessage(ChatColor.GOLD + "You begin resting.");
+                    playerSender.sendMessage(ChatColor.GOLD + "You begin meditating.");
                     Stat.getMeditatingPlayers().add(playerUUID);
 
                 } else {

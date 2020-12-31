@@ -80,6 +80,27 @@ public class IntroMiningChapter extends AbstractChapter {
         event.getPlayer().openInventory(inventory);
     }
 
+    @EventHandler
+    public void onHit(BlockBreakEvent event)
+    {
+        if (!event.getPlayer().getUniqueId().equals(getUUID()))
+            return;
+        if (!isActive())
+            return;
+        if(hasAnnouncedGold && event.getBlock().getType() == Material.GOLD_ORE)
+        {
+            sendMessage(event.getPlayer(), "You won't need all this gold...", ChapterMessageType.HELPER);
+            event.setCancelled(true);
+            return;
+        }
+
+        if(hasAnnouncedIron && event.getBlock().getType() == Material.IRON_ORE)
+        {
+            sendMessage(event.getPlayer(), "You won't need all this iron...", ChapterMessageType.HELPER);
+            event.setCancelled(true);
+            return;
+        }
+    }
 
     @EventHandler
     public void onGold(EntityPickupItemEvent event) {

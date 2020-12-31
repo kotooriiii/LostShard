@@ -70,6 +70,10 @@ public class EntityInteractPlotListener implements Listener {
         }
     }
 
+    /**
+     * Stops the RIGHT CLICK interaction on enemy plots with the exception of wooden stuff.
+     * @param playerInteractEvent
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent playerInteractEvent) {
         final Block block = playerInteractEvent.getClickedBlock();
@@ -93,6 +97,9 @@ public class EntityInteractPlotListener implements Listener {
             return;
 
         if (block.getState() instanceof Container)
+            return;
+
+        if(!(playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR || playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK))
             return;
 
 

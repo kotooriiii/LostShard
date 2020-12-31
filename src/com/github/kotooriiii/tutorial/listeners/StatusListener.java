@@ -22,18 +22,19 @@ public class StatusListener implements Listener {
 
     private NPC a1, a2, b1, b2;
     private Location spawnA, spawnA2, spawnB, spawnB2;
-    private final int rotationA = 270, rotationB = 180+180;
+    private final int rotationA = 270-180, rotationB = 180;
 
     public StatusListener() {
         this.a2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Elise");
         a2.addTrait(new TutorialTrait());
         a2.setProtected(false);
-        spawnA2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 661.5, 66, 853.5, -90 + rotationA, 0);
+        spawnA2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 664.5f, 66, 756.5f, -90 + rotationA, 0);
         a2.spawn(spawnA2);
+
 
         this.a1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Jackie");
         a1.addTrait(new TutorialTrait());
-        spawnA = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 661.5, 66, 850.5, 90 + rotationA, 0);
+        spawnA = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 664.5f, 66, 759.5f, 90 + rotationA, 0);
         a1.spawn(spawnA);
 
         new BukkitRunnable() {
@@ -54,12 +55,12 @@ public class StatusListener implements Listener {
         this.b2 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.LAWFUL.getChatColor() + "[NPC] Arizona");
         b2.addTrait(new TutorialTrait());
         b2.setProtected(false);
-        spawnB2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 666.5, 66, 751.5, 90 + rotationB, 0);
+        spawnB2 = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 663.5f, 66f, 858.5f, 90 + rotationB, 0);
         b2.spawn(spawnB2);
 
         this.b1 = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, Status.CRIMINAL.getChatColor() + "[NPC] Clover");
         b1.addTrait(new TutorialTrait());
-        spawnB = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 662.5, 66, 751.5, -90 + rotationB, 0);
+        spawnB = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 666.5f, 66f, 858.5f, -90 + rotationB, 0);
         b1.spawn(spawnB);
 
         new BukkitRunnable() {
@@ -113,18 +114,17 @@ public class StatusListener implements Listener {
                         @Override
                         public void run() {
 
-                            if(!a1.isSpawned())
+                            if (!a1.isSpawned())
                                 return;
 
                             if (!a1.getNavigator().isNavigating()) {
                                 a1.getNavigator().setTarget(a2.getEntity(), true);
-                            } else
-                            {
+                            } else {
                                 this.cancel();
                             }
 
                         }
-                    }.runTaskTimer(LostShardPlugin.plugin,20*3, 1);
+                    }.runTaskTimer(LostShardPlugin.plugin, 20 * 3, 1);
                 }
             }.runTaskLater(LostShardPlugin.plugin, 20 * 2);
 

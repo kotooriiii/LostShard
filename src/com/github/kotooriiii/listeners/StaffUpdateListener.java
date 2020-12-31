@@ -16,13 +16,20 @@ import net.luckperms.api.event.user.track.UserDemoteEvent;
 import net.luckperms.api.event.user.track.UserPromoteEvent;
 import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.material.Banner;
+import org.bukkit.material.MaterialData;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
@@ -32,6 +39,7 @@ import java.util.UUID;
 public class StaffUpdateListener implements Listener {
 
     private static ArrayList<EventSubscription> subscriptions = new ArrayList<>();
+
 
     public StaffUpdateListener(LuckPerms api) {
 
@@ -99,13 +107,12 @@ public class StaffUpdateListener implements Listener {
     }
 
 
-    @EventHandler (priority = EventPriority.MONITOR)
-    public void staffOverwrite(PlayerLoginEvent event)
-    {
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void staffOverwrite(PlayerLoginEvent event) {
         if (event.getResult() == PlayerLoginEvent.Result.KICK_FULL) {
-            if(Staff.isStaff(event.getPlayer().getUniqueId()))
-            event.allow();
-            if(RankPlayer.wrap(event.getPlayer().getUniqueId()) != null && RankPlayer.wrap(event.getPlayer().getUniqueId()).isDonator())
+            if (Staff.isStaff(event.getPlayer().getUniqueId()))
+                event.allow();
+            if (RankPlayer.wrap(event.getPlayer().getUniqueId()) != null && RankPlayer.wrap(event.getPlayer().getUniqueId()).isDonator())
                 event.allow();
         }
     }

@@ -127,7 +127,7 @@ public class LostShardPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     public static Logger logger;
     public static PluginDescriptionFile pluginDescriptionFile;
-    public static boolean isTutorial = true;
+    public static boolean isTutorial = false;
 
     public static LuckPerms luckPerms;
 

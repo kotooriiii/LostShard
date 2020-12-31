@@ -2,9 +2,11 @@ package com.github.kotooriiii.tutorial;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bungee.BungeeTutorialCompleteChannel;
+import com.github.kotooriiii.google.TutorialSheet;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -158,6 +161,12 @@ public class TutorialManager implements Observer {
         getHologramManager().clear(uuid);
         book.getBossBar().removeAll();
         Bukkit.removeBossBar(book.getBossBarKey());
+
+        ZonedDateTime timeMoved = ZonedDateTime.now().minus(book.getInitDate().toInstant().toEpochMilli(), ChronoUnit.MILLIS);
+
+        Player player = Bukkit.getPlayer(uuid);
+        TutorialSheet.getInstance().append(uuid, player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName(), book.isComplete(), (book.getCurrentChapter() == null ? "N/A" : book.getCurrentChapter().toString()), (player != null ? player.getLocation() : new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 0, 0, 0)), book.hasPlot(), book.hasMark(), timeMoved.toEpochSecond());
+
         return playerProgressions.remove(uuid, book);
     }
 

@@ -48,7 +48,7 @@ public class StatusInstructionChapter extends AbstractChapter {
                 @Override
                 public void run() {
                     setComplete();
-                    LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+                    LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
                     LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID(), false);
                 }
             }.runTaskLater(LostShardPlugin.plugin, 20*3);

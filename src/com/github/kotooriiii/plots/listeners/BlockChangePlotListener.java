@@ -4,7 +4,9 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKLevenshtein;
 import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,10 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 
 import java.util.Iterator;
@@ -380,6 +379,8 @@ public class BlockChangePlotListener implements Listener {
 
             if (!exists)
                 return;
+        } else {
+            return;
         }
 
 
@@ -567,6 +568,56 @@ public class BlockChangePlotListener implements Listener {
                 //If don't have permissions
                 if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     *
+     * @param event
+     */
+    @EventHandler
+    public void onArmorStand(PlayerInteractAtEntityEvent event) {
+        final Location location = event.getRightClicked().getLocation();
+        //If entity is not a player then cancel it
+
+        final Player player = event.getPlayer();
+        final UUID playerUUID = player.getUniqueId();
+
+        if (!(event.getRightClicked().getType() == EntityType.ARMOR_STAND))
+            return;
+
+
+        if (player.hasPermission(STAFF_PERMISSION))
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.getType().isStaff()) {
+
+
+                    player.sendMessage(ERROR_COLOR + "Cannot steal from armor stands here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
+                //If don't have permissions
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    player.sendMessage(ERROR_COLOR + "Cannot steal from armor stands here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
                     return;

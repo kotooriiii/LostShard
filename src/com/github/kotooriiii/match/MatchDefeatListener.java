@@ -1,6 +1,7 @@
 package com.github.kotooriiii.match;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.match.banmatch.Banmatch;
 import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +24,7 @@ public class MatchDefeatListener implements Listener {
 
             if(match.isFighter(player.getUniqueId()))
             {
+
                 match.end(player.getUniqueId());
             }
         }

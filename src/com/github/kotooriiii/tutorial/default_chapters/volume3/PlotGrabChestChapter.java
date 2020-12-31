@@ -1,7 +1,9 @@
 package com.github.kotooriiii.tutorial.default_chapters.volume3;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.events.PlotCreateEvent;
 import com.github.kotooriiii.plots.listeners.PlotBannerListener;
@@ -24,6 +26,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
@@ -51,8 +54,11 @@ public class PlotGrabChestChapter extends AbstractChapter {
             return;
         if(!(event.getPlayer() instanceof Player))
             return;
+        if(event.getView().getTitle().equals(PlotBannerListener.getTitle()))
+            return;
 
         event.getPlayer().openInventory(PlotBannerListener.getInventory((Player) event.getPlayer()));
+        event.setCancelled(true);
 
     }
 
@@ -64,26 +70,35 @@ public class PlotGrabChestChapter extends AbstractChapter {
             return;
         if (!isActive())
             return;
-        Inventory inv = event.getInventory();
-
-        boolean isEmpty = true;
-        for (ItemStack itemStack : inv.getContents()) {
-            if (itemStack == null || itemStack.getType().isAir())
-                continue;
-            if (itemStack.getType() == Material.FEATHER || itemStack.getType() == Material.REDSTONE) {
-                isEmpty = false;
-                break;
-            }
-
-        }
-        if (!isEmpty) {
-            event.getPlayer().getInventory().addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1));
-           // sendMessage((Player) event.getPlayer(), "Take the redstone and feather from the chest!", ChapterMessageType.HELPER);
+        if (!event.getView().getTitle().equals(PlotBannerListener.getTitle()))
             return;
-        }
 
-        LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
-        setComplete();
+        final Player player = (Player) event.getPlayer();
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if(!player.isOnline())
+                {
+                    this.cancel();
+                    return;
+                }
+
+                if(player.getInventory().contains(Material.FEATHER) && player.getInventory().contains(Material.REDSTONE))
+                {
+                    LostShardPlugin.getTutorialManager().getHologramManager().next(getUUID());
+                    setComplete();
+                    this.cancel();
+                    return;
+                } else
+                {
+                    sendMessage((Player) event.getPlayer(), "Take the redstone and feather from the chest!", ChapterMessageType.HELPER);
+                    this.cancel();
+                    return;
+                }
+
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 10);
     }
 
     @EventHandler

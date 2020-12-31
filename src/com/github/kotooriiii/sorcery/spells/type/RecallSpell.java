@@ -183,10 +183,14 @@ public class RecallSpell extends Spell implements Listener {
         MarkPlayer.Mark mark = markPlayer.getAnyMark(message);
 
         if (mark.getType() == MarkPlayer.Mark.MarkType.RANDOM) {
-            while (isObstructed(mark) || !isOnPlotFamily(markPlayer.getPlayerUUID(), mark.getLocation())) {
+            while (!(
+                    !isObstructed(mark) && (LostShardPlugin.getPlotManager().getStandingOnPlot(mark.getLocation()) == null || isOnPlotFamily(markPlayer.getPlayerUUID(), mark.getLocation()))
+            )) {
                 mark = markPlayer.getAnyMark(message);
 
             }
+
+
         }
 
         //wait for time to tp
@@ -196,7 +200,7 @@ public class RecallSpell extends Spell implements Listener {
     private boolean isOnPlotFamily(UUID uuid, Location location) {
         return LostShardPlugin.getPlotManager().getStandingOnPlot(location) != null
                 && LostShardPlugin.getPlotManager().getStandingOnPlot(location) instanceof PlayerPlot
-                && !(
+                && (
                 ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isFriend(uuid) ||
                         ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isJointOwner(uuid) ||
                         ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isOwner(uuid)

@@ -18,8 +18,13 @@ public class PlotBanner {
     private PlotBanner() {
     }
 
+    public Material getMaterial()
+    {
+        return Material.RED_BANNER;
+    }
+
     public ItemStack getItem() {
-        ItemStack itemStack = new ItemStack(Material.RED_BANNER);
+        ItemStack itemStack = new ItemStack(getMaterial());
 
         BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
 

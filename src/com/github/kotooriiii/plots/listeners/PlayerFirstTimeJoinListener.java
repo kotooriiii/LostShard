@@ -27,12 +27,13 @@ public class PlayerFirstTimeJoinListener implements Listener {
         if(player.hasPlayedBefore() || LostShardPlugin.isTutorial())
             return;
 
+        Stat.wrap(player.getUniqueId()).setMillisInit(ZonedDateTime.now().toInstant().toEpochMilli());
+
         //player has not played before
         SpawnPlot spawnPlot = (SpawnPlot) LostShardPlugin.getPlotManager().getPlot("order");
         if(spawnPlot == null || spawnPlot.getSpawn() == null)
             return;
 
-        Stat.wrap(player.getUniqueId()).setMillisInit(ZonedDateTime.now().toInstant().toEpochMilli());
         Location spawnLocation = spawnPlot.getSpawn();
         spawnLocation.getChunk().load(true);
         player.teleport(spawnLocation);

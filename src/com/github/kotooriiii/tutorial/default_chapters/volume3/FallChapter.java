@@ -89,7 +89,7 @@ public class FallChapter extends AbstractChapter {
             return;
         if (event.getBlock().getType() != Material.MELON)
             return;
-        if(melonCounter++ < 3)
+        if(++melonCounter< 3)
         {
             switch (melonCounter)
             {

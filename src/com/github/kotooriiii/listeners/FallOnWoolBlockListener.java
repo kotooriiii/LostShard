@@ -1,5 +1,6 @@
 package com.github.kotooriiii.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,7 +17,8 @@ public class FallOnWoolBlockListener implements Listener {
             return;
         if(!(event.getEntity() instanceof Player))
             return;
-        if(!event.getEntity().getLocation().getBlock().getRelative(BlockFace.DOWN).getType().getKey().getKey().toUpperCase().equals("_WOOL"))
+
+        if(!event.getEntity().getLocation().getBlock().getRelative(BlockFace.DOWN).getType().name().endsWith("_WOOL"))
             return;
 
         event.setCancelled(true);
