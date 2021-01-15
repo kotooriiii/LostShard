@@ -1,23 +1,19 @@
 package com.github.kotooriiii.sorcery.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.npc.ShardNMS;
-import com.github.kotooriiii.sorcery.spells.type.IceSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.IceSpell;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class IceBallSuffocationListener implements Listener {

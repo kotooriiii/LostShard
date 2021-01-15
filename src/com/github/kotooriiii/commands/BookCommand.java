@@ -42,11 +42,11 @@ public class BookCommand implements CommandExecutor {
         welcomeComponent.setBold(true);
         tc.addExtra(welcomeComponent);
 
-        TextComponent beginning = new TextComponent("Go outside of Order and use the Plot Banner in\n");
+        TextComponent beginning = new TextComponent("Go outside of Order and use the Plot Banner in your\n");
         beginning.setColor(ChatColor.BLACK);
         tc.addExtra(beginning);
 
-        TextComponent beginning2 = new TextComponent("your inventory to claim your base!\n");
+        TextComponent beginning2 = new TextComponent("inventory to claim your base!\n");
         beginning2.setColor(ChatColor.BLACK);
         tc.addExtra(beginning2);
 
@@ -79,7 +79,7 @@ public class BookCommand implements CommandExecutor {
         wikiDocComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DocCommand.LINK));
         tc.addExtra(wikiDocComponent);
 
-
+        bookMeta.spigot().addPage(new BaseComponent[]{tc});
         //bookMeta.spigot().addPage(new BaseComponent[]{tc}, new BaseComponent[]{discordComponent});
         itemStack.setItemMeta(bookMeta);
 

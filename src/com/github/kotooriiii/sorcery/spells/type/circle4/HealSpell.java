@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle4;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
@@ -20,12 +20,15 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class HealSpell extends Spell {
 
     private static HashMap<UUID, Double> healSpellCooldownMap = new HashMap<UUID, Double>();
+    private final static int HALF_HEARTS_HEALED = 8;
 
 
     public HealSpell()
     {
         super(SpellType.HEAL,
-                ChatColor.GREEN,
+                "Heals you for " + HALF_HEARTS_HEALED + " hearts.",
+                4,
+            ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
                 0.5d,
                 20,
@@ -36,7 +39,7 @@ public class HealSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
         double health = player.getHealth();
-        health += 8;
+        health += HALF_HEARTS_HEALED;
         if (health > player.getMaxHealth())
             health = player.getMaxHealth();
         player.setHealth(health);

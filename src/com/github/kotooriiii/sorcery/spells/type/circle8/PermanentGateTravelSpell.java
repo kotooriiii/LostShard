@@ -1,27 +1,22 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle8;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
-import com.github.kotooriiii.sorcery.events.SuccessfulRecallEvent;
+import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
-import com.github.kotooriiii.util.HelperMethods;
+import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -33,15 +28,16 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class RecallSpell extends Spell implements Listener {
+public class PermanentGateTravelSpell extends Spell implements Listener {
 
-    private final static HashMap<UUID, Double> recallSpellCooldownMap = new HashMap<>();
+
+    private final static HashMap<UUID, Double> cooldownMap = new HashMap<>();
 
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public RecallSpell() {
-        super(SpellType.RECALL, ChatColor.BLUE, new ItemStack[]{new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
+    public PermanentGateTravelSpell() {
+        super(SpellType.PERMANENT_GATE_TRAVEL,  "Create a permanent portal to one of your marks. Portal can be destroyed by right-clicking on it. Portal direction can be changed by Shift + Right-clicking it.",8, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 1.0f /*15.0f*/, 30, true, true, false);
     }
 
     @EventHandler
@@ -85,12 +81,13 @@ public class RecallSpell extends Spell implements Listener {
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onWaitToRecall(EntityDamageEvent event) {
-
-        if (event.isCancelled())
-            return;
         Entity entity = event.getEntity();
+
+        if(event.isCancelled())
+            return;
+
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
@@ -111,9 +108,10 @@ public class RecallSpell extends Spell implements Listener {
         waitingToRecallMap.remove(player.getUniqueId());
     }
 
+
     @Override
     public void updateCooldown(Player player) {
-        recallSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
+        cooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
             final double cooldown = getCooldown() * 20;
@@ -123,23 +121,23 @@ public class RecallSpell extends Spell implements Listener {
             public void run() {
 
                 if (counter >= cooldown) {
-                    recallSpellCooldownMap.remove(player.getUniqueId());
+                    cooldownMap.remove(player.getUniqueId());
                     this.cancel();
                     return;
                 }
 
                 counter += 1;
                 Double newCooldown = new Double(cooldown - counter);
-                recallSpellCooldownMap.put(player.getUniqueId(), newCooldown);
+                cooldownMap.put(player.getUniqueId(), newCooldown);
             }
         };
         runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public boolean isCooldown(Player player) {
-        if (recallSpellCooldownMap.containsKey(player.getUniqueId())) {
+        if (cooldownMap.containsKey(player.getUniqueId())) {
 
-            Double cooldownTimeTicks = recallSpellCooldownMap.get(player.getUniqueId());
+            Double cooldownTimeTicks = cooldownMap.get(player.getUniqueId());
             DecimalFormat df = new DecimalFormat("##.##");
             double cooldownTimeSeconds = cooldownTimeTicks / 20;
             BigDecimal bd = new BigDecimal(cooldownTimeSeconds).setScale(0, RoundingMode.UP);
@@ -162,7 +160,7 @@ public class RecallSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.YELLOW + "Where would you like to recall to?");
+        player.sendMessage(ChatColor.YELLOW + "What mark would you like to open a permanent gate to?");
         return true;
     }
 
@@ -173,52 +171,31 @@ public class RecallSpell extends Spell implements Listener {
         if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
             return;
 
-        if (!hasRecallRequirements(playerSender, message)) {
+        MarkPlayer.Mark mark = MarkPlayer.wrap(playerSender.getUniqueId()).getMark(message);
+
+        if (!hasGateRequirements(playerSender, message)) {
             refund(playerSender);
             return;
         }
 
-        MarkPlayer markPlayer = MarkPlayer.wrap(playerSender.getUniqueId());
+        Gate gate = new Gate(playerSender.getUniqueId(), playerSender.getLocation(), mark.getLocation());
 
-        MarkPlayer.Mark mark = markPlayer.getAnyMark(message);
-
-        if (mark.getType() == MarkPlayer.Mark.MarkType.RANDOM) {
-            while (!(
-                    !isObstructed(mark) && (LostShardPlugin.getPlotManager().getStandingOnPlot(mark.getLocation()) == null || isOnPlotFamily(markPlayer.getPlayerUUID(), mark.getLocation()))
-            )) {
-                mark = markPlayer.getAnyMark(message);
-
-            }
-
-
-        }
 
         //wait for time to tp
-        recall(playerSender, mark);
-    }
-
-    private boolean isOnPlotFamily(UUID uuid, Location location) {
-        return LostShardPlugin.getPlotManager().getStandingOnPlot(location) != null
-                && LostShardPlugin.getPlotManager().getStandingOnPlot(location) instanceof PlayerPlot
-                && (
-                ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isFriend(uuid) ||
-                        ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isJointOwner(uuid) ||
-                        ((PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(location)).isOwner(uuid)
-        );
-
-
+        gateTravel(playerSender, gate, mark.getName());
     }
 
 
     /**
      *
      */
-    private void recall(Player player, MarkPlayer.Mark mark) {
+    private void gateTravel(Player player, Gate gate, String name) {
 
         final int WAITING_TO_RECALL_PERIOD = 3;
-        player.sendMessage(ChatColor.GOLD + "You begin to cast to the mark, \"" + mark.getName() + "\"...");
+        player.sendMessage(ChatColor.GOLD + "You begin to cast Permanent Gate Travel to \"" + name + "\"...")
+        ;
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
-        mark.getLocation().getChunk().load(true);
+
         new BukkitRunnable() {
             int counter = WAITING_TO_RECALL_PERIOD;
 
@@ -236,14 +213,10 @@ public class RecallSpell extends Spell implements Listener {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
 
-                    SuccessfulRecallEvent event = new SuccessfulRecallEvent(player);
-                    LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-                    if (event.isCancelled())
-                        return;
-
-                    if (!postCast(player, mark))
+                    if (!postCast(player, gate)) {
                         if (player.isOnline())
                             refund(player);
+                    }
                     return;
                 }
 
@@ -259,45 +232,83 @@ public class RecallSpell extends Spell implements Listener {
      *
      * @return
      */
-    private boolean postCast(Player playerSender, MarkPlayer.Mark mark) {
+    private boolean postCast(Player playerSender, Gate gate) {
+
+        boolean existingGateFrom = LostShardPlugin.getGateManager().isGate(gate.getFrom());
+        boolean existingGateTo = LostShardPlugin.getGateManager().isGate(gate.getTo());
+
+        boolean existingGate = existingGateFrom || existingGateTo;
 
         if (!playerSender.isOnline())
             return false;
 
 
-        if (isObstructed(mark)) {
-            playerSender.sendMessage(ERROR_COLOR + "Cannot recall there. Your mark has been obstructed.");
+        if (isLapisNearby(gate.getFrom(), DEFAULT_LAPIS_NEARBY)) {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " here...");
             return false;
         }
-        if (isLapisNearby(mark.getLocation(), DEFAULT_LAPIS_NEARBY)) {
+
+        if(isLapisNearby(gate.getTo(), DEFAULT_LAPIS_NEARBY))
+        {
             playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
             return false;
         }
-        playerSender.teleport(mark.getLocation());
-        playerSender.sendMessage(ChatColor.GOLD + "You have recalled to the mark \"" + mark.getName() + "\".");
 
-        if (mark.getType() == MarkPlayer.Mark.MarkType.SPAWN) {
-            Stat stat = Stat.wrap(playerSender);
-            stat.setStamina(0);
-            stat.setMana(0);
-            playerSender.sendMessage(ChatColor.GRAY + "Teleporting to spawn has exhausted you.");
+        if (LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+            playerSender.sendMessage(ERROR_COLOR + "You've removed your previous gate to this location.");
+            LostShardPlugin.getGateManager().deleteExistingGateIfAny(gate);
+        } else if (!LostShardPlugin.getGateManager().isYourOwnExistingGate(gate) && existingGate) {
+            playerSender.sendMessage(ERROR_COLOR + "A portal has already been set up here by another player.");
+            return false;
         }
 
 
-        mark.getLocation().getWorld().strikeLightningEffect(mark.getLocation());
+        if (!gate.isBuildable()) {
+            playerSender.sendMessage(ERROR_COLOR + "Cannot gate travel there, the mark has been obstructed.");
+            return false;
+        } else if (LostShardPlugin.getGateManager().hasGateNearby(gate.getFrom()) || LostShardPlugin.getGateManager().hasGateNearby(gate.getTo())) {
+            playerSender.sendMessage(ERROR_COLOR + "There's another gate too close to this one.");
+            return false;
+        } else if (gate.getFrom().getWorld().equals(gate.getTo().getWorld()) && gate.getFrom().distance(gate.getTo()) <= Gate.PORTAL_DISTANCE) {
+            playerSender.sendMessage(ERROR_COLOR + "The gates must be farther than " + Gate.PORTAL_DISTANCE + " blocks away.");
+            return false;
+        }
 
+        Plot fromPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getFrom());
+        Plot toPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(gate.getTo());
+
+        if (!Staff.isStaff(playerSender.getUniqueId()) && !hasPlotBuildingPerms(playerSender, fromPlot, toPlot))
+            return false;
+
+
+        if (gate.isBuildable()) {
+            LostShardPlugin.getGateManager().addGate(gate, true);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasPlotBuildingPerms(Player player, Plot... plots) {
+
+        for (Plot plot : plots) {
+            if (plot != null) {
+                if (plot.getType().isStaff()) {
+                    if (player.isOnline())
+                        player.sendMessage(ERROR_COLOR + "You can't build a gate on staff plots. Verify both portals are not in staff territory!");
+                    return false;
+                }
+
+                if (plot instanceof PlayerPlot) {
+                    PlayerPlot playerPlot = (PlayerPlot) plot;
+                    if (!playerPlot.isJointOwner(player.getUniqueId()) && !playerPlot.isOwner(player.getUniqueId())) {
+                        player.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to build a gate. Verify both portals are in plots you can build!");
+                        return false;
+                    }
+                }
+
+            }
+        }
         return true;
-    }
-
-    private boolean isObstructed(MarkPlayer.Mark mark) {
-        Block toFeet = mark.getLocation().getBlock();
-        Block toHead = mark.getLocation().getBlock().getRelative(BlockFace.UP);
-
-        return !isAvailable(toFeet) || !isAvailable(toHead);
-    }
-
-    private boolean isAvailable(Block block) {
-        return HelperMethods.getLookingSet().contains(block.getType()) && HelperMethods.getLookingSet().contains(block.getType());
     }
 
 
@@ -307,12 +318,12 @@ public class RecallSpell extends Spell implements Listener {
      * @param playerSender
      * @return
      */
-    private boolean hasRecallRequirements(Player playerSender, String name) {
+    private boolean hasGateRequirements(Player playerSender, String name) {
         UUID playerUUID = playerSender.getUniqueId();
 
         MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
 
-        if (!markPlayer.hasMark(name) && !markPlayer.isPremadeMark(name)) {
+        if (!markPlayer.hasMark(name)) {
             playerSender.sendMessage(ERROR_COLOR + "You don't have a mark by this name.");
             return false;
         }
@@ -322,3 +333,4 @@ public class RecallSpell extends Spell implements Listener {
 
 
 }
+

@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle4;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
@@ -36,7 +36,8 @@ public class LightningSpell extends Spell {
     private static HashMap<UUID, Double> lightningSpellCooldownMap = new HashMap<UUID, Double>();
 
     public LightningSpell() {
-        super(SpellType.LIGHTNING,
+        super(SpellType.LIGHTNING, "Strikes down a bolt of lightning in the direction you are facing. Great for burning enemies’ loot.",
+                4,
                 ChatColor.GOLD,
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0f,

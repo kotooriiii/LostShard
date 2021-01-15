@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
@@ -38,7 +38,7 @@ public class FireballSpell extends Spell {
 
     public FireballSpell() {
 
-        super(SpellType.FIREBALL,
+        super(SpellType.FIREBALL, "Shoots a destructive fireball in the direction you're facing." , 3,
                 ChatColor.RED,
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0f,

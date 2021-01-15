@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle5;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.HostilityMatch;
@@ -31,6 +31,8 @@ public class WebFieldSpell extends Spell {
 
     public WebFieldSpell() {
         super(SpellType.WEB_FIELD,
+                "Creates a field made of webs in the direction you are facing.",
+                5,
                 ChatColor.AQUA,
                 new ItemStack[]{new ItemStack(Material.STRING, 1)},
                 1.0f,

@@ -1,12 +1,9 @@
 package com.github.kotooriiii.sorcery;
 
-import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
-import com.github.kotooriiii.sorcery.spells.type.PermanentGateTravelSpell;
 import com.github.kotooriiii.status.Staff;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import sun.awt.image.ImageWatched;
 
 import java.util.*;
 

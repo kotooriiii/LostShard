@@ -4,7 +4,6 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.sorcery.spells.type.TeleportSpell;
 import com.github.kotooriiii.sorcery.wands.Wand;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import org.bukkit.Bukkit;
@@ -17,7 +16,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;

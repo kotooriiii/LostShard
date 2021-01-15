@@ -3,26 +3,39 @@ package com.github.kotooriiii.sorcery.spells;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
-import com.github.kotooriiii.sorcery.spells.type.*;
+import com.github.kotooriiii.sorcery.spells.type.circle1.*;
+import com.github.kotooriiii.sorcery.spells.type.circle2.BridgeSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle2.CreateFoodSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle2.WallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.FireballSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.IceSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle4.HealSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle4.LightningSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle6.ChronoportSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import sun.corba.Bridge;
 
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.util.HelperMethods.getClosestFace;
 import static com.github.kotooriiii.util.HelperMethods.localBroadcast;
 
 public abstract class Spell {
 
     private SpellType type;
+    private String description;
+    private int circle;
     private ChatColor chatColor;
     private ItemStack[] ingredients;
     private double cooldown;
@@ -41,8 +54,10 @@ public abstract class Spell {
         return waitingForArgumentMap;
     }
 
-    public Spell(SpellType type, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
+    public Spell(SpellType type, String desc, int circle, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
         this.type = type;
+        this.description = desc;
+        this.circle = circle;
         this.chatColor = color;
         this.ingredients = ingredients;
         this.cooldown = cooldown;
@@ -68,11 +83,10 @@ public abstract class Spell {
                 return new TeleportSpell();
             case WEB_FIELD:
                 return new WebFieldSpell();
-
 //            case DARKNESS:
 //                return new DarknessSpell();
-            case CLONE:
-                return new CloneSpell();
+//            case CLONE:
+//                return new CloneSpell();
             case CLANTP:
                 return new ClanTPSpell();
             case MARK:
@@ -83,6 +97,16 @@ public abstract class Spell {
                 return new PermanentGateTravelSpell();
             case CHRONOPORT:
                 return new ChronoportSpell();
+            case GRASS:
+                return new GrassSpell();
+            case LIGHT:
+                return new LightSpell();
+            case CREATE_FOOD:
+                return new CreateFoodSpell();
+            case BRIDGE:
+                return new BridgeSpell();
+            case WALL:
+                return new WallSpell();
             default:
                 return null;
         }
@@ -132,6 +156,16 @@ public abstract class Spell {
         return spells.toArray(new Spell[spells.size()]);
     }
 
+    public static Spell[] getCircleSpells(int circle) {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell.getCircle() == circle)
+                spells.add(spell);
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
     public static int getDefaultLapisNearbyValue() {
         return DEFAULT_LAPIS_NEARBY;
     }
@@ -139,6 +173,26 @@ public abstract class Spell {
 
     public SpellType getType() {
         return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCircle() {
+        return circle;
+    }
+
+    public boolean isCastable() {
+        return isCastable;
+    }
+
+    public boolean isWandable() {
+        return isWandable;
+    }
+
+    public boolean isScrollable() {
+        return isScrollable;
     }
 
     public String[] getNames() {
@@ -189,13 +243,31 @@ public abstract class Spell {
         return false;
     }
 
+    private HashMap<Integer, Integer> getIndeces(Player player, ItemStack ingredient)
+    {
+        HashMap<Integer, Integer> indeces;
+        switch (ingredient.getType()) {
+            case OAK_LEAVES:
+                indeces = hasAnyEndMatchingIngredient(player, "_LEAVES", ingredient.getAmount(), "leaves");
+                break;
+            default:
+                indeces = hasIngredient(player, ingredient);
+                break;
+        }
+
+        return indeces;
+    }
+
     public boolean hasIngredients(Player player) {
         ItemStack[] ingredients = this.getIngredients();
         ArrayList<HashMap<Integer, Integer>> pendingRemovalItems = new ArrayList<>();
 
         boolean hasIngredients = true;
         for (ItemStack ingredient : ingredients) {
-            HashMap<Integer, Integer> indeces = hasIngredient(player, ingredient);
+
+            HashMap<Integer, Integer> indeces = getIndeces(player, ingredient);
+
+
             if (indeces == null) {
                 hasIngredients = false;
                 continue;
@@ -213,11 +285,9 @@ public abstract class Spell {
 
         boolean hasIngredients = true;
         for (ItemStack ingredient : ingredients) {
-            HashMap<Integer, Integer> indeces = hasIngredient(player, ingredient);
-            if (indeces == null) {
-                hasIngredients = false;
-                continue;
-            }
+
+            HashMap<Integer, Integer> indeces = getIndeces(player, ingredient);
+
             pendingRemovalItems.add(indeces);
         }
 
@@ -277,30 +347,39 @@ public abstract class Spell {
         return hashmap;
     }
 
-    private Block[] getCornerBlocks(Block block) {
-        Location targetLoc = block.getLocation();
-        Block[] blocks = new Block[8];
-        blocks[0] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
-        blocks[1] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ()).getBlock();
-        blocks[2] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() + 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
-        blocks[3] = new Location(targetLoc.getWorld(), targetLoc.getBlockX(), targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
-        blocks[4] = new Location(targetLoc.getWorld(), targetLoc.getBlockX(), targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
-        blocks[5] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() - 1).getBlock();
-        blocks[6] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ()).getBlock();
-        blocks[7] = new Location(targetLoc.getWorld(), targetLoc.getBlockX() - 1, targetLoc.getBlockY() + 1, targetLoc.getBlockZ() + 1).getBlock();
+    public HashMap<Integer, Integer> hasAnyEndMatchingIngredient(Player player, String endsWith, int amountRequired, String outOfStockItemName) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] contents = inventory.getContents();
 
-        return blocks;
+        int counterMoney = 0;
+
+        //Inventory slot index , int amount
+        HashMap<Integer, Integer> hashmap = new HashMap<>();
+
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack iteratingItem = contents[i];
+            if (iteratingItem == null || !iteratingItem.getType().name().endsWith(endsWith))
+                continue;
+            int iteratingCount = iteratingItem.getAmount();
+            int tempTotal = iteratingCount + counterMoney;
+
+            if (amountRequired >= tempTotal) {
+                counterMoney += iteratingCount;
+                hashmap.put(new Integer(i), 0);
+            } else if (amountRequired < tempTotal) {
+                int tempLeftover = tempTotal - amountRequired;
+                hashmap.put(new Integer(i), tempLeftover);
+                counterMoney = amountRequired;
+                break;
+            }
+        }
+
+        if (counterMoney < amountRequired) {
+            player.sendMessage(ERROR_COLOR + "You don't have " + amountRequired + " " + outOfStockItemName + " to cast this spell!");
+            return null;
+        }
+        return hashmap;
     }
-
-
-    public BlockFace getInvertBlockFace(Player player, final int range) {
-        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, range);
-        if (lastTwoTargetBlocks.size() != 2) return null;
-        Block targetBlock = lastTwoTargetBlocks.get(1);
-        Block adjacentBlock = lastTwoTargetBlocks.get(0);
-        return adjacentBlock.getFace(targetBlock);
-    }
-
 
     public static HashSet<Location> getLocationsForNonBlockBreak() {
         return locationSavedForNoDrop;
@@ -348,18 +427,6 @@ public abstract class Spell {
         return true;
     }
 
-    public boolean isCastable() {
-        return isCastable;
-    }
-
-    public boolean isWandable() {
-        return isWandable;
-    }
-
-    public boolean isScrollable() {
-        return isScrollable;
-    }
-
     public abstract boolean isCooldown(Player player);
 
     public abstract boolean executeSpell(Player player);
@@ -382,31 +449,18 @@ public abstract class Spell {
             return false;
 
         switch (this.getType()) {
+            case TELEPORT:
 
-            case FIREBALL:
-            case HEAL:
-            case ICE:
-            case LIGHTNING:
-            case WEB_FIELD:
-            case CLONE:
-            case CLANTP:
-            case MARK:
-            case PERMANENT_GATE_TRAVEL:
-            case CHRONOPORT:
-            case RECALL:
+                if (!executeSpell(player))
+                    return false;
+                localBroadcast(player, this.getLatin());
+                break;
             default:
 
                 localBroadcast(player, this.getLatin());
 
                 if (!executeSpell(player))
                     return false;
-                break;
-            case TELEPORT:
-
-                if (!executeSpell(player))
-                    return false;
-                localBroadcast(player, this.getLatin());
-
                 break;
         }
 

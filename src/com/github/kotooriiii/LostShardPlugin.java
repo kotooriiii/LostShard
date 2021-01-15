@@ -20,7 +20,6 @@ import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
 import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
-import com.github.kotooriiii.google.TutorialSheet;
 import com.github.kotooriiii.hostility.commands.HostilityCommand;
 import com.github.kotooriiii.hostility.listeners.HostilityCreateListener;
 import com.github.kotooriiii.hostility.listeners.HostilityNamePreprocessListener;
@@ -68,7 +67,12 @@ import com.github.kotooriiii.skills.skill_listeners.*;
 import com.github.kotooriiii.sorcery.GateManager;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
-import com.github.kotooriiii.sorcery.spells.type.*;
+import com.github.kotooriiii.sorcery.spells.SpellbookCommand;
+import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle1.RecallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -331,7 +335,6 @@ public class LostShardPlugin extends JavaPlugin {
         CraftingRecipes.initRecipes();
 
 
-
         //Register for crash-related incidents
         registerBuff();
         registerCriminals();
@@ -352,6 +355,10 @@ public class LostShardPlugin extends JavaPlugin {
     public void onDisable() {
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
+
+        for (Location location : LightSpell.getMap().values()) {
+            LightSpell.deleteLight(location);
+        }
 
         if (isTutorial()) {
             ArrayList<NPC> dereg = new ArrayList<NPC>();
@@ -453,8 +460,7 @@ public class LostShardPlugin extends JavaPlugin {
         for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
             try {
                 LostShardPlugin.getBankManager().saveBank(bank);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -462,8 +468,7 @@ public class LostShardPlugin extends JavaPlugin {
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
             try {
                 LostShardPlugin.getClanManager().saveClan(clan);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -471,8 +476,7 @@ public class LostShardPlugin extends JavaPlugin {
         for (Stat stat : Stat.getStatMap().values()) {
             try {
                 FileManager.write(stat);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -480,8 +484,7 @@ public class LostShardPlugin extends JavaPlugin {
         for (Plot plot : getPlotManager().getAllPlots()) {
             try {
                 FileManager.write(plot);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -490,8 +493,7 @@ public class LostShardPlugin extends JavaPlugin {
         for (SkillPlayer skillPlayer : LostShardPlugin.getSkillManager().getSkillPlayers()) {
             try {
                 getSkillManager().saveSkillPlayer(skillPlayer);
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -499,8 +501,8 @@ public class LostShardPlugin extends JavaPlugin {
         for (IgnorePlayer ignorePlayer : LostShardPlugin.getIgnoreManager().getIgnorePlayers()) {
             try {
                 if (ignorePlayer.getIgnoredUUIDS() != null && ignorePlayer.getIgnoredUUIDS().length != 0)
-                    getIgnoreManager().save(ignorePlayer);            } catch (Exception e)
-            {
+                    getIgnoreManager().save(ignorePlayer);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -616,6 +618,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("who").setExecutor(new WhoCommand());
 
         getCommand("enchant").setExecutor(new EnchantCommand());
+        getCommand("spellbook").setExecutor(new SpellbookCommand());
 
 
         //todo to use later -->
@@ -738,6 +741,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new PlotBannerListener(), this);
         pm.registerEvents(new LightningListener(), this);
+        pm.registerEvents(new LightListener(), this);
         pm.registerEvents(new MountListener(), this);
         pm.registerEvents(new PlayerHitListener(), this);
 
@@ -1008,8 +1012,7 @@ public class LostShardPlugin extends JavaPlugin {
                 for (StatusPlayer statusPlayer : StatusPlayer.getPlayerStatus().values()) {
                     if (statusPlayer.getKills() > 0) {
                         statusPlayer.setKills(statusPlayer.getKills() - 1);
-                        if(statusPlayer.getKills() <= 4 && statusPlayer.getStatus() == Status.MURDERER)
-                        {
+                        if (statusPlayer.getKills() <= 4 && statusPlayer.getStatus() == Status.MURDERER) {
                             statusPlayer.setStatus(Status.LAWFUL);
                         }
                     }

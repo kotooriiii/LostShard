@@ -30,6 +30,7 @@ public class WandListener implements Listener {
                 Spell spell = Spell.of(type);
                 if (spell == null)
                     return;
+
                 Wand wand = new Wand(spell);
 
 

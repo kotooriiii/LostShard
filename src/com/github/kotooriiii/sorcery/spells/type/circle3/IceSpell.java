@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle3;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.HostilityMatch;
@@ -33,7 +33,8 @@ public class IceSpell extends Spell {
     }
 
     public IceSpell() {
-        super(SpellType.ICE,
+        super(SpellType.ICE, "Creates a ball of ice in the direction you are facing. Good for trapping or slowing down enemies.",
+                3,
                 ChatColor.AQUA,
                 new ItemStack[]{new ItemStack(Material.STRING, 1)},
                 2.0f,

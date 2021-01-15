@@ -1,13 +1,10 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle1;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
@@ -15,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,9 +28,13 @@ public class TeleportSpell extends Spell {
 
     private static HashMap<UUID, Double> teleportSpellCooldownMap = new HashMap<UUID, Double>();
     final private static boolean isDebug = false;
+    private final static int RANGE_TP = 20;
 
     public TeleportSpell() {
         super(SpellType.TELEPORT,
+                "Teleport allows you to instantly teleport " + RANGE_TP + " blocks in the direction\n" +
+                        "you casted it. It is very useful in PvP, or just general gameplay.",
+                1,
                 ChatColor.DARK_PURPLE,
                 new ItemStack[]{new ItemStack(Material.FEATHER, 1)},
                 1.0f,
@@ -42,7 +44,7 @@ public class TeleportSpell extends Spell {
 
     @Override
     public boolean executeSpell(Player player) {
-        final int rangeTeleport = 20;
+        final int rangeTeleport = RANGE_TP;
         Location teleportLocation = teleportLocation(player, rangeTeleport);
         if (teleportLocation == null) {
             player.sendMessage(ERROR_COLOR + "You need more room to cast this spell!");
@@ -50,13 +52,13 @@ public class TeleportSpell extends Spell {
         }
 
         if (teleportLocation.getBlockX() == player.getLocation().getBlockX() && teleportLocation.getBlockY() == player.getLocation().getBlockY() && teleportLocation.getBlockZ() == player.getLocation().getBlockZ() && player.getLocation().getWorld().equals(teleportLocation.getWorld())) {
-            if(!HelperMethods.getLookingSet(false).contains(teleportLocation.getBlock())) {
+            if (!HelperMethods.getLookingSet(false).contains(teleportLocation.getBlock())) {
                 player.sendMessage(ERROR_COLOR + "Invalid target.");
                 return false;
             }
         }
 
-        if (!isAcceptableBlock(getBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
+        if (!isAcceptableBlock(getExactBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
 //            player.sendMessage(ERROR_COLOR + "Invalid target.");
 //            return false;
             //  teleportLocation.add(0, -1, 0);
@@ -129,7 +131,7 @@ public class TeleportSpell extends Spell {
     }
 
 
-    private boolean isAcceptableBlock(BlockFace facing, Block block, boolean isStrict) {
+    public static boolean isAcceptableBlock(BlockFace facing, Block block, boolean isStrict) {
 
         if (block.getType().equals(Material.AIR)) {
             if (isDebug)
@@ -206,28 +208,89 @@ public class TeleportSpell extends Spell {
         return block.getBoundingBox().getHeight() < 0.5;
     }
 
-    public Location teleportLocation(Player player, final int range) {
+    public static Location teleportLocation(Player player, final int range) {
 
-        List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(false), range);
+        Block targetBlock = null;
+        Block adjacentBlock = null;
+        BlockFace face;
 
-//        for(int i = 0; i < lastTwoTargetBlocks.size(); i++)
-//        Bukkit.broadcastMessage("i: " + i + " | " + "material: " + lastTwoTargetBlocks.get(i).getType().getKey().getKey());
+        RayTraceResult result = player.getWorld().rayTraceBlocks(player.getEyeLocation(), player.getLocation().getDirection(), range, FluidCollisionMode.ALWAYS, true);
 
-        Block targetBlock;
-        Block adjacentBlock = lastTwoTargetBlocks.get(0);
-        if (lastTwoTargetBlocks.size() > 1)
-            targetBlock = lastTwoTargetBlocks.get(1);
-        else
-            return player.getLocation();
+        RayTraceResult collideResult = player.getWorld().rayTraceBlocks(player.getEyeLocation(), player.getLocation().getDirection(), range, FluidCollisionMode.ALWAYS, false);
 
 
-        if (isAcceptableBlock(getBlockFace(player, range), player.getLocation().getWorld().getBlockAt(adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()), false) && isAcceptableBlock(getBlockFace(player, range), player.getLocation().getWorld().getBlockAt(targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()), false)) {
+        if (result == null || result.getHitBlock() == null) {
+            List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(false), range);
+            adjacentBlock = lastTwoTargetBlocks.get(0);
+
+            if (lastTwoTargetBlocks.size() > 1) {
+                targetBlock = lastTwoTargetBlocks.get(1);
+                face = targetBlock.getFace(adjacentBlock);
+            }
+            else {
+                return player.getLocation();
+            }
+
+        } else {
+
+            if(collideResult != null && collideResult.getHitBlock() != null)
+            {
+
+                switch (collideResult.getHitBlock().getType())
+                {
+                    case COBWEB:
+                        targetBlock = collideResult.getHitBlock();
+                        adjacentBlock = targetBlock.getRelative(collideResult.getHitBlockFace());
+                        break;
+                }
+            }
+
+            if(targetBlock == null || adjacentBlock == null) {
+                targetBlock = result.getHitBlock();
+                adjacentBlock = targetBlock.getRelative(result.getHitBlockFace());
+            }
+
+            face = targetBlock.getFace(adjacentBlock);
+
+        }
+
+
+        if (isAcceptableBlock(face, player.getLocation().getWorld().getBlockAt(adjacentBlock.getX(), adjacentBlock.getY() + 1, adjacentBlock.getZ()), false) && isAcceptableBlock(getBlockFace(player, range), player.getLocation().getWorld().getBlockAt(targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()), false)) {
             adjacentBlock = new Location(adjacentBlock.getWorld(), targetBlock.getX(), targetBlock.getY() + 1, targetBlock.getZ()).getBlock();
         }
         return adjacentBlock.getLocation();
     }
 
-    public BlockFace getBlockFace(Player player, final int range) {
+    public static BlockFace getExactBlockFace(Player player, final int range) {
+
+        Block targetBlock;
+        Block adjacentBlock;
+        BlockFace face;
+
+        RayTraceResult result = player.rayTraceBlocks(range, FluidCollisionMode.ALWAYS);
+
+        if (result == null || result.getHitBlock() == null) {
+            List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(false), range);
+            adjacentBlock = lastTwoTargetBlocks.get(0);
+
+            if (lastTwoTargetBlocks.size() > 1) {
+                targetBlock = lastTwoTargetBlocks.get(1);
+                face = targetBlock.getFace(adjacentBlock);
+            }
+            else {
+                return getBlockFace(player, range);
+            }
+
+        } else {
+            targetBlock = result.getHitBlock();
+            adjacentBlock = targetBlock.getRelative(result.getHitBlockFace());
+            face = targetBlock.getFace(adjacentBlock);
+        }
+
+        return face;
+    }
+
+    public static BlockFace getBlockFace(Player player, final int range) {
         List<Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(HelperMethods.getLookingSet(), range);
         if (lastTwoTargetBlocks.size() != 2) return BlockFace.SELF;
         Block targetBlock = lastTwoTargetBlocks.get(1);

@@ -1,15 +1,15 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle1;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
-import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.sorcery.events.MarkCreateEvent;
+import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,20 +28,24 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class ClanTPSpell extends Spell implements Listener {
+public class MarkSpell extends Spell implements Listener {
 
-    private final static HashMap<UUID, Double> clanTpSpellCooldownMap = new HashMap<>();
+    private final static HashMap<UUID, Double> markSpellCooldownMap = new HashMap<>();
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public ClanTPSpell() {
-        super(SpellType.CLANTP, ChatColor.GREEN, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
+    public MarkSpell() {
+        super(SpellType.MARK,
+                "Makes a mark where you’re standing that you can recall back to. Type /cast mark, and when the pop up asks you to name the mark, name it something you will remember, such as “home”. \n" +
+                "Example:\n" +
+                "/cast mark\n" +
+                "home",
+                1, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 15, true, true, false);
     }
 
     @EventHandler
     public void onChatArg(ShardChatEvent event) {
         Player player = event.getPlayer();
-
         SpellType type = waitingForArgumentMap.get(player.getUniqueId());
         if (type == null)
             return;
@@ -49,9 +53,27 @@ public class ClanTPSpell extends Spell implements Listener {
             return;
 
         waitingForArgumentMap.remove(player.getUniqueId());
-        receiveArgument(player, event.getMessage());
+        receiveArgument(event.getPlayer(), event.getMessage());
         event.setCancelled(true);
 
+    }
+
+    /**
+     * recalls a player to a mark
+     */
+    private void receiveArgument(Player playerSender, String message) {
+        if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
+            return;
+
+        Location markLocation = playerSender.getLocation();
+
+        if (!hasMarkRequirements(playerSender, message)) {
+            refund(playerSender);
+            return;
+        }
+
+        //success
+        mark(playerSender, message, markLocation);
     }
 
     @EventHandler
@@ -111,7 +133,7 @@ public class ClanTPSpell extends Spell implements Listener {
 
     @Override
     public void updateCooldown(Player player) {
-        clanTpSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
+        markSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {
             final double cooldown = getCooldown() * 20;
@@ -121,23 +143,23 @@ public class ClanTPSpell extends Spell implements Listener {
             public void run() {
 
                 if (counter >= cooldown) {
-                    clanTpSpellCooldownMap.remove(player.getUniqueId());
+                    markSpellCooldownMap.remove(player.getUniqueId());
                     this.cancel();
                     return;
                 }
 
                 counter += 1;
                 Double newCooldown = new Double(cooldown - counter);
-                clanTpSpellCooldownMap.put(player.getUniqueId(), newCooldown);
+                markSpellCooldownMap.put(player.getUniqueId(), newCooldown);
             }
         };
         runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
     }
 
     public boolean isCooldown(Player player) {
-        if (clanTpSpellCooldownMap.containsKey(player.getUniqueId())) {
+        if (markSpellCooldownMap.containsKey(player.getUniqueId())) {
 
-            Double cooldownTimeTicks = clanTpSpellCooldownMap.get(player.getUniqueId());
+            Double cooldownTimeTicks = markSpellCooldownMap.get(player.getUniqueId());
             DecimalFormat df = new DecimalFormat("##.##");
             double cooldownTimeSeconds = cooldownTimeTicks / 20;
             BigDecimal bd = new BigDecimal(cooldownTimeSeconds).setScale(0, RoundingMode.UP);
@@ -158,71 +180,19 @@ public class ClanTPSpell extends Spell implements Listener {
 
     @Override
     public boolean executeSpell(Player player) {
+
         waitingForArgumentMap.put(player.getUniqueId(), this.getType());
-        player.sendMessage(ChatColor.YELLOW + "Who would you like to teleport to?");
+        player.sendMessage(ChatColor.YELLOW + "What would you like to name your Mark?");
         return true;
     }
 
-
     /**
-     * after the successful tp
-     *
-     * @return
+     * teleports player to clan member
      */
-    private boolean postCast(Player playerSender, UUID clanMemberPlayerUUID, String justInCaseNameTheyLogOut) {
+    private void mark(Player player, String message, Location markLocation) {
 
-        Player clanMemberPlayer = Bukkit.getPlayer(clanMemberPlayerUUID);
-
-        if (!playerSender.isOnline())
-            return false;
-
-        if (clanMemberPlayer == null || !clanMemberPlayer.isOnline()) {
-            playerSender.sendMessage(ERROR_COLOR + "Player has logged out, can not clan teleport to " + justInCaseNameTheyLogOut);
-            return false;
-        }
-
-        if(isLapisNearby(clanMemberPlayer.getLocation(), DEFAULT_LAPIS_NEARBY))
-        {
-            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
-            return false;
-        }
-
-        playerSender.teleport(clanMemberPlayer.getLocation());
-        playerSender.sendMessage(ChatColor.GOLD + "You have recalled to \"" + clanMemberPlayer.getName() + "\".");
-        clanMemberPlayer.getLocation().getWorld().strikeLightningEffect(clanMemberPlayer.getLocation());
-        Stat stat = Stat.wrap(playerSender.getUniqueId());
-        stat.setMana(0);
-        stat.setStamina(0);
-        return true;
-
-    }
-
-    /**
-     * recalls a player to a mark
-     */
-    private void receiveArgument(Player playerSender, String message) {
-        if (playerSender == null || playerSender.isDead() || !playerSender.isOnline())
-            return;
-
-        if (!hasClanTPRequirements(playerSender, message)) {
-            refund(playerSender);
-            return;
-        }
-
-        Player clanMemberPlayer = Bukkit.getPlayer(message);
-
-        //success
-        clantp(playerSender, clanMemberPlayer);
-    }
-
-
-    /**
-     *
-     */
-    private void clantp(Player player, Player clanMemberPlayer) {
-
-        final int WAITING_TO_RECALL_PERIOD = 3;
-        player.sendMessage(ChatColor.GOLD + "You begin to clan teleport to \"" + clanMemberPlayer.getName() + "\"...");
+        final int WAITING_TO_RECALL_PERIOD = 2;
+        player.sendMessage(ChatColor.GOLD + "You begin to cast mark...");
         waitingToRecallMap.put(player.getUniqueId(), WAITING_TO_RECALL_PERIOD);
 
         new BukkitRunnable() {
@@ -241,10 +211,19 @@ public class ClanTPSpell extends Spell implements Listener {
                 if (counter == 0) {
                     this.cancel();
                     waitingToRecallMap.remove(player.getUniqueId());
-                    if (!postCast(player, clanMemberPlayer.getUniqueId(), clanMemberPlayer.getName()))
+
+                    if (!HelperMethods.getLookingSet().contains(markLocation.getBlock().getType()) && !markLocation.getBlock().getType().getKey().getKey().toUpperCase().endsWith("_SLAB")) {
+                        player.sendMessage(ERROR_COLOR + "You cannot create a mark in an obstructed location. Find a more open area!");
+                        refund(player);
+                        return;
+                    }
+
+
+                    if (!postCast(player, markLocation, message)) {
                         if (player.isOnline())
                             refund(player);
 
+                    }
                     return;
                 }
 
@@ -252,44 +231,64 @@ public class ClanTPSpell extends Spell implements Listener {
                 waitingToRecallMap.put(player.getUniqueId(), counter);
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
+        //success
     }
 
 
     /**
-     * checks if you are able to teleport to this supposed player
+     * after the successful tp
+     *
+     * @return
+     */
+    private boolean postCast(Player playerSender, Location location, String name) {
+
+        if (!playerSender.isOnline())
+            return false;
+
+        if (isLapisNearby(location, DEFAULT_LAPIS_NEARBY)) {
+            playerSender.sendMessage(ERROR_COLOR + "You can not seem to cast " + getName() + " there...");
+            return false;
+        }
+
+        MarkCreateEvent event = new MarkCreateEvent(playerSender, location, name);
+        LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
+        //message
+        playerSender.sendMessage(ChatColor.GOLD + "You have created a mark called \"" + name + "\".");
+        //add mark
+        MarkPlayer.wrap(playerSender.getUniqueId()).addMark(name, location);
+        return true;
+
+    }
+
+
+    /**
+     * checks if you are able to create a mark with said name
      *
      * @param playerSender
      * @return
      */
-    private boolean hasClanTPRequirements(Player playerSender, String name) {
+    private boolean hasMarkRequirements(Player playerSender, String name) {
+        UUID playerUUID = playerSender.getUniqueId();
 
-        final UUID playerUUID = playerSender.getUniqueId();
+        MarkPlayer markPlayer = MarkPlayer.wrap(playerUUID);
+        MarkPlayer.Mark[] marks = markPlayer.getMarks();
 
-        Clan clan = LostShardPlugin.getClanManager().getClan(playerUUID);
+        RankPlayer rankPlayer = RankPlayer.wrap(playerUUID);
 
-        Player clanMemberPlayer = Bukkit.getPlayer(name);
-
-        if (clan == null) {
-            playerSender.sendMessage(ERROR_COLOR + "You are not in a clan.");
+        if (marks.length == rankPlayer.getRankType().getMaxMarksNum()) {
+            playerSender.sendMessage(ERROR_COLOR + "You have reached the maximum limit of marks.");
             return false;
         }
 
-
-        if (clanMemberPlayer == null || !clanMemberPlayer.isOnline()) {
-            playerSender.sendMessage(ERROR_COLOR + "The player is not online.");
+        if (markPlayer.hasMark(name)) {
+            playerSender.sendMessage(ERROR_COLOR + "You already have a mark by this name.");
             return false;
         }
 
-        if (!clan.isInThisClan(clanMemberPlayer.getUniqueId())) {
-            playerSender.sendMessage(ERROR_COLOR + "The player is not in your clan.");
+        if (markPlayer.isPremadeMark(name)) {
+            playerSender.sendMessage(ERROR_COLOR + "You cannot name your mark \"" + name + "\". This is a server-made mark for your use.");
             return false;
         }
-
-        if (Stat.wrap(clanMemberPlayer.getUniqueId()).isPrivate()) {
-            playerSender.sendMessage(ChatColor.GOLD + "Can't teleport to that player, they are set to private");
-            return false;
-        }
-
         return true;
     }
 

@@ -1,6 +1,5 @@
 package com.github.kotooriiii.util;
 
-import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
@@ -12,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -20,6 +18,17 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 public final class HelperMethods {
+
+    private static Set<Material> set = new HashSet<>();
+    private static Set<Material> ignoreLiquidsSet = new HashSet<>();
+
+    private final static int CHAT_CENTER_PX = 154, BOOK_CENTER_PX = 46;
+
+
+    public enum CenteredType {
+        CHAT, BOOK
+    }
+
     private HelperMethods() {
     }
 
@@ -39,8 +48,60 @@ public final class HelperMethods {
         return string;
     }
 
-    private static Set<Material> set = new HashSet<>();
-    private static Set<Material> ignoreLiquidsSet = new HashSet<>();
+    public static String getCenteredMessage(CenteredType type, boolean isUnderlined, String message) {
+        if (message == null || message.equals("")) {
+            return "";
+        }
+
+        message = ChatColor.translateAlternateColorCodes('&', message);
+
+        int messagePxSize = 0;
+        boolean previousCode = false;
+        boolean isBold = false;
+
+        for (char c : message.toCharArray()) {
+            if (c == '§') {
+                previousCode = true;
+                continue;
+            } else if (previousCode == true) {
+                previousCode = false;
+                if (c == 'l' || c == 'L') {
+                    isBold = true;
+                    continue;
+                } else isBold = false;
+            } else {
+                DefaultFontInfo dFI = DefaultFontInfo.getDefaultFontInfo(c);
+                messagePxSize += isBold ? dFI.getBoldLength() : dFI.getLength();
+                messagePxSize++;
+            }
+        }
+
+        int halvedMessageSize = messagePxSize / 2;
+        int CENTER_PX;
+        switch (type) {
+            default:
+            case CHAT:
+                CENTER_PX = HelperMethods.CHAT_CENTER_PX;
+                break;
+            case BOOK:
+                CENTER_PX = HelperMethods.BOOK_CENTER_PX;
+                break;
+        }
+        int toCompensate = CENTER_PX - halvedMessageSize;
+        int spaceLength = DefaultFontInfo.SPACE.getLength() + 1;
+        int compensated = 0;
+        StringBuilder sb = new StringBuilder();
+        while (compensated < toCompensate) {
+            sb.append(" ");
+            compensated += spaceLength;
+        }
+
+        return isUnderlined ? sb.toString() + ChatColor.UNDERLINE + message : sb.toString() + message;
+    }
+
+    public static String getCenteredMessage(String message) {
+        return getCenteredMessage(CenteredType.CHAT, false, message);
+    }
 
 
     public static void initLookingSet() {

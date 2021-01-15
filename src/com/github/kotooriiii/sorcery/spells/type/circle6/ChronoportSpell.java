@@ -1,4 +1,4 @@
-package com.github.kotooriiii.sorcery.spells.type;
+package com.github.kotooriiii.sorcery.spells.type.circle6;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
@@ -25,9 +25,11 @@ public class ChronoportSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Location> chronoportMap = new HashMap<>();
 
+    private final static int TIMING = 5;
+
 
     public ChronoportSpell() {
-        super(SpellType.CHRONOPORT, ChatColor.DARK_AQUA, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 10.0f, 20, true, true, false);
+        super(SpellType.CHRONOPORT,"Functions as a rubberband that teleports you right back to where you casted it. After " + TIMING + " seconds, the place that you casted chronoport is where you will return. ", 6,  ChatColor.DARK_AQUA, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 10.0f, 20, true, true, false);
     }
 
     @Override
@@ -111,7 +113,7 @@ public class ChronoportSpell extends Spell implements Listener {
                 player.teleport(location);
 
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20 * 5);
+        }.runTaskLater(LostShardPlugin.plugin, 20 * TIMING);
     }
 
 

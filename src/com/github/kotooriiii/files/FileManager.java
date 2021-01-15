@@ -72,6 +72,9 @@ public final class FileManager {
     private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
     private static File ignoredPlayer_folder = new File(plugin_folder + File.separator + "ignored_player");
 
+    private static File resources_folder = new File(plugin_folder + File.separator + "resources");
+    private static File angelWings_file;
+
     private static File config = new File(plugin_folder + File.separator + "config.yml");
 
 
@@ -79,6 +82,11 @@ public final class FileManager {
 
 
     private FileManager() {
+    }
+
+    public static File getAngelWings()
+    {
+        return angelWings_file;
     }
 
     public static void reset() {
@@ -115,6 +123,9 @@ public final class FileManager {
         saveResource("resources" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("resources" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
         saveResource("resources" + File.separator + "bankREADME.txt", bank_folder, true);
+
+        saveResource("resources" + File.separator + "angelWings.png", resources_folder, false);
+        angelWings_file = new File(resources_folder + File.separator + "angelWings.png");
 
         load();
 

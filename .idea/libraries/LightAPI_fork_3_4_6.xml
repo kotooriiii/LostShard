@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="LightAPI-fork-3.4.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/LightAPI-fork-3.4.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

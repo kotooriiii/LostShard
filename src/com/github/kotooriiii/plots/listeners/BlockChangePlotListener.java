@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
@@ -52,6 +53,58 @@ public class BlockChangePlotListener implements Listener {
                     entityChangeBlockEvent.setCancelled(true);
                     return;
                 }
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Called when a Player breaks a block by trampling in a staff plot OR in a plot they don't have permissions to build.
+     *
+     * @param event Event being called
+     */
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+
+        if (event.getClickedBlock() == null) return;
+
+        final Location location = event.getClickedBlock().getLocation();
+        //Check entity
+        final Player playerBlockBreak = event.getPlayer();
+        //If entity is not a player then cancel it
+        final UUID playerUUID = playerBlockBreak.getUniqueId();
+
+        if (event.getAction() != Action.PHYSICAL)
+            return;
+        if (event.getClickedBlock().getType() != Material.FARMLAND)
+            return;
+
+
+        //Iterate through all plots
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+
+                //Staff no permission
+                if (plot.getType().isStaff()) {
+
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot trample farmland here, " + plot.getName() + " is protected.");
+
+                    event.setCancelled(true);
+                    return;
+                }
+
+                PlayerPlot playerPlot = (PlayerPlot) plot;
+
+                //If don't have permissions
+                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                    playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot trample farmland here, " + plot.getName() + " is protected.");
+                    event.setCancelled(true);
+                    return;
+                }
+
                 //ALLOWED
 
                 break;
@@ -321,7 +374,7 @@ public class BlockChangePlotListener implements Listener {
                 if (plot.getType().isStaff()) {
 
                     //playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
-                  //  playerInteractEvent.setCancelled(true);
+                    //  playerInteractEvent.setCancelled(true);
                     return;
                 }
 
@@ -330,7 +383,7 @@ public class BlockChangePlotListener implements Listener {
                 //If don't have permissions
                 if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
                     //  playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
-                  //  playerInteractEvent.setCancelled(true);
+                    //  playerInteractEvent.setCancelled(true);
                     return;
                 }
 
