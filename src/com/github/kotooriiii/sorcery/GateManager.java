@@ -19,6 +19,13 @@ public class GateManager {
         locationGateHashMap = new HashMap<>();
     }
 
+    public void addTemporaryGate(Gate gate) {
+
+        locationGateHashMap.put(new GateBlock(gate.getFrom()), gate);
+        locationGateHashMap.put(new GateBlock(gate.getTo()), gate);
+        gate.build();
+    }
+
     public void addGate(Gate gate, boolean saveToFile) {
         UUID uuid = gate.getSource();
 
@@ -28,15 +35,13 @@ public class GateManager {
         LinkedList<Gate> gateLinkedList = playerGateHashMap.get(uuid);
 
         ArrayList<Gate> removal = new ArrayList<>();
-        for(Gate igate : gateLinkedList)
-        {
-            if(!igate.isBuilt()) {
+        for (Gate igate : gateLinkedList) {
+            if (!igate.isBuilt()) {
                 removal.add(igate);
             }
         }
 
-        for(Gate igate : removal)
-        {
+        for (Gate igate : removal) {
             removeGate(igate);
         }
 
@@ -91,11 +96,23 @@ public class GateManager {
         FileManager.write(gate);
     }
 
+    public void removeTemporaryGate(Gate removedGate) {
+
+        //get map- > gets list ->
+        removedGate.destroy();
+
+        locationGateHashMap.remove(new GateBlock(removedGate.getFrom()), removedGate);
+        locationGateHashMap.remove(new GateBlock(removedGate.getTo()), removedGate);
+    }
+
     public void removeGate(Gate removedGate) {
 
         //get map- > gets list ->
         removedGate.destroy();
-        playerGateHashMap.get(removedGate.getSource()).remove(removedGate);
+
+        LinkedList<Gate> gates = playerGateHashMap.get(removedGate.getSource());
+        if (gates != null)
+            gates.remove(removedGate);
         locationGateHashMap.remove(new GateBlock(removedGate.getFrom()), removedGate);
         locationGateHashMap.remove(new GateBlock(removedGate.getTo()), removedGate);
         FileManager.write(removedGate);

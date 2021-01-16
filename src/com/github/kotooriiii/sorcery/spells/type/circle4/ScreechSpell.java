@@ -1,11 +1,14 @@
-package com.github.kotooriiii.sorcery.spells.type.circle5;
+package com.github.kotooriiii.sorcery.spells.type.circle4;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.skill_listeners.TamingListener;
 import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.PathEntity;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftMob;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -31,7 +34,7 @@ public class ScreechSpell extends Spell {
     public ScreechSpell() {
         super(SpellType.SCREECH,
                 "Scares mobs away through pulses.",
-                5,
+                4,
                 ChatColor.DARK_AQUA,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.REDSTONE, 1)},
                 2d,
@@ -142,16 +145,10 @@ public class ScreechSpell extends Spell {
 
                     Location location = entity.getLocation().toVector().add(dir.clone().multiply(magnitude)).toLocation(entity.getWorld());
 
-                    LivingEntity victim = (LivingEntity) entity.getWorld().spawnEntity(location, EntityType.VILLAGER);
-                    victim.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, REFRESH, 1, false, false, false));
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            victim.damage(100f);
-                        }
-                    }.runTaskLater(LostShardPlugin.plugin, REFRESH - 5);
+                    CraftMob craftMob = (CraftMob) entity;
 
-                    ((Mob) entity).setTarget(victim);
+                  // PathEntity pathEntity = craftMob.getHandle().getNavigation().a(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()), 20);
+                   craftMob.getHandle().getNavigation().a(location.getBlockX(), location.getBlockY(), location.getBlockZ(), 1.5d);
                 }
 
                 timerB[0]++;

@@ -22,7 +22,8 @@ public enum SpellType {
     WALL(new String[]{"Wall"}, "WALL"),
     FLOWER(new String[]{"Flower", "Flowers"}, "FLOWER"),
     MOON_JUMP(new String[]{"Moon Jump", "Jump"}, "MOON_JUMP"), MAGIC_ARROW(new String[]{"Magic Arrow"}, "MAGIC_ARROW"),
-    SCREECH(new String[]{"Screech"}, "SCREECH");
+    SCREECH(new String[]{"Screech"}, "SCREECH"),
+    GATE_TRAVEL(new String[]{"Gate Travel"}, "GATE_TRAVEL");
 
     private String[] names;
     private String latin;

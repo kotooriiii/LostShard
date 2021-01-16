@@ -64,6 +64,7 @@ import com.github.kotooriiii.skills.commands.PetsCommand;
 import com.github.kotooriiii.skills.commands.TrackCommand;
 import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.skill_listeners.*;
+import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateManager;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
@@ -71,6 +72,7 @@ import com.github.kotooriiii.sorcery.spells.SpellbookCommand;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.RecallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.GateTravelSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
 import com.github.kotooriiii.stats.Stat;
@@ -358,6 +360,11 @@ public class LostShardPlugin extends JavaPlugin {
 
         for (Location location : LightSpell.getMap().values()) {
             LightSpell.deleteLight(location);
+        }
+
+        for(Gate gate : GateTravelSpell.getTemporaryGateList())
+        {
+            LostShardPlugin.getGateManager().removeTemporaryGate(gate);
         }
 
         if (isTutorial()) {

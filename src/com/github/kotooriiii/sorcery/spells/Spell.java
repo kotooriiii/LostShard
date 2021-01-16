@@ -11,7 +11,8 @@ import com.github.kotooriiii.sorcery.spells.type.circle3.MagicArrowSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.HealSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.LightningSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle5.ScreechSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.GateTravelSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle6.ChronoportSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
@@ -114,6 +115,8 @@ public abstract class Spell {
                 return new MagicArrowSpell();
             case SCREECH:
                 return new ScreechSpell();
+            case GATE_TRAVEL:
+                return new GateTravelSpell();
             default:
                 return null;
         }
