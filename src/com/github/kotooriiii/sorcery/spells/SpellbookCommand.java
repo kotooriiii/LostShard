@@ -57,7 +57,6 @@ public class SpellbookCommand implements CommandExecutor {
         itemStack.setItemMeta(bookMeta);
 
         Player player = (Player) commandSender;
-        player.sendMessage(HelperMethods.getCenteredMessage("Spellbook"));
         player.getInventory().addItem(itemStack);
         return true;
     }

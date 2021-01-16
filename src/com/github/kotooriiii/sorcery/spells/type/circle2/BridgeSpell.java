@@ -84,7 +84,10 @@ public class BridgeSpell extends Spell {
             return false;
         }
 
-        final List<Block> bridgeBlocks = getBridgeBlocks(player, finalBridgeLocation);
+        final List<Block> bridgeBlocks = getBridgeBlocks(player.getLocation(), finalBridgeLocation);
+
+        int timer = 0;
+        int offset = 1;
 
         for (Block block : bridgeBlocks) {
             if (!block.getType().isAir())
@@ -100,12 +103,11 @@ public class BridgeSpell extends Spell {
 //                }
 //            }
 
-            if(isLapisNearby(block.getLocation(), DEFAULT_LAPIS_NEARBY))
+            if (isLapisNearby(block.getLocation(), DEFAULT_LAPIS_NEARBY))
                 break;
 
             Material leaf;
-            switch ((int) Math.random() * 5)
-            {
+            switch ((int) Math.random() * 5) {
                 default:
                 case 0:
                     leaf = Material.OAK_LEAVES;
@@ -131,43 +133,65 @@ public class BridgeSpell extends Spell {
                     break;
             }
 
-            
-            block.setType(leaf);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
 
-            if(block.getBlockData() instanceof Leaves) {
-                Leaves leaves = (Leaves) block.getBlockData();
-                leaves.setPersistent(true);
-                block.setBlockData(leaves);
-            }
+                    block.setType(leaf);
 
-            block.getWorld().spawnParticle(Particle.TOTEM, block.getLocation(), 5, 1,1,1);
+                    if (block.getBlockData() instanceof Leaves) {
+                        Leaves leaves = (Leaves) block.getBlockData();
+                        leaves.setPersistent(true);
+                        block.setBlockData(leaves);
+                    }
+
+                    block.getWorld().spawnParticle(Particle.TOTEM, block.getLocation(), 5, 1, 1, 1);
+                }
+
+            }.runTaskLater(LostShardPlugin.plugin, (long) (timer++) * offset);
 
         }
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                for(Block block : bridgeBlocks)
-                {
-                    if(!block.getType().name().toUpperCase().endsWith("_LEAVES"))
+                for (Block block : bridgeBlocks) {
+                    if (!block.getType().name().toUpperCase().endsWith("_LEAVES"))
                         continue;
-                    block.getWorld().spawnParticle(Particle.DRIP_LAVA, block.getLocation(), 7, 2,2,2);
                 }
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20 * (BRIDGE_DURATION-2));
+        }.runTaskLater(LostShardPlugin.plugin, 20 * (BRIDGE_DURATION - 2) + offset * timer);
+
+
+        final int[] timerLast = {0};
+        int offsetLast = 1;
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                for(Block block : bridgeBlocks)
-                {
-                    if(!block.getType().name().toUpperCase().endsWith("_LEAVES"))
-                        continue;
-                    block.setType(Material.AIR);
+                for (Block block : bridgeBlocks) {
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+
+                            if (!block.getType().name().toUpperCase().endsWith("_LEAVES"))
+                                return;
+                            block.setType(Material.AIR);
+                            block.getWorld().spawnParticle(Particle.CURRENT_DOWN, block.getLocation(), 7, 2, 2, 2);
+
+                        }
+
+                    }.runTaskLater(LostShardPlugin.plugin, (long) (timerLast[0]++) * offsetLast);
+
+
+
                     //block.getWorld().spawnParticle(Particle.BUBBLE_POP, block.getLocation(), 5, 1,1,1);
+
+
                 }
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20 * BRIDGE_DURATION);
+        }.runTaskLater(LostShardPlugin.plugin, (20 * BRIDGE_DURATION) + offset * timer);
 
         return true;
     }
@@ -245,40 +269,49 @@ public class BridgeSpell extends Spell {
         return adjacentBlock.getLocation();
     }
 
-    private List<Block> getBridgeBlocks(Player player, Location endingLocation) {
 
-        Set<Material> transparent = HelperMethods.getLookingSet(false);
+    private List<Block> getBridgeBlocks(Location initialLocation, Location endingLocation) {
+
         int maxDistance = BRIDGE_RANGE;
         int maxLength = 0;
-
-        if (transparent == null) {
-            transparent = Sets.newHashSet(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
-        }
 
         if (maxDistance > 120) {
             maxDistance = 120;
         }
-
         ArrayList<Block> blocks = new ArrayList<Block>();
 
 
-        Location startingLocation = player.getLocation().clone().add(0, -1, 0);
+        Location clonedInitialLocation = initialLocation.clone().add(0, -1, 0);
         endingLocation.setY(endingLocation.getY() - 1);
-        Vector direction = new Vector(endingLocation.getBlockX() - startingLocation.getBlockX(), endingLocation.getBlockY() - startingLocation.getBlockY(), endingLocation.getBlockZ() - startingLocation.getBlockZ());
+        Vector direction = new Vector(endingLocation.getBlockX() - clonedInitialLocation.getBlockX(), endingLocation.getBlockY() - clonedInitialLocation.getBlockY(), endingLocation.getBlockZ() - clonedInitialLocation.getBlockZ());
 
-        Iterator<Block> itr = new BlockIterator(player.getWorld(), startingLocation.toVector(), direction, 0, maxDistance);
 
-        boolean isFirst = true;
+
+        Iterator<Block> itr = new BlockIterator(initialLocation.getWorld(), clonedInitialLocation.toVector(), direction, 0, maxDistance);
+
         while (itr.hasNext()) {
             Block block = itr.next();
+            Block leftBlock = block.getLocation().clone().add(getLeftHeadDirection(direction).multiply(1.0D)).getBlock();
+            Block rightBlock = block.getLocation().clone().add(getRightHeadDirection(direction).multiply(1.0D)).getBlock();
+
+            blocks.add(leftBlock);
             blocks.add(block);
+            blocks.add(rightBlock);
             if (maxLength != 0 && blocks.size() > maxLength) {
                 blocks.remove(0);
             }
-            Material material = block.getType();
-
-            isFirst=false;
         }
         return blocks;
     }
+
+    public static Vector getRightHeadDirection(Vector vector) {
+        Vector direction = vector.normalize();
+        return new Vector(-direction.getZ(), 0.0, direction.getX()).normalize();
+    }
+
+    public static Vector getLeftHeadDirection(Vector vector) {
+        Vector direction = vector.normalize();
+        return new Vector(direction.getZ(), 0.0, -direction.getX()).normalize();
+    }
+
 }

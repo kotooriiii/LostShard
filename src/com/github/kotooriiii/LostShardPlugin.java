@@ -618,6 +618,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("who").setExecutor(new WhoCommand());
 
         getCommand("enchant").setExecutor(new EnchantCommand());
+
         getCommand("spellbook").setExecutor(new SpellbookCommand());
 
 
@@ -744,6 +745,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new LightListener(), this);
         pm.registerEvents(new MountListener(), this);
         pm.registerEvents(new PlayerHitListener(), this);
+
+        pm.registerEvents(new MoonJumpListener(), this);
 
         registerCustomEventListener();
 

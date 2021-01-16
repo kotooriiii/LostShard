@@ -51,7 +51,7 @@ public class HostilityPlatform implements Serializable {
             if(!player.getLocation().getWorld().equals(Bukkit.getWorld(worldName)))
                 continue;
 
-            if (player.isOnline() && this.contains(player)) {
+            if (!player.isDead() && player.isOnline() && this.contains(player)) {
                 playersInRegion.add(player);
             }
         }

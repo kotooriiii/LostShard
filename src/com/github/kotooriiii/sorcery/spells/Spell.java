@@ -4,13 +4,14 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.*;
-import com.github.kotooriiii.sorcery.spells.type.circle2.BridgeSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle2.CreateFoodSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle2.WallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle2.*;
 import com.github.kotooriiii.sorcery.spells.type.circle3.FireballSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle3.IceSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.MagicArrowSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.HealSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.LightningSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.ScreechSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle6.ChronoportSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
@@ -23,12 +24,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import sun.corba.Bridge;
 
 import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
-import static com.github.kotooriiii.util.HelperMethods.getClosestFace;
 import static com.github.kotooriiii.util.HelperMethods.localBroadcast;
 
 public abstract class Spell {
@@ -107,6 +106,14 @@ public abstract class Spell {
                 return new BridgeSpell();
             case WALL:
                 return new WallSpell();
+            case FLOWER:
+                return new FlowerSpell();
+            case MOON_JUMP:
+                return new MoonJumpSpell();
+            case MAGIC_ARROW:
+                return new MagicArrowSpell();
+            case SCREECH:
+                return new ScreechSpell();
             default:
                 return null;
         }

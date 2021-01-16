@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle2;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.sorcery.spells.ImageParticles;
+import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.*;
@@ -56,7 +57,7 @@ public class WallSpell extends Spell {
         double nz = WALL_DISTANCE_FROM_PLAYER * nv.getZ() + c.getZ();
 
         // Get your basis vectors for the plane
-        Vector ya = perp(nv, new Vector(0, 1, 0)).normalize();
+        Vector ya = KVectorUtils.perp(nv, new Vector(0, 1, 0)).normalize();
         Vector xa = ya.getCrossProduct(nv).normalize();
 
         //nv.multiply(-1);
@@ -69,8 +70,6 @@ public class WallSpell extends Spell {
 
         List<Block> blocks = new ArrayList<>();
 
-
-        spawnWings(p);
 
         for (int x = -WALL_RADIUS_X; x <= WALL_RADIUS_X; x++) {
             for (int y = -WALL_RADIUS_Y; y <= WALL_RADIUS_Y; y++) {
@@ -165,14 +164,14 @@ public class WallSpell extends Spell {
             e.printStackTrace();
             return;
         }
-        final int WIDTH=300/6,HEIGHT=300/6;
+        final int WIDTH=300/3,HEIGHT=300/3;
        bufferedImage = resize(bufferedImage, WIDTH,HEIGHT);
         ImageParticles particles = new ImageParticles(bufferedImage, 1);
 
         //width = 50 , height = 10
         particles.setAnchor(WIDTH/2, HEIGHT/2);
         // 0.1 means 10 particles in a block
-        particles.setDisplayRatio(0.3);
+        particles.setDisplayRatio(0.1);
 
 
         Map<Location, Color> particle = particles.getParticles(player.getEyeLocation(), 25, player.getEyeLocation().getYaw());
@@ -219,7 +218,7 @@ public class WallSpell extends Spell {
         double nz = radius * nv.getZ() + c.getZ();
 
         // Get your basis vectors for the plane
-        Vector ya = perp(nv, new Vector(0, 1, 0)).normalize();
+        Vector ya = KVectorUtils.perp(nv, new Vector(0, 1, 0)).normalize();
         Vector xa = ya.getCrossProduct(nv).normalize();
 
         //nv.multiply(-1);
@@ -256,14 +255,6 @@ public class WallSpell extends Spell {
             }.runTaskLaterAsynchronously(LostShardPlugin.plugin, (long) (timer++) * offset);
         }
 
-    }
-
-    private Vector perp(Vector onto, Vector u) {
-        return u.clone().subtract(proj(onto, u));
-    }
-
-    private Vector proj(Vector onto, Vector u) {
-        return onto.clone().multiply(onto.dot(u) / onto.lengthSquared());
     }
 
     @Override

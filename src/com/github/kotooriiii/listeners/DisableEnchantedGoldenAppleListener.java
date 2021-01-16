@@ -20,6 +20,11 @@ public class DisableEnchantedGoldenAppleListener implements Listener {
         if (event.getItem().getType() == Material.ENCHANTED_GOLDEN_APPLE && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
             event.getPlayer().sendMessage(ERROR_COLOR + "Enchanted golden apples are disabled.");
             event.setCancelled(true);
+        } else    if (event.getItem().getType() == Material.CHORUS_FRUIT && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+            event.getPlayer().sendMessage(ERROR_COLOR + "Chorus fruit are disabled.");
+            event.setCancelled(true);
         }
+
+
     }
 }

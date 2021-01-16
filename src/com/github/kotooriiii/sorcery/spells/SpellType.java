@@ -15,12 +15,14 @@ public enum SpellType {
     RECALL(new String[]{"Recall"}, "Runus Teleporticus"),
     PERMANENT_GATE_TRAVEL(new String[]{"Permanent Gate Travel", "Gate Travel", "Gate", "PGT"}, "Permanentus Gatius"),
     CHRONOPORT(new String[]{"Chronoport", "Chrono"}, "Rubberbandicus Elasticus"),
-
     GRASS(new String[]{"Grass"}, "GRASS"),
     LIGHT(new String[]{"Light"}, "LIGHT"),
     CREATE_FOOD(new String[]{"Create Food", "Food"}, "CREATE_FOOD"),
     BRIDGE(new String[]{"Bridge"}, "BRIDGE"),
-    WALL(new String[]{"Wall"}, "WALL");
+    WALL(new String[]{"Wall"}, "WALL"),
+    FLOWER(new String[]{"Flower", "Flowers"}, "FLOWER"),
+    MOON_JUMP(new String[]{"Moon Jump", "Jump"}, "MOON_JUMP"), MAGIC_ARROW(new String[]{"Magic Arrow"}, "MAGIC_ARROW"),
+    SCREECH(new String[]{"Screech"}, "SCREECH");
 
     private String[] names;
     private String latin;

@@ -119,7 +119,7 @@ public class HostilityMatch {
             @Override
             public void run() {
 
-                if (capturingPlayer == null || !capturingPlayer.isOnline() || !platform.contains(capturingPlayer) || !capturingClan.isInThisClan(capturingPlayer.getUniqueId())) {
+                if (capturingPlayer == null || capturingPlayer.isDead() ||  !capturingPlayer.isOnline() || !platform.contains(capturingPlayer) || !capturingClan.isInThisClan(capturingPlayer.getUniqueId())) {
                     PlatformLoseEvent event = new PlatformLoseEvent(match, capturingPlayer, capturingClan);
                     LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
                     if(!event.isCancelled()) {

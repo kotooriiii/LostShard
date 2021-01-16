@@ -1,8 +1,10 @@
-package com.github.kotooriiii.sorcery.spells.type.circle4;
+package com.github.kotooriiii.sorcery.spells.type.circle3;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,33 +18,72 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
+import static com.github.kotooriiii.data.Maps.STANDARD_COLOR;
 
-public class HealSpell extends Spell {
+public class HealOtherSpell extends Spell {
 
     private static HashMap<UUID, Double> healSpellCooldownMap = new HashMap<UUID, Double>();
     private final static int HALF_HEARTS_HEALED = 8;
 
 
-    public HealSpell()
+    public HealOtherSpell()
     {
         super(SpellType.HEAL,
-                "Heals you for " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY) + " hearts.",
+                "Heals your closest clan member for a total of " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY)
+                        + " hearts.",
                 4,
             ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
-                0.5d,
-                20,
+                2d,
+                15,
                 true, true, false);
     }
 
 
     @Override
     public boolean executeSpell(Player player) {
-        double health = player.getHealth();
+
+
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        if(clan == null)
+        {
+            player.sendMessage(ERROR_COLOR + "Invalid target. You must be in a clan to perform this spell.");
+            return false;
+        }
+
+        double distance = -1f;
+        Player clanPlayer = null;
+        for(Player iplayer : clan.getOnlinePlayers())
+        {
+            if(!iplayer.getWorld().equals(player.getWorld()))
+                continue;
+            if(iplayer.equals(player))
+                continue;
+
+            double tempDistance = iplayer.getLocation().distance(player.getLocation());
+            if( tempDistance > distance) {
+                distance = tempDistance;
+                clanPlayer = iplayer;
+            }
+        }
+
+        if(distance == -1 || distance > 15.0f)
+        {
+            player.sendMessage(ERROR_COLOR + "Invalid target. There are no clan mates around you.");
+            return false;
+        }
+
+
+        double health = clanPlayer.getHealth();
         health += HALF_HEARTS_HEALED;
-        if (health > player.getMaxHealth())
-            health = player.getMaxHealth();
-        player.setHealth(health);
+        if (health > clanPlayer.getMaxHealth())
+            health = clanPlayer.getMaxHealth();
+        clanPlayer.setHealth(health);
+
+        clanPlayer.sendMessage(STANDARD_COLOR + "" + StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor() + player.getName() + " heals you.");
+        player.sendMessage(STANDARD_COLOR + "You healed " + StatusPlayer.wrap(clanPlayer.getUniqueId()).getStatus().getChatColor() + player.getName() + STANDARD_COLOR + ".");
+
+
         return true;
     }
 

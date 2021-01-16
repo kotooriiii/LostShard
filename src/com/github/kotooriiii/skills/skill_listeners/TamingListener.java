@@ -397,7 +397,7 @@ public class TamingListener implements Listener {
         return new Material[]{Material.END_PORTAL};
     }
 
-    private boolean isHostile(Entity entity) {
+    public static boolean isHostile(Entity entity) {
 
         switch (entity.getType()) {
 
