@@ -5,10 +5,7 @@ import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.*;
 import com.github.kotooriiii.sorcery.spells.type.circle2.*;
-import com.github.kotooriiii.sorcery.spells.type.circle3.FireballSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle3.IceSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle3.MagicArrowSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.*;
 import com.github.kotooriiii.sorcery.spells.type.circle4.HealSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.LightningSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
@@ -117,6 +114,8 @@ public abstract class Spell {
                 return new ScreechSpell();
             case GATE_TRAVEL:
                 return new GateTravelSpell();
+            case HEAL_OTHER:
+                return new HealOtherSpell();
             default:
                 return null;
         }

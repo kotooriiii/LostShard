@@ -28,7 +28,7 @@ public class HealOtherSpell extends Spell {
 
     public HealOtherSpell()
     {
-        super(SpellType.HEAL,
+        super(SpellType.HEAL_OTHER,
                 "Heals your closest clan member for a total of " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY)
                         + " hearts.",
                 4,

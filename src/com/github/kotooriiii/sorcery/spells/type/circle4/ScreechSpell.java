@@ -92,7 +92,9 @@ public class ScreechSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        Vector dir = player.getLocation().getDirection().clone().normalize();
+
+
+
         float magnitude = 6.0f;
 
         final int REFRESH = 20;
@@ -122,6 +124,9 @@ public class ScreechSpell extends Spell {
                     screechParticles[0] ++;
 
                     drawInPlane(player.getEyeLocation().clone().add(0,-3,0), screechParticles[0]);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 0.33f);
+
+
                 }
 
                 timerA[0]++;
@@ -142,6 +147,9 @@ public class ScreechSpell extends Spell {
                         continue;
                     if (!(entity instanceof Mob))
                         continue;
+
+                 // attract   Vector dir =   entity.getLocation().toVector().clone().multiply(-1).add(player.getLocation().toVector().clone()).normalize();
+                   Vector dir =   entity.getLocation().toVector().clone().add(player.getLocation().toVector().clone().multiply(-1)).normalize();
 
                     Location location = entity.getLocation().toVector().add(dir.clone().multiply(magnitude)).toLocation(entity.getWorld());
 
