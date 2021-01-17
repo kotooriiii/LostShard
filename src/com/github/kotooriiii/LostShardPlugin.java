@@ -728,6 +728,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new NotValidMoveBlockListener(), this);
         pm.registerEvents(new EggListener(), this);
         pm.registerEvents(new PermanentGateTravelSpell(), this);
+        pm.registerEvents(new GateTravelSpell(), this);
         pm.registerEvents(new PGTListener(), this);
 
         pm.registerEvents(new NoMoreOldEnchantsListener(), this);

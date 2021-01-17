@@ -13,7 +13,7 @@ public enum SpellType {
     CLANTP(new String[]{"Clan Teleport", "ClanTP", "Clan TP"}, "Arg Matius Teleportus"),
     MARK(new String[]{"Mark"}, "Runus Markius"),
     RECALL(new String[]{"Recall"}, "Runus Teleporticus"),
-    PERMANENT_GATE_TRAVEL(new String[]{"Permanent Gate Travel", "Gate Travel", "Gate", "PGT"}, "Permanentus Gatius"),
+    PERMANENT_GATE_TRAVEL(new String[]{"Permanent Gate Travel", "PGT"}, "Permanentus Gatius"),
     CHRONOPORT(new String[]{"Chronoport", "Chrono"}, "Rubberbandicus Elasticus"),
     GRASS(new String[]{"Grass"}, "GRASS"),
     LIGHT(new String[]{"Light"}, "LIGHT"),
@@ -23,7 +23,7 @@ public enum SpellType {
     FLOWER(new String[]{"Flower", "Flowers"}, "FLOWER"),
     MOON_JUMP(new String[]{"Moon Jump", "Jump"}, "MOON_JUMP"), MAGIC_ARROW(new String[]{"Magic Arrow"}, "MAGIC_ARROW"),
     SCREECH(new String[]{"Screech"}, "SCREECH"),
-    GATE_TRAVEL(new String[]{"Gate Travel"}, "GATE_TRAVEL"), HEAL_OTHER(new String[]{"Heal Other"}, "HEAL_OTHER");
+    GATE_TRAVEL(new String[]{"Gate Travel", "GT"}, "GATE_TRAVEL"), HEAL_OTHER(new String[]{"Heal Other"}, "HEAL_OTHER");
 
     private String[] names;
     private String latin;
