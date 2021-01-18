@@ -23,7 +23,15 @@ public enum SpellType {
     FLOWER(new String[]{"Flower", "Flowers"}, "FLOWER"),
     MOON_JUMP(new String[]{"Moon Jump", "Jump"}, "MOON_JUMP"), MAGIC_ARROW(new String[]{"Magic Arrow"}, "MAGIC_ARROW"),
     SCREECH(new String[]{"Screech"}, "SCREECH"),
-    GATE_TRAVEL(new String[]{"Gate Travel", "GT"}, "GATE_TRAVEL"), HEAL_OTHER(new String[]{"Heal Other"}, "HEAL_OTHER");
+    GATE_TRAVEL(new String[]{"Gate Travel", "GT"}, "GATE_TRAVEL"),
+    HEAL_OTHER(new String[]{"Heal Other"}, "HEAL_OTHER"),
+    RESPIRATE(new String[]{"Respirate"},"RESPIRATE"),
+    FIRE_FIELD(new String[]{"Fire Field"}, "FIRE_FIELD"),
+    FIRE_WALK(new String[]{"Fire Walk"}, "FIRE_WALK"),
+    WATER_WALK(new String[]{"Water Walk"}, "WATER_WALK"),
+    FORCE_PUSH(new String[]{"Force Push"}, "FORCE_PUSH"),
+    FORCE_PULL(new String[]{"Force Pull"}, "FORCE_PULL"),
+    CLEANSE(new String[]{"Cleanse"}, "CLEANSE");
 
     private String[] names;
     private String latin;

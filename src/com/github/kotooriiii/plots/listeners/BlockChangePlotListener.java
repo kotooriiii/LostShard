@@ -30,6 +30,27 @@ import static com.github.kotooriiii.data.Maps.*;
 public class BlockChangePlotListener implements Listener {
 
     /**
+     * Called when a block burns in a plot.
+     *
+     * @param blockBurnEvent The event being called
+     */
+    @EventHandler
+    public void onBlockBurn(BlockBurnEvent blockBurnEvent) {
+        final Block block = blockBurnEvent.getBlock();
+        final Location location = block.getLocation();
+
+        if (block == null)
+            return;
+
+        Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
+
+        if(plot == null)
+            return;
+
+        blockBurnEvent.setCancelled(true);
+    }
+
+    /**
      * Called when an Enderman changes a block in a plot.
      *
      * @param entityChangeBlockEvent The event being called

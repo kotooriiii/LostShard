@@ -60,6 +60,21 @@ public class WallSpell extends Spell {
         Vector ya = KVectorUtils.perp(nv, new Vector(0, 1, 0)).normalize();
         Vector xa = ya.getCrossProduct(nv).normalize();
 
+        int negX = 0;
+        int negZ = 0;
+        int times = 1;
+
+        if(xa.getBlockX() < nv.getBlockX()) {
+            negX = -1;
+            times = 2;
+        }
+
+        if(xa.getBlockZ() < nv.getBlockZ()) {
+            negZ = -1;
+            times = 2;
+        }
+
+
         //nv.multiply(-1);
 
 
@@ -71,8 +86,10 @@ public class WallSpell extends Spell {
         List<Block> blocks = new ArrayList<>();
 
 
-        for (int x = -WALL_RADIUS_X; x <= WALL_RADIUS_X; x++) {
-            for (int y = -WALL_RADIUS_Y; y <= WALL_RADIUS_Y; y++) {
+
+
+        for (int x = negX *WALL_RADIUS_X; x <= WALL_RADIUS_X * times; x++) {
+            for (int y = negZ * WALL_RADIUS_Y; y <= WALL_RADIUS_Y * times; y++) {
 
                 // Coordinates with respect to our basis
                 double xb = x; //calculate x coordinate

@@ -106,8 +106,7 @@ public class TrackCommand implements CommandExecutor {
                     return false;
                 }
 
-                if(trackedPlayer.isDead())
-                {
+                if (trackedPlayer.isDead()) {
                     playerSender.sendMessage(ERROR_COLOR + "The player is dead...");
                     return false;
                 }
@@ -145,7 +144,7 @@ public class TrackCommand implements CommandExecutor {
                     @Override
                     public void run() {
 
-                        if (!finalTrackedPlayer.isDead())
+                        if (finalTrackedPlayer.isOnline())
                             finalTrackedPlayer.setGlowing(false);
                     }
                 }.runTaskLater(LostShardPlugin.plugin, 20 * 1);
@@ -180,7 +179,7 @@ public class TrackCommand implements CommandExecutor {
                 Location spiderLoc = null;
 
                 if (isTutorialTrack) {
-                    spiderLoc=  new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 300, 53, 682);
+                    spiderLoc = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 300, 53, 682);
                     distance = spiderLoc.distance(playerSender.getLocation());
                 } else {
                     for (Entity entity : playerSender.getLocation().getWorld().getNearbyEntities(playerSender.getLocation(), 2000, 256, 2000)) {

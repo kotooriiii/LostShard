@@ -17,6 +17,9 @@ public class PlayerLeaveListener implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
+
+        e.getPlayer().setGlowing(false);
+
         clanTagCreators.remove(uuid);
         clanColorCreators.remove(uuid);
         clanDisbandTimer.remove(uuid);

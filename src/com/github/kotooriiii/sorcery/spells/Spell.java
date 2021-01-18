@@ -9,10 +9,13 @@ import com.github.kotooriiii.sorcery.spells.type.circle3.*;
 import com.github.kotooriiii.sorcery.spells.type.circle4.HealSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.LightningSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.FireFieldSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.GateTravelSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.RespirateSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle6.ChronoportSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle6.*;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.CleanseSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -116,6 +119,20 @@ public abstract class Spell {
                 return new GateTravelSpell();
             case HEAL_OTHER:
                 return new HealOtherSpell();
+            case RESPIRATE:
+                return new RespirateSpell();
+            case FIRE_FIELD:
+                return new FireFieldSpell();
+            case FIRE_WALK:
+                return new FireWalkSpell();
+            case WATER_WALK:
+                return new WaterWalkSpell();
+            case FORCE_PULL:
+                return new ForcePullSpell();
+            case FORCE_PUSH:
+                return new ForcePushSpell();
+            case CLEANSE:
+                return new CleanseSpell();
             default:
                 return null;
         }
@@ -126,7 +143,7 @@ public abstract class Spell {
         for (SpellType types : SpellType.values()) {
             Spell spell = Spell.of(types);
             if (spell.isWandable()) {
-                spells.add(spell);
+                spells.add( spell);
             }
         }
         return spells.toArray(new Spell[spells.size()]);
@@ -252,8 +269,7 @@ public abstract class Spell {
         return false;
     }
 
-    private HashMap<Integer, Integer> getIndeces(Player player, ItemStack ingredient)
-    {
+    private HashMap<Integer, Integer> getIndeces(Player player, ItemStack ingredient) {
         HashMap<Integer, Integer> indeces;
         switch (ingredient.getType()) {
             case OAK_LEAVES:
