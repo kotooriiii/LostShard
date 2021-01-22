@@ -2,6 +2,7 @@ package com.github.kotooriiii.scoreboard;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
+import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
@@ -33,6 +34,7 @@ public class ShardScoreboardManager {
         weightMap.put(Status.MURDERER.getName(), 7);
         weightMap.put(Status.CRIMINAL.getName(), 8);
         weightMap.put(Status.LAWFUL.getName(), 9);
+        weightMap.put(SilentWalkSpell.getID(), 10);
 
         for (Map.Entry entry : weightMap.entrySet())
             LostShardPlugin.logger.log(Level.WARNING, entry.getKey() + " -> " + entry.getValue());
@@ -74,18 +76,22 @@ public class ShardScoreboardManager {
         moderator.setColor(StaffType.MODERATOR.getChatColor());
         moderator.setCanSeeFriendlyInvisibles(false);
 
+        Team silentWalk = registerScoreboard.registerNewTeam(weightMap.get(SilentWalkSpell.getID()) + SilentWalkSpell.getID());
+        silentWalk.setColor(ChatColor.BLACK);
+        silentWalk.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        silentWalk.setCanSeeFriendlyInvisibles(false);
+
+        registerProfileObjective(registerScoreboard, player.getName());
         player.setScoreboard(registerScoreboard);
-        registerProfileObjective(player);
         updateCache(player);
     }
 
-    private static void registerProfileObjective(Player player) {
+    private static void registerProfileObjective(Scoreboard scoreboard, String name) {
         //Scoreboard get from player
-        Scoreboard scoreboard = player.getScoreboard();
 
         //Objective register
-        Objective objective = scoreboard.registerNewObjective("profile", "dummy", "", RenderType.INTEGER);
-        objective.setDisplayName(ChatColor.GOLD + "-" + player.getName() + "'s Stats-");
+        Objective objective = scoreboard.registerNewObjective("profile", "profile", "profile", RenderType.INTEGER);
+        objective.setDisplayName(ChatColor.GOLD + "-" + name + "'s Stats-");
 
 
         Score manaScore = objective.getScore(ChatColor.BLUE + "Mana");
@@ -138,6 +144,9 @@ public class ShardScoreboardManager {
                             player.getScoreboard().clearSlot(DisplaySlot.SIDEBAR);
                         continue;
                     }
+
+                    if(player.getScoreboard() == null || player.getScoreboard().getObjective("profile") == null)
+                        continue;
 
                     if (player.getScoreboard().getObjective("profile").getDisplaySlot() == null)
                         player.getScoreboard().getObjective("profile").setDisplaySlot(DisplaySlot.SIDEBAR);

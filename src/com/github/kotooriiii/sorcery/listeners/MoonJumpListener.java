@@ -1,5 +1,6 @@
 package com.github.kotooriiii.sorcery.listeners;
 
+import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -20,6 +21,8 @@ public class MoonJumpListener implements Listener {
         if(event.getCause() != EntityDamageEvent.DamageCause.FALL)
             return;
         if(!((Player) entity).hasPotionEffect(PotionEffectType.JUMP))
+            return;
+        if(!MoonJumpSpell.getInstance().getJumpers().contains(entity.getUniqueId()))
             return;
         event.setCancelled(true);
     }

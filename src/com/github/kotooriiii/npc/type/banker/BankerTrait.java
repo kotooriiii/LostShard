@@ -6,6 +6,7 @@ import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.util.DataKey;
+import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -112,6 +113,16 @@ public class BankerTrait extends Trait {
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_METADATA, Skin.BANKER.getTexture());
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_SIGN_METADATA, Skin.BANKER.getSignature());
         npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Nickolov");
+
+        SkinTrait skinTrait = null;
+        if(!npc.hasTrait(SkinTrait.class)) {
+            skinTrait = new SkinTrait();
+            npc.addTrait(skinTrait);
+        } else {
+            skinTrait = npc.getTrait(SkinTrait.class);
+        }
+
+        skinTrait.setSkinName(Skin.BANKER.getName());
     }
 
     // Run code when the NPC is despawned. This is called before the entity actually despawns so npc.getBukkitEntity() is still valid.

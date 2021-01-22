@@ -126,6 +126,7 @@ public class IgniteCommand implements CommandExecutor {
         switch (material) {
             //DIAMOND
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 //
             case GOLDEN_SWORD:
 
@@ -151,6 +152,7 @@ public class IgniteCommand implements CommandExecutor {
 
             //DIAMOND
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 //GOLD
             case GOLDEN_SWORD:
                 //IRON
@@ -170,6 +172,7 @@ public class IgniteCommand implements CommandExecutor {
         int fireLevel;
         switch (itemStack.getType()) {
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 //GOLD
             case GOLDEN_SWORD:
                 //IRON
@@ -192,6 +195,7 @@ public class IgniteCommand implements CommandExecutor {
 
         switch (itemStack.getType()) {
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 //GOLD
             case GOLDEN_SWORD:
                 //IRON
@@ -223,6 +227,7 @@ public class IgniteCommand implements CommandExecutor {
 
             //DIAMOND
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 //GOLD
             case GOLDEN_SWORD:
                 //IRON

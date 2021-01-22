@@ -66,10 +66,8 @@ public class StatusUpdateListener implements Listener {
         if (stat.getMillisInit() != 0 && ZonedDateTime.now().minusDays(7).toInstant().toEpochMilli() < stat.getMillisInit()) {
 
 
-
-           Plot plot=  LostShardPlugin.getPlotManager().getStandingOnPlot(defenderPlayer.getLocation());
-            if(plot != null && plot.getName().equalsIgnoreCase("order"))
-            {
+            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(defenderPlayer.getLocation());
+            if (plot != null && plot.getName().equalsIgnoreCase("order")) {
                 guardKnockback(damagerPlayer);
                 damager.sendMessage(ChatColor.GOLD + "[Guard]" + ERROR_COLOR + " DO NOT HIT OTHER BLUE NAMES IN ORDER OR YOU WILL BECOME CRIMINAL AND THE GUARDS WILL KILL YOU. THIS IS YOUR ONLY WARNING.");
                 stat.setMillisInit(0);
@@ -132,26 +130,23 @@ public class StatusUpdateListener implements Listener {
 
             @Override
             public void run() {
-                if(guardNPC.isSpawned())
-                {
-                    if(guardNPC.getEntity() instanceof Player)
-                    {
-                        int height=3,range=20;
+                if (guardNPC.isSpawned()) {
+                    if (guardNPC.getEntity() instanceof Player) {
+                        int height = 3, range = 20;
                         Vector vector;
-                        switch (new Random().nextInt(4))
-                        {
+                        switch (new Random().nextInt(4)) {
                             case 0:
-                               vector = new Vector(range,height,range);
+                                vector = new Vector(range, height, range);
                                 break;
                             case 1:
-                                vector = new Vector(-range,height,range);
+                                vector = new Vector(-range, height, range);
                                 break;
                             case 2:
-                                vector = new Vector(range,height,-range);
+                                vector = new Vector(range, height, -range);
                                 break;
                             case 3:
                             default:
-                                vector = new Vector(-range,height,-range);
+                                vector = new Vector(-range, height, -range);
                         }
 
                         player.setVelocity(vector);
@@ -183,18 +178,16 @@ public class StatusUpdateListener implements Listener {
                 int curZ = guardNPC.getStoredLocation().getBlockZ();
                 int postZ = guardTrait.getGuardingLocation().getBlockZ();
 
-                if (curX != postX && curY != postY && curZ != postZ) {
-                    guardNPC.teleport(guardTrait.getGuardingLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
-                    guardTrait.setCalled(false);
-                    guardTrait.setOwner(null);
-                    guardTrait.setCachedOwnerName("");
-                    guardTrait.setBusy(false);
+                guardTrait.setCalled(false);
+                guardTrait.setOwner(null);
+                guardTrait.setCachedOwnerName("");
+                guardTrait.setBusy(false);
+                guardNPC.teleport(guardTrait.getGuardingLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
 
-                }
 
             }
 
-        }.runTaskLater(LostShardPlugin.plugin, 20*2);
+        }.runTaskLater(LostShardPlugin.plugin, 20 * 2);
     }
 
     @EventHandler(priority = EventPriority.LOW)

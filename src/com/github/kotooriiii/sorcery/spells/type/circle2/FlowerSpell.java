@@ -32,7 +32,7 @@ public class FlowerSpell extends Spell {
     private final static HashMap<Material, Float> map = new HashMap();
 
 
-    public FlowerSpell() {
+    private FlowerSpell() {
         super(SpellType.FLOWER,
                 "Spawns in flowers where you were looking when you casted it. Must be looking at grass to work.",
                 2,
@@ -62,6 +62,17 @@ public class FlowerSpell extends Spell {
             map.put(Material.PEONY, 13 / 100f);
         }
 
+    }
+
+    private  static FlowerSpell instance;
+    public static FlowerSpell getInstance() {
+        if (instance == null) {
+            synchronized (FlowerSpell.class) {
+                if (instance == null)
+                    instance = new FlowerSpell();
+            }
+        }
+        return instance;
     }
 
 

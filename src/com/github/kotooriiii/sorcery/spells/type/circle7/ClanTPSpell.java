@@ -5,6 +5,7 @@ import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle6.WaterWalkSpell;
 import com.github.kotooriiii.stats.Stat;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
@@ -34,12 +35,23 @@ public class ClanTPSpell extends Spell implements Listener {
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public ClanTPSpell() {
+    private ClanTPSpell() {
         super(SpellType.CLANTP,  "Teleports you to your clan member. Type /cast clantp, and when the pop-up message asks you which clan member you want to teleport to, just type in their name!\n" +
                 "Example:\n" +
                 "/cast clantp\n" +
                 "Nickolov",
                 7, ChatColor.GREEN, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
+    }
+
+    private  static ClanTPSpell instance;
+    public static ClanTPSpell getInstance() {
+        if (instance == null) {
+            synchronized (ClanTPSpell.class) {
+                if (instance == null)
+                    instance = new ClanTPSpell();
+            }
+        }
+        return instance;
     }
 
     @EventHandler

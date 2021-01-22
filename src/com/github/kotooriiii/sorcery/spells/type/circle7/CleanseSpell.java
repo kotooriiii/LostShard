@@ -5,6 +5,8 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -24,10 +26,21 @@ public class CleanseSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Double> cleanseSpellCooldownMap = new HashMap<>();
 
-    public CleanseSpell() {
+    private CleanseSpell() {
         super(SpellType.CLEANSE,
                 "Clears you of all potion effects, good and bad.",
                 7, ChatColor.AQUA, new ItemStack[]{new ItemStack(Material.SUGAR_CANE, 1), new ItemStack(Material.REDSTONE, 1)}, 1.0f, 25, true, true, false);
+    }
+
+    private  static CleanseSpell instance;
+    public static CleanseSpell getInstance() {
+        if (instance == null) {
+            synchronized (CleanseSpell.class) {
+                if (instance == null)
+                    instance = new CleanseSpell();
+            }
+        }
+        return instance;
     }
 
 
@@ -82,7 +95,7 @@ public class CleanseSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
         player.setGlowing(false);
-
+        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 2, 2, 2);
         for(PotionEffect effect:player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
 
         return true;

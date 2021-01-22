@@ -4,7 +4,6 @@ import com.github.kotooriiii.files.FileManager;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
-import net.minecraft.server.v1_15_R1.Packet;
 
 import java.io.Serializable;
 import java.util.HashMap;

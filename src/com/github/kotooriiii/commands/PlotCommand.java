@@ -142,6 +142,12 @@ public class PlotCommand implements CommandExecutor {
                                 return false;
                             }
 
+                            if(friendPlot.isJointOwner(friendUUID))
+                            {
+                                playerSender.sendMessage(ERROR_COLOR + friendPlayer.getName() + " is a co-owner. " + "Did you mean to demote him? /plot unco (username)");
+                                return false;
+                            }
+
                             if (friendPlot.isFriend(friendUUID)) {
                                 playerSender.sendMessage(ERROR_COLOR + friendPlayer.getName() + " is already a friend. " + "Did you mean to unfriend a player to your plot? /plot unfriend (username)");
                             } else {

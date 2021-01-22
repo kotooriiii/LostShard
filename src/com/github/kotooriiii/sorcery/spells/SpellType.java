@@ -9,7 +9,7 @@ public enum SpellType {
     TELEPORT(new String[]{"Teleport", "TP"}, "Nearius Porticus"),
     WEB_FIELD(new String[]{"Web Field", "Web"}, "Webicus Fieldicus"),
     //DARKNESS(new String[]{"Darkness"}),
-   // CLONE(new String[]{"Clone"}, "clonus"),
+    // CLONE(new String[]{"Clone"}, "clonus"),
     CLANTP(new String[]{"Clan Teleport", "ClanTP", "Clan TP"}, "Arg Matius Teleportus"),
     MARK(new String[]{"Mark"}, "Runus Markius"),
     RECALL(new String[]{"Recall"}, "Runus Teleporticus"),
@@ -25,13 +25,20 @@ public enum SpellType {
     SCREECH(new String[]{"Screech"}, "SCREECH"),
     GATE_TRAVEL(new String[]{"Gate Travel", "GT"}, "GATE_TRAVEL"),
     HEAL_OTHER(new String[]{"Heal Other"}, "HEAL_OTHER"),
-    RESPIRATE(new String[]{"Respirate"},"RESPIRATE"),
+    RESPIRATE(new String[]{"Respirate"}, "RESPIRATE"),
     FIRE_FIELD(new String[]{"Fire Field"}, "FIRE_FIELD"),
     FIRE_WALK(new String[]{"Fire Walk"}, "FIRE_WALK"),
     WATER_WALK(new String[]{"Water Walk"}, "WATER_WALK"),
     FORCE_PUSH(new String[]{"Force Push"}, "FORCE_PUSH"),
     FORCE_PULL(new String[]{"Force Pull"}, "FORCE_PULL"),
-    CLEANSE(new String[]{"Cleanse"}, "CLEANSE");
+    CLEANSE(new String[]{"Cleanse"}, "CLEANSE"),
+    RADIATE(new String[]{"Radiate"}, "RADIATE"),
+    SILENT_WALK(new String[]{"Silent Walk"}, "SILENT_WALK"),
+    SOAR(new String[]{"Soar"}, "SOAR"),
+    PERCEPTION(new String[]{"Perception"}, "PERCEPTION"),
+    UNVEIL(new String[]{"Unveil"}, "UNVEIL"),
+    WRATH(new String[]{"Wrath"}, "WRATH"),
+    ENVY(new String[]{"Envy"}, "ENVY");
 
     private String[] names;
     private String latin;

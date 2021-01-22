@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle4;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +24,7 @@ public class HealSpell extends Spell {
     private final static int HALF_HEARTS_HEALED = 8;
 
 
-    public HealSpell()
+    private HealSpell()
     {
         super(SpellType.HEAL,
                 "Heals you for " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY) + " hearts.",
@@ -33,6 +34,18 @@ public class HealSpell extends Spell {
                 0.5d,
                 20,
                 true, true, false);
+    }
+
+
+    private  static HealSpell instance;
+    public static HealSpell getInstance() {
+        if (instance == null) {
+            synchronized (HealSpell.class) {
+                if (instance == null)
+                    instance = new HealSpell();
+            }
+        }
+        return instance;
     }
 
 

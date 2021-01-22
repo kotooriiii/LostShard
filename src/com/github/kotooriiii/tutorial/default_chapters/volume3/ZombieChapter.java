@@ -4,12 +4,13 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
-import net.minecraft.server.v1_15_R1.EntityTypes;
-import net.minecraft.server.v1_15_R1.EntityZombie;
+
+import net.minecraft.server.v1_16_R3.EntityTypes;
+import net.minecraft.server.v1_16_R3.EntityZombie;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.CreatureSpawnEvent;

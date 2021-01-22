@@ -38,7 +38,7 @@ public class LightSpell extends Spell {
     private final static int LIGHT_LEVEL = 5;
 
 
-    public LightSpell() {
+    private LightSpell() {
         super(SpellType.LIGHT,
                 "Creates an aura of light around you for 10 seconds. Great for mining!",
                 1,
@@ -49,6 +49,18 @@ public class LightSpell extends Spell {
                 true, true, false);
 
 
+    }
+
+    private static LightSpell instance;
+
+    public static LightSpell getInstance() {
+        if (instance == null) {
+            synchronized (LightSpell.class) {
+                if (instance == null)
+                    instance = new LightSpell();
+            }
+        }
+        return instance;
     }
 
     public static int getLightLevel() {
@@ -74,8 +86,7 @@ public class LightSpell extends Spell {
         Location loc = player.getLocation().clone().add(0, 1, 0);
 
         Location oldLocation = map.get(player.getUniqueId());
-        if(oldLocation != null)
-        {
+        if (oldLocation != null) {
             deleteLight(oldLocation);
         }
 

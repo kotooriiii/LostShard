@@ -22,6 +22,7 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class RepairCommand implements CommandExecutor {
 
     final int STAMINA_COST = 10;
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
 
@@ -66,7 +67,7 @@ public class RepairCommand implements CommandExecutor {
         }
 
         //Get the skill object
-        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
+        Skill blacksmithy = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
@@ -75,7 +76,7 @@ public class RepairCommand implements CommandExecutor {
 
         BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.REPAIR);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
 
@@ -114,8 +115,19 @@ public class RepairCommand implements CommandExecutor {
 
         switch (material) {
 
+            //netherite
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
 
-            //DIAMOND
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+
+                //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -202,8 +214,19 @@ public class RepairCommand implements CommandExecutor {
 
         switch (material) {
 
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
 
-            //DIAMOND
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+
+                //DIAMOND
+
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -216,10 +239,10 @@ public class RepairCommand implements CommandExecutor {
             case DIAMOND_LEGGINGS:
                 if (level < 80)
                     return 0;
-                else if(level > 100)
+                else if (level > 100)
                     return 1;
                 else
-                    return ((double) 1/20) * (useLevel);
+                    return ((double) 1 / 20) * (useLevel);
                 //GOLD
             case GOLDEN_AXE:
             case GOLDEN_SWORD:
@@ -236,8 +259,8 @@ public class RepairCommand implements CommandExecutor {
                 else if (level > 80)
                     return 1;
                 else
-                    return ((double) 1/20) * (useLevel);
-            //IRON
+                    return ((double) 1 / 20) * (useLevel);
+                //IRON
             case IRON_AXE:
             case IRON_SWORD:
             case IRON_PICKAXE:
@@ -250,10 +273,10 @@ public class RepairCommand implements CommandExecutor {
             case IRON_LEGGINGS:
                 if (level < 30)
                     return 0;
-                else if(level > 60)
+                else if (level > 60)
                     return 1;
                 else
-                    return ((double) 1/30) * (useLevel);
+                    return ((double) 1 / 30) * (useLevel);
                 //STONE & WOOD
             case STONE_AXE:
             case STONE_SWORD:
@@ -279,7 +302,7 @@ public class RepairCommand implements CommandExecutor {
                 else if (level > 30)
                     return 1;
                 else
-                    return ((double) 1/30) * (useLevel);
+                    return ((double) 1 / 30) * (useLevel);
         }
         return -1;
     }
@@ -294,6 +317,20 @@ public class RepairCommand implements CommandExecutor {
             //BOW
             case BOW:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+            //NETHERITE
+            //DIAMOND
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, 1)};
+
             //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:

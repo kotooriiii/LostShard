@@ -43,10 +43,22 @@ public class GateTravelSpell extends Spell implements Listener {
     private final static int GATE_TRAVEL_DURATION = 10;
 
 
-    public GateTravelSpell() {
+    private GateTravelSpell() {
         super(SpellType.GATE_TRAVEL,
                 "Creates a temporary portal to one of your marks. Anyone can go through this portal. Lasts for " + GATE_TRAVEL_DURATION +  " seconds.",5, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.REDSTONE, 1),  new ItemStack(Material.STRING, 1)}, 2.0f /*15.0f*/, 25, true, true, false);
     }
+
+    private  static GateTravelSpell instance;
+    public static GateTravelSpell getInstance() {
+        if (instance == null) {
+            synchronized (GateTravelSpell.class) {
+                if (instance == null)
+                    instance = new GateTravelSpell();
+            }
+        }
+        return instance;
+    }
+
 
     @EventHandler
     public void onChatArg(ShardChatEvent event) {

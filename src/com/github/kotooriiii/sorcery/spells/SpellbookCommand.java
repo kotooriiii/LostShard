@@ -5,6 +5,7 @@ import com.github.kotooriiii.commands.DocCommand;
 import com.github.kotooriiii.commands.WikiCommand;
 import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -58,6 +59,7 @@ public class SpellbookCommand implements CommandExecutor {
 
         Player player = (Player) commandSender;
         player.getInventory().addItem(itemStack);
+        player.sendMessage(ChatColor.GOLD + "You summon your spellbook.");
         return true;
     }
 

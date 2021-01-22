@@ -1,15 +1,16 @@
 name: LostShardK
 main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
-depend: [LuckPerms, PacketListenerApi, Citizens]
+depend: [LuckPerms, PacketListenerApi, Citizens, ProtocolLib]
 softdepend:
   - WorldBorder
   - HolographicDisplays
 loadbefore:
   - BuycraftX
 version: 1.0
-api-version: 1.15
+api-version: 1.16
 commands:
+  toggle:
   spellbook:
   enchant:
   announce:

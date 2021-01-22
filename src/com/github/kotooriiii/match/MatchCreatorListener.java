@@ -40,6 +40,9 @@ public class MatchCreatorListener implements Listener {
         if (match.getArmorType() == null) {
 
             switch (message.toLowerCase()) {
+                case "netherite":
+                    match.setArmorType(Material.NETHERITE_BOOTS);
+                    break;
                 case "diamond":
                     match.setArmorType(Material.DIAMOND_BOOTS);
                     break;
@@ -83,6 +86,9 @@ public class MatchCreatorListener implements Listener {
 
         if (match.getSwordType() == null) {
             switch (message.toLowerCase()) {
+                case "netherite":
+                    match.setSwordType(Material.NETHERITE_SWORD);
+                    break;
                 case "diamond":
                     match.setSwordType(Material.DIAMOND_SWORD);
                     break;

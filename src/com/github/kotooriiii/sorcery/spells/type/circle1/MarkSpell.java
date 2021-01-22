@@ -34,13 +34,24 @@ public class MarkSpell extends Spell implements Listener {
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public MarkSpell() {
+    private MarkSpell() {
         super(SpellType.MARK,
                 "Makes a mark where you’re standing that you can recall back to. Type /cast mark, and when the pop up asks you to name the mark, name it something you will remember, such as “home”. \n" +
                 "Example:\n" +
                 "/cast mark\n" +
                 "home",
                 1, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 15, true, true, false);
+    }
+
+    private  static MarkSpell instance;
+    public static MarkSpell getInstance() {
+        if (instance == null) {
+            synchronized (MarkSpell.class) {
+                if (instance == null)
+                    instance = new MarkSpell();
+            }
+        }
+        return instance;
     }
 
     @EventHandler

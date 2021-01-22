@@ -1,12 +1,10 @@
 package com.github.kotooriiii.npc;
 
 import com.github.kotooriiii.LostShardPlugin;
-import net.minecraft.server.v1_15_R1.Entity;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
-import net.minecraft.server.v1_15_R1.Packet;
-import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
+
+import net.minecraft.server.v1_16_R3.Packet;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 

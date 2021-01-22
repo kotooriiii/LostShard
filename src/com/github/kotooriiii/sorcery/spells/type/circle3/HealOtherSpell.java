@@ -26,7 +26,7 @@ public class HealOtherSpell extends Spell {
     private final static int HALF_HEARTS_HEALED = 8;
 
 
-    public HealOtherSpell()
+    private HealOtherSpell()
     {
         super(SpellType.HEAL_OTHER,
                 "Heals your closest clan member for a total of " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY)
@@ -39,37 +39,51 @@ public class HealOtherSpell extends Spell {
                 true, true, false);
     }
 
+    private  static HealOtherSpell instance;
+    public static HealOtherSpell getInstance() {
+        if (instance == null) {
+            synchronized (HealOtherSpell.class) {
+                if (instance == null)
+                    instance = new HealOtherSpell();
+            }
+        }
+        return instance;
+    }
+
 
     @Override
     public boolean executeSpell(Player player) {
 
 
         Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
-        if(clan == null)
-        {
+        if (clan == null) {
             player.sendMessage(ERROR_COLOR + "Invalid target. You must be in a clan to perform this spell.");
             return false;
         }
 
         double distance = -1f;
         Player clanPlayer = null;
-        for(Player iplayer : clan.getOnlinePlayers())
-        {
-            if(!iplayer.getWorld().equals(player.getWorld()))
+        for (Player iplayer : clan.getOnlinePlayers()) {
+            if (!iplayer.getWorld().equals(player.getWorld()))
                 continue;
-            if(iplayer.equals(player))
+            if (iplayer.equals(player))
                 continue;
 
             double tempDistance = iplayer.getLocation().distance(player.getLocation());
-            if( tempDistance > distance) {
+            if (tempDistance > distance) {
                 distance = tempDistance;
                 clanPlayer = iplayer;
             }
         }
 
-        if(distance == -1 || distance > 15.0f)
-        {
+        if (distance == -1 || distance > 15.0f) {
             player.sendMessage(ERROR_COLOR + "Invalid target. There are no clan mates around you.");
+            return false;
+        }
+
+        if (isLapisNearby(clanPlayer.getLocation(), DEFAULT_LAPIS_NEARBY))
+        {
+            player.sendMessage(ERROR_COLOR + "You can't seem to heal your ally...");
             return false;
         }
 

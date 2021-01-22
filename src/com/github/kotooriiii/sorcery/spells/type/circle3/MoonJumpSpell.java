@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -37,11 +38,24 @@ public class MoonJumpSpell extends Spell implements Listener {
     private final static HashMap<UUID, Double> moonJumpSpell = new HashMap<>();
     private final static int DURATION = 10;
 
+    private final static HashSet<UUID> jumpers = new HashSet<>();
 
-    public MoonJumpSpell() {
+
+    private MoonJumpSpell() {
         super(SpellType.MOON_JUMP,
                 "Makes you jump really high each jump for " + DURATION + " seconds! No fall damage, just high jumping. Very useful if you are in a trap!",
                 3, ChatColor.WHITE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 20, true, true, false);
+    }
+
+    private  static MoonJumpSpell instance;
+    public static MoonJumpSpell getInstance() {
+        if (instance == null) {
+            synchronized (MoonJumpSpell.class) {
+                if (instance == null)
+                    instance = new MoonJumpSpell();
+            }
+        }
+        return instance;
     }
 
 
@@ -96,9 +110,55 @@ public class MoonJumpSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 20*DURATION, 16, false, false, false));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20*DURATION, 1, false, false, false));
+        getJumpers().add(player.getUniqueId());
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 20*DURATION, 6, false, false, false));
+
+
+        final UUID uuidConst = player.getUniqueId();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                getJumpers().remove(uuidConst);
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 20*DURATION);
+
+       // player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20*DURATION, 1, false, false, false));
 
         return true;
+    }
+
+    @EventHandler
+    public void onMoveJumpersListener(PlayerMoveEvent event) {
+
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
+            return;
+
+        final int x_initial, y_initial, z_initial,
+                x_final, y_final, z_final;
+
+        x_initial = event.getFrom().getBlockX();
+        y_initial = event.getFrom().getBlockY();
+        z_initial = event.getFrom().getBlockZ();
+
+        x_final = event.getTo().getBlockX();
+        y_final = event.getTo().getBlockY();
+        z_final = event.getTo().getBlockZ();
+
+        if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
+            return;
+
+        if(!getJumpers().contains(event.getPlayer().getUniqueId()))
+            return;
+        if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
+            return;
+
+        getJumpers().remove(event.getPlayer().getUniqueId());
+
+        event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to let you moon jump anymore...");
+    }
+
+
+    public static HashSet<UUID> getJumpers() {
+        return jumpers;
     }
 }

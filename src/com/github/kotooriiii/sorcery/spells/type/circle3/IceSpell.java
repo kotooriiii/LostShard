@@ -32,7 +32,7 @@ public class IceSpell extends Spell {
         return uuidBlockPlacedMap;
     }
 
-    public IceSpell() {
+    private IceSpell() {
         super(SpellType.ICE, "Creates a ball of ice in the direction you are facing. Good for trapping or slowing down enemies.",
                 3,
                 ChatColor.AQUA,
@@ -41,6 +41,17 @@ public class IceSpell extends Spell {
                 15,
                 true, true, false);
 
+    }
+
+    private  static IceSpell instance;
+    public static IceSpell getInstance() {
+        if (instance == null) {
+            synchronized (IceSpell.class) {
+                if (instance == null)
+                    instance = new IceSpell();
+            }
+        }
+        return instance;
     }
 
     @Override

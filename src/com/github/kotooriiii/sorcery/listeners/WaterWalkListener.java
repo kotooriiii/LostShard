@@ -31,7 +31,7 @@ public class WaterWalkListener implements Listener {
     public void onMoveFromBlock(PlayerMoveEvent event)
     {
         Player player = event.getPlayer();
-        if(!CitizensAPI.getNPCRegistry().isNPC(player))
+        if(CitizensAPI.getNPCRegistry().isNPC(player))
             return;
 
         int fX = event.getFrom().getBlockX();
@@ -69,6 +69,7 @@ public class WaterWalkListener implements Listener {
             if(list == null)
             {
                 list = new ArrayList<Block>();
+                getBlocks().put(player.getUniqueId(), list);
             }
 
             list.add(relativeDown);

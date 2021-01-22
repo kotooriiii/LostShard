@@ -80,7 +80,7 @@ public class EnhanceCommand implements CommandExecutor {
 
 
         //Get the skill object
-        Skill blacksmithy =  LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
+        Skill blacksmithy = LostShardPlugin.getSkillManager().getSkillPlayer(playerUUID).getActiveBuild().getBlacksmithy();
 
         //Calculate chance
         int level = (int) blacksmithy.getLevel();
@@ -93,11 +93,11 @@ public class EnhanceCommand implements CommandExecutor {
 
         BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.ENHANCE);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
         //Harden
-        enchant(mainHand,playerSender);
+        enchant(mainHand, playerSender);
         playerSender.sendMessage(ChatColor.GOLD + "You enhance the item.");
 
 
@@ -121,6 +121,11 @@ public class EnhanceCommand implements CommandExecutor {
 
         switch (material) {
             //DIAMOND
+            case NETHERITE_PICKAXE:
+            case NETHERITE_AXE:
+            case NETHERITE_SHOVEL:
+            case NETHERITE_HOE:
+
             case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
@@ -130,15 +135,15 @@ public class EnhanceCommand implements CommandExecutor {
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
             case GOLDEN_HOE:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 50;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 60;
-                else if(nextLevel == 3)
+                else if (nextLevel == 3)
                     return 70;
-                else if(nextLevel == 4)
+                else if (nextLevel == 4)
                     return 80;
-                else if(nextLevel == 5)
+                else if (nextLevel == 5)
                     return 100;
                 else
                     return -1;
@@ -147,11 +152,11 @@ public class EnhanceCommand implements CommandExecutor {
             case IRON_AXE:
             case IRON_SHOVEL:
             case IRON_HOE:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 25;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 30;
-                else if(nextLevel == 3)
+                else if (nextLevel == 3)
                     return 40;
                 else
                     return -1;
@@ -160,9 +165,9 @@ public class EnhanceCommand implements CommandExecutor {
             case STONE_AXE:
             case STONE_SHOVEL:
             case STONE_HOE:
-                if(nextLevel == 1)
+                if (nextLevel == 1)
                     return 10;
-                else if(nextLevel == 2)
+                else if (nextLevel == 2)
                     return 15;
                 else
                     return -1;
@@ -185,31 +190,37 @@ public class EnhanceCommand implements CommandExecutor {
 
         switch (material) {
 
-            //DIAMOND
+            //netherite
+            case NETHERITE_PICKAXE:
+            case NETHERITE_AXE:
+            case NETHERITE_SHOVEL:
+            //case NETHERITE_HOE:
+
+                //DIAMOND
             case DIAMOND_PICKAXE:
             case DIAMOND_AXE:
             case DIAMOND_SHOVEL:
-            //case DIAMOND_HOE:
+                //case DIAMOND_HOE:
                 //GOLD
             case GOLDEN_PICKAXE:
             case GOLDEN_AXE:
             case GOLDEN_SHOVEL:
-           // case GOLDEN_HOE:
+                // case GOLDEN_HOE:
                 //IRON
             case IRON_PICKAXE:
             case IRON_AXE:
             case IRON_SHOVEL:
-          //  case IRON_HOE:
+                //  case IRON_HOE:
                 //STONE
             case STONE_PICKAXE:
             case STONE_AXE:
             case STONE_SHOVEL:
-         //   case STONE_HOE:
+                //   case STONE_HOE:
                 //WOODEN
             case WOODEN_PICKAXE:
             case WOODEN_AXE:
             case WOODEN_SHOVEL:
-            //case WOODEN_HOE:
+                //case WOODEN_HOE:
                 return true;
         }
         return false;
@@ -219,7 +230,7 @@ public class EnhanceCommand implements CommandExecutor {
 
         int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
         Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
-        if(clan != null && clan.hasEnhanceTimer())
+        if (clan != null && clan.hasEnhanceTimer())
             MAXIMUM_ENHANCE_FINAL = 5;
 
         int efficiencyLevel = itemStack.getEnchantmentLevel(Enchantment.DIG_SPEED);
@@ -255,7 +266,7 @@ public class EnhanceCommand implements CommandExecutor {
     private void enchant(ItemStack itemStack, Player player) {
 
         int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
-        Clan clan =LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
         if (clan != null && clan.hasEnhanceTimer())
             MAXIMUM_ENHANCE_FINAL = 5;
 
@@ -270,10 +281,9 @@ public class EnhanceCommand implements CommandExecutor {
         if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= efficiencyMaxLevel) {
             itemStack.removeEnchantment(Enchantment.DIG_SPEED);
             itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
-            if(nextLevel == 4)
+            if (nextLevel == 4)
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
-            if(nextLevel == 5)
-            {
+            if (nextLevel == 5) {
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
                 clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
                 clan.setEnhanceTimer(0);
@@ -284,7 +294,6 @@ public class EnhanceCommand implements CommandExecutor {
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
         }
-
 
 
     }
@@ -313,6 +322,13 @@ public class EnhanceCommand implements CommandExecutor {
         }
 
         switch (material) {
+
+            case NETHERITE_AXE:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, cost)};
 
             //DIAMOND
             case DIAMOND_PICKAXE:

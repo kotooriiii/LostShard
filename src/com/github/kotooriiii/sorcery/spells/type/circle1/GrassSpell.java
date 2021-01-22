@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle6.FireWalkSpell;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -34,7 +35,7 @@ public class GrassSpell extends Spell {
     private final static HashMap<Material, Float> map = new HashMap();
 
 
-    public GrassSpell() {
+    private GrassSpell() {
         super(SpellType.GRASS,
                 "Creates a grassy area around the casting point.",
                 1,
@@ -51,6 +52,18 @@ public class GrassSpell extends Spell {
 
         }
 
+    }
+
+
+    private  static GrassSpell instance;
+    public static GrassSpell getInstance() {
+        if (instance == null) {
+            synchronized (GrassSpell.class) {
+                if (instance == null)
+                    instance = new GrassSpell();
+            }
+        }
+        return instance;
     }
 
 
@@ -113,9 +126,17 @@ public class GrassSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        int castingX = player.getLocation().getBlockX();
-        int castingY = player.getLocation().getBlockY();
-        int castingZ = player.getLocation().getBlockZ();
+        Block block = player.getTargetBlockExact(5, FluidCollisionMode.NEVER);
+
+        if(block == null || block.getType() == Material.AIR)
+        {
+            player.sendMessage(ERROR_COLOR + "You must be near the block.");
+            return false;
+        }
+
+        int castingX = block.getLocation().getBlockX();
+        int castingY = block.getLocation().getBlockY();
+        int castingZ = block.getLocation().getBlockZ();
 
         for (int x = castingX - RANGE; x <= castingX + RANGE; x++) {
             for (int z = castingZ - RANGE; z <= castingZ + RANGE; z++) {

@@ -539,7 +539,18 @@ public class SurvivalismListener implements Listener {
                 break;
             case GHAST:
                 break;
-            case PIG_ZOMBIE:
+
+            case ZOMBIFIED_PIGLIN:
+                break;
+            case PIGLIN_BRUTE:
+                break;
+            case STRIDER:
+                break;
+            case ZOGLIN:
+                break;
+            case HOGLIN:
+                break;
+            case PIGLIN:
                 break;
             case ENDERMAN:
                 break;

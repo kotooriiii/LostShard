@@ -35,7 +35,7 @@ public class LightningSpell extends Spell {
 
     private static HashMap<UUID, Double> lightningSpellCooldownMap = new HashMap<UUID, Double>();
 
-    public LightningSpell() {
+    private LightningSpell() {
         super(SpellType.LIGHTNING, "Strikes down a bolt of lightning in the direction you are facing. Great for burning enemies’ loot.",
                 4,
                 ChatColor.GOLD,
@@ -44,6 +44,18 @@ public class LightningSpell extends Spell {
                 20,
                 true, true, false);
     }
+
+    private  static LightningSpell instance;
+    public static LightningSpell getInstance() {
+        if (instance == null) {
+            synchronized (LightningSpell.class) {
+                if (instance == null)
+                    instance = new LightningSpell();
+            }
+        }
+        return instance;
+    }
+
 
     @Override
     public boolean executeSpell(Player player) {

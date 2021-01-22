@@ -3,6 +3,8 @@ package com.github.kotooriiii.sorcery.spells;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
+import com.github.kotooriiii.sorcery.listeners.SilentWalkListener;
+import com.github.kotooriiii.sorcery.listeners.WaterWalkListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.*;
 import com.github.kotooriiii.sorcery.spells.type.circle2.*;
 import com.github.kotooriiii.sorcery.spells.type.circle3.*;
@@ -16,12 +18,21 @@ import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle6.*;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.CleanseSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.RadiateSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.PerceptionSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.UnveilSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.EnvySpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.WrathSpell;
 import com.github.kotooriiii.stats.Stat;
+import javafx.scene.control.Toggle;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -48,6 +59,8 @@ public abstract class Spell {
     protected final static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
     protected final static HashMap<UUID, SpellType> waitingForArgumentMap = new HashMap<>();
 
+    protected final static HashMap<SpellToggleable, HashSet<UUID>> getManaDrainMap = new HashMap<>();
+
     protected static final int DEFAULT_LAPIS_NEARBY = 5;
 
     public static HashMap<UUID, SpellType> getWaitingForArgumentMap() {
@@ -72,67 +85,81 @@ public abstract class Spell {
         switch (type) {
 
             case FIREBALL:
-                return new FireballSpell();
+                return FireballSpell.getInstance();
             case HEAL:
-                return new HealSpell();
+                return HealSpell.getInstance();
             case ICE:
-                return new IceSpell();
+                return IceSpell.getInstance();
             case LIGHTNING:
-                return new LightningSpell();
+                return LightningSpell.getInstance();
             case TELEPORT:
-                return new TeleportSpell();
+                return TeleportSpell.getInstance();
             case WEB_FIELD:
-                return new WebFieldSpell();
+                return WebFieldSpell.getInstance();
 //            case DARKNESS:
 //                return new DarknessSpell();
 //            case CLONE:
 //                return new CloneSpell();
             case CLANTP:
-                return new ClanTPSpell();
+                return ClanTPSpell.getInstance();
             case MARK:
-                return new MarkSpell();
+                return MarkSpell.getInstance();
             case RECALL:
-                return new RecallSpell();
+                return RecallSpell.getInstance();
             case PERMANENT_GATE_TRAVEL:
-                return new PermanentGateTravelSpell();
+                return PermanentGateTravelSpell.getInstance();
             case CHRONOPORT:
-                return new ChronoportSpell();
+                return ChronoportSpell.getInstance();
             case GRASS:
-                return new GrassSpell();
+                return GrassSpell.getInstance();
             case LIGHT:
-                return new LightSpell();
+                return LightSpell.getInstance();
             case CREATE_FOOD:
-                return new CreateFoodSpell();
+                return CreateFoodSpell.getInstance();
             case BRIDGE:
-                return new BridgeSpell();
+                return BridgeSpell.getInstance();
             case WALL:
-                return new WallSpell();
+                return WallSpell.getInstance();
             case FLOWER:
-                return new FlowerSpell();
+                return FlowerSpell.getInstance();
             case MOON_JUMP:
-                return new MoonJumpSpell();
+                return MoonJumpSpell.getInstance();
             case MAGIC_ARROW:
-                return new MagicArrowSpell();
+                return MagicArrowSpell.getInstance();
             case SCREECH:
-                return new ScreechSpell();
+                return  ScreechSpell.getInstance();
             case GATE_TRAVEL:
-                return new GateTravelSpell();
+                return GateTravelSpell.getInstance();
             case HEAL_OTHER:
-                return new HealOtherSpell();
+                return HealOtherSpell.getInstance();
             case RESPIRATE:
-                return new RespirateSpell();
+                return RespirateSpell.getInstance();
             case FIRE_FIELD:
-                return new FireFieldSpell();
+                return FireFieldSpell.getInstance();
             case FIRE_WALK:
-                return new FireWalkSpell();
+                return FireWalkSpell.getInstance();
             case WATER_WALK:
-                return new WaterWalkSpell();
+                return WaterWalkSpell.getInstance();
             case FORCE_PULL:
-                return new ForcePullSpell();
+                return ForcePullSpell.getInstance();
             case FORCE_PUSH:
-                return new ForcePushSpell();
+                return ForcePushSpell.getInstance();
             case CLEANSE:
-                return new CleanseSpell();
+                return CleanseSpell.getInstance();
+            case RADIATE:
+                return RadiateSpell.getInstance();
+            case SILENT_WALK:
+                return SilentWalkSpell.getInstance();
+            case SOAR:
+                return SoarSpell.getInstance();
+            case PERCEPTION:
+                return PerceptionSpell.getInstance();
+            case UNVEIL:
+                return UnveilSpell.getInstance();
+            case WRATH:
+                return WrathSpell.getInstance();
+            case ENVY:
+                return EnvySpell.getInstance();
             default:
                 return null;
         }
@@ -187,6 +214,17 @@ public abstract class Spell {
         for (SpellType types : SpellType.values()) {
             Spell spell = Spell.of(types);
             if (spell.getCircle() == circle)
+                spells.add(spell);
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static Spell[] getToggleableSpells()
+    {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell instanceof SpellToggleable)
                 spells.add(spell);
         }
         return spells.toArray(new Spell[spells.size()]);
@@ -274,6 +312,9 @@ public abstract class Spell {
         switch (ingredient.getType()) {
             case OAK_LEAVES:
                 indeces = hasAnyEndMatchingIngredient(player, "_LEAVES", ingredient.getAmount(), "leaves");
+                break;
+            case WHITE_WOOL:
+                indeces = hasAnyEndMatchingIngredient(player, "_WOOL", ingredient.getAmount(), "wool");
                 break;
             default:
                 indeces = hasIngredient(player, ingredient);
@@ -460,9 +501,35 @@ public abstract class Spell {
 
     public final void refund(Player player) {
         player.getInventory().addItem(this.getIngredients());
+        final Stat wrap = Stat.wrap(player.getUniqueId());
+        wrap.setMana(wrap.getMana() + this.getManaCost());
     }
 
     public boolean cast(Player player) {
+
+        if(this instanceof SpellToggleable)
+        {
+          if(  hasDraining(player.getUniqueId()) )
+          {
+              player.sendMessage(ERROR_COLOR + "You are already toggled on to this spell. Toggle off with /toggle " + this.getType().getName());
+              return false;
+          }
+
+          if(Stat.getMeditatingPlayers().contains(player.getUniqueId()))
+          {
+              player.sendMessage(ERROR_COLOR + "You have stopped meditating.");
+              Stat.getMeditatingPlayers().remove(player.getUniqueId());
+
+          }
+
+            if(Stat.getRestingPlayers().contains(player.getUniqueId()))
+            {
+                player.sendMessage(ERROR_COLOR + "You have stopped resting.");
+                Stat.getRestingPlayers().remove(player.getUniqueId());
+
+            }
+
+        }
 
         SpellCastEvent spellCastEvent = new SpellCastEvent(player, this);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(spellCastEvent);
@@ -496,7 +563,78 @@ public abstract class Spell {
             removeIngredients(player);
         if (getCooldown() != 0.0d)
             updateCooldown(player);
+
+        if(this instanceof SpellToggleable)
+        {
+
+            SpellToggleable toggleable = (SpellToggleable) this;
+
+            HashSet<UUID> drainSet = getManaDrainMap.get(toggleable);
+            if( drainSet == null)
+            {
+                drainSet = new HashSet<>();
+                getManaDrainMap.put(toggleable, drainSet);
+            }
+
+            drainSet.add(player.getUniqueId());
+        }
+
         return true;
+    }
+
+
+    public static HashMap<SpellToggleable, HashSet<UUID>> getManaDrainMap() {
+        return getManaDrainMap;
+    }
+
+    public static boolean removeDraining(SpellToggleable toggleable, UUID uuid) {
+        if (!(toggleable instanceof SpellToggleable))
+            return false;
+
+        final HashSet<UUID> uuids = getManaDrainMap.get(toggleable);
+        if (uuids == null)
+            return false;
+
+        return uuids.remove(uuid) ;
+    }
+
+    public static boolean hasDraining(SpellToggleable toggleable, UUID uuid)
+    {
+        if(!(toggleable instanceof SpellToggleable))
+            return false;
+
+        final HashSet<UUID> uuids = getManaDrainMap.get(toggleable);
+        if(uuids == null)
+            return false;
+
+        if(!uuids.contains(uuid))
+            return false;
+        return true;
+    }
+
+    public boolean hasDraining(UUID uuid)
+    {
+        if(!(this instanceof SpellToggleable))
+            return false;
+
+        final HashSet<UUID> uuids = getManaDrainMap.get(this);
+        if(uuids == null)
+            return false;
+
+        if(!uuids.contains(uuid))
+            return false;
+        return true;
+    }
+
+    public  boolean removeDraining(UUID uuid) {
+        if (!(this instanceof SpellToggleable))
+            return false;
+
+        final HashSet<UUID> uuids = getManaDrainMap.get(this);
+        if (uuids == null)
+            return false;
+
+        return uuids.remove(uuid) ;
     }
 
 }

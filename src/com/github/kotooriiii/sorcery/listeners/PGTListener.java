@@ -58,7 +58,7 @@ public class PGTListener implements Listener {
 
     @EventHandler
     public void onSpawn(CreatureSpawnEvent event) {
-        if (!event.getEntityType().equals(EntityType.PIG_ZOMBIE))
+        if (!event.getEntityType().equals(EntityType.ZOMBIFIED_PIGLIN))
             return;
         if (event.getLocation().getWorld().getEnvironment() != World.Environment.NETHER)
             return;

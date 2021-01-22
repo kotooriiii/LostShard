@@ -27,7 +27,7 @@ public class CreateFoodSpell extends Spell {
     final private static boolean isDebug = false;
     private final static int RANGE_FOOD = 3;
 
-    public CreateFoodSpell() {
+    private CreateFoodSpell() {
         super(SpellType.CREATE_FOOD,
                 "Makes a piece of food magically appear wherever you were looking when you casted it. Useful for when there is no food in sight.",
                 2,
@@ -86,6 +86,17 @@ public class CreateFoodSpell extends Spell {
             foodMap.put(new ItemStack(Material.SWEET_BERRIES), E);
             foodMap.put(new ItemStack(Material.TROPICAL_FISH), E);
         }
+    }
+
+    private  static CreateFoodSpell instance;
+    public static CreateFoodSpell getInstance() {
+        if (instance == null) {
+            synchronized (CreateFoodSpell.class) {
+                if (instance == null)
+                    instance = new CreateFoodSpell();
+            }
+        }
+        return instance;
     }
 
     @Override

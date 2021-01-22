@@ -34,7 +34,7 @@ public class WallSpell extends Spell {
     private final static int WALL_DISTANCE_FROM_PLAYER = 2, WALL_RADIUS_X = 2, WALL_RADIUS_Y = 1, WALL_DURATION = 10;
 
 
-    public WallSpell() {
+    private WallSpell() {
         super(SpellType.WALL,
                 "Creates a wall made of stone in front of you. Useful for when you want to block the projectiles of your enemies. ",
                 2,
@@ -43,6 +43,17 @@ public class WallSpell extends Spell {
                 1.0f,
                 15,
                 true, true, false);
+    }
+
+    private  static WallSpell instance;
+    public static WallSpell getInstance() {
+        if (instance == null) {
+            synchronized (WallSpell.class) {
+                if (instance == null)
+                    instance = new WallSpell();
+            }
+        }
+        return instance;
     }
 
     private boolean createWall(Player p) {
@@ -157,64 +168,55 @@ public class WallSpell extends Spell {
         return true;
     }
 
-    public static BufferedImage resize(BufferedImage img, int newW, int newH) {
-        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
-        BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g2d = dimg.createGraphics();
-        g2d.drawImage(tmp, 0, 0, null);
-        g2d.dispose();
-
-        return dimg;
-    }
-
-    private void spawnWings(Player player) {
-        BufferedImage bufferedImage = null;
-        try {
-            if (!FileManager.getAngelWings().exists()) {
-                LostShardPlugin.plugin.getLogger().severe("Angel wings file is not loaded on the server.");
-                return;
-            }
-            bufferedImage = ImageIO.read(FileManager.getAngelWings());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        final int WIDTH=300/3,HEIGHT=300/3;
-       bufferedImage = resize(bufferedImage, WIDTH,HEIGHT);
-        ImageParticles particles = new ImageParticles(bufferedImage, 1);
-
-        //width = 50 , height = 10
-        particles.setAnchor(WIDTH/2, HEIGHT/2);
-        // 0.1 means 10 particles in a block
-        particles.setDisplayRatio(0.1);
 
 
-        Map<Location, Color> particle = particles.getParticles(player.getEyeLocation(), 25, player.getEyeLocation().getYaw());
-
-        new BukkitRunnable() {
-
-            final int DURATION = 5;
-            int progress = 0;
-
-            @Override
-            public void run() {
-
-                if((float) (progress)/20f >= DURATION)
-                {
-                    this.cancel();
-                    return;
-                }
-
-                for (Map.Entry<Location, Color> entry : particle.entrySet()) {
-                    entry.getKey().getWorld().spawnParticle(Particle.REDSTONE, entry.getKey(), 1, new Particle.DustOptions(entry.getValue(), 1));
-                }
-
-                progress += 5;
-            }
-        }.runTaskTimerAsynchronously(LostShardPlugin.plugin,  0,5);
-    }
+//    private void spawnWings(Player player) {
+//        BufferedImage bufferedImage = null;
+//        try {
+//            if (!FileManager.getAngelWings().exists()) {
+//                LostShardPlugin.plugin.getLogger().severe("Angel wings file is not loaded on the server.");
+//                return;
+//            }
+//            bufferedImage = ImageIO.read(FileManager.getAngelWings());
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return;
+//        }
+//        final int WIDTH=300/3,HEIGHT=300/3;
+//       bufferedImage = resize(bufferedImage, WIDTH,HEIGHT);
+//        ImageParticles particles = new ImageParticles(bufferedImage, 1);
+//
+//        //width = 50 , height = 10
+//        particles.setAnchor(WIDTH/2, HEIGHT/2);
+//        // 0.1 means 10 particles in a block
+//        particles.setDisplayRatio(0.1);
+//
+//
+//        Map<Location, Color> particle = particles.getParticles(player.getEyeLocation(), 25, player.getEyeLocation().getYaw());
+//
+//        new BukkitRunnable() {
+//
+//            final int DURATION = 5;
+//            int progress = 0;
+//
+//            @Override
+//            public void run() {
+//
+//                if((float) (progress)/20f >= DURATION)
+//                {
+//                    this.cancel();
+//                    return;
+//                }
+//
+//                for (Map.Entry<Location, Color> entry : particle.entrySet()) {
+//                    entry.getKey().getWorld().spawnParticle(Particle.REDSTONE, entry.getKey(), 1, new Particle.DustOptions(entry.getValue(), 1));
+//                }
+//
+//                progress += 5;
+//            }
+//        }.runTaskTimerAsynchronously(LostShardPlugin.plugin,  0,5);
+//    }
 
     public void drawInPlane(Player p) {
 

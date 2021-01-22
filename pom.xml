@@ -6,7 +6,7 @@
 
     <groupId>com.github.kotooriiii</groupId>
     <artifactId>LostShardK</artifactId>
-    <version>1.15.2</version>
+    <version>1.16.5</version>
     <packaging>jar</packaging>
 
 
@@ -110,7 +110,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <copy file="target/LostShardK-1.15.2-shaded.jar" todir="C:/Users/Kotori/Desktop/Servers/server mc 1/plugins" />
+                                <copy file="target/LostShardK-1.16.5-shaded.jar" todir="C:/Users/Kotori/Desktop/Servers/server mc 1/plugins" />
                             </tasks>
                         </configuration>
                         <goals>
@@ -138,6 +138,11 @@
         </repository>
 
         <repository>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
+        </repository>
+
+        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
@@ -158,16 +163,23 @@
             <scope>compile</scope>
         </dependency>
         <!--This adds the Spigot API artifact to the build -->
+<!--        <dependency>-->
+<!--            <groupId>org.spigotmc</groupId>-->
+<!--            <artifactId>spigot-api</artifactId>-->
+<!--            <version>1.15.2-R0.1-SNAPSHOT</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>io.netty</groupId>-->
+<!--                    <artifactId>netty-all</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-all</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -182,7 +194,7 @@
                     <artifactId>netty-all</artifactId>
                 </exclusion>
             </exclusions>
-            <systemPath>${project.basedir}/libs/craftbukkit-1.15.2.jar</systemPath>
+            <systemPath>${project.basedir}/libs/craftbukkit-1.16.4.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -227,13 +239,7 @@
             <systemPath>${project.basedir}/libs/PacketListenerAPI_v3.7.6-SNAPSHOT.jar</systemPath>
         </dependency>
 
-        <dependency>
-            <groupId>net.citizensnpcs</groupId>
-            <artifactId>citizensapi</artifactId>
-            <version>2.0.18-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>worldborder</groupId>
@@ -264,6 +270,20 @@
         </dependency>
 
         <dependency>
+            <groupId>protocollib</groupId>
+            <artifactId>protocollib-api</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/ProtocolLib.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>holographicdisplays</groupId>
             <artifactId>hd-api</artifactId>
             <version>1.0</version>
@@ -275,6 +295,34 @@
                 </exclusion>
             </exclusions>
             <systemPath>${project.basedir}/libs/HolographicDisplays.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>xglowapi</groupId>
+            <artifactId>xglow</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/XGlow-1.0.5.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>citizensapi</groupId>
+            <artifactId>citizens</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
+            <systemPath>${project.basedir}/libs/Citizens-2.0.27-b2232.jar</systemPath>
         </dependency>
 
         <dependency>

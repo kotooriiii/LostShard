@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -28,10 +29,10 @@ public class FireFieldSpell extends Spell {
 
     private static HashMap<UUID, Double> fireFieldCooldownMap = new HashMap<UUID, Double>();
 
-    private final static int RANGE = 5, DISTANCE = 32, DURATION = 15;
+    private final static int RANGE = 3, DISTANCE = 32, DURATION = 6;
 
 
-    public FireFieldSpell() {
+    private FireFieldSpell() {
         super(SpellType.FIRE_FIELD,
                 "Creates a field of fire in the direction you are facing.",
                 5,
@@ -40,6 +41,17 @@ public class FireFieldSpell extends Spell {
                 1d,
                 15,
                 true, true, false);
+    }
+
+    private  static FireFieldSpell instance;
+    public static FireFieldSpell getInstance() {
+        if (instance == null) {
+            synchronized (FireFieldSpell.class) {
+                if (instance == null)
+                    instance = new FireFieldSpell();
+            }
+        }
+        return instance;
     }
 
 
@@ -80,9 +92,11 @@ public class FireFieldSpell extends Spell {
             return false;
         }
 
-        int castingX = player.getLocation().getBlockX();
-        int castingY = player.getLocation().getBlockY();
-        int castingZ = player.getLocation().getBlockZ();
+
+
+        int castingX = block.getX();
+        int castingY = block.getY();
+        int castingZ = block.getZ();
 
         ArrayList<Block> blocks = new ArrayList<>();
 

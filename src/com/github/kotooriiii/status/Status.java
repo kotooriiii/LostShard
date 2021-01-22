@@ -18,6 +18,7 @@ public enum Status {
     }
 
     public static Status newStatuses(Status status) {
+
         switch (status) {
             case EXILED:
                 return MURDERER;

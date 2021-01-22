@@ -12,7 +12,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import net.minecraft.server.v1_15_R1.Packet;
 import org.bukkit.Bukkit;
 
 public class DC4JBot {

@@ -6,13 +6,14 @@ import com.github.kotooriiii.npc.ShardNMS;
 import com.github.kotooriiii.skills.events.EntityTrackEvent;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import net.citizensnpcs.api.CitizensAPI;
-import net.minecraft.server.v1_15_R1.EntitySpider;
-import net.minecraft.server.v1_15_R1.EntityTypes;
-import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntityLiving;
+
+import net.minecraft.server.v1_16_R3.EntitySpider;
+import net.minecraft.server.v1_16_R3.EntityTypes;
+import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.CreatureSpawnEvent;

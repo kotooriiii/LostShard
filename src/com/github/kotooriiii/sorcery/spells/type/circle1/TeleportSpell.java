@@ -30,7 +30,7 @@ public class TeleportSpell extends Spell {
     final private static boolean isDebug = false;
     private final static int RANGE_TP = 20;
 
-    public TeleportSpell() {
+    private TeleportSpell() {
         super(SpellType.TELEPORT,
                 "Teleport allows you to instantly teleport " + RANGE_TP + " blocks in the direction\n" +
                         "you casted it. It is very useful in PvP, or just general gameplay.",
@@ -40,6 +40,17 @@ public class TeleportSpell extends Spell {
                 1.0f,
                 15,
                 true, true, false);
+    }
+
+    private  static TeleportSpell instance;
+    public static TeleportSpell getInstance() {
+        if (instance == null) {
+            synchronized (TeleportSpell.class) {
+                if (instance == null)
+                    instance = new TeleportSpell();
+            }
+        }
+        return instance;
     }
 
     @Override

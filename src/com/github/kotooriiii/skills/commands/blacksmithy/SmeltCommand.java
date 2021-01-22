@@ -138,8 +138,19 @@ public class SmeltCommand implements CommandExecutor {
 
         switch (material) {
 
+            //NETHERITE
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
 
-            //DIAMOND
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+
+                //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -227,7 +238,18 @@ public class SmeltCommand implements CommandExecutor {
         switch (material) {
 
 
-            //DIAMOND
+            //NETHERITE
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+                //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -318,6 +340,20 @@ public class SmeltCommand implements CommandExecutor {
             //BOW
             case BOW:
                 return new ItemStack[]{new ItemStack(Material.STRING, 1)};
+
+            //DIAMOND
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, 1)};
+
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, 3)};
             //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
@@ -398,6 +434,17 @@ public class SmeltCommand implements CommandExecutor {
 
             //BOW
             case BOW:
+
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
                 //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
@@ -477,7 +524,12 @@ public class SmeltCommand implements CommandExecutor {
             case MODIFIED_WOODED_BADLANDS_PLATEAU:
             case MODIFIED_BADLANDS_PLATEAU:
             case FOREST:
-            case NETHER:
+            case NETHER_WASTES:
+            case WOODED_HILLS:
+            case BASALT_DELTAS:
+            case WARPED_FOREST:
+            case CRIMSON_FOREST:
+            case SOUL_SAND_VALLEY:
             case THE_END:
             case DEEP_OCEAN:
             case MUSHROOM_FIELDS:
@@ -545,6 +597,8 @@ public class SmeltCommand implements CommandExecutor {
                 return new ItemStack(Material.DARK_OAK_PLANKS, 1);
             case SAVANNA:
             case SAVANNA_PLATEAU:
+            case SHATTERED_SAVANNA:
+            case SHATTERED_SAVANNA_PLATEAU:
                 return new ItemStack(Material.ACACIA_PLANKS, 1);
 
         }

@@ -40,12 +40,23 @@ public class RecallSpell extends Spell implements Listener {
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public RecallSpell() {
+    private RecallSpell() {
         super(SpellType.RECALL, "Recall back to the mark you created. Type /cast recall, and when the pop-up message asks you which mark you want to recall back to, type in the name of the mark, such as “home”. If you've forgotten the name of your mark, type /marks.\n" +
                 "Example:\n" +
                 "/cast recall\n" +
                 "home",
                 1, ChatColor.BLUE, new ItemStack[]{new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
+    }
+
+    private  static RecallSpell instance;
+    public static RecallSpell getInstance() {
+        if (instance == null) {
+            synchronized (RecallSpell.class) {
+                if (instance == null)
+                    instance = new RecallSpell();
+            }
+        }
+        return instance;
     }
 
     @EventHandler

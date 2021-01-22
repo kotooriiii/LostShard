@@ -24,7 +24,7 @@ public class FireWalkListener implements Listener {
     public void onMoveFromBlock(PlayerMoveEvent event)
     {
         Player player = event.getPlayer();
-        if(!CitizensAPI.getNPCRegistry().isNPC(player))
+        if(CitizensAPI.getNPCRegistry().isNPC(player))
             return;
 
         int fX = event.getFrom().getBlockX();

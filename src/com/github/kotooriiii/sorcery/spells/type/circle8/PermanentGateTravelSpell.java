@@ -8,6 +8,7 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle7.RadiateSpell;
 import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
@@ -36,8 +37,19 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
 
 
-    public PermanentGateTravelSpell() {
+    private PermanentGateTravelSpell() {
         super(SpellType.PERMANENT_GATE_TRAVEL,  "Create a permanent portal to one of your marks. Portal can be destroyed by right-clicking on it. Portal direction can be changed by Shift + Right-clicking it.",8, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 1.0f /*15.0f*/, 30, true, true, false);
+    }
+
+    private  static PermanentGateTravelSpell instance;
+    public static PermanentGateTravelSpell getInstance() {
+        if (instance == null) {
+            synchronized (PermanentGateTravelSpell.class) {
+                if (instance == null)
+                    instance = new PermanentGateTravelSpell();
+            }
+        }
+        return instance;
     }
 
     @EventHandler

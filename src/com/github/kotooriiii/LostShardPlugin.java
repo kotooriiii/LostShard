@@ -66,15 +66,24 @@ import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.skill_listeners.*;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateManager;
+import com.github.kotooriiii.sorcery.commands.ToggleCommand;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
 import com.github.kotooriiii.sorcery.spells.SpellbookCommand;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.RecallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.GateTravelSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle5.RespirateSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle6.FireWalkSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle6.WaterWalkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.PerceptionSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.EnvySpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -324,6 +333,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         //Run loop to regen stats
         StatRegenRunner.regen();
+        StatRegenRunner.initManaDrainRunnable();
 
         //Registers the com.github.kotooriiii.commands and com.github.kotooriiii.events from this plugin
         registerCommands();
@@ -362,8 +372,7 @@ public class LostShardPlugin extends JavaPlugin {
             LightSpell.deleteLight(location);
         }
 
-        for(Gate gate : GateTravelSpell.getTemporaryGateList())
-        {
+        for (Gate gate : GateTravelSpell.getTemporaryGateList()) {
             LostShardPlugin.getGateManager().removeTemporaryGate(gate);
         }
 
@@ -627,6 +636,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("enchant").setExecutor(new EnchantCommand());
 
         getCommand("spellbook").setExecutor(new SpellbookCommand());
+        getCommand("toggle").setExecutor(new ToggleCommand());
 
 
         //todo to use later -->
@@ -710,9 +720,9 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new ScrollListener(), this);
 
-        pm.registerEvents(new ClanTPSpell(), this);
-        pm.registerEvents(new MarkSpell(), this);
-        pm.registerEvents(new RecallSpell(), this);
+        pm.registerEvents(ClanTPSpell.getInstance(), this);
+        pm.registerEvents(MarkSpell.getInstance(), this);
+        pm.registerEvents(RecallSpell.getInstance(), this);
 
         pm.registerEvents(new MovingWhileCastArgumentListener(), this);
 
@@ -727,8 +737,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new NotValidReachBlockListener(), this);
         pm.registerEvents(new NotValidMoveBlockListener(), this);
         pm.registerEvents(new EggListener(), this);
-        pm.registerEvents(new PermanentGateTravelSpell(), this);
-        pm.registerEvents(new GateTravelSpell(), this);
+        pm.registerEvents(PermanentGateTravelSpell.getInstance(), this);
+        pm.registerEvents(GateTravelSpell.getInstance(), this);
         pm.registerEvents(new PGTListener(), this);
 
         pm.registerEvents(new NoMoreOldEnchantsListener(), this);
@@ -751,11 +761,28 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlotBannerListener(), this);
         pm.registerEvents(new LightningListener(), this);
         pm.registerEvents(new LightListener(), this);
+        pm.registerEvents(new RadiateListener(), this);
         pm.registerEvents(new MountListener(), this);
         pm.registerEvents(new PlayerHitListener(), this);
 
         pm.registerEvents(new MoonJumpListener(), this);
+        pm.registerEvents(new WaterWalkListener(), this);
+        pm.registerEvents(new FireWalkListener(), this);
+        pm.registerEvents(new MonsterTargetListener(), this);
 
+        pm.registerEvents(new SpellToggleableQuitDeathListener(), this);
+        pm.registerEvents(SoarSpell.getInstance(), this);
+        pm.registerEvents(new GlowListener(), this);
+
+        pm.registerEvents(WaterWalkSpell.getInstance(), this);
+        pm.registerEvents(PerceptionSpell.getInstance(), this);
+        pm.registerEvents(EnvySpell.getInstance(), this);
+        pm.registerEvents(FireWalkSpell.getInstance(), this);
+        pm.registerEvents(RespirateSpell.getInstance(), this);
+        pm.registerEvents(ScreechSpell.getInstance(), this);
+        pm.registerEvents(MoonJumpSpell.getInstance(), this);
+
+        SilentWalkListener.initSilentWalkListener();
         registerCustomEventListener();
 
         //todo to use later -->

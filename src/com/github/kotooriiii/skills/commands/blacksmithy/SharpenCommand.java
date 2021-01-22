@@ -178,6 +178,9 @@ public class SharpenCommand implements CommandExecutor {
             case STONE_SWORD:
                 //WOODEN
             case WOODEN_SWORD:
+
+            case NETHERITE_SWORD:
+
                 return true;
         }
         return false;
@@ -254,6 +257,7 @@ public class SharpenCommand implements CommandExecutor {
 
             //DIAMOND
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, cost)};
 
             //GOLD

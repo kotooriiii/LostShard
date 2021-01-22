@@ -3,7 +3,6 @@ package com.github.kotooriiii.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import net.citizensnpcs.api.CitizensAPI;
-import net.minecraft.server.v1_15_R1.EnumItemSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;

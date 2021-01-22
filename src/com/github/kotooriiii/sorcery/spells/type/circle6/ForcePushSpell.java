@@ -1,6 +1,7 @@
 package com.github.kotooriiii.sorcery.spells.type.circle6;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import net.citizensnpcs.api.CitizensAPI;
@@ -29,13 +30,24 @@ public class ForcePushSpell extends Spell {
 
     private static HashMap<UUID, Double> forcePushSpellCooldownMap = new HashMap<UUID, Double>();
 
-    private final static int MAGNITUDE = 20;
+    private final static int MAGNITUDE = 25;
     private final static int DEGREE_RANGE = 60;
     private final static int RADIUS = 5;
 
-    public ForcePushSpell() {
-        super(SpellType.FORCE_PUSH,"Pushes everyone in your view " + MAGNITUDE + " blocks away from you. Very OP.", 6,  ChatColor.GOLD
+    private ForcePushSpell() {
+        super(SpellType.FORCE_PUSH, "Pushes everyone in your view " + MAGNITUDE + " blocks away from you. Very OP.", 6, ChatColor.GOLD
                 , new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.STRING, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 20, true, true, false);
+    }
+
+    private  static ForcePushSpell instance;
+    public static ForcePushSpell getInstance() {
+        if (instance == null) {
+            synchronized (ForcePushSpell.class) {
+                if (instance == null)
+                    instance = new ForcePushSpell();
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -89,40 +101,55 @@ public class ForcePushSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        for(Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), RADIUS, RADIUS, RADIUS))
-        {
-            if(entity.getType() != EntityType.PLAYER)
+
+        final Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+
+        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), RADIUS, RADIUS, RADIUS)) {
+            if (entity.getType() != EntityType.PLAYER)
                 continue;
-            if(CitizensAPI.getNPCRegistry().isNPC(entity))
+            if (CitizensAPI.getNPCRegistry().isNPC(entity))
+                continue;
+            if (entity == player)
+                continue;
+            if(clan != null)
+            {
+                if(clan.isInThisClan(entity.getUniqueId()) && clan.isFriendlyFire())
+                    continue;
+            }
+
+            Vector normalizedDirection = entity.getLocation().toVector().clone().subtract(player.getLocation().toVector().clone());
+
+            if (normalizedDirection.getX() == 0 && normalizedDirection.getY() == 0 && normalizedDirection.getZ() == 0)
                 continue;
 
-            Vector normalizedDirection = entity.getLocation().toVector().clone().subtract(player.getLocation().toVector().clone()).normalize();
 
-            if(Math.toDegrees(Math.acos(player.getLocation().getDirection().dot(normalizedDirection))) > DEGREE_RANGE)
+            normalizedDirection = normalizedDirection.normalize();
+
+
+            if (Math.toDegrees(Math.acos(player.getLocation().getDirection().clone().dot(normalizedDirection.clone()))) > DEGREE_RANGE)
                 continue;
 
-
-            Vector direction = normalizedDirection.multiply(MAGNITUDE);
+            Vector direction = normalizedDirection.clone().multiply(new Vector(MAGNITUDE, 2, MAGNITUDE));
 
             entity.setVelocity(direction);
 
             int timer = 0;
-            int offset= 1;
-            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1, 0);
+            int offset = 1;
+            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1, 120);
+
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if(iterator.hasNext())
-                    {
+                    if (iterator.hasNext()) {
                         Block next = iterator.next();
-                        entity.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, next.getLocation(), 10, 1,1,1);
+                        entity.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, next.getLocation(), 10, 1, 1, 1);
 
                     } else {
                         this.cancel();
                     }
 
                 }
-            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, timer*offset);
+            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, timer * offset);
 
         }
         return true;

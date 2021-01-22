@@ -34,7 +34,7 @@ public class BrawlingListener implements Listener {
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+        if (CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
             return;
 
 
@@ -70,9 +70,9 @@ public class BrawlingListener implements Listener {
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(damager))
+        if (CitizensAPI.getNPCRegistry().isNPC(damager))
             return;
-        if(CitizensAPI.getNPCRegistry().isNPC(defender))
+        if (CitizensAPI.getNPCRegistry().isNPC(defender))
             return;
 
 
@@ -100,7 +100,7 @@ public class BrawlingListener implements Listener {
 
         Player defenderPlayer = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
 
@@ -135,7 +135,7 @@ public class BrawlingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPEntityDeath(EntityDeathEvent event) {
         Entity defenderEntity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
@@ -233,8 +233,8 @@ public class BrawlingListener implements Listener {
         boolean isFriendlyKill = false;
         if (level >= 100) {
             damage += 4;
-            if(killFriendly(damager, defender, event))
-                isFriendlyKill =true;
+            if (killFriendly(damager, defender, event))
+                isFriendlyKill = true;
 
             applyStun(damager, defender, 0.15);
         } else if (75 <= level && level < 100) {
@@ -250,14 +250,13 @@ public class BrawlingListener implements Listener {
 
         }
 
-        if(!isFriendlyKill)
-        event.setDamage(damage);
+        if (!isFriendlyKill)
+            event.setDamage(damage);
     }
 
     private boolean addXP(Player player, Entity entity) {
-        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getBrawling().addXP(getXP(entity) + getXP(entity)*0.3f);
+        return LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getBrawling().addXP(getXP(entity) + getXP(entity) * 0.3f);
     }
-
 
 
     private float getXP(Entity entity) {
@@ -345,7 +344,17 @@ public class BrawlingListener implements Listener {
                 break;
             case GHAST:
                 break;
-            case PIG_ZOMBIE:
+            case ZOMBIFIED_PIGLIN:
+                break;
+            case HOGLIN:
+                break;
+            case PIGLIN:
+                break;
+            case STRIDER:
+                break;
+            case ZOGLIN:
+                break;
+            case PIGLIN_BRUTE:
                 break;
             case ENDERMAN:
                 break;
@@ -497,6 +506,11 @@ public class BrawlingListener implements Listener {
             case EVOKER:
             case VEX:
             case VINDICATOR:
+            case HOGLIN:
+            case PIGLIN:
+            case STRIDER:
+            case ZOGLIN:
+            case PIGLIN_BRUTE:
             case ILLUSIONER:
             case CREEPER:
             case SKELETON:
@@ -505,7 +519,7 @@ public class BrawlingListener implements Listener {
             case ZOMBIE:
             case SLIME:
             case GHAST:
-            case PIG_ZOMBIE:
+            case ZOMBIFIED_PIGLIN:
             case ENDERMAN:
             case CAVE_SPIDER:
             case SILVERFISH:
@@ -524,6 +538,7 @@ public class BrawlingListener implements Listener {
             case PILLAGER:
             case RAVAGER:
             case PLAYER:
+            case WANDERING_TRADER:
                 break;
 
             case DONKEY:

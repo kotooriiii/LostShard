@@ -1,12 +1,13 @@
 package com.github.kotooriiii.stats;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class StatRegenRunner {
     public static void regen() {
@@ -57,5 +58,40 @@ public class StatRegenRunner {
                 }
             }
         }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 20);
+    }
+
+    public static void initManaDrainRunnable() {
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                for (Map.Entry<SpellToggleable, HashSet<UUID>> entry : Spell.getManaDrainMap().entrySet()) {
+
+                    final SpellToggleable spell = entry.getKey();
+                    final HashSet<UUID> set = entry.getValue();
+                    final Iterator<UUID> iterator = set.iterator();
+                    while(iterator.hasNext()) {
+
+                        UUID uuid = iterator.next();
+
+                        final Stat wrap = Stat.wrap(uuid);
+                        double manaNew = wrap.getMana() - spell.getManaCostPerSecond();
+
+                        if(manaNew < 0.0d)
+                        {
+                            spell.stopManaDrain(uuid);
+                            iterator.remove();
+
+                        }
+                        else {
+                            spell.manaDrainExecuteSpell(uuid);
+                            wrap.setMana(manaNew);
+                        }
+
+                    }
+                }
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
     }
 }

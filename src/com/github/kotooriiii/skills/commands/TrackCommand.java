@@ -1,6 +1,7 @@
 package com.github.kotooriiii.skills.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.events.EntityTrackEvent;
 import com.github.kotooriiii.skills.events.PlayerTrackEvent;
@@ -19,6 +20,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import ru.xezard.glow.data.glow.Glow;
 
 import java.util.UUID;
 
@@ -137,17 +139,22 @@ public class TrackCommand implements CommandExecutor {
                     return false;
 
 
-                trackedPlayer.setGlowing(true);
+                Glow glow = Glow.builder()
+                        .animatedColor(ChatColor.YELLOW)
+                        .name("Track")
+                        .build();
+                glow.addHolders(trackedPlayer);
+                glow.display(playerSender);
 
-                final Player finalTrackedPlayer = trackedPlayer;
                 new BukkitRunnable() {
                     @Override
                     public void run() {
+                        glow.destroy();
+                        if(playerSender.isOnline())
+                            ShardScoreboardManager.registerScoreboard(playerSender);
 
-                        if (finalTrackedPlayer.isOnline())
-                            finalTrackedPlayer.setGlowing(false);
                     }
-                }.runTaskLater(LostShardPlugin.plugin, 20 * 1);
+                }.runTaskLater(LostShardPlugin.plugin, 20*1);
 
 
                 String direction = getCompassDirection(playerSender, trackedPlayer.getLocation());

@@ -14,6 +14,7 @@ import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.api.util.DataKey;
+import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -177,6 +178,16 @@ public class GuardTrait extends Trait {
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_METADATA, Skin.GUARD.getTexture());
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_SIGN_METADATA, Skin.GUARD.getSignature());
         npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Shelvie");
+
+        SkinTrait skinTrait = null;
+        if(!npc.hasTrait(SkinTrait.class)) {
+            skinTrait = new SkinTrait();
+            npc.addTrait(skinTrait);
+        } else {
+            skinTrait = npc.getTrait(SkinTrait.class);
+        }
+
+        skinTrait.setSkinName(Skin.GUARD.getName());
     }
 
     // Run code when the NPC is despawned. This is called before the entity actually despawns so npc.getBukkitEntity() is still valid.

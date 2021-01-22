@@ -2,7 +2,6 @@ package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
-import net.minecraft.server.v1_15_R1.CommandGamemode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;

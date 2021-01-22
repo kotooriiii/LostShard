@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle6;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,8 +29,19 @@ public class ChronoportSpell extends Spell implements Listener {
     private final static int TIMING = 5;
 
 
-    public ChronoportSpell() {
+    private ChronoportSpell() {
         super(SpellType.CHRONOPORT,"Functions as a rubberband that teleports you right back to where you casted it. After " + TIMING + " seconds, the place that you casted chronoport is where you will return. ", 6,  ChatColor.DARK_AQUA, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 10.0f, 20, true, true, false);
+    }
+
+    private  static ChronoportSpell instance;
+    public static ChronoportSpell getInstance() {
+        if (instance == null) {
+            synchronized (ChronoportSpell.class) {
+                if (instance == null)
+                    instance = new ChronoportSpell();
+            }
+        }
+        return instance;
     }
 
     @Override

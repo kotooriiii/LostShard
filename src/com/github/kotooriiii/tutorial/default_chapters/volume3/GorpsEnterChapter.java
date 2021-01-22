@@ -8,12 +8,13 @@ import com.github.kotooriiii.hostility.Zone;
 import com.github.kotooriiii.hostility.events.*;
 import com.github.kotooriiii.tutorial.AbstractChapter;
 import com.github.kotooriiii.tutorial.events.TutorialPlayerDeathEvent;
-import net.minecraft.server.v1_15_R1.EntityPhantom;
-import net.minecraft.server.v1_15_R1.EntitySkeleton;
-import net.minecraft.server.v1_15_R1.EntityTypes;
-import net.minecraft.server.v1_15_R1.EntityZombie;
+
+import net.minecraft.server.v1_16_R3.EntityPhantom;
+import net.minecraft.server.v1_16_R3.EntitySkeleton;
+import net.minecraft.server.v1_16_R3.EntityTypes;
+import net.minecraft.server.v1_16_R3.EntityZombie;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;

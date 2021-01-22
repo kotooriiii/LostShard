@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle1.TeleportSpell;
 import com.github.kotooriiii.util.HelperMethods;
 import com.google.common.collect.Sets;
 import org.bukkit.*;
@@ -37,7 +38,7 @@ public class BridgeSpell extends Spell {
     private final static int BRIDGE_RANGE = 20, BRIDGE_DURATION = 10;
 
 
-    public BridgeSpell() {
+    private BridgeSpell() {
         super(SpellType.BRIDGE,
                 "Creates a bridge out of leaves in the direction you casted it. The bridge shortly disappears after about " + BRIDGE_DURATION + " seconds, so cross quickly!",
                 2,
@@ -46,6 +47,17 @@ public class BridgeSpell extends Spell {
                 1.0f,
                 10,
                 true, true, false);
+    }
+
+    private  static BridgeSpell instance;
+    public static BridgeSpell getInstance() {
+        if (instance == null) {
+            synchronized (BridgeSpell.class) {
+                if (instance == null)
+                    instance = new BridgeSpell();
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -178,7 +190,7 @@ public class BridgeSpell extends Spell {
                             if (!block.getType().name().toUpperCase().endsWith("_LEAVES"))
                                 return;
                             block.setType(Material.AIR);
-                            block.getWorld().spawnParticle(Particle.CURRENT_DOWN, block.getLocation(), 7, 2, 2, 2);
+                            block.getWorld().spawnParticle(Particle.SPIT, block.getLocation(), 2, 0, 0, 0);
 
                         }
 

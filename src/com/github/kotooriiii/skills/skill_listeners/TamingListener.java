@@ -1,7 +1,6 @@
 package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
-import net.minecraft.server.v1_15_R1.IChunkAccess;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
@@ -228,18 +227,18 @@ public class TamingListener implements Listener {
         if (tameable.isTamed())
             return;
 
-        if(!(vehicle instanceof AbstractHorse))
+        if (!(vehicle instanceof AbstractHorse))
             return;
         AbstractHorse horse = (AbstractHorse) vehicle;
 
-    //    addXP((Player) livingEntity, vehicle);
+        //    addXP((Player) livingEntity, vehicle);
     }
 
 
     @EventHandler
-    public void denyMobSpawnerChange(PlayerInteractEvent event){
-        if((event.getClickedBlock() != null) && (event.getItem() != null) && (event.getClickedBlock().getType() == Material.SPAWNER) && (event.getItem().getType().getKey().getKey().toUpperCase().endsWith("SPAWN_EGG")))
-            if(event.getPlayer().getGameMode() != GameMode.CREATIVE)
+    public void denyMobSpawnerChange(PlayerInteractEvent event) {
+        if ((event.getClickedBlock() != null) && (event.getItem() != null) && (event.getClickedBlock().getType() == Material.SPAWNER) && (event.getItem().getType().getKey().getKey().toUpperCase().endsWith("SPAWN_EGG")))
+            if (event.getPlayer().getGameMode() != GameMode.CREATIVE)
                 event.setCancelled(true);
     }
 
@@ -470,9 +469,14 @@ public class TamingListener implements Listener {
             case ZOMBIE:
             case SLIME:
             case GHAST:
-            case PIG_ZOMBIE:
+            case PIGLIN:
+            case HOGLIN:
+            case ZOGLIN:
+            case STRIDER:
+            case PIGLIN_BRUTE:
             case ENDERMAN:
             case CAVE_SPIDER:
+            case ZOMBIFIED_PIGLIN:
             case SILVERFISH:
             case BLAZE:
             case MAGMA_CUBE:
@@ -522,6 +526,7 @@ public class TamingListener implements Listener {
     private boolean isPassive(Entity entity) {
 
         switch (entity.getType()) {
+
 
             case DROPPED_ITEM:
             case EXPERIENCE_ORB:
@@ -592,7 +597,12 @@ public class TamingListener implements Listener {
             case ZOMBIE:
             case SLIME:
             case GHAST:
-            case PIG_ZOMBIE:
+            case ZOMBIFIED_PIGLIN:
+            case HOGLIN:
+            case PIGLIN:
+            case STRIDER:
+            case ZOGLIN:
+            case PIGLIN_BRUTE:
             case ENDERMAN:
             case CAVE_SPIDER:
             case SILVERFISH:
@@ -751,11 +761,26 @@ public class TamingListener implements Listener {
             case GHAST:
                 material = Material.GHAST_SPAWN_EGG;
                 break;
-            case PIG_ZOMBIE:
-                material = Material.ZOMBIE_PIGMAN_SPAWN_EGG;
+            case ZOMBIFIED_PIGLIN:
+                material = Material.ZOMBIFIED_PIGLIN_SPAWN_EGG;
                 break;
             case ENDERMAN:
                 material = Material.ENDERMAN_SPAWN_EGG;
+                break;
+            case HOGLIN:
+                material = Material.HOGLIN_SPAWN_EGG;
+                break;
+            case PIGLIN:
+                material = Material.PIGLIN_SPAWN_EGG;
+                break;
+            case STRIDER:
+                material = Material.STRIDER_SPAWN_EGG;
+                break;
+            case ZOGLIN:
+                material = Material.ZOGLIN_SPAWN_EGG;
+                break;
+            case PIGLIN_BRUTE:
+                material = Material.PIGLIN_BRUTE_SPAWN_EGG;
                 break;
             case CAVE_SPIDER:
                 material = Material.CAVE_SPIDER_SPAWN_EGG;
@@ -1075,7 +1100,17 @@ public class TamingListener implements Listener {
                 break;
             case GHAST:
                 break;
-            case PIG_ZOMBIE:
+            case ZOMBIFIED_PIGLIN:
+                break;
+            case PIGLIN_BRUTE:
+                break;
+            case STRIDER:
+                break;
+            case ZOGLIN:
+                break;
+            case HOGLIN:
+                break;
+            case PIGLIN:
                 break;
             case ENDERMAN:
                 break;

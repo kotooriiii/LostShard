@@ -376,7 +376,17 @@ public class SwordsmanshipListener implements Listener {
                 break;
             case GHAST:
                 break;
-            case PIG_ZOMBIE:
+            case HOGLIN:
+                break;
+            case ZOGLIN:
+                break;
+            case STRIDER:
+                break;
+            case PIGLIN_BRUTE:
+                break;
+            case ZOMBIFIED_PIGLIN:
+                break;
+            case PIGLIN:
                 break;
             case ENDERMAN:
                 break;

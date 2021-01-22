@@ -11,11 +11,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.List;
 
 public final class HelperMethods {
 
@@ -30,6 +33,17 @@ public final class HelperMethods {
     }
 
     private HelperMethods() {
+    }
+
+    public static BufferedImage resize(BufferedImage img, int newW, int newH) {
+        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+        BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = dimg.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
+
+        return dimg;
     }
 
     public static String stringBuilder(String[] args, int n, String concat) {
@@ -640,6 +654,7 @@ public final class HelperMethods {
         ItemStack item = player.getInventory().getItemInMainHand();
         switch (item.getType()) {
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
             case GOLDEN_SWORD:
             case IRON_SWORD:
             case STONE_SWORD:

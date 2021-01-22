@@ -29,7 +29,7 @@ public class WebFieldSpell extends Spell {
 
     private static HashMap<UUID, Double> webFieldSpellCooldownMap = new HashMap<UUID, Double>();
 
-    public WebFieldSpell() {
+    private WebFieldSpell() {
         super(SpellType.WEB_FIELD,
                 "Creates a field made of webs in the direction you are facing.",
                 5,
@@ -38,6 +38,17 @@ public class WebFieldSpell extends Spell {
                 1.0f,
                 15,
                 true, true, false);
+    }
+
+    private  static WebFieldSpell instance;
+    public static WebFieldSpell getInstance() {
+        if (instance == null) {
+            synchronized (WebFieldSpell.class) {
+                if (instance == null)
+                    instance = new WebFieldSpell();
+            }
+        }
+        return instance;
     }
 
     @Override

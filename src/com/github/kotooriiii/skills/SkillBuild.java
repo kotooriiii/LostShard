@@ -1,7 +1,6 @@
 package com.github.kotooriiii.skills;
 
 import com.google.gson.internal.$Gson$Preconditions;
-import net.minecraft.server.v1_15_R1.AreaTransformer;
 
 public class SkillBuild {
 

@@ -1,14 +1,20 @@
 package com.github.kotooriiii.sorcery.spells.type.circle6;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.google.TutorialSheet;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Fire;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -24,15 +30,17 @@ import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class FireWalkSpell extends Spell {
+public class FireWalkSpell extends Spell  implements Listener {
 
     private static HashMap<UUID, Double> fireWalkCooldownMap = new HashMap<UUID, Double>();
     private static final HashSet<UUID> fireWalkActiveSet= new HashSet<>();
 
     private final static int DURATION = 10;
 
+    private static FireWalkSpell instance;
 
-    public FireWalkSpell() {
+
+    private FireWalkSpell() {
         super(SpellType.FIRE_WALK,
                 "Leaves a trail of fire behind you, as well as giving you Speed II for " + DURATION + " seconds. ",
                 6,
@@ -41,6 +49,17 @@ public class FireWalkSpell extends Spell {
                 1d,
                 20,
                 true, true, false);
+    }
+
+    public static FireWalkSpell getInstance() {
+        if (instance == null) {
+            synchronized (FireWalkSpell.class) {
+                if (instance == null)
+                    instance = new FireWalkSpell();
+            }
+        }
+        return instance;
+
     }
 
     @Override
@@ -113,6 +132,37 @@ public class FireWalkSpell extends Spell {
         }
         return false;
     }
+
+    @EventHandler
+    public void onMovePerceptionListener(PlayerMoveEvent event) {
+
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
+            return;
+
+        final int x_initial, y_initial, z_initial,
+                x_final, y_final, z_final;
+
+        x_initial = event.getFrom().getBlockX();
+        y_initial = event.getFrom().getBlockY();
+        z_initial = event.getFrom().getBlockZ();
+
+        x_final = event.getTo().getBlockX();
+        y_final = event.getTo().getBlockY();
+        z_final = event.getTo().getBlockZ();
+
+        if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
+            return;
+
+        if(!fireWalkActiveSet.contains(event.getPlayer().getUniqueId()))
+            return;
+        if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
+            return;
+
+        fireWalkActiveSet.remove(event.getPlayer().getUniqueId());
+
+        event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to let you leave a trail of fire anymore...");
+    }
+
 
     public static HashSet<UUID> getFireWalkActiveSet() {
         return fireWalkActiveSet;

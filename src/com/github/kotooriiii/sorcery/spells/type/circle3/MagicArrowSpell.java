@@ -28,10 +28,21 @@ public class MagicArrowSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Double> magicArrowCooldownMap = new HashMap<>();
 
-    public MagicArrowSpell() {
+    private MagicArrowSpell() {
         super(SpellType.MAGIC_ARROW,
                 "Shoots 3 arrows in a cone in the direction you are facing. Sort of like a multi-shot.",
                 3, ChatColor.DARK_RED, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 20, true, true, false);
+    }
+
+    private  static MagicArrowSpell instance;
+    public static MagicArrowSpell getInstance() {
+        if (instance == null) {
+            synchronized (MagicArrowSpell.class) {
+                if (instance == null)
+                    instance = new MagicArrowSpell();
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -84,13 +95,18 @@ public class MagicArrowSpell extends Spell implements Listener {
     @Override
     public boolean executeSpell(Player player) {
 
+        final float MAGNITUDE = 15/4;
+
         Arrow a1 = player.launchProjectile(Arrow.class, player.getLocation().getDirection());
+        a1.setVelocity(a1.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1,MAGNITUDE)));
         a1.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
         Arrow a2 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(45)));
+        a2.setVelocity(a2.getVelocity().clone().multiply(new Vector(MAGNITUDE,1,MAGNITUDE)));
         a2.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
         Arrow a3 =player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(360-45)));
+        a3.setVelocity(a3.getVelocity().clone().multiply(new Vector(MAGNITUDE,1,MAGNITUDE)));
         a3.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
 

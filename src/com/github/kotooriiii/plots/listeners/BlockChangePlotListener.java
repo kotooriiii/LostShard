@@ -44,7 +44,7 @@ public class BlockChangePlotListener implements Listener {
 
         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(location);
 
-        if(plot == null)
+        if (plot == null)
             return;
 
         blockBurnEvent.setCancelled(true);
@@ -1081,7 +1081,12 @@ public class BlockChangePlotListener implements Listener {
             case ZOMBIE:
             case SLIME:
             case GHAST:
-            case PIG_ZOMBIE:
+            case ZOMBIFIED_PIGLIN:
+            case PIGLIN_BRUTE:
+            case STRIDER:
+            case ZOGLIN:
+            case HOGLIN:
+            case PIGLIN:
             case ENDERMAN:
             case CAVE_SPIDER:
             case SILVERFISH:

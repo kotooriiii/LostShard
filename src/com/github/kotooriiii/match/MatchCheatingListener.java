@@ -159,6 +159,8 @@ public class MatchCheatingListener implements Listener {
             case IRON_SWORD:
             case GOLDEN_SWORD:
             case DIAMOND_SWORD:
+            case STONE_SWORD:
+            case NETHERITE_SWORD:
                 return true;
             default:
                 return false;
@@ -168,9 +170,11 @@ public class MatchCheatingListener implements Listener {
     private boolean isHigherSwordType(Material highestType, Material type) {
         final HashMap<Material, Integer> swordPriority = new HashMap<>();
         swordPriority.put(Material.WOODEN_SWORD, 0);
-        swordPriority.put(Material.IRON_SWORD, 1);
-        swordPriority.put(Material.GOLDEN_SWORD, 2);
-        swordPriority.put(Material.DIAMOND_SWORD, 3);
+        swordPriority.put(Material.STONE_SWORD, 1);
+        swordPriority.put(Material.IRON_SWORD, 2);
+        swordPriority.put(Material.GOLDEN_SWORD, 3);
+        swordPriority.put(Material.DIAMOND_SWORD, 4);
+        swordPriority.put(Material.NETHERITE_SWORD, 5);
 
         if (swordPriority.get(type) > swordPriority.get(highestType))
             return true;
@@ -206,24 +210,29 @@ public class MatchCheatingListener implements Listener {
         helmetPriority.put(Material.IRON_HELMET, 1);
         helmetPriority.put(Material.GOLDEN_HELMET, 2);
         helmetPriority.put(Material.DIAMOND_HELMET, 3);
+        helmetPriority.put(Material.NETHERITE_HELMET, 4);
+
 
         final HashMap<Material, Integer> chestPriority = new HashMap<>();
         chestPriority.put(Material.CHAINMAIL_CHESTPLATE, 0);
         chestPriority.put(Material.IRON_CHESTPLATE, 1);
         chestPriority.put(Material.GOLDEN_CHESTPLATE, 2);
         chestPriority.put(Material.DIAMOND_CHESTPLATE, 3);
+        helmetPriority.put(Material.NETHERITE_CHESTPLATE, 4);
 
         final HashMap<Material, Integer> leggingsPriority = new HashMap<>();
         leggingsPriority.put(Material.CHAINMAIL_LEGGINGS, 0);
         leggingsPriority.put(Material.IRON_LEGGINGS, 1);
         leggingsPriority.put(Material.GOLDEN_LEGGINGS, 2);
         leggingsPriority.put(Material.DIAMOND_LEGGINGS, 3);
+        helmetPriority.put(Material.NETHERITE_LEGGINGS, 4);
 
         final HashMap<Material, Integer> bootsPriority = new HashMap<>();
         bootsPriority.put(Material.CHAINMAIL_BOOTS, 0);
         bootsPriority.put(Material.IRON_BOOTS, 1);
         bootsPriority.put(Material.GOLDEN_BOOTS, 2);
         bootsPriority.put(Material.DIAMOND_BOOTS, 3);
+        helmetPriority.put(Material.NETHERITE_BOOTS, 4);
 
 
         int priority = bootsPriority.get(match.getArmorType());

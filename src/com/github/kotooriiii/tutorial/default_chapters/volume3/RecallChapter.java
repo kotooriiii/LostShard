@@ -22,7 +22,7 @@ public class RecallChapter extends AbstractChapter {
                     return;
                 }
 
-                for (ItemStack itemStack : new RecallSpell().getIngredients()) {
+                for (ItemStack itemStack : RecallSpell.getInstance().getIngredients()) {
                     player.getInventory().addItem(itemStack);
 
                 }

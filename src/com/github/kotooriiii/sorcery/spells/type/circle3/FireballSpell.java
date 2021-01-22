@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle3;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle2.WallSpell;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import org.bukkit.ChatColor;
@@ -36,7 +37,7 @@ public class FireballSpell extends Spell {
 
     private static HashMap<UUID, Double> fireballSpellCooldownMap = new HashMap<UUID, Double>();
 
-    public FireballSpell() {
+    private FireballSpell() {
 
         super(SpellType.FIREBALL, "Shoots a destructive fireball in the direction you're facing." , 3,
                 ChatColor.RED,
@@ -44,6 +45,17 @@ public class FireballSpell extends Spell {
                 2.0f,
                 15,
                 true, true, false);
+    }
+
+    private  static FireballSpell instance;
+    public static FireballSpell getInstance() {
+        if (instance == null) {
+            synchronized (FireballSpell.class) {
+                if (instance == null)
+                    instance = new FireballSpell();
+            }
+        }
+        return instance;
     }
 
     @EventHandler

@@ -121,7 +121,12 @@ public class HardenCommand implements CommandExecutor {
 
         switch (material) {
 
-            //DIAMOND
+            //NETHERITE
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+
             case DIAMOND_BOOTS:
             case DIAMOND_HELMET:
             case DIAMOND_CHESTPLATE:
@@ -172,7 +177,14 @@ public class HardenCommand implements CommandExecutor {
 
         switch (material) {
 
-            //DIAMOND
+            //netherite
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+
+
+                //DIAMOND
 
             case DIAMOND_BOOTS:
             case DIAMOND_HELMET:
@@ -260,6 +272,13 @@ public class HardenCommand implements CommandExecutor {
         int cost = getHardenLevel(itemStack) + 1;
 
         switch (material) {
+
+            //NETHERITE
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, cost)};
 
             //DIAMOND
             case DIAMOND_BOOTS:

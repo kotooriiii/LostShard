@@ -519,6 +519,8 @@ public final class FileManager {
         ZonedDateTime lastAtoneDate = ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
 
         Status status = Status.matchStatus(name);
+        if(status == null)
+            return null;
         status = Status.newStatuses(status);
         StatusPlayer statusPlayer = new StatusPlayer(UUID.fromString(uuid), status, kills);
         statusPlayer.setLastAtoneDate(lastAtoneDate);

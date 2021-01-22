@@ -1,6 +1,7 @@
 package com.github.kotooriiii.sorcery.spells.type.circle6;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import net.citizensnpcs.api.CitizensAPI;
@@ -31,9 +32,20 @@ public class ForcePullSpell extends Spell {
     private final static int DEGREE_RANGE = 60;
     private final static int RADIUS = 12;
 
-    public ForcePullSpell() {
+    private ForcePullSpell() {
         super(SpellType.FORCE_PULL,"Pulls everyone within " + RADIUS + " blocks of the direction you’re facing right into you. Sort of like a hook-in.", 6,  ChatColor.GOLD
                 , new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.STRING, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 30, true, true, false);
+    }
+
+    private  static ForcePullSpell instance;
+    public static ForcePullSpell getInstance() {
+        if (instance == null) {
+            synchronized (ForcePushSpell.class) {
+                if (instance == null)
+                    instance = new ForcePullSpell();
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -87,25 +99,45 @@ public class ForcePullSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+
         for(Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), RADIUS, RADIUS, RADIUS))
         {
             if(entity.getType() != EntityType.PLAYER)
                 continue;
             if(CitizensAPI.getNPCRegistry().isNPC(entity))
                 continue;
+            if(entity == player)
+                continue;
+            if(clan != null)
+            {
+                if(clan.isInThisClan(entity.getUniqueId()) && clan.isFriendlyFire())
+                    continue;
+            }
 
-            Vector normalizedDirection = entity.getLocation().toVector().clone().subtract(player.getLocation().toVector().clone()).normalize();
+            //Player to entity
+            Vector normalizedDirection = entity.getLocation().toVector().clone().subtract(player.getLocation().toVector().clone());
+
+            if (normalizedDirection.getX() == 0 && normalizedDirection.getY() == 0 && normalizedDirection.getZ() == 0)
+                continue;
+
+
+            normalizedDirection = normalizedDirection.normalize();
 
             if(Math.toDegrees(Math.acos(player.getLocation().getDirection().dot(normalizedDirection))) > DEGREE_RANGE)
                 continue;
 
+            //Entity to player
             Vector direction = player.getLocation().toVector().clone().subtract(entity.getLocation().toVector().clone());
 
-            entity.setVelocity(normalizedDirection.multiply(direction));
+            if(direction.getY() > 2)
+            direction = direction.setY(2);
+
+            entity.setVelocity(direction.multiply(0.35f));
 
             int timer = 0;
             int offset= 1;
-            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1, 0);
+            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1, 120);
             new BukkitRunnable() {
                 @Override
                 public void run() {
