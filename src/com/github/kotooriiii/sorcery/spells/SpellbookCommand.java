@@ -18,6 +18,8 @@ import org.bukkit.util.ChatPaginator;
 import ru.beykerykt.lightapi.LightAPI;
 
 import java.util.ArrayList;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class SpellbookCommand implements CommandExecutor {
 
@@ -47,12 +49,21 @@ public class SpellbookCommand implements CommandExecutor {
         bookMeta.spigot().addPage(new BaseComponent[]{tc});
 
 
-        for (int i = 1; i <= 9; i++) {
-            TextComponent circle = addCircle(i);
-            bookMeta.spigot().addPage(new BaseComponent[]{circle});
+        Queue<Spell> spellsOrdered = new ArrayBlockingQueue<Spell>(SpellType.values().length);
 
+        for (int i = 1; i <= 9; i++) {
+            TextComponent circle = addCircle(i, spellsOrdered);
+            bookMeta.spigot().addPage(new BaseComponent[]{circle});
         }
 
+        final int INITIAL_SIZE = spellsOrdered.size();
+
+        while (spellsOrdered.size() > 0) {
+
+            Spell spell = spellsOrdered.poll();
+            int currentSize = spellsOrdered.size();
+            bookMeta.spigot().addPage(new BaseComponent[]{addSpell(spell)});
+        }
 
 
         itemStack.setItemMeta(bookMeta);
@@ -63,7 +74,62 @@ public class SpellbookCommand implements CommandExecutor {
         return true;
     }
 
-    private TextComponent addCircle(int i) {
+    private TextComponent addSpell(Spell spell) {
+
+        boolean isOwned = false; //todo
+
+
+        TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, false, "  " + spell.getName()) + "\n\n");
+        root.setColor(isOwned ? ChatColor.GREEN : ChatColor.DARK_GRAY);
+        root.setBold(false);
+
+        TextComponent castComponent = new TextComponent("/cast " + spell.getName().toLowerCase() + "\n\n");
+        castComponent.setColor(ChatColor.BLACK);
+        root.addExtra(castComponent);
+
+        String ingredients = "";
+
+        for (int i = 0; i < spell.getIngredients().length; i++ ) {
+
+            ItemStack itemStack = spell.getIngredients()[i];
+
+            String name = itemStack.getType().getKey().getKey().replace("_", " ");
+
+            if (name.length() >= 2)
+                name =  name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+           else if (name.length() == 1)
+                name = name.substring(0, 1).toUpperCase();
+           else
+               name = "";
+
+
+            ingredients += itemStack.getAmount() + " " + name + "%";
+        }
+
+        String fullIngredients = HelperMethods.stringBuilder(ingredients.split("%"), 0, " ", ", and", " and ");
+
+        TextComponent reagentComponent = new TextComponent("Reagents: " + fullIngredients + "\n\n");
+        reagentComponent.setColor(ChatColor.BLACK);
+        root.addExtra(reagentComponent);
+
+        TextComponent manaComponent = new TextComponent("Mana: " + spell.getManaCost()+ "\n\n");
+        manaComponent.setColor(ChatColor.BLACK);
+        root.addExtra(manaComponent);
+
+        TextComponent infoComponent = new TextComponent("Info: \n" + spell.getDescription());
+        infoComponent.setColor(ChatColor.BLACK);
+        root.addExtra(infoComponent);
+
+
+
+        return root;
+    }
+
+    /**
+     * @param i circle number
+     * @return
+     */
+    private TextComponent addCircle(int i, Queue<Spell> queue) {
 
         String suffix = "";
         if (i == 1)
@@ -81,18 +147,16 @@ public class SpellbookCommand implements CommandExecutor {
         Spell[] spells = Spell.getCircleSpells(i);
 
 
-        for(Spell spell : spells) {
-            TextComponent textComponent = getComponentOfSpell(spell);
+        for (Spell spell : spells) {
+            TextComponent textComponent = getComponentOfSpell(spell, queue);
             root.addExtra(textComponent);
         }
-
 
 
         return root;
     }
 
-    public TextComponent getComponentOfSpell(Spell spell)
-    {
+    public TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue) {
         boolean isOwned = false; //todo
 
         TextComponent spellComponent = new TextComponent(spell.getName() + "\n\n");
@@ -100,10 +164,16 @@ public class SpellbookCommand implements CommandExecutor {
         spellComponent.setBold(false);
         spellComponent.setUnderlined(false);
         spellComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Redirects to the page containing this spell information.").create()));
-        spellComponent.setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, "1"));
 
-       return spellComponent;
+        queue.add(spell);
+
+        spellComponent.setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, String.valueOf(1 + 9 + queue.size())));
+
+        return spellComponent;
     }
 
+    private class Counter {
+        public int getSpellNum;
+    }
 
 }

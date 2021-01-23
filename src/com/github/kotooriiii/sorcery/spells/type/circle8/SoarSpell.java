@@ -25,7 +25,7 @@ import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class SoarSpell extends Spell implements Listener{
+public class SoarSpell extends Spell implements Listener {
 
     //todo Cooldown map
     private static HashMap<UUID, Double> flightCooldownMap = new HashMap<UUID, Double>();
@@ -164,12 +164,12 @@ public class SoarSpell extends Spell implements Listener{
             return false;
         }
 
-        playerSender.setVelocity(new Vector(0, 40, 0));
+        playerSender.setVelocity(new Vector(0, 30, 0));
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(!playerSender.isOnline())
+                if (!playerSender.isOnline())
                     return;
                 playerSender.setAllowFlight(true);
                 playerSender.setFlying(true);
@@ -185,53 +185,34 @@ public class SoarSpell extends Spell implements Listener{
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(playerSender.isOnline())
-                {
+                if (playerSender.isOnline()) {
                     playerSender.getWorld().playSound(playerSender.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
                 }
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20*(FLIGHT_DURATION-4));
+        }.runTaskLater(LostShardPlugin.plugin, 20 * (FLIGHT_DURATION - 4));
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(playerSender.isOnline())
-                {
-                    playerSender.setFlySpeed(0.1f);
-                    playerSender.setFlying(false);
-                    playerSender.setAllowFlight(false);
-                    flightSet.remove(playerSender.getUniqueId());
+                if (playerSender.isOnline()) {
+                    removeFlight(playerSender);
                 }
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20*FLIGHT_DURATION);
+        }.runTaskLater(LostShardPlugin.plugin, 20 * FLIGHT_DURATION);
         return true;
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event)
-    {
+    public void onQuit(PlayerQuitEvent event) {
         final Player playerSender = event.getPlayer();
-        if(flightSet.contains(event.getPlayer().getUniqueId()))
-        {
-            playerSender.setFlySpeed(FLIGHT_SPEED);
-            playerSender.setFlying(false);
-            playerSender.setAllowFlight(false);
-            playerSender.getWorld().playSound(playerSender.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
-            flightSet.remove(event.getPlayer().getUniqueId());
-        }
+        removeFlight(playerSender);
+
     }
+
     @EventHandler
-    public void onDeath(PlayerDeathEvent event)
-    {
+    public void onDeath(PlayerDeathEvent event) {
         final Player playerSender = event.getEntity();
-        if(flightSet.contains(event.getEntity().getUniqueId()))
-        {
-            playerSender.setFlySpeed(FLIGHT_SPEED);
-            playerSender.setFlying(false);
-            playerSender.setAllowFlight(false);
-            playerSender.getWorld().playSound(playerSender.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
-            flightSet.remove(event.getEntity().getUniqueId());
-        }
+        removeFlight(playerSender);
     }
 
     @EventHandler
@@ -254,49 +235,26 @@ public class SoarSpell extends Spell implements Listener{
         if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
             return;
 
-        if(!flightSet.contains(event.getPlayer().getUniqueId()))
+        if (!flightSet.contains(event.getPlayer().getUniqueId()))
             return;
-        if(!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
+        if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
             return;
         event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to let you soar free here...");
-        event.getPlayer().setFlySpeed(FLIGHT_SPEED);
-        event.getPlayer().setFlying(false);
-        event.getPlayer().setAllowFlight(false);
-        event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
-        flightSet.remove(event.getPlayer().getUniqueId());
+        removeFlight(event.getPlayer());
+
     }
 
-    @EventHandler
-    public void onDeath(PlayerMoveEvent event) {
-        if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
-            return;
+    private void removeFlight(Player player) {
+        if (flightSet.contains(player.getUniqueId())) {
+            if (player.getGameMode() == GameMode.SURVIVAL) {
+                player.setFlySpeed(FLIGHT_SPEED);
+                player.setFlying(false);
+                player.setAllowFlight(false);
+            }
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
+            flightSet.remove(player.getUniqueId());
 
-        int fX = event.getFrom().getBlockX();
-        int fY = event.getFrom().getBlockY();
-        int fZ = event.getFrom().getBlockZ();
-
-        int tX = event.getTo().getBlockX();
-        int tY = event.getTo().getBlockY();
-        int tZ = event.getTo().getBlockZ();
-
-        if (fX == tX && fY == tY && fZ == tZ)
-            return;
-
-        if(!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
-            return;
-
-        final Player playerSender = event.getPlayer();
-
-        if(flightSet.contains(event.getPlayer().getUniqueId()))
-        {
-            playerSender.setFlySpeed(FLIGHT_SPEED);
-            playerSender.setFlying(false);
-            playerSender.setAllowFlight(false);
-            playerSender.getWorld().playSound(playerSender.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
-            event.getPlayer().sendMessage(ERROR_COLOR + "Something toggled off your spell...");
-            flightSet.remove(playerSender.getUniqueId());
         }
-
     }
 
     @Override

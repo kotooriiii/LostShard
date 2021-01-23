@@ -5,10 +5,13 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -19,6 +22,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,7 +32,7 @@ import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class GreedSpell extends Spell {
+public class GreedSpell extends Spell implements Listener {
 
     private final static HashMap<UUID, Double> greedSpellCooldownMap = new HashMap<>();
     private final static ChatColor COLOR = ChatColor.GRAY;
@@ -107,16 +112,22 @@ public class GreedSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
+        final UUID UNIQUE_UUID = player.getUniqueId();
         player.sendMessage(COLOR + "Open your inventory and select an item to soulbind...");
-        soulbindSelectSet.add(player.getUniqueId());
+        soulbindSelectSet.add(UNIQUE_UUID);
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                player.sendMessage(ERROR_COLOR + "You ran out of time to soulbind an item...");
-                soulbindSelectSet.remove(player.getUniqueId());
+
+                if (!soulbindSelectSet.contains(UNIQUE_UUID))
+                    return;
+
+                if (player.isOnline())
+                    player.sendMessage(ERROR_COLOR + "You ran out of time to soulbind an item...");
+                soulbindSelectSet.remove(UNIQUE_UUID);
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20*DURATION);
+        }.runTaskLater(LostShardPlugin.plugin, 20 * DURATION);
 
         return true;
     }
@@ -129,6 +140,8 @@ public class GreedSpell extends Spell {
 
         HumanEntity whoClicked = event.getWhoClicked();
         if (whoClicked.getType() != EntityType.PLAYER)
+            return;
+        if (!soulbindSelectSet.contains(whoClicked.getUniqueId()))
             return;
         if (currentItem.getAmount() != 1) {
             whoClicked.sendMessage(ERROR_COLOR + "You can only select one item... Make sure you are clicking only one item...");
@@ -167,8 +180,7 @@ public class GreedSpell extends Spell {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(player.isOnline())
-                {
+                if (player.isOnline()) {
                     player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                 }
             }
@@ -186,7 +198,7 @@ public class GreedSpell extends Spell {
             return;
         if (!isSoulbound(item))
             return;
-        soulbreak(item, false);
+        soulbreak(item);
     }
 
     @EventHandler
@@ -205,7 +217,7 @@ public class GreedSpell extends Spell {
                 continue;
             iterator.remove();
             ItemStack clone = item.clone();
-            soulbreak(clone);
+            soulbreak(clone, false);
             soulbindedMapToReturn.put(event.getEntity().getUniqueId(), clone);
             break;
         }
@@ -220,6 +232,80 @@ public class GreedSpell extends Spell {
             return;
         event.getPlayer().getInventory().addItem(soulbindedMapToReturn.get(event.getPlayer().getUniqueId()));
         soulbindedMapToReturn.remove(event.getPlayer().getUniqueId());
+        event.getPlayer().sendMessage(COLOR + "Your soulbinded item has been returned...");
+
+        final Location deadLocation = event.getPlayer().getEyeLocation();
+        deadLocation.getWorld().playSound(deadLocation, Sound.ENTITY_PARROT_FLY, 6.0f, 5.0f);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                if (!event.getPlayer().isOnline())
+                    return;
+
+                final int[] timer = {0};
+                int duration = 3;
+                final Location respawnLocation = event.getPlayer().getEyeLocation();
+
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (timer[0]++ / 4 >= duration) {
+
+                            respawnLocation.getWorld().playSound(respawnLocation, Sound.ENTITY_ENDERMAN_TELEPORT, 6.0f, 1.0f);
+                            deadLocation.getWorld().playSound(deadLocation, Sound.ENTITY_ENDERMAN_TELEPORT, 6.0f, 1.0f);
+
+                            Vector dir = respawnLocation.toVector().clone().subtract(deadLocation.toVector().clone());
+
+                            BlockIterator blockIteratorB = new BlockIterator(respawnLocation.getWorld(), respawnLocation.toVector(), dir.clone().multiply(-1), 0, 7);
+                            BlockIterator blockIteratorA = new BlockIterator(deadLocation.getWorld(), deadLocation.toVector(), dir, 0, 7);
+
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    if (blockIteratorB.hasNext()) {
+                                        final Block next = blockIteratorB.next();
+                                        next.getWorld().spawnParticle(Particle.REDSTONE, next.getLocation(), 10, 0, 0, 0, new Particle.DustOptions(Color.GRAY, 1f));
+                                    } else {
+                                        this.cancel();
+                                    }
+
+                                }
+                            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 10, 4);
+
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    if (blockIteratorA.hasNext()) {
+                                        final Block next = blockIteratorA.next();
+                                        next.getWorld().spawnParticle(Particle.REDSTONE, next.getLocation(), 10, 0, 0, 0, new Particle.DustOptions(Color.GRAY, 1f));
+                                    } else {
+                                        this.cancel();
+                                    }
+
+                                }
+                            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 10, 4);
+
+                            this.cancel();
+                            return;
+                        }
+
+
+                        deadLocation.getWorld().spawnParticle(Particle.REDSTONE, deadLocation, 10, (float) 1, (float) 0.1f, (float) 1f, new Particle.DustOptions(Color.GRAY, 1f));
+                        respawnLocation.getWorld().spawnParticle(Particle.REDSTONE, respawnLocation, 10, (float) 1, (float) 0.1f, (float) 1f, new Particle.DustOptions(Color.GRAY, 1f));
+
+                    }
+                }.runTaskTimer(LostShardPlugin.plugin, 0, 5);
+
+
+                deadLocation.getWorld().playSound(deadLocation, Sound.ENTITY_PARROT_FLY, 6.0f, 1.0f);
+                respawnLocation.getWorld().playSound(respawnLocation, Sound.ENTITY_PARROT_FLY, 6.0f, 1.0f);
+
+            }
+        }.runTaskLater(LostShardPlugin.plugin, 10);
+
 
     }
 
@@ -320,6 +406,25 @@ public class GreedSpell extends Spell {
      * @param event
      */
     @EventHandler
+    public void onDrop(BlockPlaceEvent event) {
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
+            return;
+
+        ItemStack item = event.getItemInHand();
+        if (item == null || item.getItemMeta() == null || item.getItemMeta().getLore() == null || item.getItemMeta().getLore().isEmpty())
+            return;
+        if (!isSoulbound(item))
+            return;
+
+        soulbreak(item);
+    }
+
+    /**
+     * Drop soul binded item
+     *
+     * @param event
+     */
+    @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
         if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
             return;
@@ -334,7 +439,7 @@ public class GreedSpell extends Spell {
     }
 
     @EventHandler
-    public void onMoveSoarListener(PlayerMoveEvent event) {
+    public void onMoveGreedListener(PlayerMoveEvent event) {
 
         if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
             return;
@@ -353,9 +458,9 @@ public class GreedSpell extends Spell {
         if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
             return;
 
-        if(!soulbindSelectSet.contains(event.getPlayer().getUniqueId()))
+        if (!soulbindSelectSet.contains(event.getPlayer().getUniqueId()))
             return;
-        if(!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
+        if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
             return;
         event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to let you soulbind an item here...");
         soulbindSelectSet.remove(event.getPlayer().getUniqueId());
@@ -439,17 +544,37 @@ public class GreedSpell extends Spell {
         List<String> list = itemMeta.getLore();
         if (list == null || list.size() < 2) {
             list = new ArrayList<>();
+        } else {
+            if (!list.get(list.size() - 1).equals(ID))
+                return false;
+            if (!list.get(list.size() - 2).equals(OWNER + player.getName()))
+                return false;
         }
-        if (!list.get(list.size() - 1).equals(ID))
-            return false;
-        if (!list.get(list.size() - 2).equals(OWNER + player.getName()))
-            return false;
+
         list.add(OWNER + player.getName());
         list.add(ID);
         removeSoulboundedInventory(player.getInventory());
         itemMeta.setLore(list);
         itemStack.setItemMeta(itemMeta);
         player.sendMessage(COLOR + "This item has become soulbound...");
+        final Location loc = player.getEyeLocation();
+
+        final int[] timer = {0};
+        int duration = 3;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (timer[0]++ / 4 >= duration) {
+                    this.cancel();
+                    return;
+                }
+
+                loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, 30, 1, 0, 1);
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, 5);
+        loc.getWorld().playSound(loc, Sound.AMBIENT_BASALT_DELTAS_MOOD, 5.0f, 7.0f);
+
+        soulbindSelectSet.remove(player.getUniqueId());
         return true;
     }
 
@@ -460,29 +585,7 @@ public class GreedSpell extends Spell {
      * @return true if item has broken soulbound, false if still soulbinded or item is not soulbinded already.
      */
     private boolean soulbreak(ItemStack itemStack) {
-        if (itemStack == null)
-            return false;
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta == null)
-            return false;
-        List<String> list = itemMeta.getLore();
-        if (list == null || list.size() < 2) {
-            list = new ArrayList<>();
-        }
-        if (!list.get(list.size() - 1).equals(ID))
-            return false;
-
-        String name = list.get(list.size() - 2).substring(OWNER.length());
-        Player player = Bukkit.getPlayer(name);
-        if (player != null) {
-            player.sendMessage(COLOR + "This item is no longer soulbound...");
-        }
-
-        list.remove(list.size() - 1);
-        list.remove(list.size() - 2);
-        itemMeta.setLore(list);
-        itemStack.setItemMeta(itemMeta);
-        return true;
+        return soulbreak(itemStack, true);
     }
 
     /**
@@ -499,20 +602,23 @@ public class GreedSpell extends Spell {
         if (itemMeta == null)
             return false;
         List<String> list = itemMeta.getLore();
-        if (list == null || list.size() < 2) {
-            list = new ArrayList<>();
-        }
-        if (!list.get(list.size() - 1).equals(ID))
+        if (list == null || list.size() < 2)
             return false;
 
+
+        if (!list.get(list.size() - 1).equals(ID))
+            return false;
         String name = list.get(list.size() - 2).substring(OWNER.length());
         Player player = Bukkit.getPlayer(name);
         if (player != null && isVisible) {
             player.sendMessage(COLOR + "This item is no longer soulbound...");
+            player.getWorld().spawnParticle(Particle.SMOKE_LARGE, player.getLocation(), 20, 0.3f, 0.3f, 0.3f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 5.0f, 7.0f);
+
         }
 
         list.remove(list.size() - 1);
-        list.remove(list.size() - 2);
+        list.remove(list.size() - 1);
         itemMeta.setLore(list);
         itemStack.setItemMeta(itemMeta);
         return true;

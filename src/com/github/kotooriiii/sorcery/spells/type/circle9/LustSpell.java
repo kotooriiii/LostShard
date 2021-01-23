@@ -100,6 +100,7 @@ public class LustSpell extends Spell {
         if(clan == null)
         {
             player.sendMessage(ERROR_COLOR + "You are not in a clan.");
+            return false;
         }
 
         Player[] onlinePlayers = clan.getOnlinePlayers();
@@ -107,13 +108,14 @@ public class LustSpell extends Spell {
         if(onlinePlayers.length == 0)
         {
             player.sendMessage(ERROR_COLOR + "No clan members are online.");
+            return false;
         }
 
         for(Player iplayer : onlinePlayers )
         {
             iplayer.setHealth(iplayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             iplayer.setFoodLevel(20);
-            iplayer.getWorld().spawnParticle(Particle.HEART, iplayer.getLocation(), 3, 1,1,1);
+            iplayer.getWorld().spawnParticle(Particle.HEART, iplayer.getEyeLocation(), 3, 1,0.3f,1);
             iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 8.0f, 2.0f);
             Stat wrap = Stat.wrap(iplayer);
             wrap.setStamina(wrap.getMaxStamina());

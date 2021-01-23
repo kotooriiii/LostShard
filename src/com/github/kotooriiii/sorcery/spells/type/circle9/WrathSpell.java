@@ -87,23 +87,29 @@ public class WrathSpell extends Spell {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            final Block block = lightningLocation.clone().add(0, 1, 0).getBlock();
+                            Block roseBlock = lightningLocation.clone().add(0, 1, 0).getBlock();
+                            int roseY = getWitherY(roseBlock.getLocation());
+                            if(roseY == -1)
+                                return;
+                            roseBlock = roseBlock.getLocation().getWorld().getBlockAt(roseBlock.getX(), roseY, roseBlock.getZ());
+
+                            removeFire(roseBlock.getRelative(BlockFace.WEST));
+                            removeFire(roseBlock.getRelative(BlockFace.NORTH));
+                            removeFire(roseBlock.getRelative(BlockFace.SOUTH));
+                            removeFire(roseBlock.getRelative(BlockFace.EAST));
 
 
-                            removeFire(block.getRelative(BlockFace.WEST));
-                            removeFire(block.getRelative(BlockFace.NORTH));
-                            removeFire(block.getRelative(BlockFace.SOUTH));
-                            removeFire(block.getRelative(BlockFace.EAST));
-
-
-                            final Plot standingOnPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(block.getLocation());
+                            final Plot standingOnPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(roseBlock.getLocation());
                             if (standingOnPlot == null) {
-                                block.getWorld().spawnParticle(Particle.SMOKE_LARGE, block.getLocation(), 10, 3, 3, 3);
-                                block.setType(Material.WITHER_ROSE);
+                                roseBlock.getWorld().spawnParticle(Particle.SMOKE_LARGE, roseBlock.getLocation(), 10, 3, 3, 3);
+
+
+
+                                roseBlock.setType(Material.WITHER_ROSE);
                             } else {
                                 if (!standingOnPlot.getType().isStaff()) {
-                                    block.getWorld().spawnParticle(Particle.SMOKE_LARGE, block.getLocation(), 10, 3, 3, 3);
-                                    block.setType(Material.WITHER_ROSE);
+                                    roseBlock.getWorld().spawnParticle(Particle.SMOKE_LARGE, roseBlock.getLocation(), 10, 3, 3, 3);
+                                    roseBlock.setType(Material.WITHER_ROSE);
                                 }
                             }
 
@@ -164,7 +170,7 @@ public class WrathSpell extends Spell {
             @Override
             public void run() {
 
-                if ((float) (progress) / 20f >= DURATION) {
+                if ((float) (progress) / 4f >= DURATION) {
 
 
                     this.cancel();
@@ -199,8 +205,6 @@ public class WrathSpell extends Spell {
                 if (y == -1)
                     continue;
 
-                Bukkit.broadcastMessage(y + "");//todo remove
-
                 burnLocation = w.getBlockAt(x, y, z).getLocation();
 
                 if ((cx - x) * (cx - x) + (cz - z) * (cz - z) <= rSquared) {
@@ -231,6 +235,35 @@ public class WrathSpell extends Spell {
                 }
             }
         }
+    }
+
+    public int getWitherY(Location location) {
+
+        Location cloneLoc = location.clone();
+
+        //exclusive. i.e 1 block for feet.
+        final int Y_SPACE = 3, Y_SPACE_DOWN = 12;
+
+        if (cloneLoc.getBlock().getType().isAir()) {
+
+            //If Y point is still higher than the space we let it, and y is not bedrock, and its not air and its not fire OR  if block below is not solid OR  block below is fire ,
+            //End Loop: If Y point is less than the space we let it, OR y is bedrock, OR its air or its fire AND [if block below is solid AND block below is not fire] ,
+            for (int y = cloneLoc.getBlockY(); y >= location.getBlockY() - Y_SPACE_DOWN && y != 0 && !( cloneLoc.getBlock().getType().isAir() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()); y--) {
+                cloneLoc.setY(y);
+            }
+        } else {
+            for (int y = cloneLoc.getBlockY(); y <= location.getBlockY() + Y_SPACE && y != cloneLoc.getWorld().getMaxHeight() && !( cloneLoc.getBlock().getType().isAir() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) ; y++) {
+                cloneLoc.setY(y);
+            }
+        }
+
+        if (cloneLoc.getBlockY() == cloneLoc.getWorld().getMaxHeight() || cloneLoc.getBlockY() == 0)
+            return -1;
+        if (cloneLoc.getBlockY() - 1 < location.getBlockY() - Y_SPACE_DOWN || cloneLoc.getBlockY() + 1 > location.getBlockY() + Y_SPACE) {
+            return -1;
+        }
+
+        return cloneLoc.getBlockY();
     }
 
     public int getY(Location location) {
