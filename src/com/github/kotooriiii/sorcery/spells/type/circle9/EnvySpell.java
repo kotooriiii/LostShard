@@ -97,6 +97,7 @@ public class EnvySpell extends Spell implements Listener {
         final int oldDefenderHunger = defender.getFoodLevel();
         final Location oldDefenderLocation = defender.getLocation().clone();
         final Location oldDefenderEyeHeight = defender.getEyeLocation().clone();
+        final int oldTotalXP = defender.getTotalExperience();
         final Collection<PotionEffect> oldDefenderPotionEffects = new ArrayList<>(defender.getActivePotionEffects());
 
         final Location oldAttackerLocation = attacker.getLocation().clone();
@@ -109,7 +110,9 @@ public class EnvySpell extends Spell implements Listener {
         defender.setFoodLevel(attacker.getFoodLevel());
         defenderStat.setMana(attackerStat.getMana());
         defenderStat.setStamina(attackerStat.getStamina());
+        defender.setTotalExperience(attacker.getTotalExperience());
         defender.teleport(attacker.getLocation());
+
         for (PotionEffect effect : oldDefenderPotionEffects)
             defender.removePotionEffect(effect.getType());
         defender.addPotionEffects(attacker.getActivePotionEffects());
@@ -122,6 +125,7 @@ public class EnvySpell extends Spell implements Listener {
         for (PotionEffect effect : attacker.getActivePotionEffects())
             attacker.removePotionEffect(effect.getType());
         attacker.addPotionEffects(oldDefenderPotionEffects);
+        attacker.setTotalExperience(oldTotalXP);
 
         attacker.sendMessage(ChatColor.RED + "You have sated your envious desire with " + defender.getName() + ".");
         defender.sendMessage(ChatColor.RED + attacker.getName() + " sated his envious desire.");
