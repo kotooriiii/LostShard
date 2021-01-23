@@ -39,7 +39,8 @@ public enum SpellType {
     UNVEIL(new String[]{"Unveil"}, "UNVEIL"),
     WRATH(new String[]{"Wrath"}, "WRATH"),
     ENVY(new String[]{"Envy"}, "ENVY"),
-    LUST(new String[]{"Lust"}, "LUST"), GREED(new String[]{"Greed"}, "GREED");
+    LUST(new String[]{"Lust"}, "LUST"), GREED(new String[]{"Greed"}, "GREED"),
+    DAY(new String[]{"Day"}, "DAY");
 
     private String[] names;
     private String latin;

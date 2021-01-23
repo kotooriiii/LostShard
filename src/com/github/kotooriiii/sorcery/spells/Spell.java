@@ -3,8 +3,6 @@ package com.github.kotooriiii.sorcery.spells;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
-import com.github.kotooriiii.sorcery.listeners.SilentWalkListener;
-import com.github.kotooriiii.sorcery.listeners.WaterWalkListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.*;
 import com.github.kotooriiii.sorcery.spells.type.circle2.*;
 import com.github.kotooriiii.sorcery.spells.type.circle3.*;
@@ -29,15 +27,15 @@ import com.github.kotooriiii.sorcery.spells.type.circle9.GreedSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle9.LustSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle9.WrathSpell;
 import com.github.kotooriiii.stats.Stat;
-import javafx.scene.control.Toggle;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -560,6 +558,38 @@ public abstract class Spell {
                 if (!executeSpell(player))
                     return false;
                 break;
+        }
+
+        if(this instanceof SpellChanneleable)
+        {
+            SpellChanneleable channeleable = (SpellChanneleable) this;
+
+
+            final UUID uuid = player.getUniqueId();
+
+            Spell spell = this;
+            BukkitTask task = new BukkitRunnable() {
+                @Override
+                public void run() {
+                   if(channeleable.hasMember(uuid))
+                   {
+                       if(player.isOnline())
+                       {
+                           player.sendMessage(ERROR_COLOR + "You fail to cast " + spell.getName() + ". You had " + channeleable.size() + "/" + channeleable.getRequired() + ".");
+                       }
+                       channeleable.removeMember(uuid);
+                   }
+                }
+            }.runTaskLater(LostShardPlugin.plugin, (long) (channeleable.getGraceTimeSeconds()*20));
+
+            channeleable.addMember(player, task);
+
+            if(!channeleable.hasRequiredMembers(player.getLocation()))
+            {
+                channeleable.executeSuccessfulChannelSpell(player, channeleable.getMembers(player.getLocation()));
+            } else {
+                channeleable.executeFailedChannelSpell(player, channeleable.getMembers(player.getLocation()));
+            }
         }
 
 
