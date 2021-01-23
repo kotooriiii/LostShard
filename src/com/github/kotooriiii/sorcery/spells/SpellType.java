@@ -38,7 +38,8 @@ public enum SpellType {
     PERCEPTION(new String[]{"Perception"}, "PERCEPTION"),
     UNVEIL(new String[]{"Unveil"}, "UNVEIL"),
     WRATH(new String[]{"Wrath"}, "WRATH"),
-    ENVY(new String[]{"Envy"}, "ENVY");
+    ENVY(new String[]{"Envy"}, "ENVY"),
+    LUST(new String[]{"Lust"}, "LUST"), GREED(new String[]{"Greed"}, "GREED");
 
     private String[] names;
     private String latin;

@@ -46,7 +46,7 @@ public class EnvySpell extends Spell implements Listener {
     private EnvySpell() {
         super(SpellType.ENVY,
                 "Switch stats with the next player you hit. You will get their stamina, mana, and health, and they will get yours. Best if you are low on all of them when you use this.",
-                1,
+                9,
                 ChatColor.DARK_RED,
                 new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.NETHER_STAR, 1)},
                 1.0d,

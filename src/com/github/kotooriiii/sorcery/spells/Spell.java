@@ -25,6 +25,8 @@ import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpel
 import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.UnveilSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle9.EnvySpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.GreedSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.LustSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle9.WrathSpell;
 import com.github.kotooriiii.stats.Stat;
 import javafx.scene.control.Toggle;
@@ -160,6 +162,10 @@ public abstract class Spell {
                 return WrathSpell.getInstance();
             case ENVY:
                 return EnvySpell.getInstance();
+            case LUST:
+                return LustSpell.getInstance();
+            case GREED:
+                return GreedSpell.getInstance();
             default:
                 return null;
         }
