@@ -181,15 +181,19 @@ public class WrathSpell extends Spell {
     }
 
     private void cylinder(Player player, Location loc, Material mat, int r) {
+
+        //CenterX
         int cx = loc.getBlockX();
         int cy = loc.getBlockY();
         int cz = loc.getBlockZ();
+
         World w = loc.getWorld();
         int rSquared = r * r;
+
         for (int x = cx - r; x <= cx + r; x++) {
             for (int z = cz - r; z <= cz + r; z++) {
 
-
+                //Location at x, center Y, and z.
                 Location burnLocation = w.getBlockAt(x, cy, z).getLocation();
                 int y = getY(burnLocation);
                 if (y == -1)
@@ -237,11 +241,14 @@ public class WrathSpell extends Spell {
         final int Y_SPACE = 3, Y_SPACE_DOWN = 10;
 
         if (cloneLoc.getBlock().getType().isAir()) {
-            for (int y = cloneLoc.getBlockY(); y >= location.getBlockY() - Y_SPACE_DOWN && y != 0 && !(cloneLoc.getBlock().getType().isAir() && (cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() || cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE)); y--) {
+
+            //If Y point is still higher than the space we let it, and y is not bedrock, and its not air and its not fire OR  if block below is not solid OR  block below is fire ,
+            //End Loop: If Y point is less than the space we let it, OR y is bedrock, OR its air or its fire AND [if block below is solid AND block below is not fire] ,
+            for (int y = cloneLoc.getBlockY(); y >= location.getBlockY() - Y_SPACE_DOWN && y != 0 && !( (cloneLoc.getBlock().getType().isAir() || cloneLoc.getBlock().getType() == Material.FIRE) && (cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE)); y--) {
                 cloneLoc.setY(y);
             }
         } else {
-            for (int y = cloneLoc.getBlockY(); y <= location.getBlockY() + Y_SPACE && y != cloneLoc.getWorld().getMaxHeight() && !(cloneLoc.getBlock().getType().isAir() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE) ; y++) {
+            for (int y = cloneLoc.getBlockY(); y <= location.getBlockY() + Y_SPACE && y != cloneLoc.getWorld().getMaxHeight() && !( (cloneLoc.getBlock().getType().isAir() || cloneLoc.getBlock().getType() == Material.FIRE) && (cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE)) ; y++) {
                 cloneLoc.setY(y);
             }
         }
