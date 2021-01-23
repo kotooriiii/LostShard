@@ -530,6 +530,7 @@ public class PlotBannerListener implements Listener {
             return;
         if (!setToGivePlotBanner.contains(event.getPlayer().getUniqueId()))
             return;
+        setToGivePlotBanner.remove(event.getPlayer().getUniqueId());
         event.getPlayer().getInventory().addItem(PlotBanner.getInstance().getItem());
     }
 
