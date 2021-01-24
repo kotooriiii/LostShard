@@ -127,7 +127,7 @@ public abstract class Spell {
             case MAGIC_ARROW:
                 return MagicArrowSpell.getInstance();
             case SCREECH:
-                return  ScreechSpell.getInstance();
+                return ScreechSpell.getInstance();
             case GATE_TRAVEL:
                 return GateTravelSpell.getInstance();
             case HEAL_OTHER:
@@ -174,7 +174,7 @@ public abstract class Spell {
         for (SpellType types : SpellType.values()) {
             Spell spell = Spell.of(types);
             if (spell.isWandable()) {
-                spells.add( spell);
+                spells.add(spell);
             }
         }
         return spells.toArray(new Spell[spells.size()]);
@@ -223,12 +223,21 @@ public abstract class Spell {
         return spells.toArray(new Spell[spells.size()]);
     }
 
-    public static Spell[] getToggleableSpells()
-    {
+    public static Spell[] getToggleableSpells() {
         ArrayList<Spell> spells = new ArrayList<>();
         for (SpellType types : SpellType.values()) {
             Spell spell = Spell.of(types);
             if (spell instanceof SpellToggleable)
+                spells.add(spell);
+        }
+        return spells.toArray(new Spell[spells.size()]);
+    }
+
+    public static Spell[] getChanneleableSpells() {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for (SpellType types : SpellType.values()) {
+            Spell spell = Spell.of(types);
+            if (spell instanceof SpellChanneleable)
                 spells.add(spell);
         }
         return spells.toArray(new Spell[spells.size()]);
@@ -511,23 +520,19 @@ public abstract class Spell {
 
     public boolean cast(Player player) {
 
-        if(this instanceof SpellToggleable)
-        {
-          if(  hasDraining(player.getUniqueId()) )
-          {
-              player.sendMessage(ERROR_COLOR + "You are already toggled on to this spell. Toggle off with /toggle " + this.getType().getName());
-              return false;
-          }
+        if (this instanceof SpellToggleable) {
+            if (hasDraining(player.getUniqueId())) {
+                player.sendMessage(ERROR_COLOR + "You are already toggled on to this spell. Toggle off with /toggle " + this.getType().getName());
+                return false;
+            }
 
-          if(Stat.getMeditatingPlayers().contains(player.getUniqueId()))
-          {
-              player.sendMessage(ERROR_COLOR + "You have stopped meditating.");
-              Stat.getMeditatingPlayers().remove(player.getUniqueId());
+            if (Stat.getMeditatingPlayers().contains(player.getUniqueId())) {
+                player.sendMessage(ERROR_COLOR + "You have stopped meditating.");
+                Stat.getMeditatingPlayers().remove(player.getUniqueId());
 
-          }
+            }
 
-            if(Stat.getRestingPlayers().contains(player.getUniqueId()))
-            {
+            if (Stat.getRestingPlayers().contains(player.getUniqueId())) {
                 player.sendMessage(ERROR_COLOR + "You have stopped resting.");
                 Stat.getRestingPlayers().remove(player.getUniqueId());
 
@@ -560,8 +565,7 @@ public abstract class Spell {
                 break;
         }
 
-        if(this instanceof SpellChanneleable)
-        {
+        if (this instanceof SpellChanneleable) {
             SpellChanneleable channeleable = (SpellChanneleable) this;
 
 
@@ -571,21 +575,18 @@ public abstract class Spell {
             BukkitTask task = new BukkitRunnable() {
                 @Override
                 public void run() {
-                   if(channeleable.hasMember(uuid))
-                   {
-                       if(player.isOnline())
-                       {
-                           player.sendMessage(ERROR_COLOR + "You fail to cast " + spell.getName() + ". You had " + channeleable.size() + "/" + channeleable.getRequired() + ".");
-                       }
-                       channeleable.removeMember(uuid);
-                   }
+                    if (channeleable.hasMember(uuid)) {
+                        if (player.isOnline()) {
+                            player.sendMessage(ERROR_COLOR + "You fail to cast " + spell.getName() + ". You had " + channeleable.size() + "/" + channeleable.getRequired() + ".");
+                        }
+                        channeleable.removeMember(uuid);
+                    }
                 }
-            }.runTaskLater(LostShardPlugin.plugin, (long) (channeleable.getGraceTimeSeconds()*20));
+            }.runTaskLater(LostShardPlugin.plugin, (long) (channeleable.getGraceTimeSeconds() * 20));
 
             channeleable.addMember(player, task);
 
-            if(!channeleable.hasRequiredMembers(player.getLocation()))
-            {
+            if (!channeleable.hasRequiredMembers(player.getLocation())) {
                 channeleable.executeSuccessfulChannelSpell(player, channeleable.getMembers(player.getLocation()));
             } else {
                 channeleable.executeFailedChannelSpell(player, channeleable.getMembers(player.getLocation()));
@@ -600,14 +601,12 @@ public abstract class Spell {
         if (getCooldown() != 0.0d)
             updateCooldown(player);
 
-        if(this instanceof SpellToggleable)
-        {
+        if (this instanceof SpellToggleable) {
 
             SpellToggleable toggleable = (SpellToggleable) this;
 
             HashSet<UUID> drainSet = getManaDrainMap.get(toggleable);
-            if( drainSet == null)
-            {
+            if (drainSet == null) {
                 drainSet = new HashSet<>();
                 getManaDrainMap.put(toggleable, drainSet);
             }
@@ -616,6 +615,27 @@ public abstract class Spell {
         }
 
         return true;
+    }
+
+    public static boolean isChanneling(Player player) {
+        Spell[] channeleableSpells = getChanneleableSpells();
+        for (Spell spell : channeleableSpells) {
+            SpellChanneleable spellChanneleable = (SpellChanneleable) spell;
+            if (spellChanneleable.hasMember(player.getUniqueId()))
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean removeChanneling(Player player) {
+        Spell[] channeleableSpells = getChanneleableSpells();
+        for (Spell spell : channeleableSpells) {
+            SpellChanneleable spellChanneleable = (SpellChanneleable) spell;
+
+           if(spellChanneleable.removeMember(player))
+               return true;
+        }
+        return false;
     }
 
 
@@ -631,38 +651,23 @@ public abstract class Spell {
         if (uuids == null)
             return false;
 
-        return uuids.remove(uuid) ;
+        return uuids.remove(uuid);
     }
 
-    public static boolean hasDraining(SpellToggleable toggleable, UUID uuid)
-    {
-        if(!(toggleable instanceof SpellToggleable))
+    public static boolean hasDraining(SpellToggleable toggleable, UUID uuid) {
+        if (!(toggleable instanceof SpellToggleable))
             return false;
 
         final HashSet<UUID> uuids = getManaDrainMap.get(toggleable);
-        if(uuids == null)
+        if (uuids == null)
             return false;
 
-        if(!uuids.contains(uuid))
-            return false;
-        return true;
-    }
-
-    public boolean hasDraining(UUID uuid)
-    {
-        if(!(this instanceof SpellToggleable))
-            return false;
-
-        final HashSet<UUID> uuids = getManaDrainMap.get(this);
-        if(uuids == null)
-            return false;
-
-        if(!uuids.contains(uuid))
+        if (!uuids.contains(uuid))
             return false;
         return true;
     }
 
-    public  boolean removeDraining(UUID uuid) {
+    public boolean hasDraining(UUID uuid) {
         if (!(this instanceof SpellToggleable))
             return false;
 
@@ -670,7 +675,20 @@ public abstract class Spell {
         if (uuids == null)
             return false;
 
-        return uuids.remove(uuid) ;
+        if (!uuids.contains(uuid))
+            return false;
+        return true;
+    }
+
+    public boolean removeDraining(UUID uuid) {
+        if (!(this instanceof SpellToggleable))
+            return false;
+
+        final HashSet<UUID> uuids = getManaDrainMap.get(this);
+        if (uuids == null)
+            return false;
+
+        return uuids.remove(uuid);
     }
 
 }

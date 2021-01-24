@@ -273,6 +273,16 @@ public abstract class SpellChanneleable extends Spell {
         return finalVector.toLocation(location.getWorld());
     }
 
+    public HashSet<UUID> getALLChanneling()
+    {
+        HashSet<UUID> uuids = new HashSet<>();
+        for(HashMap<UUID, BukkitTask> map : membersMap.values())
+        {
+            uuids.addAll(map.keySet());
+        }
+        return uuids;
+    }
+
     public final int size() {
         return membersMap.size();
     }
