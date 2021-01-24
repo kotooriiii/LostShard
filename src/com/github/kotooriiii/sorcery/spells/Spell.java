@@ -18,14 +18,8 @@ import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.CleanseSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.RadiateSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle8.PerceptionSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle8.UnveilSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.EnvySpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.GreedSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.LustSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.WrathSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle8.*;
+import com.github.kotooriiii.sorcery.spells.type.circle9.*;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -154,6 +148,8 @@ public abstract class Spell {
                 return SoarSpell.getInstance();
             case PERCEPTION:
                 return PerceptionSpell.getInstance();
+            case DAY:
+                return DaySpell.getInstance();
             case UNVEIL:
                 return UnveilSpell.getInstance();
             case WRATH:
@@ -164,6 +160,10 @@ public abstract class Spell {
                 return LustSpell.getInstance();
             case GREED:
                 return GreedSpell.getInstance();
+            case SLOTH:
+                return SlothSpell.getInstance();
+            case PRIDE:
+                return PrideSpell.getInstance();
             default:
                 return null;
         }

@@ -126,7 +126,7 @@ public class GrassSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        Block block = player.getTargetBlockExact(5, FluidCollisionMode.NEVER);
+        Block block = player.getTargetBlockExact(12, FluidCollisionMode.NEVER);
 
         if(block == null || block.getType() == Material.AIR)
         {

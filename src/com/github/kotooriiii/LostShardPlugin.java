@@ -83,9 +83,7 @@ import com.github.kotooriiii.sorcery.spells.type.circle7.ClanTPSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PerceptionSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.EnvySpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.GreedSpell;
-import com.github.kotooriiii.sorcery.spells.type.circle9.LustSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle9.*;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -784,6 +782,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(ScreechSpell.getInstance(), this);
         pm.registerEvents(MoonJumpSpell.getInstance(), this);
         pm.registerEvents(GreedSpell.getInstance(), this);
+        pm.registerEvents(SlothSpell.getInstance(), this);
+        pm.registerEvents(PrideSpell.getInstance(), this);
 
         pm.registerEvents(new SpellChanneleableQuitDeathListener(), this);
         pm.registerEvents(new DayListener(), this);

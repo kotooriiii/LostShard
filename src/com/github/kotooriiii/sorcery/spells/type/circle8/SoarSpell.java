@@ -177,7 +177,7 @@ public class SoarSpell extends Spell implements Listener {
             }
         }.runTaskLater(LostShardPlugin.plugin, 10);
 
-        playerSender.sendMessage(ChatColor.GOLD + "You soar high into the sky!.");
+        playerSender.sendMessage(ChatColor.GOLD + "You soar high into the sky!");
         playerSender.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, playerSender.getLocation(), 1, 0, 0, 0);
         playerSender.getWorld().playSound(playerSender.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0);
         flightSet.add(playerSender.getUniqueId());

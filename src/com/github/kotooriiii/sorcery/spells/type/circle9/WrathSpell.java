@@ -83,7 +83,7 @@ public class WrathSpell extends Spell {
             @Override
             public void run() {
 
-                if (timer[0] / 4 == DURATION) {
+                if (timer[0] *5 == DURATION*20) {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -170,7 +170,7 @@ public class WrathSpell extends Spell {
             @Override
             public void run() {
 
-                if ((float) (progress) / 4f >= DURATION) {
+                if ((float) (progress) * 5f >= DURATION * 20) {
 
 
                     this.cancel();
@@ -356,6 +356,12 @@ public class WrathSpell extends Spell {
             if (attacker.equals(entity)) {
                 attacker.damage(DAMAGE);
                 continue;
+            }
+
+            if(entity instanceof Player)
+            {
+                if(((Player) entity).getGameMode() != GameMode.SURVIVAL)
+                    continue;
             }
             if (clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;

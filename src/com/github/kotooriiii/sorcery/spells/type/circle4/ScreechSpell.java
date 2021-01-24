@@ -137,7 +137,8 @@ public class ScreechSpell extends Spell implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (timerA[0] * REFRESH / frequency >= SCREECH_DURATION * 20 || player.isDead() || !player.isOnline() || !screechSet.contains(uniqueId)) {
+                if (timerA[0] * (REFRESH / frequency) >= SCREECH_DURATION * 20 || player.isDead() || !player.isOnline() || !screechSet.contains(uniqueId)) {
+                    screechSet.remove(uniqueId);
                     this.cancel();
                     return;
                 }
@@ -165,9 +166,6 @@ public class ScreechSpell extends Spell implements Listener {
             public void run() {
 
                 if (timerB[0] * REFRESH >= SCREECH_DURATION * 20 || player.isDead() || !player.isOnline() || !screechSet.contains(uniqueId)) {
-
-
-                    screechSet.remove(uniqueId);
                     this.cancel();
                     return;
                 }

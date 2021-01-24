@@ -35,12 +35,16 @@ public enum SpellType {
     RADIATE(new String[]{"Radiate"}, "RADIATE"),
     SILENT_WALK(new String[]{"Silent Walk"}, "SILENT_WALK"),
     SOAR(new String[]{"Soar"}, "SOAR"),
+    DAY(new String[]{"Day"}, "DAY"),
     PERCEPTION(new String[]{"Perception"}, "PERCEPTION"),
     UNVEIL(new String[]{"Unveil"}, "UNVEIL"),
+
     WRATH(new String[]{"Wrath"}, "WRATH"),
     ENVY(new String[]{"Envy"}, "ENVY"),
-    LUST(new String[]{"Lust"}, "LUST"), GREED(new String[]{"Greed"}, "GREED"),
-    DAY(new String[]{"Day"}, "DAY");
+    LUST(new String[]{"Lust"}, "LUST"),
+    GREED(new String[]{"Greed"}, "GREED"),
+    SLOTH(new String[]{"Sloth"}, "SLOTH"),
+    PRIDE(new String[]{"Pride"}, "PRIDE");
 
     private String[] names;
     private String latin;

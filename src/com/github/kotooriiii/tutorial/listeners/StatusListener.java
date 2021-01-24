@@ -93,7 +93,7 @@ public class StatusListener implements Listener {
         if (a2 == event.getNPC() && event.getDamager() == a1.getEntity()) {
 
             if (entity instanceof LivingEntity)
-                ((LivingEntity) entity).setHealth(((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                ((LivingEntity) entity).setHealth(((LivingEntity) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
             event.setDamage(1);
 
             new BukkitRunnable() {
