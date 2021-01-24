@@ -363,7 +363,7 @@ public class WrathSpell extends Spell {
             EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
             entity.setLastDamageCause(damageByEntityEvent);
             Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-            ((Player) entity).setHealth(((Player) entity).getHealth() - DAMAGE);
+            ((LivingEntity) entity).setHealth(((LivingEntity) entity).getHealth() - DAMAGE);
         }
     }
 }

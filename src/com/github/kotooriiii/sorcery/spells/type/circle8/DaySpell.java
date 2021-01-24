@@ -17,10 +17,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
@@ -29,7 +26,7 @@ public class DaySpell extends SpellChanneleable {
     //Cooldown map
     private final static HashMap<UUID, Double> daySpellCooldownMap = new HashMap<UUID, Double>();
 
-    private final static HashMap<UUID, HashMap<HashSet<UUID>, BukkitTask>> castMap= new HashMap<>();
+    private final static HashMap<UUID, DayCast> castMap= new HashMap<>();
     private final static float CAST_TIME = 2;
 
     private DaySpell() {
@@ -45,6 +42,25 @@ public class DaySpell extends SpellChanneleable {
 
     }
 
+    public class DayCast
+    {
+        private HashSet<UUID> set;
+        private BukkitTask task;
+
+        public DayCast(HashSet<UUID> set, BukkitTask task) {
+            this.set = set;
+            this.task = task;
+        }
+
+        public BukkitTask getTask() {
+            return task;
+        }
+
+        public HashSet<UUID> getSet() {
+            return set;
+        }
+    }
+
 
     //todo switch to ur name
     private  static DaySpell instance;
@@ -57,7 +73,6 @@ public class DaySpell extends SpellChanneleable {
         }
         return instance;
     }
-
 
     @Override
     public boolean executeSpell(Player player) {
@@ -73,6 +88,14 @@ public class DaySpell extends SpellChanneleable {
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
+
+                if(isCancelled())
+                    return;
+
+                final DayCast dayCast = castMap.get(uuid);
+                if(dayCast == null)
+                    return;
+
                 player.getWorld().setTime(0);
                 displayMessage(values);
                 castMap.remove(uuid);
@@ -80,12 +103,13 @@ public class DaySpell extends SpellChanneleable {
         }.runTaskLater(LostShardPlugin.plugin, (long) (20 * CAST_TIME));
 
         removeMembers(player.getLocation());
+
         ArrayList<UUID> uuids = new ArrayList<>();
         for(UUID iterating_uuid : values)
             uuids.add(iterating_uuid);
-        HashMap<HashSet<UUID>, BukkitTask> map = new HashMap<>();
-        map.put(new HashSet<UUID>(uuids), task);
-        castMap.put(uuid, map);
+
+
+        castMap.put(uuid, new DayCast(new HashSet<UUID>(uuids), task));
     }
 
     @Override
@@ -101,8 +125,31 @@ public class DaySpell extends SpellChanneleable {
         }
     }
 
-    private void remove()
+    public static void remove(UUID uuid, String message)
     {
+        final Iterator<Map.Entry<UUID, DayCast>> iterator = castMap.entrySet().iterator();
+        while(iterator.hasNext())
+        {
+            final Map.Entry<UUID, DayCast> next = iterator.next();
+            if(next.getValue().getSet().contains(uuid))
+            {
+                next.getValue().getTask().cancel();
+                iterator.remove();
+
+                if(!message.isEmpty())
+                {
+
+                    for(UUID uuid1 : next.getValue().getSet()) {
+                        final Player player = Bukkit.getPlayer(uuid1);
+                        if (player != null)
+                        {
+                            player.sendMessage(message);
+                        }
+                    }
+
+                }
+            }
+        }
 
     }
 
@@ -153,6 +200,7 @@ public class DaySpell extends SpellChanneleable {
         return false;
     }
 
-
-
+    public static HashMap<UUID, DayCast> getCastMap() {
+        return castMap;
+    }
 }

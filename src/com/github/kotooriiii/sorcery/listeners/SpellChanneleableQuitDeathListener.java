@@ -4,6 +4,8 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -26,6 +28,7 @@ public class SpellChanneleableQuitDeathListener implements Listener {
             return;
         if(Spell.isChanneling(event.getPlayer()))
         {
+            Spell.sendMessageOnChannelers(event.getPlayer(), ERROR_COLOR + event.getPlayer().getName() + " is no longer channeling.");
             Spell.removeChanneling(event.getPlayer());
         }
     }
@@ -37,6 +40,7 @@ public class SpellChanneleableQuitDeathListener implements Listener {
 
         if(Spell.isChanneling(event.getEntity()))
         {
+            Spell.sendMessageOnChannelers(event.getEntity(), ERROR_COLOR + event.getEntity().getName() + " is no longer channeling.");
             Spell.removeChanneling(event.getEntity());
         }
     }
@@ -59,6 +63,7 @@ public class SpellChanneleableQuitDeathListener implements Listener {
 
         if(Spell.isChanneling(event.getPlayer()))
         {
+            Spell.sendMessageOnChannelers(event.getPlayer(), ERROR_COLOR + event.getPlayer().getName() + " is no longer channeling.");
             Spell.removeChanneling(event.getPlayer());
         }
     }
@@ -68,5 +73,15 @@ public class SpellChanneleableQuitDeathListener implements Listener {
     {
         if(event.getBlockPlaced().getType() != Material.LAPIS_BLOCK)
             return;
+        for(Entity entity : event.getBlockPlaced().getWorld().getNearbyEntities(event.getBlockPlaced().getLocation(), Spell.getDefaultLapisNearbyValue(), Spell.getDefaultLapisNearbyValue(), Spell.getDefaultLapisNearbyValue()))
+        {
+            if(entity.getType() != EntityType.PLAYER)
+                continue;
+            if(Spell.isChanneling(event.getPlayer()))
+            {
+                Spell.sendMessageOnChannelers(event.getPlayer(), ERROR_COLOR + event.getPlayer().getName() + " is no longer channeling.");
+                Spell.removeChanneling(event.getPlayer());
+            }
+        }
     }
 }

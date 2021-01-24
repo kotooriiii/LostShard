@@ -575,6 +575,10 @@ public abstract class Spell {
             BukkitTask task = new BukkitRunnable() {
                 @Override
                 public void run() {
+
+                    if(isCancelled())
+                        return;
+
                     if (channeleable.hasMember(uuid)) {
                         if (player.isOnline()) {
                             player.sendMessage(ERROR_COLOR + "You fail to cast " + spell.getName() + ". You had " + channeleable.size() + "/" + channeleable.getRequired() + ".");
@@ -636,6 +640,22 @@ public abstract class Spell {
                return true;
         }
         return false;
+    }
+
+    public static void sendMessageOnChannelers(Player player, String message) {
+        Spell[] channeleableSpells = getChanneleableSpells();
+        for (Spell spell : channeleableSpells) {
+            SpellChanneleable spellChanneleable = (SpellChanneleable) spell;
+
+            if(spellChanneleable.hasMember(player))
+            {
+                for (Player onlineMember : spellChanneleable.getOnlineMembers(player.getLocation())) {
+                    onlineMember.sendMessage(message);
+                }
+
+                return;
+            }
+        }
     }
 
 

@@ -785,6 +785,9 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(MoonJumpSpell.getInstance(), this);
         pm.registerEvents(GreedSpell.getInstance(), this);
 
+        pm.registerEvents(new SpellChanneleableQuitDeathListener(), this);
+        pm.registerEvents(new DayListener(), this);
+
         SilentWalkListener.initSilentWalkListener();
         registerCustomEventListener();
 
