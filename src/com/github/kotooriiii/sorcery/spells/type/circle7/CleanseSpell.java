@@ -95,6 +95,7 @@ public class CleanseSpell extends Spell implements Listener {
     public boolean executeSpell(Player player) {
 
         player.setGlowing(false);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE,  7.0f, 6f);
         player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation(), 10, 2, 2, 2);
         for(PotionEffect effect:player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
 

@@ -5,21 +5,22 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -27,6 +28,35 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class LustSpell extends Spell {
 
     private final static HashMap<UUID, Double> lustSpellCooldownMap = new HashMap<>();
+    private final  LustColor[] lustColorArray = new LustColor[]{new LustColor(27,100,18), new LustColor(18,100,51), new LustColor(18,100,91)};
+
+    private class LustColor
+    {
+        private int r,g,b;
+
+        public LustColor(int r, int g, int b) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public int getB() {
+            return b;
+        }
+
+        public int getR() {
+            return r;
+        }
+
+        public int getG() {
+            return g;
+        }
+
+        public Color toColor()
+        {
+            return Color.fromRGB(r,g,b);
+        }
+    }
 
     private LustSpell() {
         super(SpellType.LUST,
@@ -113,10 +143,20 @@ public class LustSpell extends Spell {
 
         for(Player iplayer : onlinePlayers )
         {
+
+            BlockIterator iterator = new BlockIterator(iplayer.getWorld(), iplayer.getEyeLocation().toVector(), new Vector(0,1,0), 0, 0);
+            while(iterator.hasNext())
+            {
+                Block next = iterator.next();
+                if(!next.getType().isAir())
+                    break;
+                next.getWorld().spawnParticle(Particle.REDSTONE, next.getLocation(), 10, 0, 0, 0, new Particle.DustOptions(lustColorArray[new Random().nextInt(lustColorArray.length)].toColor(), 1f));
+            }
+
             iplayer.setHealth(iplayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             iplayer.setFoodLevel(20);
             iplayer.getWorld().spawnParticle(Particle.HEART, iplayer.getEyeLocation(), 3, 1,0.3f,1);
-            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ENTITY_CAT_PURREOW, 8.0f, 2.0f);
+            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 8.0f, 2.0f);
             Stat wrap = Stat.wrap(iplayer);
             wrap.setStamina(wrap.getMaxStamina());
         }
