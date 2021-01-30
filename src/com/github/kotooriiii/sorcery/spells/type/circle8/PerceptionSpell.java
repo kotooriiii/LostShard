@@ -52,7 +52,6 @@ public class PerceptionSpell extends Spell implements Listener {
     }
 
 
-    //todo switch to ur name
     private  static PerceptionSpell instance;
     public static PerceptionSpell getInstance() {
         if (instance == null) {
@@ -118,7 +117,7 @@ public class PerceptionSpell extends Spell implements Listener {
 
         if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
             return;
-        boolean exists =true;
+        boolean exists =false;
         for (IGlow glow : GlowsManager.getInstance().getGlows())
         {
             if(glow.getViewers().contains(event.getPlayer()))

@@ -57,7 +57,6 @@ public class EnvySpell extends Spell implements Listener {
     }
 
 
-    //todo switch to ur name
     private static EnvySpell instance;
 
     public static EnvySpell getInstance() {

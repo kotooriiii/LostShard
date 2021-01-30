@@ -44,7 +44,8 @@ public enum SpellType {
     LUST(new String[]{"Lust"}, "LUST"),
     GREED(new String[]{"Greed"}, "GREED"),
     SLOTH(new String[]{"Sloth"}, "SLOTH"),
-    PRIDE(new String[]{"Pride"}, "PRIDE");
+    PRIDE(new String[]{"Pride"}, "PRIDE"),
+    GLUTTONY(new String[]{"Gluttony"}, "GLUTTONY");
 
     private String[] names;
     private String latin;

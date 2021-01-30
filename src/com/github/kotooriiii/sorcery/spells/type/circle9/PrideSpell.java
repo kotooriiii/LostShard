@@ -6,6 +6,7 @@ import com.github.kotooriiii.skills.skill_listeners.TamingListener;
 import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.type.circle8.DaySpell;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -140,7 +142,6 @@ public class PrideSpell extends Spell implements Listener {
             @Override
             public void run() {
                 if (timerA[0] * (REFRESH) >= PRIDE_DURATION * 20 || player.isDead() || !player.isOnline() || !prideSet.contains(uniqueId)) {
-                    prideSet.remove(uniqueId);
                     this.cancel();
                     return;
                 }
@@ -161,8 +162,7 @@ public class PrideSpell extends Spell implements Listener {
 
                 if (timerB[0] * REFRESH >= PRIDE_DURATION * 20 || player.isDead() || !player.isOnline() || !prideSet.contains(uniqueId)) {
 
-                    if(player.isOnline() && !player.isDead() && prideSet.contains(uniqueId))
-                    {
+                    if (player.isOnline() && !player.isDead() && prideSet.contains(uniqueId)) {
                         afterHoursPrideSet.add(uniqueId);
                         new BukkitRunnable() {
                             @Override
@@ -175,7 +175,7 @@ public class PrideSpell extends Spell implements Listener {
                                         player.setAbsorptionAmount(newAbsorption);
                                     }
                                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, 5.0f, 1f);
-                                    player.getWorld().spawnParticle(Particle.FALLING_HONEY, player.getEyeLocation().clone().add(0,0.5f,0), 3);
+                                    player.getWorld().spawnParticle(Particle.FALLING_HONEY, player.getEyeLocation().clone().add(0, 0.5f, 0), 3);
                                     return;
                                 }
 
@@ -184,7 +184,7 @@ public class PrideSpell extends Spell implements Listener {
                             }
                         }.runTaskTimer(LostShardPlugin.plugin, 0, 20);
                     }
-
+                    prideSet.remove(uniqueId);
                     this.cancel();
                     return;
                 }
@@ -193,6 +193,8 @@ public class PrideSpell extends Spell implements Listener {
 
                 for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), PRIDE_DISTANCE, PRIDE_DISTANCE, PRIDE_DISTANCE)) {
                     if (!(entity instanceof Player))
+                        continue;
+                    if (entity == player)
                         continue;
 
                     Player loopedPlayer = (Player) entity;
@@ -207,7 +209,7 @@ public class PrideSpell extends Spell implements Listener {
 
                     Vector dir = ((Player) entity).getEyeLocation().toVector().clone().subtract(player.getEyeLocation().toVector().clone());
 
-                    BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), player.getEyeLocation().toVector(), dir, 1, 120);
+                    BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), player.getEyeLocation().toVector(), dir, 0, 120);
                     new BukkitRunnable() {
                         private boolean color = false;
 
@@ -230,7 +232,14 @@ public class PrideSpell extends Spell implements Listener {
                     EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(player, entity, EntityDamageEvent.DamageCause.CUSTOM, ABSORB_POINTS);
                     entity.setLastDamageCause(damageByEntityEvent);
                     Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-                    ((Player) entity).setHealth(((Player) entity).getHealth() - ABSORB_POINTS);
+                    if(!damageByEntityEvent.isCancelled()) {
+                        double newHealth = ((Player) entity).getHealth() - ABSORB_POINTS;
+                        if (newHealth < 0)
+                            ((Player) entity).setHealth(0);
+                        else
+                            ((Player) entity).setHealth(newHealth);
+                    }
+
                 }
 
                 double newHealth = player.getHealth() + ABSORB_POINTS;
@@ -332,6 +341,17 @@ public class PrideSpell extends Spell implements Listener {
         if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
             return;
 
+        prideSet.remove(event.getPlayer().getUniqueId());
+
+        event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't make you full of pride anymore...");
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent event) {
+        if (event.getBlockPlaced().getType() != Material.LAPIS_BLOCK)
+            return;
+        if (!prideSet.contains(event.getPlayer().getUniqueId()))
+            return;
         prideSet.remove(event.getPlayer().getUniqueId());
 
         event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't make you full of pride anymore...");

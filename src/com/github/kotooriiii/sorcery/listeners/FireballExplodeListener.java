@@ -108,7 +108,15 @@ public class FireballExplodeListener implements Listener {
             EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(shooter, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
             entity.setLastDamageCause(damageByEntityEvent);
             Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-            ((Player) entity).setHealth(((Player) entity).getHealth() - DAMAGE);
+
+            if(!damageByEntityEvent.isCancelled()) {
+                double newHealth = ((Player) entity).getHealth() - DAMAGE;
+                if (newHealth < 0)
+                    ((Player) entity).setHealth(0);
+                else
+                    ((Player) entity).setHealth(newHealth);
+            }
+
 
 
         }

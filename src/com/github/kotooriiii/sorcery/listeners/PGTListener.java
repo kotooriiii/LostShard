@@ -34,7 +34,9 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class PGTListener implements Listener {
     HashSet<UUID> map = new HashSet<>();
+    HashMap<UUID, Integer> hasHitPortalMap = new HashMap<>();
 
+    private final static int HIT=2,NO_HIT=1, UNKNOWN=0;
     private boolean isBrokenGate(Player player) {
         Location entityLocation = player.getLocation();
         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
@@ -211,10 +213,15 @@ public class PGTListener implements Listener {
         }
 
         Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+
+        final Location finalLocation = teleportingTo.clone();
+        finalLocation.setPitch(player.getLocation().getPitch());
+        finalLocation.setYaw(player.getLocation().getYaw());
+
         if (teleportingTo == null)
             player.sendMessage(ERROR_COLOR + "The gate encountered a critical error.");
         else
-            player.teleport(teleportingTo);
+            player.teleport(finalLocation);
 
         event.setCancelled(true);
 
@@ -233,6 +240,11 @@ public class PGTListener implements Listener {
         Entity entity = event.getEntity();
         if (entity instanceof Player)
             return;
+
+        if (entity instanceof Projectile || entity instanceof Explosive) {
+            event.setCancelled(true);
+            return;
+        }
 
         Location entityLocation = event.getEntity().getLocation();
         Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
@@ -257,13 +269,32 @@ public class PGTListener implements Listener {
         Vector vector = entity.getVelocity();
         Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
 
+        Chunk chunk = teleportingTo.getChunk();
+        chunk.setForceLoaded(true);
+
         if (teleportingTo != null) {
-            entity.teleport(new Location(teleportingTo.getWorld(), teleportingTo.getBlockX(), teleportingTo.getBlockY(), teleportingTo.getBlockZ(), entity.getLocation().getYaw(), entity.getLocation().getPitch()));
-            entity.setVelocity(vector);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+
+                    if (entity.isValid() && !entity.isDead()) {
+                        entity.teleport(new Location(teleportingTo.getWorld(), teleportingTo.getBlockX(), teleportingTo.getBlockY(), teleportingTo.getBlockZ(), entity.getLocation().getYaw(), entity.getLocation().getPitch()));
+                        entity.setVelocity(vector);
+                    }
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            chunk.setForceLoaded(false);
+
+                        }
+                    }.runTask(LostShardPlugin.plugin);
+                }
+            }.runTaskLater(LostShardPlugin.plugin, 5);
+
         }
     }
 
-    HashMap<UUID, Boolean> hasHitPortalMap = new HashMap<>();
 
     /**
      * This event appears to only affect projectile  othen than players.
@@ -304,69 +335,114 @@ public class PGTListener implements Listener {
 
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
-        Entity entity = event.getEntity();
+
+//        if(true)
+//            return;
+
+        final Entity entity = event.getEntity();
+        final UUID uuid = entity.getUniqueId();
+
+        //!isNPC
         if (CitizensAPI.getNPCRegistry().isNPC(entity))
             return;
+        //is project/explosive
         if (!(entity instanceof Projectile) && !(entity instanceof Explosive))
             return;
-        hasHitPortalMap.put(entity.getUniqueId(), false);
+
+        Integer hasSpawnHitPortal = hasHitPortalMap.get(uuid);
+        if (hasSpawnHitPortal == null || (hasSpawnHitPortal != null && hasSpawnHitPortal != HIT)) {
+            hasHitPortalMap.put(entity.getUniqueId(), NO_HIT);
+        }
 
         final BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (isHittingPortal(entity.getLocation())) {
-                    Boolean hasHitPortal = hasHitPortalMap.get(entity.getUniqueId());
-                    if (hasHitPortal != null && !hasHitPortal.booleanValue()) {
-                        hasHitPortalMap.put(entity.getUniqueId(), true);
 
-                        Location entityLocation = event.getEntity().getLocation();
-                        Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
+                if(isCancelled())
+                    return;
 
-                        if (gateLocation == null) {
-                            return;
-                        }
+                if (entity.isDead())
+                    return;
+                if (!entity.isValid())
+                    return;
+                if (!isHittingPortal(entity.getLocation()))
+                    return;
+                if(entity instanceof AbstractArrow)
+                {
+                    final AbstractArrow abstractArrow = (AbstractArrow) entity;
+                    if(abstractArrow.isInBlock())
+                        return;
+                }
 
-                        Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
+                Integer hasHitPortal = hasHitPortalMap.get(uuid);
+                if (hasHitPortal == null || hasHitPortal == HIT || hasHitPortal == UNKNOWN) {
+                    return;
+                }
 
-                        //check if there is a gate at location
-                        if (gate == null) {
-                            return;
-                        }
-
-                        //if for some instance gate is not created .
-                        if (!gate.isBuilt()) {
-                            LostShardPlugin.getGateManager().removeGate(gate);
-                            return;
-                        }
-
-                        //check if possible
-                        if (entity.isValid()) {
-
-                            // hasHitPortalMap.remove(entity.getUniqueId());
+                hasHitPortalMap.put(uuid, HIT);
 
 
-                            //get initial vector, teleport, re-set it
-                            Vector vector = entity.getVelocity();
-                            Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+                Location entityLocation = entity.getLocation();
+                Location gateLocation = LostShardPlugin.getGateManager().getGateNearbyUpdatedLocation(entityLocation);
 
-                            if (teleportingTo == null)
-                                return;
+                if (gateLocation == null)
+                    return;
 
-                            Location clone = teleportingTo.clone().add(0, 1, 0);
+                Gate gate = LostShardPlugin.getGateManager().getGate(gateLocation);
 
-                            if (clone != null) {
-                                entity.teleport(clone);
-                                entity.setVelocity(vector);
-                            }
+                //check if there is a gate at location
+                if (gate == null) {
+                    return;
+                }
+
+                //if for some instance gate is not created .
+                if (!gate.isBuilt()) {
+                    LostShardPlugin.getGateManager().removeGate(gate);
+                    return;
+                }
+
+                //check if possible
+
+                // hasHitPortalMap.remove(entity.getUniqueId());
+
+
+                //get initial vector, teleport, re-set it
+                Vector vector = entity.getVelocity();
+                Location teleportingTo = gate.getTeleportTo(new GateBlock(gateLocation));
+
+                if (teleportingTo == null)
+                    return;
+
+                Location clone = teleportingTo.clone().add(0, 1, 0);
+
+                final Chunk chunk = clone.getChunk();
+                chunk.setForceLoaded(true);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (entity.isValid() && !entity.isDead()) {
+
+                            entity.teleport(clone);
+                            entity.setVelocity(vector);
 
                             //reset ticks for tnt
                             if (entity instanceof TNTPrimed)
                                 ((TNTPrimed) entity).setFuseTicks(20 * 4);
-
-
                         }
                     }
-                }
+                }.runTaskLater(LostShardPlugin.plugin, 5);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+
+                        chunk.setForceLoaded(false);
+
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, 10);
+
+
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 1);
 
@@ -374,9 +450,9 @@ public class PGTListener implements Listener {
             @Override
             public void run() {
                 task.cancel();
-                hasHitPortalMap.remove(entity.getUniqueId());
+                hasHitPortalMap.remove(uuid);
             }
-        }.runTaskLaterAsynchronously(LostShardPlugin.plugin, 20 * 4); //arbitrary number set low to clear projectiles quickly
+        }.runTaskLater(LostShardPlugin.plugin, 20 * 4); //arbitrary number set low to clear projectiles quickly
     }
 
 

@@ -28,8 +28,6 @@ public class MurdererChapter extends AbstractChapter {
     private int counter = 0;
     private boolean isSpawnedMurderer = false, isHologramSetup = false, isHologramSetup2 = false;
 
-
-    //todo
     private static Zone zone = new Zone(590, 596, 60, 70, 813, 792);
     private static Location[] locations = new Location[]
             {

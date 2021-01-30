@@ -5,8 +5,11 @@ import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -833,6 +836,64 @@ public final class HelperMethods {
             compassDir = BlockFace.EAST;
         }
         return compassDir;
+    }
+
+    public static void customDamage(LivingEntity attacker, LivingEntity defender, int damage) {
+        customDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, damage);
+    }
+
+    public static void customDamage(LivingEntity attacker, LivingEntity defender, EntityDamageEvent.DamageCause cause, int damage) {
+        EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(attacker, defender, cause, damage);
+        defender.setLastDamageCause(damageByEntityEvent);
+        Bukkit.getPluginManager().callEvent(damageByEntityEvent);
+
+        if (!damageByEntityEvent.isCancelled()) {
+
+
+            double totalHealth = defender.getHealth() + defender.getAbsorptionAmount();
+            double totalDamage = damage;
+
+            final double effectiveHealth = totalHealth - totalDamage;
+
+            if (effectiveHealth < 0) {
+                defender.setHealth(0);
+            } else if (effectiveHealth <= 20) {
+                defender.setHealth(effectiveHealth);
+            } else {
+                double health = 20d;
+                double absorption = effectiveHealth - health;
+                defender.setHealth(health);
+                if (absorption != 0)
+                    defender.setAbsorptionAmount(absorption);
+            }
+        }
+    }
+
+    public static void customDamage(LivingEntity defender, EntityDamageEvent.DamageCause cause, int damage) {
+        EntityDamageEvent damageByEntityEvent = new EntityDamageEvent(defender, cause, damage);
+        defender.setLastDamageCause(damageByEntityEvent);
+        Bukkit.getPluginManager().callEvent(damageByEntityEvent);
+
+        if (!damageByEntityEvent.isCancelled()) {
+
+
+            double totalHealth = defender.getHealth() + defender.getAbsorptionAmount();
+            double totalDamage = damage;
+
+            final double effectiveHealth = totalHealth - totalDamage;
+
+            if (effectiveHealth < 0) {
+                defender.setHealth(0);
+            } else if (effectiveHealth <= 20) {
+                defender.setHealth(effectiveHealth);
+            } else {
+                double health = 20d;
+                double absorption = effectiveHealth - health;
+                defender.setHealth(health);
+                if (absorption != 0)
+                    defender.setAbsorptionAmount(absorption);
+            }
+        }
     }
 
 }

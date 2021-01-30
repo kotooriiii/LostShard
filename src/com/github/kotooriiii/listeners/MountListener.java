@@ -48,6 +48,7 @@ public class MountListener implements Listener {
         if(set.contains(player.getUniqueId()))
         {
             player.sendMessage(ERROR_COLOR + "You are trying to mount too fast!");
+            event.setCancelled(true);
             return;
         }
 

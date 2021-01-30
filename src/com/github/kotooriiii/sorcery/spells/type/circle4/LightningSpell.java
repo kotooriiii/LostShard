@@ -156,8 +156,19 @@ public class LightningSpell extends Spell {
             if (clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 
-            LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.damage(3.0f, attacker);
+            final float DAMAGE = 3f;
+            //      ((Player) entity).damage(0.1f);
+            EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
+            entity.setLastDamageCause(damageByEntityEvent);
+            Bukkit.getPluginManager().callEvent(damageByEntityEvent);
+
+            if(!damageByEntityEvent.isCancelled()) {
+                double newHealth = ((LivingEntity) entity).getHealth() - DAMAGE;
+                if (newHealth < 0)
+                    ((LivingEntity) entity).setHealth(0);
+                else
+                    ((LivingEntity) entity).setHealth(newHealth);
+            }
         }
     }
 }

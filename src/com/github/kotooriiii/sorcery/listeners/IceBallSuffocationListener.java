@@ -5,6 +5,7 @@ import com.github.kotooriiii.sorcery.spells.type.circle3.IceSpell;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -59,7 +60,13 @@ public class IceBallSuffocationListener implements Listener {
                     EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(damagerPlayer, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
                     entity.setLastDamageCause(damageByEntityEvent);
                     Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-                    ((Player) entity).setHealth(((Player) entity).getHealth() - DAMAGE);
+                    if(!damageByEntityEvent.isCancelled()) {
+                        double newHealth = ((LivingEntity) entity).getHealth() - DAMAGE;
+                        if (newHealth < 0)
+                            ((Player) entity).setHealth(0);
+                        else
+                            ((Player) entity).setHealth(newHealth);
+                    }
 
                     new BukkitRunnable()
                     {

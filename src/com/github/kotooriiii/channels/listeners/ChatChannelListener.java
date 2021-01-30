@@ -7,6 +7,7 @@ import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.commands.NotificationCommand;
 import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.sorcery.spells.type.circle9.GluttonySpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -135,20 +136,23 @@ public class ChatChannelListener implements Listener {
 
         String[] properties;
 
+        boolean isCake = GluttonySpell.isCake(player.getUniqueId());
+        String cakeText = isCake ?  ChatColor.LIGHT_PURPLE + "(Cake)" : "";
+
         switch (LostShardPlugin.getChannelManager().getChannel(player)) {
 
             case GLOBAL:
             case CLAN:
-                properties = new String[]{prefix, clanTag, title, name};
+                properties = new String[]{prefix, clanTag, title, name, cakeText};
                 break;
             case SHOUT:
-                properties = new String[]{name, ChatColor.WHITE + "shouts"};
+                properties = new String[]{name,cakeText, ChatColor.WHITE + "shouts"};
                 break;
             case WHISPER:
-                properties = new String[]{name, ChatColor.WHITE + "whispers"};
+                properties = new String[]{name,cakeText, ChatColor.WHITE + "whispers"};
                 break;
             case STAFF:
-                properties = new String[]{prefix, name};
+                properties = new String[]{prefix, name, cakeText};
                 break;
             default:
                 properties = new String[]{"nullChannel"};

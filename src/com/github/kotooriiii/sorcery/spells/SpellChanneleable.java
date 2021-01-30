@@ -4,6 +4,7 @@ package com.github.kotooriiii.sorcery.spells;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
@@ -14,7 +15,7 @@ import java.util.*;
 
 public abstract class SpellChanneleable extends Spell {
 
-    final private HashMap<Location, HashMap<UUID, BukkitTask>> membersMap = new HashMap<>();
+    final private HashMap<ChannelPoint, HashMap<UUID, BukkitTask>> membersMap = new HashMap<>();
 
     final private int DISTANCE;
     final private int REQUIRED;
@@ -26,6 +27,60 @@ public abstract class SpellChanneleable extends Spell {
         this.SECONDS = graceSeconds;
         this.DISTANCE = distance;
     }
+
+    private class ChannelPoint
+    {
+        private final World world;
+        int x,y,z;
+
+        public ChannelPoint(World world, int x, int y, int z) {
+            this.world = world;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public ChannelPoint(Location location) {
+            this(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        }
+
+        public World getWorld() {
+            return world;
+        }
+
+        public int getZ() {
+            return z;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public Location getLocation()
+        {
+            return new Location(world,x,y,z);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ChannelPoint that = (ChannelPoint) o;
+            return getX() == that.getX() &&
+                    getY() == that.getY() &&
+                    getZ() == that.getZ();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getX(), getY(), getZ());
+        }
+    }
+
 
 
     public abstract void executeSuccessfulChannelSpell(Player player, UUID... value);
@@ -42,12 +97,12 @@ public abstract class SpellChanneleable extends Spell {
 
     public final boolean hasRequiredMembers(Location location) {
 
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
-            Location entryLocation = entry.getKey();
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+            ChannelPoint entryLocation = entry.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(location.getWorld()))
                     continue;
-                if (entryLocation.distance(location) > DISTANCE)
+                if (entryLocation.getLocation().distance(location) > DISTANCE)
                     continue;
             }
             HashMap<UUID, BukkitTask> value = entry.getValue();
@@ -63,14 +118,14 @@ public abstract class SpellChanneleable extends Spell {
     public final void removeMembers(Location location) {
 
 
-        Iterator<Map.Entry<Location, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
+        Iterator<Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Location, HashMap<UUID, BukkitTask>> next = iterator.next();
-            Location entryLocation = next.getKey();
+            Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> next = iterator.next();
+            ChannelPoint entryLocation = next.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(location.getWorld()))
                     continue;
-                if (entryLocation.distance(location) > DISTANCE)
+                if (entryLocation.getLocation().distance(location) > DISTANCE)
                     continue;
             }
             HashMap<UUID, BukkitTask> value = next.getValue();
@@ -87,35 +142,37 @@ public abstract class SpellChanneleable extends Spell {
 
     public final boolean addMember(Player player, BukkitTask task) {
 
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
-            Location entryLocation = entry.getKey();
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+            ChannelPoint entryLocation = entry.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(player.getLocation()))
                     continue;
-                if (entryLocation.distance(player.getLocation()) > DISTANCE)
+                if (entryLocation.getLocation().distance(player.getLocation()) > DISTANCE)
                     continue;
             }
 
             HashMap<UUID, BukkitTask> value = entry.getValue();
             if (value == null)
                 continue;
+            if(value.containsKey(player.getUniqueId()))
+                continue;
             value.put(player.getUniqueId(), task);
             return true;
         }
         HashMap<UUID, BukkitTask> value = new HashMap<UUID, BukkitTask>();
         value.put(player.getUniqueId(), task);
-        membersMap.put(player.getLocation(), value);
+        membersMap.put(new ChannelPoint(player.getLocation()), value);
         return true;
     }
 
     public final boolean hasMember(Player player) {
 
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
-            Location entryLocation = entry.getKey();
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+            ChannelPoint entryLocation = entry.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(player.getLocation()))
                     continue;
-                if (entryLocation.distance(player.getLocation()) > DISTANCE)
+                if (entryLocation.getLocation().distance(player.getLocation()) > DISTANCE)
                     continue;
             }
 
@@ -132,13 +189,15 @@ public abstract class SpellChanneleable extends Spell {
 
     public final boolean hasMember(UUID uuid) {
 
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
 
             HashMap<UUID, BukkitTask> value = entry.getValue();
             if (value == null)
                 continue;
-            if (!value.containsKey(uuid))
+            if (!value.containsKey(uuid)) {
                 continue;
+            }
             return true;
         }
 
@@ -147,14 +206,14 @@ public abstract class SpellChanneleable extends Spell {
 
     public final boolean removeMember(Player player) {
 
-        Iterator<Map.Entry<Location, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
+        Iterator<Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Location, HashMap<UUID, BukkitTask>> next = iterator.next();
-            Location entryLocation = next.getKey();
+            Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> next = iterator.next();
+            ChannelPoint entryLocation = next.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(player.getLocation()))
                     continue;
-                if (entryLocation.distance(player.getLocation()) > DISTANCE)
+                if (entryLocation.getLocation().distance(player.getLocation()) > DISTANCE)
                     continue;
             }
 
@@ -175,9 +234,9 @@ public abstract class SpellChanneleable extends Spell {
     }
 
     public final boolean removeMember(UUID uuid) {
-        Iterator<Map.Entry<Location, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
+        Iterator<Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>>> iterator = membersMap.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Location, HashMap<UUID, BukkitTask>> next = iterator.next();
+            Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> next = iterator.next();
 
             HashMap<UUID, BukkitTask> value = next.getValue();
             if (value == null)
@@ -197,12 +256,12 @@ public abstract class SpellChanneleable extends Spell {
     }
 
     public final UUID[] getMembers(Location location) {
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
-            Location entryLocation = entry.getKey();
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+            ChannelPoint entryLocation = entry.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(location))
                     continue;
-                if (entryLocation.distance(location) > DISTANCE)
+                if (entryLocation.getLocation().distance(location) > DISTANCE)
                     continue;
             }
 
@@ -213,7 +272,7 @@ public abstract class SpellChanneleable extends Spell {
 
             int i = 0;
             for (UUID uuid : value.keySet()) {
-                if (i < uuids.length)
+                if (i >= uuids.length)
                     break;
                 uuids[i++] = uuid;
             }
@@ -225,12 +284,13 @@ public abstract class SpellChanneleable extends Spell {
 
     public final Player[] getOnlineMembers(Location location) {
         ArrayList<Player> players = new ArrayList<>();
-        for (Map.Entry<Location, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
-            Location entryLocation = entry.getKey();
+
+        for (Map.Entry<ChannelPoint, HashMap<UUID, BukkitTask>> entry : membersMap.entrySet()) {
+            ChannelPoint entryLocation = entry.getKey();
             if (DISTANCE >= 0) {
                 if (!entryLocation.getWorld().equals(location))
                     continue;
-                if (entryLocation.distance(location) > DISTANCE)
+                if (entryLocation.getLocation().distance(location) > DISTANCE)
                     continue;
             }
 
@@ -242,7 +302,7 @@ public abstract class SpellChanneleable extends Spell {
 
             int i = 0;
             for (UUID uuid : value.keySet()) {
-                if (i < uuids.length)
+                if (i >= uuids.length)
                     break;
                 uuids[i++] = uuid;
             }

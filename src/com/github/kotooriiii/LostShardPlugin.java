@@ -84,6 +84,7 @@ import com.github.kotooriiii.sorcery.spells.type.circle8.PerceptionSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.SoarSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.PermanentGateTravelSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle9.*;
+import com.github.kotooriiii.sorcery.spells.type_helpers.GluttonyCake;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.stats.StatRegenRunner;
 import com.github.kotooriiii.status.*;
@@ -367,6 +368,11 @@ public class LostShardPlugin extends JavaPlugin {
     public void onDisable() {
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
+
+        for(GluttonyCake cake : GluttonySpell.getLocationCakeHashMap().values())
+        {
+            cake.getHologram().delete();
+        }
 
         for (Location location : LightSpell.getMap().values()) {
             LightSpell.deleteLight(location);
@@ -784,6 +790,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(GreedSpell.getInstance(), this);
         pm.registerEvents(SlothSpell.getInstance(), this);
         pm.registerEvents(PrideSpell.getInstance(), this);
+        pm.registerEvents(GluttonySpell.getInstance(), this);
 
         pm.registerEvents(new SpellChanneleableQuitDeathListener(), this);
         pm.registerEvents(new DayListener(), this);

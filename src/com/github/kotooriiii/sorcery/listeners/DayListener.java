@@ -32,16 +32,8 @@ public class DayListener implements Listener {
         if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
             return;
 
-        final Iterator<Map.Entry<UUID, DaySpell.DayCast>> iterator = DaySpell.getCastMap().entrySet().iterator();
-        while(iterator.hasNext())
-        {
-            final Map.Entry<UUID, DaySpell.DayCast> next = iterator.next();
-            if(next.getValue().getSet().contains(event.getPlayer().getUniqueId()))
-            {
-                DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
-            }
+        DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
 
-        }
     }
 
     @EventHandler
@@ -49,16 +41,8 @@ public class DayListener implements Listener {
         if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
-        final Iterator<Map.Entry<UUID, DaySpell.DayCast>> iterator = DaySpell.getCastMap().entrySet().iterator();
-        while(iterator.hasNext())
-        {
-            final Map.Entry<UUID, DaySpell.DayCast> next = iterator.next();
-            if(next.getValue().getSet().contains(event.getEntity().getUniqueId()))
-            {
-                DaySpell.getInstance().remove(event.getEntity().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getEntity().getName()));
-            }
+        DaySpell.getInstance().remove(event.getEntity().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getEntity().getName()));
 
-        }
     }
 
     @EventHandler
@@ -76,17 +60,8 @@ public class DayListener implements Listener {
 
         if (fX == tX && fY == tY && fZ == tZ)
             return;
+        DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
 
-        final Iterator<Map.Entry<UUID, DaySpell.DayCast>> iterator = DaySpell.getCastMap().entrySet().iterator();
-        while(iterator.hasNext())
-        {
-            final Map.Entry<UUID, DaySpell.DayCast> next = iterator.next();
-            if(next.getValue().getSet().contains(event.getPlayer().getUniqueId()))
-            {
-                DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
-            }
-
-        }
     }
 
     @EventHandler
@@ -94,15 +69,7 @@ public class DayListener implements Listener {
     {
         if(event.getBlockPlaced().getType() != Material.LAPIS_BLOCK)
             return;
-        final Iterator<Map.Entry<UUID, DaySpell.DayCast>> iterator = DaySpell.getCastMap().entrySet().iterator();
-        while(iterator.hasNext())
-        {
-            final Map.Entry<UUID, DaySpell.DayCast> next = iterator.next();
-            if(next.getValue().getSet().contains(event.getPlayer().getUniqueId()))
-            {
-                DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
-            }
+        DaySpell.getInstance().remove(event.getPlayer().getUniqueId(), ERROR_MESSAGE.replace(ID, event.getPlayer().getName()));
 
-        }
     }
 }

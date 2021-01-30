@@ -100,7 +100,6 @@ public class MurdererTrait extends Trait {
         npc.getTrait(Equipment.class).set(Equipment.EquipmentSlot.HAND, new ItemStack(Material.IRON_SWORD, 1));
 
 
-        //todo v
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_METADATA, Skin.BANKER.getTexture());
         npc.data().set(NPC.PLAYER_SKIN_TEXTURE_PROPERTIES_SIGN_METADATA, Skin.BANKER.getSignature());
         npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, "Nickolov");

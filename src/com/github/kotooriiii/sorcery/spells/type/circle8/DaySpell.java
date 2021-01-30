@@ -5,10 +5,9 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellChanneleable;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import net.md_5.bungee.api.ChatMessageType;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -96,8 +95,8 @@ public class DaySpell extends SpellChanneleable {
                 if(dayCast == null)
                     return;
 
-                player.getWorld().setTime(0);
-                displayMessage(values);
+                day(player.getWorld(), values);
+                displayMessage(ChatColor.DARK_GRAY + "A storm begins.", values);
                 castMap.remove(uuid);
             }
         }.runTaskLater(LostShardPlugin.plugin, (long) (20 * CAST_TIME));
@@ -105,34 +104,82 @@ public class DaySpell extends SpellChanneleable {
         removeMembers(player.getLocation());
 
         ArrayList<UUID> uuids = new ArrayList<>();
-        for(UUID iterating_uuid : values)
+        for(UUID iterating_uuid : values) {
+            Player player1 =Bukkit.getPlayer(iterating_uuid);
+            if(player1!=null)
+                player1.sendMessage(ChatColor.GOLD + "You begin to cast Day.");
             uuids.add(iterating_uuid);
+        }
 
 
         castMap.put(uuid, new DayCast(new HashSet<UUID>(uuids), task));
+    }
+
+    private void day(World world, UUID[] values) {
+
+        final int LIGHTNING_STORM_DURATION = 10, LIGHTNING_STORM_FREQUENCY = 5;
+        final int[] timer = {0};
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                if(timer[0]++ * LIGHTNING_STORM_FREQUENCY >= 20*LIGHTNING_STORM_DURATION)
+                {
+                    this.cancel();
+                    world.setTime(0);
+                    displayMessage(ChatColor.GOLD + "The sun shines.", values);
+                    return;
+                }
+
+                for(Player player : Bukkit.getOnlinePlayers())
+                    lightning(player.getLocation(), 1);
+
+
+            }
+        }.runTaskTimer(LostShardPlugin.plugin, 0, LIGHTNING_STORM_FREQUENCY);
+    }
+
+    private void lightning(Location location, int times)
+    {
+        if(times <= 0)
+            return;
+
+        for(int i = 0 ; i < times; i++) {
+            int x = new Random().nextInt(51);
+            int z = new Random().nextInt(51);
+
+            final Block highestBlockAt = location.getWorld().getHighestBlockAt(x, z);
+            highestBlockAt.getWorld().strikeLightningEffect(highestBlockAt.getLocation());
+        }
     }
 
     @Override
     public void executeFailedChannelSpell(Player player, UUID... values) {
     }
 
-    private void displayMessage(UUID... values)
+    private void displayMessage(String message, UUID... values)
     {
         for(UUID uuid : values) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null)
-                player.sendMessage(ChatColor.GOLD + "The sun shines.");
+                player.sendMessage(message);
         }
     }
 
     public static void remove(UUID uuid, String message)
     {
+
+        //todo debuggers
         final Iterator<Map.Entry<UUID, DayCast>> iterator = castMap.entrySet().iterator();
         while(iterator.hasNext())
         {
+
+
             final Map.Entry<UUID, DayCast> next = iterator.next();
             if(next.getValue().getSet().contains(uuid))
             {
+
                 next.getValue().getTask().cancel();
                 iterator.remove();
 
@@ -141,6 +188,7 @@ public class DaySpell extends SpellChanneleable {
 
                     for(UUID uuid1 : next.getValue().getSet()) {
                         final Player player = Bukkit.getPlayer(uuid1);
+
                         if (player != null)
                         {
                             player.sendMessage(message);

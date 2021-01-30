@@ -21,10 +21,7 @@ import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle8.*;
 import com.github.kotooriiii.sorcery.spells.type.circle9.*;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -164,6 +161,8 @@ public abstract class Spell {
                 return SlothSpell.getInstance();
             case PRIDE:
                 return PrideSpell.getInstance();
+            case GLUTTONY:
+                return GluttonySpell.getInstance();
             default:
                 return null;
         }
@@ -572,7 +571,10 @@ public abstract class Spell {
             final UUID uuid = player.getUniqueId();
 
             Spell spell = this;
-            BukkitTask task = new BukkitRunnable() {
+
+
+
+            BukkitRunnable runnable = new BukkitRunnable() {
                 @Override
                 public void run() {
 
@@ -586,11 +588,12 @@ public abstract class Spell {
                         channeleable.removeMember(uuid);
                     }
                 }
-            }.runTaskLater(LostShardPlugin.plugin, (long) (channeleable.getGraceTimeSeconds() * 20));
+            };
 
-            channeleable.addMember(player, task);
+            channeleable.addMember(player, runnable.runTaskLater(LostShardPlugin.plugin, (long) (channeleable.getGraceTimeSeconds() * 20)));
 
-            if (!channeleable.hasRequiredMembers(player.getLocation())) {
+
+            if (channeleable.hasRequiredMembers(player.getLocation())) {
                 channeleable.executeSuccessfulChannelSpell(player, channeleable.getMembers(player.getLocation()));
             } else {
                 channeleable.executeFailedChannelSpell(player, channeleable.getMembers(player.getLocation()));
@@ -649,6 +652,7 @@ public abstract class Spell {
 
             if(spellChanneleable.hasMember(player))
             {
+
                 for (Player onlineMember : spellChanneleable.getOnlineMembers(player.getLocation())) {
                     onlineMember.sendMessage(message);
                 }

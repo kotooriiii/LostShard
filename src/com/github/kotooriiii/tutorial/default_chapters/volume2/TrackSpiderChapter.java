@@ -44,7 +44,7 @@ public class TrackSpiderChapter extends AbstractChapter {
         packetHandler = null;
         entityUUID = null;
         isComplete = isCrossed = isTracked = false;
-        spiderLocation = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 297, 54, 684); //todo set this
+        spiderLocation = new Location(LostShardPlugin.getTutorialManager().getTutorialWorld(), 297, 54, 684);
     }
 
     @Override

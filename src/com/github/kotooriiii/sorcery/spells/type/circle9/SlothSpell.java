@@ -109,8 +109,8 @@ public class SlothSpell extends Spell implements Listener {
 
 
         getSlothers().add(player.getUniqueId());
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * DURATION, 3, false, false, false));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * DURATION, 6, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * DURATION, 2, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * DURATION, 4, false, false, false));
 
         final UUID uuidConst = player.getUniqueId();
 

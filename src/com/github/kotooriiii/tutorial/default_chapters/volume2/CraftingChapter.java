@@ -42,7 +42,6 @@ public class CraftingChapter extends AbstractChapter {
 
     @EventHandler
     public void onCraft(InventoryClickEvent event) {
-        //todo implement
         if (event.getSlotType() != InventoryType.SlotType.RESULT)
             return;
 
