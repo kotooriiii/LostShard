@@ -21,12 +21,19 @@ import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import static org.bukkit.ChatColor.DARK_PURPLE;
+
 public class SpellbookCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (!(commandSender instanceof Player))
             return false;
+
+        if(SpellType.oldMapValues() != null) {
+            commandSender.sendMessage(DARK_PURPLE + "MAP 3 RELEASE COMING SOON");
+            return false;
+        }
 
         if (!command.getName().equalsIgnoreCase("spellbook"))
             return false;

@@ -42,7 +42,7 @@ public class BindCommand implements CommandExecutor {
                     // Loop through all possible
                     boolean isFound = false;
                     Wand wand = null;
-                    for (SpellType spellType : SpellType.values()) {
+                    for (SpellType spellType : SpellType.oldMapValues()) {
 
                         // Check if wand is the one requested
                         for(String iname : spellType.getNames())

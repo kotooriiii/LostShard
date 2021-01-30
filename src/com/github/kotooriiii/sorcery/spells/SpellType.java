@@ -15,6 +15,7 @@ public enum SpellType {
     RECALL(new String[]{"Recall"}, "Runus Teleporticus"),
     PERMANENT_GATE_TRAVEL(new String[]{"Permanent Gate Travel", "PGT"}, "Permanentus Gatius"),
     CHRONOPORT(new String[]{"Chronoport", "Chrono"}, "Rubberbandicus Elasticus"),
+
     GRASS(new String[]{"Grass"}, "GRASS"),
     LIGHT(new String[]{"Light"}, "LIGHT"),
     CREATE_FOOD(new String[]{"Create Food", "Food"}, "CREATE_FOOD"),
@@ -71,6 +72,11 @@ public enum SpellType {
             }
         }
         return null;
+    }
+
+    public static SpellType[] oldMapValues()
+    {
+        return new SpellType[]{FIREBALL,HEAL,ICE,LIGHTNING,TELEPORT,WEB_FIELD,CLANTP,MARK,RECALL,PERMANENT_GATE_TRAVEL,CHRONOPORT};
     }
 
     public String getLatin() {

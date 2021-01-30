@@ -170,7 +170,7 @@ public abstract class Spell {
 
     public static Spell[] getWandableSpells() {
         ArrayList<Spell> spells = new ArrayList<>();
-        for (SpellType types : SpellType.values()) {
+        for (SpellType types : SpellType.oldMapValues()) {
             Spell spell = Spell.of(types);
             if (spell.isWandable()) {
                 spells.add(spell);
@@ -181,7 +181,7 @@ public abstract class Spell {
 
     public static Spell[] getCastableSpells() {
         ArrayList<Spell> spells = new ArrayList<>();
-        for (SpellType types : SpellType.values()) {
+        for (SpellType types : SpellType.oldMapValues()) {
             Spell spell = Spell.of(types);
             if (spell.isCastable()) {
                 spells.add(spell);
@@ -203,7 +203,7 @@ public abstract class Spell {
 
     public static Spell[] getSpells() {
         ArrayList<Spell> spells = new ArrayList<>();
-        for (SpellType types : SpellType.values()) {
+        for (SpellType types : SpellType.oldMapValues()) {
             Spell spell = Spell.of(types);
 
             spells.add(spell);
