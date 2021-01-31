@@ -158,8 +158,13 @@ public class SpellbookCommand implements CommandExecutor {
 
     public TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue) {
         boolean isOwned = false; //todo
+        String newliner = spell.getCircle() == 9 ? "\n" : "\n\n";
 
-        TextComponent spellComponent = new TextComponent(spell.getName() + "\n\n");
+        TextComponent spellComponent = new TextComponent(spell.getName() + newliner);
+
+        if(spell.getCircle() == 9 && !isOwned)
+            spellComponent = new TextComponent(spell.getName().replaceAll("[A-Za-z]", "?") + newliner);
+
         spellComponent.setColor(isOwned ? ChatColor.GREEN : ChatColor.DARK_GRAY);
         spellComponent.setBold(false);
         spellComponent.setUnderlined(false);

@@ -6,9 +6,11 @@ import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftMob;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +46,9 @@ public class RadiateSpell extends Spell implements SpellToggleable {
                 new ItemStack[]{new ItemStack(Material.GLOWSTONE, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0d,
                 5,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.SILVERFISH}, 0.02));
+
 
 
     }

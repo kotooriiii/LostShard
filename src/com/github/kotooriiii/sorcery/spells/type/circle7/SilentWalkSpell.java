@@ -5,8 +5,10 @@ import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -36,7 +38,9 @@ public class SilentWalkSpell extends Spell implements SpellToggleable {
                 new ItemStack[]{new ItemStack(Material.WHITE_WOOL, 1), new ItemStack(Material.LAPIS_BLOCK, 1), new ItemStack(Material.GOLD_NUGGET, 1)},
                 2.0d,
                 5,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.OCELOT}, 0.10));
+
 
 
     }

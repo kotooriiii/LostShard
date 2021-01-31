@@ -6,6 +6,7 @@ import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftMob;
@@ -46,7 +47,9 @@ public class ScreechSpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.REDSTONE, 1)},
                 2d,
                 20,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.WOLF}, 0.05));
+
     }
 
     private static ScreechSpell instance;

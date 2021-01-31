@@ -8,12 +8,14 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.ImageParticles;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
 import jdk.jfr.events.FileReadEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -49,7 +51,8 @@ public class WrathSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.FIRE_CHARGE, 1)},
                 1.0f,
                 80,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
     }
 
     private static WrathSpell instance;

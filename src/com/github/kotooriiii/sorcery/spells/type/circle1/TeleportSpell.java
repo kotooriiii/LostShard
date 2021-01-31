@@ -3,11 +3,13 @@ package com.github.kotooriiii.sorcery.spells.type.circle1;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -39,7 +41,8 @@ public class TeleportSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.FEATHER, 1)},
                 1.0f,
                 15,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{}, 0.00));
     }
 
     private  static TeleportSpell instance;

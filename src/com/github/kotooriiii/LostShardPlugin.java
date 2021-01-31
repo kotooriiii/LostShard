@@ -70,6 +70,7 @@ import com.github.kotooriiii.sorcery.commands.ToggleCommand;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
 import com.github.kotooriiii.sorcery.spells.SpellbookCommand;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDropListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.RecallSpell;
@@ -794,6 +795,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new SpellChanneleableQuitDeathListener(), this);
         pm.registerEvents(new DayListener(), this);
+
+        pm.registerEvents(new SpellMonsterDropListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
         registerCustomEventListener();

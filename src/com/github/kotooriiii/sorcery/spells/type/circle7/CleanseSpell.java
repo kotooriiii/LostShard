@@ -3,10 +3,12 @@ package com.github.kotooriiii.sorcery.spells.type.circle7;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +31,9 @@ public class CleanseSpell extends Spell implements Listener {
     private CleanseSpell() {
         super(SpellType.CLEANSE,
                 "Clears you of all potion effects, good and bad.",
-                7, ChatColor.AQUA, new ItemStack[]{new ItemStack(Material.SUGAR_CANE, 1), new ItemStack(Material.REDSTONE, 1)}, 1.0f, 25, true, true, false);
+                7, ChatColor.AQUA, new ItemStack[]{new ItemStack(Material.SUGAR_CANE, 1), new ItemStack(Material.REDSTONE, 1)}, 1.0f, 25, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.WITCH}, 0.04));
+
     }
 
     private  static CleanseSpell instance;

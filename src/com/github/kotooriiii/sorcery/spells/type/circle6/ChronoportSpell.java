@@ -3,10 +3,12 @@ package com.github.kotooriiii.sorcery.spells.type.circle6;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle5.WebFieldSpell;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -30,7 +32,8 @@ public class ChronoportSpell extends Spell implements Listener {
 
 
     private ChronoportSpell() {
-        super(SpellType.CHRONOPORT,"Functions as a rubberband that teleports you right back to where you casted it. After " + TIMING + " seconds, the place that you casted chronoport is where you will return. ", 6,  ChatColor.DARK_AQUA, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 10.0f, 20, true, true, false);
+        super(SpellType.CHRONOPORT,"Functions as a rubberband that teleports you right back to where you casted it. After " + TIMING + " seconds, the place that you casted chronoport is where you will return. ", 6,  ChatColor.DARK_AQUA, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 10.0f, 20, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.HOGLIN}, 0.03));
     }
 
     private  static ChronoportSpell instance;

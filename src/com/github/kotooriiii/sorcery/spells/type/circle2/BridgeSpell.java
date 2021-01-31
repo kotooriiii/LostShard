@@ -5,6 +5,7 @@ import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle1.TeleportSpell;
 import com.github.kotooriiii.util.HelperMethods;
 import com.google.common.collect.Sets;
@@ -13,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Leaves;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +48,8 @@ public class BridgeSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.OAK_LEAVES, 1)},
                 1.0f,
                 10,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.PIG}, 0.15));
     }
 
     private  static BridgeSpell instance;

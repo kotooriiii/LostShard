@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle9;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -46,7 +47,8 @@ public class GreedSpell extends Spell implements Listener {
     private GreedSpell() {
         super(SpellType.GREED,
                 "Soulbind an item that is kept upon death. Cast greed, then open your inventory and the first item you pick up will be soulbound. Only viable for 1 death.",
-                9, ChatColor.GOLD, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.GOLD_BLOCK, 1)}, 2.0f, 50, true, true, false);
+                9, ChatColor.GOLD, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.GOLD_BLOCK, 1)}, 2.0f, 50, true, true, false,                new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
+
     }
 
     private static GreedSpell instance;

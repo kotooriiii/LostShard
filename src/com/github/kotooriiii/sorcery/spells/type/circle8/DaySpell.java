@@ -5,9 +5,11 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellChanneleable;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,9 +38,8 @@ public class DaySpell extends SpellChanneleable {
                 new ItemStack[]{new ItemStack(Material.GLOWSTONE, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.OBSIDIAN)},
                 2.0d,
                 50,
-                true, true, false);
-
-
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{}, 0.00));
     }
 
     public class DayCast

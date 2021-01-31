@@ -1,6 +1,7 @@
 package com.github.kotooriiii.sorcery.spells;
 
 
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,8 +22,8 @@ public abstract class SpellChanneleable extends Spell {
     final private int REQUIRED;
     final private float SECONDS;
 
-    public SpellChanneleable(SpellType type, int required, float graceSeconds, int distance, String desc, int circle, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
-        super(type, desc, circle, color, ingredients, cooldown, manaCost, isCastable, isWandable, isScrollable);
+    public SpellChanneleable(SpellType type, int required, float graceSeconds, int distance, String desc, int circle, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable, SpellMonsterDrop monsterDrop) {
+        super(type, desc, circle, color, ingredients, cooldown, manaCost, isCastable, isWandable, isScrollable, monsterDrop);
         this.REQUIRED = required;
         this.SECONDS = graceSeconds;
         this.DISTANCE = distance;

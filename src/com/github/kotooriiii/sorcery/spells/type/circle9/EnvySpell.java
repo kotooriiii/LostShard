@@ -5,12 +5,14 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle7.RadiateSpell;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,7 +53,8 @@ public class EnvySpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.NETHER_STAR, 1)},
                 1.0d,
                 100,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
 
 
     }

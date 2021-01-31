@@ -3,10 +3,12 @@ package com.github.kotooriiii.sorcery.spells.type.circle5;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,7 +37,9 @@ public class RespirateSpell extends Spell implements Listener {
     private RespirateSpell() {
         super(SpellType.RESPIRATE,
                 "Breath underwater without taking damage for " + DURATION + " seconds.",
-                5, ChatColor.BLUE, new ItemStack[]{new ItemStack(Material.KELP, 1), new ItemStack(Material.REDSTONE, 1)}, 1.0f, 25, true, true, false);
+                5, ChatColor.BLUE, new ItemStack[]{new ItemStack(Material.KELP, 1), new ItemStack(Material.REDSTONE, 1)}, 1.0f, 25, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.DROWNED}, 0.08));
+
     }
 
     private  static RespirateSpell instance;

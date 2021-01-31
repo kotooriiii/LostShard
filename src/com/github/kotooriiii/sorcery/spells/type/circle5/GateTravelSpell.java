@@ -8,11 +8,13 @@ import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -45,7 +47,8 @@ public class GateTravelSpell extends Spell implements Listener {
 
     private GateTravelSpell() {
         super(SpellType.GATE_TRAVEL,
-                "Creates a temporary portal to one of your marks. Anyone can go through this portal. Lasts for " + GATE_TRAVEL_DURATION +  " seconds.",5, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.REDSTONE, 1),  new ItemStack(Material.STRING, 1)}, 2.0f /*15.0f*/, 25, true, true, false);
+                "Creates a temporary portal to one of your marks. Anyone can go through this portal. Lasts for " + GATE_TRAVEL_DURATION +  " seconds.",5, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.REDSTONE, 1),  new ItemStack(Material.STRING, 1)}, 2.0f /*15.0f*/, 25, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDERMAN}, 0.05));
     }
 
     private  static GateTravelSpell instance;

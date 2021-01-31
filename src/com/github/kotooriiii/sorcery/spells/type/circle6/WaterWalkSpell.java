@@ -4,11 +4,13 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.listeners.WaterWalkListener;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -46,7 +48,9 @@ public class WaterWalkSpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.LILY_PAD, 1), new ItemStack(Material.REDSTONE, 1)},
                 2d,
                 20,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.DOLPHIN}, 0.05));
+
     }
 
     private  static WaterWalkSpell instance;

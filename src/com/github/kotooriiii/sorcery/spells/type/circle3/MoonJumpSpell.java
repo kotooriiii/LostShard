@@ -7,12 +7,14 @@ import com.github.kotooriiii.sorcery.events.MarkCreateEvent;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -44,7 +46,10 @@ public class MoonJumpSpell extends Spell implements Listener {
     private MoonJumpSpell() {
         super(SpellType.MOON_JUMP,
                 "Makes you jump really high each jump for " + DURATION + " seconds! No fall damage, just high jumping. Very useful if you are in a trap!",
-                3, ChatColor.WHITE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 20, true, true, false);
+                3, ChatColor.WHITE, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 20,
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.SLIME}, 0.05));
+
     }
 
     private  static MoonJumpSpell instance;

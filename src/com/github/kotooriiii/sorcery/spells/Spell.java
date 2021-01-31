@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
 import com.github.kotooriiii.skills.skill_listeners.BrawlingListener;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle1.*;
 import com.github.kotooriiii.sorcery.spells.type.circle2.*;
 import com.github.kotooriiii.sorcery.spells.type.circle3.*;
@@ -47,6 +48,8 @@ public abstract class Spell {
     private boolean isWandable;
     private boolean isScrollable;
 
+    private SpellMonsterDrop monsterDrop;
+
     protected final static HashSet<Location> locationSavedForNoDrop = new HashSet<>();
     protected final static HashMap<UUID, SpellType> waitingForArgumentMap = new HashMap<>();
 
@@ -58,7 +61,7 @@ public abstract class Spell {
         return waitingForArgumentMap;
     }
 
-    public Spell(SpellType type, String desc, int circle, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable) {
+    public Spell(SpellType type, String desc, int circle, ChatColor color, ItemStack[] ingredients, double cooldown, int manaCost, boolean isCastable, boolean isWandable, boolean isScrollable, SpellMonsterDrop monsterDrop) {
         this.type = type;
         this.description = desc;
         this.circle = circle;
@@ -70,6 +73,8 @@ public abstract class Spell {
         this.isCastable = isCastable;
         this.isWandable = isWandable;
         this.isScrollable = isScrollable;
+
+        this.monsterDrop = monsterDrop;
     }
 
     public static Spell of(SpellType type) {
@@ -297,6 +302,10 @@ public abstract class Spell {
 
     public int getManaCost() {
         return manaCost;
+    }
+
+    public SpellMonsterDrop getMonsterDrop() {
+        return monsterDrop;
     }
 
     public static boolean isLapisNearby(Location location, int range) {

@@ -5,6 +5,7 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type_helpers.GluttonyCake;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Staff;
@@ -65,7 +66,8 @@ public class GluttonySpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.CAKE, 1)},
                 2.0d,
                 75,
-                true, true, false);
+                true, true, false, new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
+
     }
 
 
@@ -134,8 +136,7 @@ public class GluttonySpell extends Spell implements Listener {
 
         target.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * GLUTTONY_DURATION, 1, false, false, false));
 
-        for(Player player : Bukkit.getOnlinePlayers())
-        {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.hidePlayer(LostShardPlugin.plugin, target);
         }
         target.setSwimming(true);
@@ -174,8 +175,7 @@ public class GluttonySpell extends Spell implements Listener {
     private void cakeBaked(GluttonyCake cake) {
         Player cakee = Bukkit.getPlayer(cake.getPlayerIsCakeUUID());
 
-        if(cake.getLocation().getBlock().getType() == Material.CAKE)
-        {
+        if (cake.getLocation().getBlock().getType() == Material.CAKE) {
             cake.getLocation().getBlock().setType(Material.AIR);
         }
 
@@ -187,8 +187,7 @@ public class GluttonySpell extends Spell implements Listener {
         if (cakee != null) {
             cake.getLocation().getWorld().spawnParticle(Particle.VILLAGER_ANGRY, cake.getLocation(), 5, 1, 1, 1);
             cakee.removePotionEffect(PotionEffectType.INVISIBILITY);
-            for(Player player : Bukkit.getOnlinePlayers())
-            {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.showPlayer(LostShardPlugin.plugin, cakee);
             }
             cakee.setSwimming(true);
@@ -206,26 +205,22 @@ public class GluttonySpell extends Spell implements Listener {
     //
 
     @EventHandler
-    public void onQuitShow(PlayerQuitEvent event)
-    {
+    public void onQuitShow(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
-        for(UUID uuid : uuidCakeHashMap.keySet())
-        {
+        for (UUID uuid : uuidCakeHashMap.keySet()) {
             final Player player1 = Bukkit.getPlayer(uuid);
-            if(player1 == null)
+            if (player1 == null)
                 continue;
             player.showPlayer(LostShardPlugin.plugin, player1);
         }
     }
 
     @EventHandler
-    public void onJoinHide(PlayerJoinEvent event)
-    {
+    public void onJoinHide(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        for(UUID uuid : uuidCakeHashMap.keySet())
-        {
+        for (UUID uuid : uuidCakeHashMap.keySet()) {
             final Player player1 = Bukkit.getPlayer(uuid);
-            if(player1 == null)
+            if (player1 == null)
                 continue;
             player.hidePlayer(LostShardPlugin.plugin, player1);
         }
@@ -234,7 +229,7 @@ public class GluttonySpell extends Spell implements Listener {
     //
     // On Cakee Control
     //
-    @EventHandler (priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOW)
     public void onQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
 
@@ -291,7 +286,7 @@ public class GluttonySpell extends Spell implements Listener {
             return;
         if (!uuidCakeHashMap.containsKey(player.getUniqueId()))
             return;
-        if(Staff.isStaff(player.getUniqueId())) {
+        if (Staff.isStaff(player.getUniqueId())) {
             player.sendMessage(ChatColor.YELLOW + "Bypassed CAKE command restrictions because you're staff :) .");
             return;
         }
@@ -302,14 +297,13 @@ public class GluttonySpell extends Spell implements Listener {
         event.setCancelled(true);
     }
 
-    private boolean isAllowedCommands(String message)
-    {
+    private boolean isAllowedCommands(String message) {
         message = message.substring(1).toLowerCase();
 
         return message.startsWith("msg") || message.startsWith("message")
-                || message.startsWith("whisper")  || message.startsWith("w ")  || message.equals("w")
+                || message.startsWith("whisper") || message.startsWith("w ") || message.equals("w")
                 || message.startsWith("g ") || message.equals("g") || message.startsWith("global ") || message.equals("global") ||
-                message.startsWith("l ") || message.equals("l")  || message.startsWith("local")
+                message.startsWith("l ") || message.equals("l") || message.startsWith("local")
                 || message.startsWith("shout") || message.startsWith("s ") || message.equals("s")
                 || message.startsWith("reply") || message.startsWith("r ") || message.equals("r");
     }
@@ -580,8 +574,7 @@ public class GluttonySpell extends Spell implements Listener {
         return uuidCakeHashMap;
     }
 
-    public static boolean isCake(UUID uuid)
-    {
+    public static boolean isCake(UUID uuid) {
         return uuidCakeHashMap.containsKey(uuid);
     }
 }

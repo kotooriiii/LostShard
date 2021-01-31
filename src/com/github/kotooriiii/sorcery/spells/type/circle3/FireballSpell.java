@@ -3,6 +3,7 @@ package com.github.kotooriiii.sorcery.spells.type.circle3;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle2.WallSpell;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -44,7 +45,8 @@ public class FireballSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.GUNPOWDER, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0f,
                 15,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.GHAST}, 0.20));
     }
 
     private  static FireballSpell instance;

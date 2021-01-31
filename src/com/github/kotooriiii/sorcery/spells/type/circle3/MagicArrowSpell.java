@@ -3,11 +3,13 @@ package com.github.kotooriiii.sorcery.spells.type.circle3;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +33,11 @@ public class MagicArrowSpell extends Spell implements Listener {
     private MagicArrowSpell() {
         super(SpellType.MAGIC_ARROW,
                 "Shoots 3 arrows in a cone in the direction you are facing. Sort of like a multi-shot.",
-                3, ChatColor.DARK_RED, new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)}, 2.0f, 20, true, true, false);
+                3, ChatColor.DARK_RED,
+                new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1)},
+                2.0f, 20, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.SKELETON}, 0.10));
+
     }
 
     private  static MagicArrowSpell instance;

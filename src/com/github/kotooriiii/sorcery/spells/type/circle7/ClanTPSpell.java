@@ -5,6 +5,7 @@ import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle6.WaterWalkSpell;
 import com.github.kotooriiii.stats.Stat;
 import net.citizensnpcs.api.CitizensAPI;
@@ -12,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,7 +42,8 @@ public class ClanTPSpell extends Spell implements Listener {
                 "Example:\n" +
                 "/cast clantp\n" +
                 "Nickolov",
-                7, ChatColor.GREEN, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false);
+                7, ChatColor.GREEN, new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 15, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDERMAN}, 0.01));
     }
 
     private  static ClanTPSpell instance;

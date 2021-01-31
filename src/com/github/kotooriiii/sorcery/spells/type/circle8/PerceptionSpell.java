@@ -5,6 +5,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -46,9 +47,8 @@ public class PerceptionSpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.ENDER_EYE, 1), new ItemStack(Material.REDSTONE, 1)},
                 2.0d,
                 20,
-                true, true, false);
-
-
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{}, 0.00));
     }
 
 

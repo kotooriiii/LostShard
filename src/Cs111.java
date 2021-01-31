@@ -1,6 +1,11 @@
 public class Cs111 {
     public static void main(String[] args) {
 
+        System.out.println("Yes".replace("[A-Za-z]", "?"));
+
+        if(1==1)
+            return;
+
         int[] encryptedArray = new int[]
                 {
                         53, 58, 37, 37, 69, 62, 7,

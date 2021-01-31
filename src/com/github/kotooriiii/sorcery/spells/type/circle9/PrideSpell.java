@@ -6,6 +6,7 @@ import com.github.kotooriiii.skills.skill_listeners.TamingListener;
 import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle8.DaySpell;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
@@ -13,6 +14,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftMob;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,7 +58,8 @@ public class PrideSpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.POPPY, 1)},
                 2d,
                 60,
-                true, true, false);
+                true, true, false, new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
+
     }
 
     private static PrideSpell instance;
@@ -232,7 +235,7 @@ public class PrideSpell extends Spell implements Listener {
                     EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(player, entity, EntityDamageEvent.DamageCause.CUSTOM, ABSORB_POINTS);
                     entity.setLastDamageCause(damageByEntityEvent);
                     Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-                    if(!damageByEntityEvent.isCancelled()) {
+                    if (!damageByEntityEvent.isCancelled()) {
                         double newHealth = ((Player) entity).getHealth() - ABSORB_POINTS;
                         if (newHealth < 0)
                             ((Player) entity).setHealth(0);

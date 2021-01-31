@@ -5,10 +5,12 @@ import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -46,9 +48,8 @@ public class LightSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.COAL, 1)},
                 LIGHT_DURATION,
                 5,
-                true, true, false);
-
-
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.CHICKEN, EntityType.COW, EntityType.SHEEP}, 0.3));
     }
 
     private static LightSpell instance;

@@ -3,12 +3,14 @@ package com.github.kotooriiii.sorcery.spells.type.circle9;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,7 +43,8 @@ public class SlothSpell extends Spell implements Listener {
     private SlothSpell() {
         super(SpellType.SLOTH,
                 "You take less damage and knock people far away for " + DURATION + " seconds! However, you become really slow.",
-                9, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.SCUTE, 1)}, 2.0f, 45, true, true, false);
+                9, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.SCUTE, 1)}, 2.0f, 45, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
     }
 
     private static SlothSpell instance;

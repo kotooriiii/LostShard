@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -36,7 +37,9 @@ public class ForcePushSpell extends Spell {
 
     private ForcePushSpell() {
         super(SpellType.FORCE_PUSH, "Pushes everyone in your view " + MAGNITUDE + " blocks away from you. Very OP.", 6, ChatColor.GOLD
-                , new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.STRING, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 20, true, true, false);
+                , new ItemStack[]{new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.STRING, 1), new ItemStack(Material.FEATHER, 1)}, 2.0f, 20, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.CAVE_SPIDER}, 0.02));
+
     }
 
     private  static ForcePushSpell instance;

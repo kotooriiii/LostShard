@@ -6,9 +6,11 @@ import com.github.kotooriiii.sorcery.spells.ImageParticles;
 import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import org.bukkit.*;
 import org.bukkit.Color;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -42,7 +44,8 @@ public class WallSpell extends Spell {
                 new ItemStack[]{new ItemStack(Material.COBBLESTONE, 1)},
                 1.0f,
                 15,
-                true, true, false);
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.SHEEP}, 0.10));
     }
 
     private  static WallSpell instance;

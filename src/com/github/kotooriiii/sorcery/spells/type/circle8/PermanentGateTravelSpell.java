@@ -8,6 +8,7 @@ import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle7.RadiateSpell;
 import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.CitizensAPI;
@@ -38,7 +39,8 @@ public class PermanentGateTravelSpell extends Spell implements Listener {
 
 
     private PermanentGateTravelSpell() {
-        super(SpellType.PERMANENT_GATE_TRAVEL,  "Create a permanent portal to one of your marks. Portal can be destroyed by right-clicking on it. Portal direction can be changed by Shift + Right-clicking it.",8, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 1.0f /*15.0f*/, 30, true, true, false);
+        super(SpellType.PERMANENT_GATE_TRAVEL,  "Create a permanent portal to one of your marks. Portal can be destroyed by right-clicking on it. Portal direction can be changed by Shift + Right-clicking it.",8, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.OBSIDIAN, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.LAPIS_LAZULI, 1), new ItemStack(Material.STRING, 1)}, 1.0f /*15.0f*/, 30, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{}, 0.00));
     }
 
     private  static PermanentGateTravelSpell instance;

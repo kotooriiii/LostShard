@@ -4,10 +4,12 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -61,7 +63,8 @@ public class LustSpell extends Spell {
     private LustSpell() {
         super(SpellType.LUST,
                 "Replenishes every one of your clan member’s stamina and hearts to full.",
-                9, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 1)}, 2.0f, 85, true, true, false);
+                9, ChatColor.DARK_PURPLE, new ItemStack[]{new ItemStack(Material.DRAGON_EGG, 1), new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 1)}, 2.0f, 85, true, true, false,
+                new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
     }
 
     private  static LustSpell instance;

@@ -3,9 +3,11 @@ package com.github.kotooriiii.sorcery.spells.type.circle8;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
+import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -45,9 +47,8 @@ public class SoarSpell extends Spell implements Listener {
                 new ItemStack[]{new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), new ItemStack(Material.PHANTOM_MEMBRANE, 1)},
                 2.0d,
                 90,
-                true, true, false);
-
-
+                true, true, false,
+                new SpellMonsterDrop(new EntityType[]{}, 0.00d));
     }
 
 
