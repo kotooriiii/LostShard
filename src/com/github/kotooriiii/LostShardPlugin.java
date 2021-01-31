@@ -69,7 +69,8 @@ import com.github.kotooriiii.sorcery.GateManager;
 import com.github.kotooriiii.sorcery.commands.ToggleCommand;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
-import com.github.kotooriiii.sorcery.spells.SpellbookCommand;
+import com.github.kotooriiii.sorcery.spells.SorceryManager;
+import com.github.kotooriiii.sorcery.commands.SpellbookCommand;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDropListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
@@ -167,6 +168,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static TutorialManager tutorialManager;
     private static TutorialReader tutorialReader;
     private static TipsManager tipsManager;
+    private static SorceryManager sorceryManager;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -294,6 +296,7 @@ public class LostShardPlugin extends JavaPlugin {
         shrineManager = new ShrineManager();
         gatheringManager = new GatheringManager();
         ignoreManager = new IgnoreManager();
+        sorceryManager = new SorceryManager();
 
 
         if (isTutorial()) {
@@ -1218,6 +1221,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static TipsManager getTipsManager() {
         return tipsManager;
+    }
+
+    public static SorceryManager getSorceryManager() {
+        return sorceryManager;
     }
 
     public static LSBorder getBorder(String worldName) {

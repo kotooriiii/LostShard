@@ -23,6 +23,7 @@ import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.SkillType;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
 import com.github.kotooriiii.sorcery.wands.Glow;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
@@ -956,6 +957,28 @@ public final class FileManager {
         }
     }
 
+    public static void readSorceryPlayer(File file) {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+
+        String fileName = file.getName().substring(0, file.getName().indexOf('.'));
+
+        if (!fileName.equalsIgnoreCase(sorceryPlayer_folder.getName()))
+            return;
+
+        Set<String> paths = yaml.getConfigurationSection("ignoredList").getKeys(false);
+
+
+        for (String path : paths) {
+            IgnorePlayer ignorePlayer = new IgnorePlayer(UUID.fromString(path));
+            List<String> uuidsString = yaml.getStringList("ignoredList." + path);
+            HashSet<UUID> uuids = new HashSet<>();
+            for (String uuidString : uuidsString)
+                uuids.add(UUID.fromString(uuidString));
+            ignorePlayer.setIgnoredPlayers(uuids);
+            LostShardPlugin.getIgnoreManager().addIgnorePlayer(ignorePlayer, false);
+        }
+    }
+
 
     public static synchronized void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -1518,6 +1541,28 @@ public final class FileManager {
         }
     }
 
+    public static void write(SorceryPlayer sorceryPlayer) {
+        String fileName = sorceryPlayer.getUUID() + ".yml";
+        File sorceryPlayerFile = new File(sorceryPlayer_folder + File.separator + fileName);
+        if (!sorceryPlayerFile.exists()) {
+            try {
+                sorceryPlayerFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(sorceryPlayerFile);
+
+        yaml.set("spellsOwned", sorceryPlayer.getArrayList());
+
+        try {
+            yaml.save(sorceryPlayerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void removeFile(Shrine shrine) {
         String fileName = shrine.getType().name() + ".yml";
@@ -1625,6 +1670,14 @@ public final class FileManager {
 
     }
 
+    public static void removeFile(SorceryPlayer sorceryPlayer) {
+        File sorceryPlayerFile = new File(sorceryPlayer_folder + File.separator + sorceryPlayer.getUUID() + ".yml");
+
+        if (sorceryPlayerFile.exists())
+            sorceryPlayerFile.delete();
+
+    }
+
     public static void removeFile(LinkPlayer linkPlayer) {
         File linkPlayerFile = new File(links_folder + File.separator + linkPlayer.getUserSnowflake() + ".obj");
 
@@ -1687,6 +1740,7 @@ public final class FileManager {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");
         }
     }
+
 
 
 }

@@ -9,6 +9,7 @@ import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.sorcery.marks.MarkPlayer;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
@@ -39,10 +40,20 @@ public class InitializerListener implements Listener {
         registerBank(player);
         registerSkill(player);
         registerMark(player);
+        registerSorcery(player);
 
         registerStatus(player);
         registerStat(player);
         registerIgnore(player);
+    }
+
+    private void registerSorcery(Player player) {
+        SorceryPlayer sorceryPlayer = LostShardPlugin.getSorceryManager().wrap(player.getUniqueId());
+        if (sorceryPlayer == null) {
+            sorceryPlayer = new SorceryPlayer(player.getUniqueId());
+            LostShardPlugin.getSorceryManager().addSorceryPlayer(sorceryPlayer, true);
+            return;
+        }
     }
 
     private void registerPlot(Player player) {

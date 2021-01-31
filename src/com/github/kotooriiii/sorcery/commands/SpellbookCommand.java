@@ -1,8 +1,12 @@
-package com.github.kotooriiii.sorcery.spells;
+package com.github.kotooriiii.sorcery.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.commands.DiscordCommand;
 import com.github.kotooriiii.commands.DocCommand;
 import com.github.kotooriiii.commands.WikiCommand;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -50,19 +54,21 @@ public class SpellbookCommand implements CommandExecutor {
 
 
         Queue<Spell> spellsOrdered = new ArrayBlockingQueue<Spell>(SpellType.values().length);
+        SorceryPlayer sorceryPlayer = LostShardPlugin.getSorceryManager().wrap(((Player) commandSender).getUniqueId());
 
         for (int i = 1; i <= 9; i++) {
-            TextComponent circle = addCircle(i, spellsOrdered);
+            TextComponent circle = addCircle(i, spellsOrdered, sorceryPlayer);
             bookMeta.spigot().addPage(new BaseComponent[]{circle});
         }
 
         final int INITIAL_SIZE = spellsOrdered.size();
 
+
         while (spellsOrdered.size() > 0) {
 
             Spell spell = spellsOrdered.poll();
             int currentSize = spellsOrdered.size();
-            bookMeta.spigot().addPage(new BaseComponent[]{addSpell(spell)});
+            bookMeta.spigot().addPage(new BaseComponent[]{addSpell(spell, sorceryPlayer)});
         }
 
 
@@ -74,9 +80,9 @@ public class SpellbookCommand implements CommandExecutor {
         return true;
     }
 
-    private TextComponent addSpell(Spell spell) {
+    private TextComponent addSpell(Spell spell, SorceryPlayer sorceryPlayer) {
 
-        boolean isOwned = false; //todo
+        boolean isOwned = sorceryPlayer.hasSpell(spell.getType());
 
 
         TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, false, "  " + spell.getName()) + "\n\n");
@@ -129,7 +135,7 @@ public class SpellbookCommand implements CommandExecutor {
      * @param i circle number
      * @return
      */
-    private TextComponent addCircle(int i, Queue<Spell> queue) {
+    private TextComponent addCircle(int i, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
 
         String suffix = "";
         if (i == 1)
@@ -148,7 +154,7 @@ public class SpellbookCommand implements CommandExecutor {
 
 
         for (Spell spell : spells) {
-            TextComponent textComponent = getComponentOfSpell(spell, queue);
+            TextComponent textComponent = getComponentOfSpell(spell, queue, sorceryPlayer);
             root.addExtra(textComponent);
         }
 
@@ -156,8 +162,8 @@ public class SpellbookCommand implements CommandExecutor {
         return root;
     }
 
-    public TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue) {
-        boolean isOwned = false; //todo
+    public TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
+        boolean isOwned = sorceryPlayer.hasSpell(spell.getType());
         String newliner = spell.getCircle() == 9 ? "\n" : "\n\n";
 
         TextComponent spellComponent = new TextComponent(spell.getName() + newliner);

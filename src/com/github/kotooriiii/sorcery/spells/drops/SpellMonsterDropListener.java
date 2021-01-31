@@ -1,5 +1,7 @@
 package com.github.kotooriiii.sorcery.spells.drops;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
@@ -46,9 +48,9 @@ public class SpellMonsterDropListener implements Listener {
         attacker is not null
          */
 
+        SorceryPlayer sorceryPlayer = LostShardPlugin.getSorceryManager().wrap(attacker.getUniqueId());
         for (Spell spell : Spell.getSpells()) {
-            //todo if plauyer already owns
-            boolean isOwned = false;
+            boolean isOwned = sorceryPlayer.hasSpell(spell.getType());
 
             if (isOwned)
                 continue;
@@ -61,7 +63,8 @@ public class SpellMonsterDropListener implements Listener {
                     continue;
 
                 //LUCKY
-                //todo grab spell and drop it!
+
+                defenderEntity.getWorld().dropItem(defenderEntity.getLocation(), SpellDropScroll.getScrollPaper(attacker, spell));
                 defenderEntity.getLocation().getWorld().playSound(defenderEntity.getLocation(), Sound.BLOCK_BELL_RESONATE, 10f, 4);
                 spawnFireworks(defenderEntity.getLocation(), 1);
                 break;
