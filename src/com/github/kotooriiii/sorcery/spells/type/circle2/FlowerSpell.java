@@ -138,7 +138,7 @@ public class FlowerSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        Block block = player.getTargetBlockExact(12, FluidCollisionMode.NEVER);
+        Block block = player.getTargetBlockExact(20, FluidCollisionMode.NEVER);
 
         if (block == null) {
             player.sendMessage(ERROR_COLOR + "You must be near the block.");

@@ -134,7 +134,7 @@ public class DaySpell extends SpellChanneleable {
                 }
 
                 for(Player player : Bukkit.getOnlinePlayers())
-                    lightning(player.getLocation(), 1);
+                    lightning(player.getLocation(), 6);
 
 
             }
@@ -147,10 +147,11 @@ public class DaySpell extends SpellChanneleable {
             return;
 
         for(int i = 0 ; i < times; i++) {
-            int x = new Random().nextInt(51);
-            int z = new Random().nextInt(51);
+            int x = new Random().nextInt(51)-25;
+            int z = new Random().nextInt(51)-25;
 
-            final Block highestBlockAt = location.getWorld().getHighestBlockAt(x, z);
+
+            final Block highestBlockAt = location.getWorld().getHighestBlockAt(location.getBlockX()+x, location.getBlockZ()+z);
             highestBlockAt.getWorld().strikeLightningEffect(highestBlockAt.getLocation());
         }
     }

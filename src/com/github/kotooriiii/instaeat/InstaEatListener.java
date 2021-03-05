@@ -5,6 +5,7 @@ import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -24,7 +25,8 @@ public class InstaEatListener implements Listener {
 
     @EventHandler
     public void onInstaEat(PlayerInteractEvent playerInteractEvent) {
-
+        if(playerInteractEvent.useItemInHand() == Event.Result.DENY)
+            return;
 
         Player player = playerInteractEvent.getPlayer();
 

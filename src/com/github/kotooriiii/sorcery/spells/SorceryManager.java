@@ -2,6 +2,7 @@ package com.github.kotooriiii.sorcery.spells;
 
 import com.github.kotooriiii.files.FileManager;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -39,5 +40,9 @@ public class SorceryManager {
     public SorceryPlayer wrap(UUID uuid)
     {
         return sorceryPlayerHashMap.get(uuid);
+    }
+
+    public Collection<SorceryPlayer> getSorceryPlayers() {
+        return sorceryPlayerHashMap.values();
     }
 }

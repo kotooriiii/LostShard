@@ -13,6 +13,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -124,6 +125,10 @@ public class MoonJumpSpell extends Spell implements Listener {
             @Override
             public void run() {
                 getJumpers().remove(uuidConst);
+                if(player.isOnline()) {
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_HIT, 5.0f, 2.333f);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SLIME_SQUISH, 7.0f, 3.333f);
+                }
             }
         }.runTaskLater(LostShardPlugin.plugin, 20*DURATION);
 

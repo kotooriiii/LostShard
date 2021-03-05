@@ -63,6 +63,11 @@ public class BindCommand implements CommandExecutor {
                         return false;
                     }
 
+                    if(!LostShardPlugin.getSorceryManager().wrap(playerUUID).hasSpell(wand.getSpell().getType())) {
+                        playerSender.sendMessage(ERROR_COLOR + "You don't own this spell...");
+                        return true;
+                    }
+
                     ItemStack inHand = playerSender.getInventory().getItemInMainHand();
                     if (inHand == null || inHand.getType() != Material.STICK) {
                         playerSender.sendMessage(ERROR_COLOR + "You need a stick in your main hand to bind a spell!");

@@ -30,11 +30,10 @@ import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 public class LustSpell extends Spell {
 
     private final static HashMap<UUID, Double> lustSpellCooldownMap = new HashMap<>();
-    private final  LustColor[] lustColorArray = new LustColor[]{new LustColor(27,100,18), new LustColor(18,100,51), new LustColor(18,100,91)};
+    private final LustColor[] lustColorArray = new LustColor[]{new LustColor(70, 98, 65), new LustColor(18, 100, 51), new LustColor(18, 100, 91)};
 
-    private class LustColor
-    {
-        private int r,g,b;
+    private class LustColor {
+        private int r, g, b;
 
         public LustColor(int r, int g, int b) {
             this.r = r;
@@ -54,9 +53,8 @@ public class LustSpell extends Spell {
             return g;
         }
 
-        public Color toColor()
-        {
-            return Color.fromRGB(r,g,b);
+        public Color toColor() {
+            return Color.fromRGB(r, g, b);
         }
     }
 
@@ -67,7 +65,8 @@ public class LustSpell extends Spell {
                 new SpellMonsterDrop(new EntityType[]{EntityType.ENDER_DRAGON}, 0.1111111111));
     }
 
-    private  static LustSpell instance;
+    private static LustSpell instance;
+
     public static LustSpell getInstance() {
         if (instance == null) {
             synchronized (LustSpell.class) {
@@ -130,36 +129,55 @@ public class LustSpell extends Spell {
     public boolean executeSpell(Player player) {
 
         Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
-        if(clan == null)
-        {
+        if (clan == null) {
             player.sendMessage(ERROR_COLOR + "You are not in a clan.");
             return false;
         }
 
         Player[] onlinePlayers = clan.getOnlinePlayers();
 
-        if(onlinePlayers.length == 0)
-        {
+        if (onlinePlayers.length == 0) {
             player.sendMessage(ERROR_COLOR + "No clan members are online.");
             return false;
         }
 
-        for(Player iplayer : onlinePlayers )
-        {
+        for (Player iplayer : onlinePlayers) {
 
-            BlockIterator iterator = new BlockIterator(iplayer.getWorld(), iplayer.getEyeLocation().toVector(), new Vector(0,1,0), 0, 0);
-            while(iterator.hasNext())
-            {
-                Block next = iterator.next();
-                if(!next.getType().isAir())
-                    break;
-                next.getWorld().spawnParticle(Particle.REDSTONE, next.getLocation(), 10, 0, 0, 0, new Particle.DustOptions(lustColorArray[new Random().nextInt(lustColorArray.length)].toColor(), 1f));
-            }
+            BlockIterator iterator = new BlockIterator(iplayer.getWorld(), iplayer.getEyeLocation().clone().add(0, 1, 0).toVector(), new Vector(0, 1, 0), 0, 0);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (iterator.hasNext()) {
+                        Block next = iterator.next();
+                        if (!next.getType().isAir()) {
+                            this.cancel();
+                            return;
+                        }
+                        next.getWorld().spawnParticle(Particle.REDSTONE, next.getLocation().clone().add(0.5, 0, 0.5), 10, 0, 1, 0, new Particle.DustOptions(lustColorArray[new Random().nextInt(lustColorArray.length)].toColor(), 1f));
+                        next.getWorld().spawnParticle(Particle.TOWN_AURA, next.getLocation().clone().add(0.5, 0, 0.5), 3, 0, 0, 0);
+                        next.getWorld().spawnParticle(Particle.TOTEM, next.getLocation().clone().add(0.5, 0, 0.5), 3, 0, 0, 0);
+
+                        if (Math.random() < 0.5)
+                            next.getWorld().spawnParticle(Particle.HEART, next.getLocation().clone().add(0.5, 0, 0.5), 3, 1, 0.3f, 1);
+
+
+                        if (next.getY() + 1 > next.getWorld().getMaxHeight()) {
+                            this.cancel();
+                            return;
+                        }
+                    }
+
+                }
+            }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 1);
 
             iplayer.setHealth(iplayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             iplayer.setFoodLevel(20);
-            iplayer.getWorld().spawnParticle(Particle.HEART, iplayer.getEyeLocation(), 3, 1,0.3f,1);
-            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 8.0f, 2.0f);
+            iplayer.getWorld().spawnParticle(Particle.HEART, iplayer.getEyeLocation(), 3, 1, 0.3f, 1);
+            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.EVENT_RAID_HORN, 10.0f, 7.0f);
+            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 10.0f, 7.0f);
+            iplayer.getWorld().playSound(iplayer.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 10.0f, 7.0f);
+
             Stat wrap = Stat.wrap(iplayer);
             wrap.setStamina(wrap.getMaxStamina());
         }

@@ -5,6 +5,7 @@ import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.status.StatusUpdateListener;
+import com.github.kotooriiii.util.HelperMethods;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -96,6 +97,8 @@ public class FireballExplodeListener implements Listener {
         for (Entity entity : location.getWorld().getNearbyEntities(location, RADIUS, RADIUS, RADIUS)) {
             if (!(entity instanceof Damageable))
                 continue;
+            if(!(entity instanceof LivingEntity))
+                continue;
             if(entity.equals(shooter)) {
                 ((Damageable) entity).damage(damage);
                 continue;
@@ -105,18 +108,8 @@ public class FireballExplodeListener implements Listener {
 
             final float DAMAGE = damage;
             //      ((Player) entity).damage(0.1f);
-            EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(shooter, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
-            entity.setLastDamageCause(damageByEntityEvent);
-            Bukkit.getPluginManager().callEvent(damageByEntityEvent);
 
-            if(!damageByEntityEvent.isCancelled()) {
-                double newHealth = ((Player) entity).getHealth() - DAMAGE;
-                if (newHealth < 0)
-                    ((Player) entity).setHealth(0);
-                else
-                    ((Player) entity).setHealth(newHealth);
-            }
-
+            HelperMethods.customDamage(shooter, (LivingEntity) entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
 
 
         }

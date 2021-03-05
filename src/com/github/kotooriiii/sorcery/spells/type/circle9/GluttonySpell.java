@@ -22,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -88,10 +89,14 @@ public class GluttonySpell extends Spell implements Listener {
     @Override
     public boolean executeSpell(Player player) {
 
-        final RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), GLUTTONY_DISTANCE, e -> e.getType() == EntityType.PLAYER && !uuidCakeHashMap.containsKey(e.getUniqueId()) && !((LivingEntity) e).hasPotionEffect(PotionEffectType.INVISIBILITY) && e != player);
+        final RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), GLUTTONY_DISTANCE, e -> e.getType() == EntityType.PLAYER && !uuidCakeHashMap.containsKey(e.getUniqueId()) && !((LivingEntity) e).hasPotionEffect(PotionEffectType.INVISIBILITY) && e != player && (!Staff.isStaff(e.getUniqueId())));
+
+        if (result == null) {
+            player.sendMessage(ERROR_COLOR + "No player targeted.");
+            return false;
+        }
         final Player hitPlayer = (Player) result.getHitEntity();
 
-        //todo how does it affect invis entities?
 
         if (result == null || hitPlayer == null) {
             player.sendMessage(ERROR_COLOR + "No player targeted.");
@@ -121,7 +126,7 @@ public class GluttonySpell extends Spell implements Listener {
     // Cake methods
     //
     private void cake(Player target, Player caster) {
-        Hologram hologram = HologramsAPI.createHologram(LostShardPlugin.plugin, target.getLocation().clone().add(0, 1.5f, 0));
+        Hologram hologram = HologramsAPI.createHologram(LostShardPlugin.plugin, target.getLocation().clone().add(0.5f, 1.5f, 0.5f));
 
         final StatusPlayer targetStatus = StatusPlayer.wrap(target.getUniqueId());
 
@@ -266,7 +271,7 @@ public class GluttonySpell extends Spell implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
 
@@ -275,6 +280,8 @@ public class GluttonySpell extends Spell implements Listener {
         if (!uuidCakeHashMap.containsKey(player.getUniqueId()))
             return;
         player.sendMessage(ERROR_COLOR + "Cakes don't interact!");
+        event.setUseItemInHand(Event.Result.DENY);
+        event.setUseInteractedBlock(Event.Result.DENY);
         event.setCancelled(true);
     }
 
@@ -348,14 +355,16 @@ public class GluttonySpell extends Spell implements Listener {
             return;
 
         Cake cakeBlockData = (Cake) cakeBlock.getBlockData();
-        if (cakeBlockData.getBites() < cakeBlockData.getMaximumBites()) {
-            cakeBlockData.setBites(cakeBlockData.getBites() + 1);
+        if (cakeBlockData.getBites() <= cakeBlockData.getMaximumBites()) {
+            gluttonyCake.addDamageDefault();
 
-            if (cakeBlockData.getBites() + 1 == cakeBlockData.getMaximumBites()) {
+            if (cakeBlockData.getBites() == cakeBlockData.getMaximumBites()) {
                 cakeBlock.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, cakeBlock.getLocation(), 4, 0, 0.2f, 0);
                 gluttonyCake.setEaten(true);
                 cakeBaked(gluttonyCake);
             }
+            if (cakeBlockData.getBites() + 1 != 7)
+                cakeBlockData.setBites(cakeBlockData.getBites() + 1);
         }
 
         final int foodLevel = event.getPlayer().getFoodLevel();
@@ -373,7 +382,6 @@ public class GluttonySpell extends Spell implements Listener {
         if (eaten != null)
             LostShardPlugin.getCombatLogManager().combat(eaten, eater);
 
-        gluttonyCake.addDamageDefault();
         event.setCancelled(true);
     }
 

@@ -508,7 +508,7 @@ public class BlockChangePlotListener implements Listener {
      */
     @EventHandler
     public void onBucketfill(PlayerBucketEmptyEvent event) {
-        final Location location = event.getPlayer().getLocation();
+        final Location location = event.getBlockClicked().getLocation();
         //Check entity
         final Entity entity = event.getPlayer();
         //If entity is not a player then cancel it
@@ -554,7 +554,7 @@ public class BlockChangePlotListener implements Listener {
      */
     @EventHandler
     public void onBucketfill(PlayerBucketFillEvent event) {
-        final Location location = event.getPlayer().getLocation();
+        final Location location = event.getBlockClicked().getLocation();
         //Check entity
         final Entity entity = event.getPlayer();
         //If entity is not a player then cancel it

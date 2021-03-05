@@ -44,7 +44,7 @@ public class PrideSpell extends Spell implements Listener {
     public final static int PRIDE_DISTANCE = 4;
     private final static float PRIDE_DURATION = 15.0f;
 
-    private final static int ABSORB_POINTS = 2;
+    private final static int ABSORB_POINTS = 2*2;
 
     private static HashSet<UUID> prideSet = new HashSet<>();
     private static HashSet<UUID> afterHoursPrideSet = new HashSet<>();
@@ -74,12 +74,16 @@ public class PrideSpell extends Spell implements Listener {
         return instance;
     }
 
-    public void drawInPlane(Location location, double distance) {
+    public void drawInPlane(Location location, Particle particle, double chance, double distance) {
+
+        if(Math.random() < chance && particle != Particle.REDSTONE)
+            return;
 
         // We will use these for drawing our parametric curve on the plane:
         double twopi = 2 * Math.PI;
         double times = 1 * twopi;
         double division = twopi / 100;
+
         //This is how far away we want the plane's origin to be:
         double radius = 1d;
 
@@ -99,7 +103,9 @@ public class PrideSpell extends Spell implements Listener {
         //nv.multiply(-1);
 
         // For loop for your parametric equation
-        for (double theta = 0; theta < times; theta += division) {
+        for (double theta = chance == 1 ?  0 : Math.random()*twopi; theta < times; theta += division) {
+
+
 
             // Coordinates with respect to our basis
             double xb = distance * Math.cos(theta); //calculate x coordinate
@@ -119,8 +125,20 @@ public class PrideSpell extends Spell implements Listener {
 //            // 6 = RED
 //            double ran = 6d / 24d;
 
-            for (Player player : Bukkit.getOnlinePlayers())
-                player.spawnParticle(Particle.CRIMSON_SPORE, new Location(c.getWorld(), x, y, z), 1);
+            Location prideLocation =  new Location(c.getWorld(), x, y, z);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if(particle == Particle.REDSTONE)
+                player.getWorld().spawnParticle(Particle.REDSTONE, prideLocation, 2, 0, 0, 0, new Particle.DustOptions(Color.fromRGB(26, 5, 4), 1f));
+                else {
+
+                    player.getWorld().spawnParticle(particle, prideLocation, 2);
+                }
+
+            }
+            if(chance != 1)
+                break;
+
+
             //player.spawnParticle(Particle.NOTE, new Location(c.getWorld(), x, y, z), 0, ran, 0, 0, 1);
         }
 
@@ -140,23 +158,31 @@ public class PrideSpell extends Spell implements Listener {
 
         prideSet.add(player.getUniqueId());
 
+        Particle particle = Particle.FALLING_LAVA;
+
+        final int PARTICLE_FREQUENCY = 1;
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (timerA[0] * (REFRESH) >= PRIDE_DURATION * 20 || player.isDead() || !player.isOnline() || !prideSet.contains(uniqueId)) {
+                if (timerA[0] * (PARTICLE_FREQUENCY) >= PRIDE_DURATION * 20 || player.isDead() || !player.isOnline() || !prideSet.contains(uniqueId)) {
                     this.cancel();
                     return;
                 }
 
                 if (player.isOnline() && !player.isDead()) {
-                    drawInPlane(player.getEyeLocation().clone().add(0, -3, 0), PRIDE_DISTANCE);
+                    drawInPlane(player.getEyeLocation().clone().add(0, -3, 0), Particle.REDSTONE, 1, PRIDE_DISTANCE);
+                    drawInPlane(player.getEyeLocation().clone().add(0, -3, 0), particle, 0.25, PRIDE_DISTANCE-1);
+                    drawInPlane(player.getEyeLocation().clone().add(0, -3, 0), particle, 0.25, PRIDE_DISTANCE-2);
+                    drawInPlane(player.getEyeLocation().clone().add(0, -3, 0), particle, 0.25, PRIDE_DISTANCE-3);
+
+                    if((timerA[0] * (PARTICLE_FREQUENCY)) % 20 == 0)
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 10.0f, 0.33f);
                 }
 
                 timerA[0]++;
             }
-        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, REFRESH);
+        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, PARTICLE_FREQUENCY);
 
 
         new BukkitRunnable() {

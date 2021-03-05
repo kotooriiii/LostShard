@@ -286,7 +286,7 @@ public class SurvivalismListener implements Listener {
 
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
-        Entity damager = betterDamageCause.getEntity();
+        Entity damager = betterDamageCause.getDamager();
 
         if (damager == null)
             return;

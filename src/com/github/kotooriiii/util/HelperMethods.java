@@ -842,7 +842,7 @@ public final class HelperMethods {
         customDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, damage);
     }
 
-    public static void customDamage(LivingEntity attacker, LivingEntity defender, EntityDamageEvent.DamageCause cause, int damage) {
+    public static void customDamage(LivingEntity attacker, LivingEntity defender, EntityDamageEvent.DamageCause cause, float damage) {
         EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(attacker, defender, cause, damage);
         defender.setLastDamageCause(damageByEntityEvent);
         Bukkit.getPluginManager().callEvent(damageByEntityEvent);

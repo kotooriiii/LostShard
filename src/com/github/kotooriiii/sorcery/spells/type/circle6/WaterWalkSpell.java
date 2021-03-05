@@ -76,6 +76,8 @@ public class WaterWalkSpell extends Spell implements Listener {
             public void run() {
                 if (player != null && player.isOnline()) {
                     player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_HIT, 5.0f, 2.333f);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_DOLPHIN_SPLASH, 7.0f, 3.333f);
+
 
                     ArrayList<Block> blocks = WaterWalkListener.getBlocks().get(uuid);
                     if (blocks != null) {

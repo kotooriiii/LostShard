@@ -1,6 +1,7 @@
 package com.github.kotooriiii.commands;
 
 import com.github.kotooriiii.status.Staff;
+import com.github.kotooriiii.util.HelperMethods;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -80,17 +81,32 @@ public class EnchantCommand implements CommandExecutor {
 //            public static final Enchantment VANISHING_CURSE = new EnchantmentWrapper("vanishing_curse");
 //        }
 
+        String enchName = "";
+        for(int i = 0; i < args.length; i ++)
+        {
+            if(i == args.length- 1)
+                continue;
 
-        Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase().replace(" ", "_")));
+            if(i == args.length - 2)
+                enchName += args[i] ;
+
+            else
+            enchName += args[i] + " ";
+        }
+
+
+
+
+        Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchName.toLowerCase().replace(" ", "_")));
         if (enchantment == null)
             return false;
 
-        if (!NumberUtils.isNumber(args[1]) || args[1].contains(".")) {
+        if (!NumberUtils.isNumber(args[args.length-1]) || args[args.length-1].contains(".")) {
             commandSender.sendMessage(ERROR_COLOR + "Must be an integer between 0-1000.");
             return false;
         }
 
-        int enchLvl = NumberUtils.createInteger(args[1]).intValue();
+        int enchLvl = NumberUtils.createInteger(args[args.length-1]).intValue();
 
         if (!(enchLvl >= 0 && enchLvl <= 1000)) {
             commandSender.sendMessage(ERROR_COLOR + "Must be an integer between 0-1000.");

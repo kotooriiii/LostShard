@@ -31,12 +31,12 @@ public class SpellMonsterDropListener implements Listener {
 
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
-        Entity damagerEntity = betterDamageCause.getEntity();
+        Entity damagerEntity = betterDamageCause.getDamager();
 
         if (damagerEntity == null)
             return;
 
-        Player attacker = HelperMethods.getPlayerDamagerONLY(defenderEntity, event.getEntity().getKiller());
+        Player attacker = HelperMethods.getPlayerDamagerONLY(defenderEntity, damagerEntity);
 
         if (attacker == null)
             return;

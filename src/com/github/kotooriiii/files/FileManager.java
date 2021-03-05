@@ -72,6 +72,7 @@ public final class FileManager {
     private static File shrines_folder = new File(plugin_folder + File.separator + "shrines");
     private static File buildchanger_folder = new File(plugin_folder + File.separator + "buildchanger");
     private static File ignoredPlayer_folder = new File(plugin_folder + File.separator + "ignored_player");
+    private static File sorceryPlayer_folder = new File(plugin_folder + File.separator + "sorcery");
 
     private static File resources_folder = new File(plugin_folder + File.separator + "resources");
     private static File angelWings_file;
@@ -85,8 +86,7 @@ public final class FileManager {
     private FileManager() {
     }
 
-    public static File getAngelWings()
-    {
+    public static File getAngelWings() {
         return angelWings_file;
     }
 
@@ -120,6 +120,7 @@ public final class FileManager {
         shrines_folder.mkdirs();
         buildchanger_folder.mkdirs();
         ignoredPlayer_folder.mkdirs();
+        sorceryPlayer_folder.mkdirs();
 
         saveResource("resources" + File.separator + "clanREADME.txt", clans_folder, true);
         saveResource("resources" + File.separator + "hostilityREADME.txt", hostility_platform_folder, true);
@@ -326,6 +327,15 @@ public final class FileManager {
         }
         LostShardPlugin.getBanManager().
                 setBannedPlayers(bannedPlayers);
+
+
+        for(File file : sorceryPlayer_folder.listFiles())
+        {
+            if (!file.getName().endsWith(".yml"))
+            continue;
+            readSorceryPlayer(file);
+        }
+
     }
 
 
@@ -520,7 +530,7 @@ public final class FileManager {
         ZonedDateTime lastAtoneDate = ZonedDateTime.ofInstant(instant, ZoneId.of("America/New_York"));
 
         Status status = Status.matchStatus(name);
-        if(status == null)
+        if (status == null)
             return null;
         status = Status.newStatuses(status);
         StatusPlayer statusPlayer = new StatusPlayer(UUID.fromString(uuid), status, kills);
@@ -962,23 +972,16 @@ public final class FileManager {
 
         String fileName = file.getName().substring(0, file.getName().indexOf('.'));
 
-        if (!fileName.equalsIgnoreCase(sorceryPlayer_folder.getName()))
-            return;
-
-        Set<String> paths = yaml.getConfigurationSection("ignoredList").getKeys(false);
+        UUID playerUUID = UUID.fromString(fileName);
 
 
-        for (String path : paths) {
-            IgnorePlayer ignorePlayer = new IgnorePlayer(UUID.fromString(path));
-            List<String> uuidsString = yaml.getStringList("ignoredList." + path);
-            HashSet<UUID> uuids = new HashSet<>();
-            for (String uuidString : uuidsString)
-                uuids.add(UUID.fromString(uuidString));
-            ignorePlayer.setIgnoredPlayers(uuids);
-            LostShardPlugin.getIgnoreManager().addIgnorePlayer(ignorePlayer, false);
-        }
+        List<String> paths = yaml.getStringList("spellsOwned");
+
+        final SorceryPlayer sorceryPlayer = new SorceryPlayer(playerUUID);
+        sorceryPlayer.addSpells(paths);
+
+        LostShardPlugin.getSorceryManager().addSorceryPlayer(sorceryPlayer, false);
     }
-
 
     public static synchronized void write(Clan clan) {
         UUID clanID = clan.getID();
@@ -1740,7 +1743,6 @@ public final class FileManager {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");
         }
     }
-
 
 
 }

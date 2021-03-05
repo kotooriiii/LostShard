@@ -37,6 +37,7 @@ public class GrassSpell extends Spell {
     private final static HashMap<Material, Float> map = new HashMap();
 
 
+
     private GrassSpell() {
         super(SpellType.GRASS,
                 "Creates a grassy area around the casting point.",
@@ -129,7 +130,7 @@ public class GrassSpell extends Spell {
     @Override
     public boolean executeSpell(Player player) {
 
-        Block block = player.getTargetBlockExact(12, FluidCollisionMode.NEVER);
+        Block block = player.getTargetBlockExact(20, FluidCollisionMode.NEVER);
 
         if(block == null || block.getType() == Material.AIR)
         {

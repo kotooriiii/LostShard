@@ -6,6 +6,7 @@ import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -17,6 +18,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -32,7 +35,9 @@ public class SoarSpell extends Spell implements Listener {
     //todo Cooldown map
     private static HashMap<UUID, Double> flightCooldownMap = new HashMap<UUID, Double>();
     private final static HashMap<UUID, Integer> waitingToRecallMap = new HashMap<>();
+
     private final static HashSet<UUID> flightSet = new HashSet<>();
+    private final static HashSet<UUID> descentSet = new HashSet<>();
 
     //todo Constants
     private final static int FLIGHT_DURATION = 15;
@@ -207,6 +212,7 @@ public class SoarSpell extends Spell implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         final Player playerSender = event.getPlayer();
         removeFlight(playerSender);
+        removeFall(playerSender);
 
     }
 
@@ -214,6 +220,7 @@ public class SoarSpell extends Spell implements Listener {
     public void onDeath(PlayerDeathEvent event) {
         final Player playerSender = event.getEntity();
         removeFlight(playerSender);
+        removeFall(playerSender);
     }
 
     @EventHandler
@@ -236,26 +243,47 @@ public class SoarSpell extends Spell implements Listener {
         if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
             return;
 
-        if (!flightSet.contains(event.getPlayer().getUniqueId()))
-            return;
         if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
+            return;
+        if (descentSet.contains(event.getPlayer().getUniqueId()))
+            removeFall(event.getPlayer());
+        if (!flightSet.contains(event.getPlayer().getUniqueId()))
             return;
         event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to let you soar free here...");
         removeFlight(event.getPlayer());
-
+        removeFall(event.getPlayer());
     }
 
     private void removeFlight(Player player) {
         if (flightSet.contains(player.getUniqueId())) {
+            player.setFlySpeed(0.1f);
             if (player.getGameMode() == GameMode.SURVIVAL) {
-                player.setFlySpeed(FLIGHT_SPEED);
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 10.0f, 0);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, Integer.MAX_VALUE, 1, false, false, false));
+            descentSet.add(player.getUniqueId());
             flightSet.remove(player.getUniqueId());
 
         }
+    }
+
+    private void removeFall(Player player) {
+        descentSet.remove(player.getUniqueId());
+        player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+    }
+
+    @EventHandler
+    public void onFall(PlayerMoveEvent event) {
+        final Player player = event.getPlayer();
+        if (CitizensAPI.getNPCRegistry().isNPC(player))
+            return;
+        if (event.getFrom().getBlockY() == event.getTo().getBlockY())
+            return;
+        if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType().isAir())
+            return;
+        removeFall(player);
     }
 
     @Override

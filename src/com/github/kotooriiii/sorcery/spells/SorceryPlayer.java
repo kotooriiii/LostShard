@@ -2,6 +2,7 @@ package com.github.kotooriiii.sorcery.spells;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 public class SorceryPlayer {
@@ -21,7 +22,7 @@ public class SorceryPlayer {
         return uuid;
     }
 
-    public void addSpells(ArrayList<String> spellNames)
+    public void addSpells(List<String> spellNames)
     {
         spellTypes.addAll(spellNames);
     }
@@ -43,6 +44,17 @@ public class SorceryPlayer {
 
     public HashSet<String> getSpellTypes() {
         return spellTypes;
+    }
+
+    public Spell[] getSpells()
+    {
+        ArrayList<Spell> spells = new ArrayList<>();
+        for(String spellName : spellTypes)
+        {
+            Spell spell = Spell.of(SpellType.matchSpellType(spellName));
+            spells.add(spell);
+        }
+        return spells.toArray(new Spell[spells.size()]);
     }
 
     public ArrayList<String> getArrayList()

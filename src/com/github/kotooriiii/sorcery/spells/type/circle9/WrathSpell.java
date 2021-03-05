@@ -14,6 +14,7 @@ import jdk.jfr.events.FileReadEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -40,7 +41,7 @@ public class WrathSpell extends Spell {
 
     private static HashMap<UUID, Double> wrathSpellCooldownMap = new HashMap<UUID, Double>();
 
-    private static final float DAMAGE = 3f;
+    private static final float DAMAGE =  10;
     private static final int DURATION = 10;
 
 
@@ -108,11 +109,25 @@ public class WrathSpell extends Spell {
 
 
 
+                                final Block relative = roseBlock.getRelative(BlockFace.DOWN);
+                                if(!(relative.getState() instanceof Container))
+                                {
+                                    if(relative.getType() != Material.BEDROCK)
+                                    relative.setType(Material.GOLD_BLOCK);
+                                }
                                 roseBlock.setType(Material.WITHER_ROSE);
+
                             } else {
                                 if (!standingOnPlot.getType().isStaff()) {
                                     roseBlock.getWorld().spawnParticle(Particle.SMOKE_LARGE, roseBlock.getLocation(), 10, 3, 3, 3);
+                                    final Block relative = roseBlock.getRelative(BlockFace.DOWN);
+                                    if(!(relative.getState() instanceof Container))
+                                    {
+                                        if(relative.getType() != Material.BEDROCK)
+                                            relative.setType(Material.GOLD_BLOCK);
+                                    }
                                     roseBlock.setType(Material.WITHER_ROSE);
+
                                 }
                             }
 
@@ -124,7 +139,7 @@ public class WrathSpell extends Spell {
                 }
 
 
-                cylinder(player, lightningLocation.clone().add(0, 1, 0), Material.FIRE, RADIUS);
+                cylinder(player, lightningLocation.clone().add(0, 1, 0), Material.FIRE, RADIUS, timer[0]);
                 timer[0]++;
             }
         }.runTaskTimer(LostShardPlugin.plugin, 0, 5);
@@ -189,7 +204,7 @@ public class WrathSpell extends Spell {
         }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 5);
     }
 
-    private void cylinder(Player player, Location loc, Material mat, int r) {
+    private void cylinder(Player player, Location loc, Material mat, int r, int time) {
 
         //CenterX
         int cx = loc.getBlockX();
@@ -205,18 +220,27 @@ public class WrathSpell extends Spell {
                 //Location at x, center Y, and z.
                 Location burnLocation = w.getBlockAt(x, cy, z).getLocation();
                 int y = getY(burnLocation);
-                if (y == -1)
+                final boolean isInCircle = (cx - x) * (cx - x) + (cz - z) * (cz - z) <= rSquared;
+                if (y == -1) {
+                    if (isInCircle) {
+                        burnLocation = w.getBlockAt(x,getMoreRealY(burnLocation),z).getLocation();
+                        if(time%20 == 0)
+                        damage(player, burnLocation);
+                    }
                     continue;
+                }
 
                 burnLocation = w.getBlockAt(x, y, z).getLocation();
 
-                if ((cx - x) * (cx - x) + (cz - z) * (cz - z) <= rSquared) {
+                if (isInCircle) {
+                    if(time%20 == 0)
+                    damage(player, burnLocation);
 
                     if (Math.random() <= 0.30d) {
                         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(burnLocation);
 
                         player.getLocation().getWorld().strikeLightning(burnLocation);
-                        damage(player, burnLocation);
+                     //   damage(player, burnLocation);
 
                         if (plot != null) {
                             if (plot.getType().isStaff())
@@ -301,6 +325,37 @@ public class WrathSpell extends Spell {
         return cloneLoc.getBlockY() - 1;
     }
 
+    public int getMoreRealY(Location location) {
+
+        Location cloneLoc = location.clone();
+
+        //exclusive. i.e 1 block for feet.
+        final int Y_SPACE = 3, Y_SPACE_DOWN = 10;
+
+        if (cloneLoc.getBlock().getType().isAir()) {
+
+            //If Y point is still higher than the space we let it, and y is not bedrock, and its not air and its not fire OR  if block below is not solid OR  block below is fire ,
+            //End Loop: If Y point is less than the space we let it, OR y is bedrock, OR its air or its fire AND [if block below is solid AND block below is not fire] ,
+            for (int y = cloneLoc.getBlockY(); y >= location.getBlockY() - Y_SPACE_DOWN && y != 0 && !( (cloneLoc.getBlock().getType().isAir() || cloneLoc.getBlock().getType() == Material.FIRE) && (cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE)); y--) {
+                cloneLoc.setY(y);
+            }
+        } else {
+            for (int y = cloneLoc.getBlockY(); y <= location.getBlockY() + Y_SPACE && y != cloneLoc.getWorld().getMaxHeight() && !( (cloneLoc.getBlock().getType().isAir() || cloneLoc.getBlock().getType() == Material.FIRE) && (cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && cloneLoc.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FIRE)) ; y++) {
+                cloneLoc.setY(y);
+            }
+        }
+
+        if (cloneLoc.getBlockY() == cloneLoc.getWorld().getMaxHeight()|| cloneLoc.getBlockY() == 0)
+            return cloneLoc.getBlockY();
+
+
+        if (cloneLoc.getBlockY() - 1 <= 0)
+            return 0;
+
+        if(cloneLoc.getBlockY() == 0)
+            return 0;
+        return cloneLoc.getBlockY() - 1;
+    }
 
     @Override
     public void updateCooldown(Player player) {
@@ -354,13 +409,10 @@ public class WrathSpell extends Spell {
         Clan clan = LostShardPlugin.getClanManager().getClan(attacker.getUniqueId());
 
         for (Entity entity : attacker.getLocation().getWorld().getNearbyEntities(location, 1, 1, 1)) {
+            if(entity.getLocation().getBlockX() !=  location.getBlockX()|| entity.getLocation().getBlockZ() != location.getBlockZ())
+                continue;
             if (!(entity instanceof LivingEntity))
                 continue;
-            if (attacker.equals(entity)) {
-                attacker.damage(DAMAGE);
-                continue;
-            }
-
             if(entity instanceof Player)
             {
                 if(((Player) entity).getGameMode() != GameMode.SURVIVAL)
@@ -369,17 +421,7 @@ public class WrathSpell extends Spell {
             if (clan != null && entity instanceof Player && clan.isInThisClan(entity.getUniqueId()) && !clan.isFriendlyFire())
                 continue;
 
-            EntityDamageByEntityEvent damageByEntityEvent = new EntityDamageByEntityEvent(attacker, entity, EntityDamageEvent.DamageCause.CUSTOM, DAMAGE);
-            entity.setLastDamageCause(damageByEntityEvent);
-            Bukkit.getPluginManager().callEvent(damageByEntityEvent);
-
-            if(!damageByEntityEvent.isCancelled()) {
-                double newHealth = ((LivingEntity) entity).getHealth() - DAMAGE;
-                if (newHealth < 0)
-                    ((LivingEntity) entity).setHealth(0);
-                else
-                    ((LivingEntity) entity).setHealth(newHealth);
-            }
+            HelperMethods.customDamage(attacker,(LivingEntity) entity, (int) DAMAGE);
         }
     }
 }

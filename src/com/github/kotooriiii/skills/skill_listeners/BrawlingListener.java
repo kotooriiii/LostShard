@@ -110,7 +110,7 @@ public class BrawlingListener implements Listener {
 
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
-        Entity damager = betterDamageCause.getEntity();
+        Entity damager = betterDamageCause.getDamager();
 
         if (damager == null)
             return;
@@ -143,7 +143,7 @@ public class BrawlingListener implements Listener {
             return;
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
-        Entity damagerEntity = betterDamageCause.getEntity();
+        Entity damagerEntity = betterDamageCause.getDamager();
 
         if (damagerEntity == null)
             return;

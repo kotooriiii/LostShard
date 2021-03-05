@@ -76,17 +76,17 @@ public class WallSpell extends Spell {
 
         int negX = 0;
         int negZ = 0;
-        int times = 1;
+        int times = 2;
 
-        if(xa.getBlockX() < nv.getBlockX()) {
-            negX = -1;
-            times = 2;
-        }
-
-        if(xa.getBlockZ() < nv.getBlockZ()) {
-            negZ = -1;
-            times = 2;
-        }
+//        if(xa.getBlockX() < nv.getBlockX()) {
+//            negX = -1;
+//            times = 2;
+//        }
+//
+//        if(xa.getBlockZ() < nv.getBlockZ()) {
+//            negZ = -1;
+//            times = 2;
+//        }
 
 
         //nv.multiply(-1);
@@ -106,8 +106,8 @@ public class WallSpell extends Spell {
             for (int y = negZ * WALL_RADIUS_Y; y <= WALL_RADIUS_Y * times; y++) {
 
                 // Coordinates with respect to our basis
-                double xb = x; //calculate x coordinate
-                double yb = y; //calculate y coordinate
+                double xb = x - Math.ceil((float) WALL_RADIUS_X*times/2); //calculate x coordinate
+                double yb = y - (Math.ceil((float) WALL_RADIUS_Y*times/2));//calculate y coordinate
 
 
                 // Multiply the transformation matrix with our coordinates for the change of basis

@@ -1,34 +1,21 @@
-package com.github.kotooriiii.commands;
+package com.github.kotooriiii.sorcery.commands;
 
 import com.github.kotooriiii.LostShardPlugin;
-import com.github.kotooriiii.clans.Clan;
-import com.github.kotooriiii.ranks.RankPlayer;
-import com.github.kotooriiii.sorcery.marks.MarkPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
-import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
-import com.wimbli.WorldBorder.BorderData;
-import com.wimbli.WorldBorder.Config;
 import org.apache.commons.lang.math.NumberUtils;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
-import java.util.*;
+import java.util.UUID;
 
-import static com.github.kotooriiii.data.Maps.*;
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
-public class CastCommand implements CommandExecutor {
-
+public class SpellCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
@@ -36,14 +23,12 @@ public class CastCommand implements CommandExecutor {
         if (sender instanceof Player) {
             final Player playerSender = (Player) sender;
             final UUID playerUUID = playerSender.getUniqueId();
-            if (cmd.getName().equalsIgnoreCase("cast")) {
+            if (cmd.getName().equalsIgnoreCase("spell")) {
 
                 if (args.length == 0) {
-                    playerSender.performCommand("cast 1");
+                    playerSender.performCommand("spell 1");
                     return false;
                 } else if (args.length >= 1) {
-
-                    String name = HelperMethods.stringBuilder(args, 0, " ");
 
                     String numberString = args[0];
                     if (NumberUtils.isNumber(numberString) && !numberString.contains(".")) {
@@ -58,33 +43,13 @@ public class CastCommand implements CommandExecutor {
                         return true;
                     }
 
-                    if(args[0].equalsIgnoreCase("help"))
-                    {
-                        playerSender.performCommand("cast 1");
+                    if (args[0].equalsIgnoreCase("help")) {
+                        playerSender.performCommand("spell 1");
                         return false;
                     }
 
-
-
-
-                    SpellType type = SpellType.matchSpellType(name.toLowerCase());
-                    if (type != null) {
-                        Spell spell = Spell.of(type);
-                        if (spell != null) {
-                            if (Spell.of(type).isCastable()) {
-                                if(LostShardPlugin.getSorceryManager().wrap(playerUUID).hasSpell(type))
-                                spell.cast(playerSender);
-                                else
-                                    playerSender.sendMessage(ERROR_COLOR + "You don't own this spell...");
-                                return true;
-                            }
-                        }
-                    }
-
-
-                    playerSender.sendMessage(ERROR_COLOR + "The spell does not exist or you did not enter a positive integer for a page.");
+                    playerSender.sendMessage(ERROR_COLOR + "Have more questions? Type: /spellbook");
                     return false;
-
                 }
 
             }
@@ -101,7 +66,6 @@ public class CastCommand implements CommandExecutor {
         Spell[] castableSpells = LostShardPlugin.getSorceryManager().wrap(playerUUID).getSpells();
 
         int size = castableSpells.length;
-
 
 
         int pages = (int) Math.ceil((double) size / amtOfSpellsPerPage);

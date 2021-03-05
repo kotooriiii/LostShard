@@ -66,11 +66,15 @@ import com.github.kotooriiii.skills.commands.blacksmithy.*;
 import com.github.kotooriiii.skills.skill_listeners.*;
 import com.github.kotooriiii.sorcery.Gate;
 import com.github.kotooriiii.sorcery.GateManager;
+import com.github.kotooriiii.sorcery.commands.SorceryCommand;
+import com.github.kotooriiii.sorcery.commands.SpellCommand;
 import com.github.kotooriiii.sorcery.commands.ToggleCommand;
 import com.github.kotooriiii.sorcery.listeners.*;
 import com.github.kotooriiii.sorcery.scrolls.ScrollListener;
 import com.github.kotooriiii.sorcery.spells.SorceryManager;
 import com.github.kotooriiii.sorcery.commands.SpellbookCommand;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
+import com.github.kotooriiii.sorcery.spells.drops.SpellDropAddListener;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDropListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
@@ -534,6 +538,15 @@ public class LostShardPlugin extends JavaPlugin {
 
         }
 
+        for(SorceryPlayer sorceryPlayer : LostShardPlugin.getSorceryManager().getSorceryPlayers())
+        {
+            try {
+                    getSorceryManager().saveFile(sorceryPlayer);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         //todo save tips data subs
 
         SignChangeListener.save();
@@ -647,6 +660,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         getCommand("spellbook").setExecutor(new SpellbookCommand());
         getCommand("toggle").setExecutor(new ToggleCommand());
+        getCommand("sorcery").setExecutor(new SorceryCommand());
+        getCommand("spell").setExecutor(new SpellCommand());
 
 
         //todo to use later -->
@@ -800,6 +815,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new DayListener(), this);
 
         pm.registerEvents(new SpellMonsterDropListener(), this);
+        pm.registerEvents(new SpellDropAddListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
         registerCustomEventListener();

@@ -16,6 +16,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.util.ChatPaginator;
@@ -27,6 +28,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class SpellbookCommand implements CommandExecutor {
 
+    public final static String BOOK_NAME = ChatColor.DARK_PURPLE + "Spellbook";
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (!(commandSender instanceof Player))
@@ -35,11 +38,20 @@ public class SpellbookCommand implements CommandExecutor {
         if (!command.getName().equalsIgnoreCase("spellbook"))
             return false;
 
+        Player player = (Player) commandSender;
+
+        player.getInventory().addItem(getBookItemStack(player));
+        player.sendMessage(ChatColor.GOLD + "You summon your spellbook.");
+        return true;
+    }
+
+    public static ItemStack getBookItemStack(Player player)
+    {
         ItemStack itemStack = new ItemStack(Material.WRITTEN_BOOK, 1);
         BookMeta bookMeta = (BookMeta) itemStack.getItemMeta();
 
         bookMeta.setAuthor(ChatColor.DARK_PURPLE + "" + ChatColor.MAGIC + "Nickolov");
-        bookMeta.setTitle(ChatColor.DARK_PURPLE + "Spellbook");
+        bookMeta.setTitle(BOOK_NAME);
         bookMeta.setGeneration(BookMeta.Generation.TATTERED);
 
         TextComponent tc = new TextComponent("");
@@ -54,7 +66,7 @@ public class SpellbookCommand implements CommandExecutor {
 
 
         Queue<Spell> spellsOrdered = new ArrayBlockingQueue<Spell>(SpellType.values().length);
-        SorceryPlayer sorceryPlayer = LostShardPlugin.getSorceryManager().wrap(((Player) commandSender).getUniqueId());
+        SorceryPlayer sorceryPlayer = LostShardPlugin.getSorceryManager().wrap(player.getUniqueId());
 
         for (int i = 1; i <= 9; i++) {
             TextComponent circle = addCircle(i, spellsOrdered, sorceryPlayer);
@@ -73,23 +85,20 @@ public class SpellbookCommand implements CommandExecutor {
 
 
         itemStack.setItemMeta(bookMeta);
-
-        Player player = (Player) commandSender;
-        player.getInventory().addItem(itemStack);
-        player.sendMessage(ChatColor.GOLD + "You summon your spellbook.");
-        return true;
+        return itemStack;
     }
 
-    private TextComponent addSpell(Spell spell, SorceryPlayer sorceryPlayer) {
+    private static TextComponent addSpell(Spell spell, SorceryPlayer sorceryPlayer) {
 
         boolean isOwned = sorceryPlayer.hasSpell(spell.getType());
 
+        String spellName = !(!isOwned && spell.getCircle() == 9) ? spell.getName() : spell.getName().replaceAll("[A-Za-z0-9]", "?");
 
-        TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, false, "  " + spell.getName()) + "\n\n");
+        TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, false, "  " + spellName + "\n\n"));
         root.setColor(isOwned ? ChatColor.GREEN : ChatColor.DARK_GRAY);
         root.setBold(false);
 
-        TextComponent castComponent = new TextComponent("/cast " + spell.getName().toLowerCase() + "\n\n");
+        TextComponent castComponent = new TextComponent("/cast " + spellName.toLowerCase() + "\n\n");
         castComponent.setColor(ChatColor.BLACK);
         root.addExtra(castComponent);
 
@@ -113,16 +122,22 @@ public class SpellbookCommand implements CommandExecutor {
         }
 
         String fullIngredients = HelperMethods.stringBuilder(ingredients.split("%"), 0, " ", ", and", " and ");
+        if((!isOwned && spell.getCircle() == 9))
+            fullIngredients = fullIngredients.replaceAll("[A-Za-z0-9]", "?");
+
 
         TextComponent reagentComponent = new TextComponent("Reagents: " + fullIngredients + "\n\n");
         reagentComponent.setColor(ChatColor.BLACK);
         root.addExtra(reagentComponent);
 
-        TextComponent manaComponent = new TextComponent("Mana: " + spell.getManaCost()+ "\n\n");
+        TextComponent manaComponent = new TextComponent("Mana: " + ((isOwned || spell.getCircle() != 9) ? spell.getManaCost() : "?") + "\n\n");
         manaComponent.setColor(ChatColor.BLACK);
         root.addExtra(manaComponent);
 
-        TextComponent infoComponent = new TextComponent("Info: \n" + spell.getDescription());
+        String desc = spell.getDescription();
+        if((!isOwned && spell.getCircle() == 9))
+            desc = desc.replaceAll("[A-Za-z0-9]", "?");
+        TextComponent infoComponent = new TextComponent("Info: \n" +desc);
         infoComponent.setColor(ChatColor.BLACK);
         root.addExtra(infoComponent);
 
@@ -135,7 +150,7 @@ public class SpellbookCommand implements CommandExecutor {
      * @param i circle number
      * @return
      */
-    private TextComponent addCircle(int i, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
+    private static TextComponent addCircle(int i, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
 
         String suffix = "";
         if (i == 1)
@@ -146,7 +161,7 @@ public class SpellbookCommand implements CommandExecutor {
             suffix = "th";
 
 
-        TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, true, i + suffix + " Circle") + "\n\n");
+        TextComponent root = new TextComponent(HelperMethods.getCenteredMessage(HelperMethods.CenteredType.BOOK, true, i + suffix + " Circle") + (i!=9 ? "\n\n" : "\n"));
         root.setColor(ChatColor.DARK_PURPLE);
         root.setBold(true);
 
@@ -162,14 +177,14 @@ public class SpellbookCommand implements CommandExecutor {
         return root;
     }
 
-    public TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
+    public static TextComponent getComponentOfSpell(Spell spell, Queue<Spell> queue, SorceryPlayer sorceryPlayer) {
         boolean isOwned = sorceryPlayer.hasSpell(spell.getType());
-        String newliner = spell.getCircle() == 9 ? "\n" : "\n\n";
+        String newliner = spell.getCircle() == 9 ? "\n\n" : "\n\n";
 
         TextComponent spellComponent = new TextComponent(spell.getName() + newliner);
 
         if(spell.getCircle() == 9 && !isOwned)
-            spellComponent = new TextComponent(spell.getName().replaceAll("[A-Za-z]", "?") + newliner);
+            spellComponent = new TextComponent(spell.getName().replaceAll("[A-Za-z0-9]", "?") + newliner);
 
         spellComponent.setColor(isOwned ? ChatColor.GREEN : ChatColor.DARK_GRAY);
         spellComponent.setBold(false);
