@@ -712,6 +712,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new ArcheryListener(), this);
         pm.registerEvents(new BlacksmithyListener(), this);
         pm.registerEvents(new BrawlingListener(), this);
+        pm.registerEvents(new EnchantingListener(), this);
         pm.registerEvents(new FishingListener(), this);
         pm.registerEvents(new LumberjackingListener(), this);
         pm.registerEvents(new MiningListener(), this);

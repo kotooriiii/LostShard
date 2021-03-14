@@ -812,7 +812,9 @@ public final class FileManager {
                 skill.setLocked(isLocked);
                 skills[skillIndex++] = skill;
             }
-            skillBuild.setSkills(skills);
+
+            final Skill[] skillsWithAdded = skillBuild.getSkillsWithAdded(skills);
+            skillBuild.setSkills(skillsWithAdded);
             list.add(skillBuild);
         }
 
