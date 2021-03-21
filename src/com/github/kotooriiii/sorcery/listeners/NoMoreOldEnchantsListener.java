@@ -28,14 +28,14 @@ public class NoMoreOldEnchantsListener implements Listener {
     public static final String COMBINABLE_PREFIX = ChatColor.GREEN + "Combinable";
     public static final int COMBINABLE_LEVEL = 30;
 
-    @EventHandler
-    public void onEnchant(InventoryOpenEvent event) {
-        if (!event.getView().getType().equals(InventoryType.ENCHANTING))
-            return;
-
-        event.getPlayer().sendMessage(ERROR_COLOR + "You must use the Blacksmithy skill to enchant your items.");
-        event.setCancelled(true);
-    }
+//    @EventHandler
+//    public void onEnchant(InventoryOpenEvent event) {
+//        if (!event.getView().getType().equals(InventoryType.ENCHANTING))
+//            return;
+//
+//        event.getPlayer().sendMessage(ERROR_COLOR + "You must use the Blacksmithy skill to enchant your items.");
+//        event.setCancelled(true);
+//    }
 
     @EventHandler
     public void onNPC(InventoryOpenEvent event) {

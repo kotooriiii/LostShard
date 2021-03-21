@@ -96,8 +96,12 @@ public class EnhanceCommand implements CommandExecutor {
         if (event.isCancelled())
             return false;
 
-        //Harden
-        enchant(mainHand, playerSender);
+        //Enhance
+        if(!enchant(mainHand, playerSender))
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You cannot add conflicting enchantments.");
+            return false;
+        }
         playerSender.sendMessage(ChatColor.GOLD + "You enhance the item.");
 
 
@@ -263,7 +267,7 @@ public class EnhanceCommand implements CommandExecutor {
         return efficiencyLevel < unbreakingLevel ? efficiencyLevel : unbreakingLevel;
     }
 
-    private void enchant(ItemStack itemStack, Player player) {
+    private boolean enchant(ItemStack itemStack, Player player) {
 
         int MAXIMUM_ENHANCE_FINAL = MAXIMUM_ENHANCE;
         Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
@@ -278,12 +282,26 @@ public class EnhanceCommand implements CommandExecutor {
         int efficiencyMaxLevel = Enchantment.DIG_SPEED.getMaxLevel();
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
+
+
         if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= efficiencyMaxLevel) {
+            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DIG_SPEED))
+                return false;
             itemStack.removeEnchantment(Enchantment.DIG_SPEED);
             itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
-            if (nextLevel == 4)
+
+
+
+            if (nextLevel == 4) {
+
+                if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+                    return false;
+
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
-            if (nextLevel == 5) {
+            }
+            else if (nextLevel == 5) {
+                if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+                    return false;
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
                 clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
                 clan.setEnhanceTimer(0);
@@ -291,11 +309,13 @@ public class EnhanceCommand implements CommandExecutor {
         }
 
         if (unbreakingLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= unbreakingMaxLevel) {
+            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
+                return false;
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
         }
 
-
+return true;
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {

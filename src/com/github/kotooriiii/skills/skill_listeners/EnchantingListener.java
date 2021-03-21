@@ -2,233 +2,870 @@ package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.Skill;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
+import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentOffer;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class EnchantingListener implements Listener {
 
+    //Skill XP
     final int ADDED_XP = 100;
 
+
+    private static class BetterEnchantment {
+
+        //100
+        public static final BetterEnchantment LOOTING_3 = new BetterEnchantment(Enchantment.LOOT_BONUS_MOBS, 3, 20);
+        public static final BetterEnchantment FORTUNE_2 = new BetterEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2, 20);
+
+        //90
+        public static final BetterEnchantment FEATHER_FALLING_4 = new BetterEnchantment(Enchantment.PROTECTION_FALL, 4, 15);
+        public static final BetterEnchantment SILK_TOUCH_1 = new BetterEnchantment(Enchantment.SILK_TOUCH, 1, 15);
+
+        //80
+        public static final BetterEnchantment SMITE_5 = new BetterEnchantment(Enchantment.DAMAGE_UNDEAD, 5, 15);
+        public static final BetterEnchantment BANE_OF_ARTHROPODS_5 = new BetterEnchantment(Enchantment.DAMAGE_ARTHROPODS, 5, 15);
+        public static final BetterEnchantment RESPIRATION_3 = new BetterEnchantment(Enchantment.OXYGEN, 3, 15);
+
+        //70
+        public static final BetterEnchantment FIRE_PROTECTION_4 = new BetterEnchantment(Enchantment.PROTECTION_FIRE, 4, 10);
+        public static final BetterEnchantment BLAST_PROTECTION_4 = new BetterEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 4, 10);
+        public static final BetterEnchantment LOOTING_2 = new BetterEnchantment(Enchantment.LOOT_BONUS_MOBS, 2, 10);
+        public static final BetterEnchantment PROJECTILE_PROTECTION_4 = new BetterEnchantment(Enchantment.PROTECTION_PROJECTILE, 4, 10);
+        public static final BetterEnchantment LURE_3 = new BetterEnchantment(Enchantment.LURE, 3, 10);
+
+        //60
+        public static final BetterEnchantment SMITE_4 = new BetterEnchantment(Enchantment.DAMAGE_UNDEAD, 4, 8);
+        public static final BetterEnchantment BANE_OF_ARTHROPODS_4 = new BetterEnchantment(Enchantment.DAMAGE_ARTHROPODS, 4, 8);
+        public static final BetterEnchantment LUCK_OF_THE_SEA_3 = new BetterEnchantment(Enchantment.LUCK, 3, 8);
+        public static final BetterEnchantment FEATHER_FALLING_3 = new BetterEnchantment(Enchantment.PROTECTION_FALL, 3, 8);
+
+        //50
+        public static final BetterEnchantment FORTUNE_1 = new BetterEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1, 8);
+        public static final BetterEnchantment LURE_2 = new BetterEnchantment(Enchantment.LURE, 2, 8);
+        public static final BetterEnchantment RESPIRATION_2 = new BetterEnchantment(Enchantment.OXYGEN, 2, 8);
+        public static final BetterEnchantment SOUL_SPEED_3 = new BetterEnchantment(Enchantment.SOUL_SPEED, 3, 8);
+
+        //40
+        public static final BetterEnchantment SMITE_3 = new BetterEnchantment(Enchantment.DAMAGE_UNDEAD, 3, 5);
+        public static final BetterEnchantment BANE_OF_ARTHROPODS_3 = new BetterEnchantment(Enchantment.DAMAGE_ARTHROPODS, 3, 5);
+        public static final BetterEnchantment LOOTING_1 = new BetterEnchantment(Enchantment.LOOT_BONUS_MOBS, 1, 5);
+        public static final BetterEnchantment LUCK_OF_THE_SEA_2 = new BetterEnchantment(Enchantment.LUCK, 2, 5);
+
+        //30
+        public static final BetterEnchantment FIRE_PROTECTION_3 = new BetterEnchantment(Enchantment.PROTECTION_FIRE, 3, 5);
+        public static final BetterEnchantment BLAST_PROTECTION_3 = new BetterEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 3, 5);
+        public static final BetterEnchantment PROJECTILE_PROTECTION_3 = new BetterEnchantment(Enchantment.PROTECTION_PROJECTILE, 3, 5);
+        public static final BetterEnchantment SOUL_SPEED_2 = new BetterEnchantment(Enchantment.SOUL_SPEED, 2, 5);
+
+        //25
+        public static final BetterEnchantment RESPIRATION_1 = new BetterEnchantment(Enchantment.OXYGEN, 1, 5);
+        public static final BetterEnchantment FEATHER_FALLING_2 = new BetterEnchantment(Enchantment.PROTECTION_FALL, 2, 5);
+        public static final BetterEnchantment AQUA_AFFINITY_1 = new BetterEnchantment(Enchantment.WATER_WORKER, 1, 5);
+
+        //20
+        public static final BetterEnchantment SMITE_2 = new BetterEnchantment(Enchantment.DAMAGE_UNDEAD, 2, 3);
+        public static final BetterEnchantment BANE_OF_ARTHROPODS_2 = new BetterEnchantment(Enchantment.DAMAGE_ARTHROPODS, 2, 3);
+        public static final BetterEnchantment SOUL_SPEED_1 = new BetterEnchantment(Enchantment.SOUL_SPEED, 1, 3);
+        public static final BetterEnchantment LUCK_OF_THE_SEA_1 = new BetterEnchantment(Enchantment.LUCK, 1, 3);
+
+        //15
+        public static final BetterEnchantment FIRE_PROTECTION_2 = new BetterEnchantment(Enchantment.PROTECTION_FIRE, 2, 3);
+        public static final BetterEnchantment BLAST_PROTECTION_2 = new BetterEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 2, 3);
+        public static final BetterEnchantment PROJECTILE_PROTECTION_2 = new BetterEnchantment(Enchantment.PROTECTION_PROJECTILE, 2, 3);
+
+        //10
+        public static final BetterEnchantment FEATHER_FALLING_1 = new BetterEnchantment(Enchantment.PROTECTION_FALL, 1, 1);
+
+        //5
+        public static final BetterEnchantment FIRE_PROTECTION_1 = new BetterEnchantment(Enchantment.PROTECTION_FIRE, 1, 1);
+        public static final BetterEnchantment BANE_OF_ARTHROPODS_1 = new BetterEnchantment(Enchantment.DAMAGE_ARTHROPODS, 1, 1);
+        public static final BetterEnchantment PROJECTILE_PROTECTION_1 = new BetterEnchantment(Enchantment.PROTECTION_PROJECTILE, 1, 1);
+
+        //0
+        public static final BetterEnchantment SMITE_1 = new BetterEnchantment(Enchantment.DAMAGE_UNDEAD, 1, 1);
+        public static final BetterEnchantment BLAST_PROTECTION_1 = new BetterEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 1, 1);
+        public static final BetterEnchantment LURE_1 = new BetterEnchantment(Enchantment.LURE, 1, 1);
+
+
+        public final Enchantment enchantment;
+        private final int emeraldCount;
+        public final int level;
+
+        public BetterEnchantment(Enchantment enchantment, int level, int emeraldCount) {
+            this.enchantment = enchantment;
+            this.level = level;
+            this.emeraldCount = emeraldCount;
+        }
+
+        @Override
+        public String toString() {
+            return this.enchantment.getKey().getKey() + " " + this.level;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return enchantment.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return enchantment.hashCode();
+        }
+    }
+
+    private static class SmartEnchantment {
+        public EnchantmentOffer[] offers;
+        public int oldXP;
+
+        public SmartEnchantment() {
+
+        }
+
+        public SmartEnchantment(EnchantmentOffer[] offers, int oldXP) {
+            this.offers = offers;
+            this.oldXP = oldXP;
+        }
+    }
+
+    //Mutual exlusives
+    private static final Enchantment[] protectionsArr = new Enchantment[]{Enchantment.PROTECTION_ENVIRONMENTAL, Enchantment.PROTECTION_EXPLOSIONS, Enchantment.PROTECTION_FIRE, Enchantment.PROTECTION_PROJECTILE};
+    private static final Enchantment[] bootsArr = new Enchantment[]{Enchantment.DEPTH_STRIDER, Enchantment.FROST_WALKER};
+    private static final Enchantment[] physicalArr = new Enchantment[]{Enchantment.DAMAGE_ALL, Enchantment.DAMAGE_ARTHROPODS, Enchantment.DAMAGE_UNDEAD};
+    private static final Enchantment[] toolsArr = new Enchantment[]{Enchantment.LOOT_BONUS_BLOCKS, Enchantment.SILK_TOUCH};
+    private static final Enchantment[] tridentArr = new Enchantment[]{Enchantment.CHANNELING, Enchantment.LOYALTY, Enchantment.RIPTIDE};
+    private static final Enchantment[] crossbowArr = new Enchantment[]{Enchantment.PIERCING, Enchantment.MULTISHOT};
+
+    //Lapis
+    private static ItemStack lapis;
+
+    //XP
+    private static int ENCHANT_LEVEL_XP = 30;
+
+    //ID
+    private final static String ID = ChatColor.DARK_PURPLE + "Enchantments: ";
+    private final static String END_ID = ChatColor.DARK_PURPLE + "-END_ENCHANT";
+
+    private final static HashMap<UUID, SmartEnchantment> trackMap = new HashMap<>();
+
+
+    public EnchantingListener() {
+        lapis = new ItemStack(Material.LAPIS_LAZULI, 3);
+        final ItemMeta itemMeta = lapis.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.DARK_PURPLE + "Nickolov's Lazuli");
+        lapis.setItemMeta(itemMeta);
+    }
+
+    //
+    //METHODS
+    //
+
+    private ArrayList<BetterEnchantment> getValidEnchantment(int level) {
+        ArrayList<BetterEnchantment> betterEnchantments = new ArrayList<>();
+
+        if (level >= 100) {
+            betterEnchantments.add(BetterEnchantment.LOOTING_3);
+            betterEnchantments.add(BetterEnchantment.FORTUNE_2);
+        }
+
+        if (level >= 90) {
+            betterEnchantments.add(BetterEnchantment.FEATHER_FALLING_4);
+            betterEnchantments.add(BetterEnchantment.SILK_TOUCH_1);
+        }
+
+        if (level >= 80) {
+            betterEnchantments.add(BetterEnchantment.SMITE_5);
+            betterEnchantments.add(BetterEnchantment.BANE_OF_ARTHROPODS_5);
+            betterEnchantments.add(BetterEnchantment.RESPIRATION_3);
+        }
+
+        if (level >= 70) {
+            betterEnchantments.add(BetterEnchantment.FIRE_PROTECTION_4);
+            betterEnchantments.add(BetterEnchantment.BLAST_PROTECTION_4);
+            betterEnchantments.add(BetterEnchantment.LOOTING_2);
+            betterEnchantments.add(BetterEnchantment.PROJECTILE_PROTECTION_4);
+            betterEnchantments.add(BetterEnchantment.LURE_3);
+        }
+        if (level >= 60) {
+            betterEnchantments.add(BetterEnchantment.SMITE_4);
+            betterEnchantments.add(BetterEnchantment.BANE_OF_ARTHROPODS_4);
+            betterEnchantments.add(BetterEnchantment.LUCK_OF_THE_SEA_3);
+            betterEnchantments.add(BetterEnchantment.FEATHER_FALLING_3);
+        }
+
+        if (level >= 50) {
+            betterEnchantments.add(BetterEnchantment.FORTUNE_1);
+            betterEnchantments.add(BetterEnchantment.LURE_2);
+            betterEnchantments.add(BetterEnchantment.RESPIRATION_2);
+            betterEnchantments.add(BetterEnchantment.SOUL_SPEED_3);
+        }
+
+        if (level >= 40) {
+            betterEnchantments.add(BetterEnchantment.SMITE_3);
+            betterEnchantments.add(BetterEnchantment.BANE_OF_ARTHROPODS_3);
+            betterEnchantments.add(BetterEnchantment.LOOTING_1);
+            betterEnchantments.add(BetterEnchantment.LUCK_OF_THE_SEA_2);
+        }
+
+        if (level >= 30) {
+            betterEnchantments.add(BetterEnchantment.FIRE_PROTECTION_3);
+            betterEnchantments.add(BetterEnchantment.BLAST_PROTECTION_3);
+            betterEnchantments.add(BetterEnchantment.PROJECTILE_PROTECTION_3);
+            betterEnchantments.add(BetterEnchantment.SOUL_SPEED_2);
+        }
+
+        if (level >= 25) {
+            betterEnchantments.add(BetterEnchantment.RESPIRATION_1);
+            betterEnchantments.add(BetterEnchantment.FEATHER_FALLING_2);
+            betterEnchantments.add(BetterEnchantment.AQUA_AFFINITY_1);
+        }
+
+        if (level >= 20) {
+            betterEnchantments.add(BetterEnchantment.SMITE_2);
+            betterEnchantments.add(BetterEnchantment.BANE_OF_ARTHROPODS_2);
+            betterEnchantments.add(BetterEnchantment.SOUL_SPEED_1);
+            betterEnchantments.add(BetterEnchantment.LUCK_OF_THE_SEA_1);
+        }
+
+        if (level >= 15) {
+            betterEnchantments.add(BetterEnchantment.FIRE_PROTECTION_2);
+            betterEnchantments.add(BetterEnchantment.BLAST_PROTECTION_2);
+            betterEnchantments.add(BetterEnchantment.PROJECTILE_PROTECTION_2);
+        }
+
+
+        if (level >= 10) {
+            betterEnchantments.add(BetterEnchantment.FEATHER_FALLING_1);
+
+        }
+
+        if (level >= 5) {
+            betterEnchantments.add(BetterEnchantment.FIRE_PROTECTION_1);
+            betterEnchantments.add(BetterEnchantment.BANE_OF_ARTHROPODS_1);
+            betterEnchantments.add(BetterEnchantment.PROJECTILE_PROTECTION_1);
+        }
+
+        if( level >= 0) {
+            betterEnchantments.add(BetterEnchantment.SMITE_1);
+            betterEnchantments.add(BetterEnchantment.BLAST_PROTECTION_1);
+            betterEnchantments.add(BetterEnchantment.LURE_1);
+        }
+
+        return betterEnchantments;
+}
+
+    private void filter(ArrayList<BetterEnchantment> list, Material material) {
+
+        if (material == null) {
+            list.clear();
+        }
+
+        String name = material.getKey().getKey().toLowerCase();
+        if (name.endsWith("_helmet")) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.PROTECTION_FIRE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_PROJECTILE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_EXPLOSIONS &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_ENVIRONMENTAL &&
+                            betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.OXYGEN &&
+                            betterEnchantment.enchantment != Enchantment.WATER_WORKER &&
+                            betterEnchantment.enchantment != Enchantment.THORNS &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.BINDING_CURSE &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (name.endsWith("_chestplate")) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.PROTECTION_FIRE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_PROJECTILE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_EXPLOSIONS &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_ENVIRONMENTAL &&
+                            betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.THORNS &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.BINDING_CURSE &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (name.endsWith("_leggings")) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.PROTECTION_FIRE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_PROJECTILE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_EXPLOSIONS &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_ENVIRONMENTAL &&
+                            betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.THORNS &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.BINDING_CURSE &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (name.endsWith("_boots")) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.PROTECTION_FIRE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_PROJECTILE &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_EXPLOSIONS &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_ENVIRONMENTAL &&
+                            betterEnchantment.enchantment != Enchantment.PROTECTION_FALL &&
+                            betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.THORNS &&
+                            betterEnchantment.enchantment != Enchantment.DEPTH_STRIDER &&
+                            betterEnchantment.enchantment != Enchantment.SOUL_SPEED &&
+                            betterEnchantment.enchantment != Enchantment.FROST_WALKER &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.BINDING_CURSE &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (name.endsWith("_sword")) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DAMAGE_ARTHROPODS &&
+                            betterEnchantment.enchantment != Enchantment.DAMAGE_UNDEAD &&
+                            betterEnchantment.enchantment != Enchantment.DAMAGE_ALL &&
+                            betterEnchantment.enchantment != Enchantment.FIRE_ASPECT &&
+                            betterEnchantment.enchantment != Enchantment.LOOT_BONUS_MOBS &&
+                            betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.KNOCKBACK &&
+                            betterEnchantment.enchantment != Enchantment.SWEEPING_EDGE &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (name.endsWith("_axe") || name.endsWith("_pickaxe") || name.endsWith("_shovel") || name.endsWith("_hoe")) {
+
+
+            list.removeIf(betterEnchantment -> {
+
+                boolean result = true;
+
+                if (name.endsWith("_axe")) {
+
+                    result = betterEnchantment.enchantment != Enchantment.DAMAGE_ARTHROPODS &&
+                            betterEnchantment.enchantment != Enchantment.DAMAGE_UNDEAD &&
+                            betterEnchantment.enchantment != Enchantment.DAMAGE_ALL;
+
+
+                }
+
+                //If result is FALSE, it WILL never make result true.
+
+                result = result &&
+                        betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                        betterEnchantment.enchantment != Enchantment.DIG_SPEED &&
+                        betterEnchantment.enchantment != Enchantment.SILK_TOUCH &&
+                        betterEnchantment.enchantment != Enchantment.LOOT_BONUS_BLOCKS &&
+                        betterEnchantment.enchantment != Enchantment.MENDING &&
+                        betterEnchantment.enchantment != Enchantment.VANISHING_CURSE;
+                return result;
+            });
+        } else if (material == Material.BOW) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.ARROW_DAMAGE &&
+                            betterEnchantment.enchantment != Enchantment.ARROW_KNOCKBACK &&
+                            betterEnchantment.enchantment != Enchantment.ARROW_FIRE &&
+                            betterEnchantment.enchantment != Enchantment.ARROW_INFINITE &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (material == Material.FISHING_ROD) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.LURE &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+                            betterEnchantment.enchantment != Enchantment.LUCK &&
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (material == Material.TRIDENT) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.IMPALING &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+
+                            betterEnchantment.enchantment != Enchantment.CHANNELING &&
+                            betterEnchantment.enchantment != Enchantment.LOYALTY &&
+                            betterEnchantment.enchantment != Enchantment.RIPTIDE &&
+
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (material == Material.CROSSBOW) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.QUICK_CHARGE &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+
+                            betterEnchantment.enchantment != Enchantment.PIERCING &&
+                            betterEnchantment.enchantment != Enchantment.MULTISHOT &&
+
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (material == Material.SHEARS) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.DIG_SPEED &&
+                            betterEnchantment.enchantment != Enchantment.MENDING &&
+
+                            betterEnchantment.enchantment != Enchantment.VANISHING_CURSE);
+        } else if (material == Material.SHIELD || material == Material.ELYTRA || material == Material.FLINT_AND_STEEL || material == Material.CARROT_ON_A_STICK || material == Material.WARPED_FUNGUS_ON_A_STICK) {
+            list.removeIf(betterEnchantment ->
+                    betterEnchantment.enchantment != Enchantment.DURABILITY &&
+                            betterEnchantment.enchantment != Enchantment.MENDING);
+        } else {
+            list.clear();
+        }
+
+
+    }
+
+    private void removeExclusives(ArrayList<BetterEnchantment> list, Set<Enchantment> currentEnchantmentsOnItem) {
+        removeExclusive(list, currentEnchantmentsOnItem, protectionsArr);
+        removeExclusive(list, currentEnchantmentsOnItem, bootsArr);
+        removeExclusive(list, currentEnchantmentsOnItem, physicalArr);
+        removeExclusive(list, currentEnchantmentsOnItem, toolsArr);
+        removeExclusive(list, currentEnchantmentsOnItem, tridentArr);
+        removeExclusive(list, currentEnchantmentsOnItem, crossbowArr);
+    }
+
+    private void removeExclusive(ArrayList<BetterEnchantment> list, Set<Enchantment> currentEnchantmentsOnItem, Enchantment[] exclusiveArray) {
+        int index = -1;
+
+        //Loop exclusives
+        for (int i = 0; i < exclusiveArray.length; i++) {
+
+            Enchantment iteratedEnchantment = exclusiveArray[i];
+
+            if (index == -1) {
+                //Loop current enchanted on item
+                for (Enchantment currentEnchantment : currentEnchantmentsOnItem) {
+                    //Check if current enchant equals exclusive enchant
+                    if (iteratedEnchantment.getKey().getKey().equals(currentEnchantment.getKey().getKey())) {
+                        index = i;
+                        i = -1;
+                        continue;
+                    }
+                }
+            } else {
+                if (index == i)
+                    continue;
+                list.removeIf(betterEnchantment -> (iteratedEnchantment.getKey().getKey().equals(betterEnchantment.enchantment.getKey().getKey())));
+            }
+
+        }
+    }
+
+
+
+
+    private void removeHigherLevels(ArrayList<BetterEnchantment> list, Map<Enchantment, Integer> currentEnchantmentsOnItem) {
+
+        for (Map.Entry<Enchantment, Integer> entry : currentEnchantmentsOnItem.entrySet()) {
+            final Enchantment enchantment = entry.getKey();
+            final Integer enchantedLevel = entry.getValue();
+
+            //We are removing enchantments of the same TYPE.
+            //Once we find the same type, we only keep the NEXT level
+
+
+            list.removeIf(betterEnchantment -> (enchantment.getKey().getKey().equals(betterEnchantment.enchantment.getKey().getKey()))
+                    && (enchantedLevel + 1 != (betterEnchantment.level))
+            );
+        }
+
+
+        HashMap<String, Integer> enchantmentIntegerHashMap = new HashMap<>();
+
+        for (BetterEnchantment betterEnchantment : list) {
+            final Integer integer = enchantmentIntegerHashMap.get(betterEnchantment.enchantment.getKey().getKey());
+            if (integer == null) {
+                enchantmentIntegerHashMap.put(betterEnchantment.enchantment.getKey().getKey(), betterEnchantment.level);
+                continue;
+            }
+
+            if (integer.intValue() > betterEnchantment.level) {
+                enchantmentIntegerHashMap.put(betterEnchantment.enchantment.getKey().getKey(), betterEnchantment.level);
+                continue;
+            }
+        }
+
+        list.removeIf(betterEnchantment -> enchantmentIntegerHashMap.get(betterEnchantment.enchantment.getKey().getKey()) != betterEnchantment.level);
+    }
+
+    private BetterEnchantment[] getThree(ArrayList<BetterEnchantment> list) {
+        //Smallest size of list to a min of 3 because theres only 3 offers.
+        final int SIZE = Math.min(list.size(), 3);
+
+        BetterEnchantment[] betterEnchantments = new BetterEnchantment[3];
+
+        /*
+
+            The index must be less than the size.
+                Example:
+                    Size of array is 3.
+                    Index MUST BE 2 at the most.
+                Example 2:
+                    Size of array is 2.
+                    Index MUST BE 1 at most.
+
+
+         */
+
+        int index = 0;
+
+        FillTheBE:
+        while (index < SIZE) {
+            int randomInt = (int) (Math.random() * list.size()); //random selection of list element
+            BetterEnchantment betterEnchantmentIterated = list.get(randomInt);
+
+
+            //WE DO NOT WANT DUPLICATES SO FIND IT
+            Set:
+            for (BetterEnchantment betterEnchantmentCheck : betterEnchantments) {
+                if (betterEnchantmentCheck == betterEnchantmentIterated) {
+                    continue FillTheBE;
+                }
+            }
+
+            betterEnchantments[index++] = betterEnchantmentIterated;
+        }
+
+        return betterEnchantments;
+
+    }
+
+    private EnchantmentOffer[] toEnchantmentOffer(BetterEnchantment[] betterEnchantments) {
+
+        EnchantmentOffer[] enchantmentOffers = new EnchantmentOffer[3];
+
+        for (int i = 0; i < betterEnchantments.length; i++) {
+
+            final BetterEnchantment betterEnchantment = betterEnchantments[i];
+            if (betterEnchantment == null)
+                continue;
+
+            EnchantmentOffer enchantmentOffer = new EnchantmentOffer(betterEnchantment.enchantment, betterEnchantment.level, betterEnchantment.emeraldCount);
+
+            enchantmentOffers[i] = enchantmentOffer;
+        }
+        return enchantmentOffers;
+    }
+
+    private void toLore(ItemStack itemStack) {
+        final ItemMeta itemMeta = itemStack.getItemMeta();
+        final Map<Enchantment, Integer> enchants = itemMeta.getEnchants();
+
+        List<String> lore = itemMeta.getLore();
+
+        if (lore == null) {
+            lore = new ArrayList<>();
+        } else {
+            lore = new ArrayList<>(lore);
+        }
+
+        lore.add(ID);
+
+        for (Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+            final Enchantment key = entry.getKey();
+            final Integer value = entry.getValue();
+            lore.add(ChatColor.DARK_PURPLE + "- " + key.getKey().getKey() + " " + value);
+        }
+
+        lore.add(END_ID);
+
+        for (Enchantment enchantment : itemMeta.getEnchants().keySet())
+            itemMeta.removeEnchant(enchantment);
+
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+
+    }
+
+    private void toEnchant(ItemStack itemStack) {
+        final ItemMeta itemMeta = itemStack.getItemMeta();
+        List<String> lore = itemMeta.getLore();
+        if (lore == null) {
+            lore = new ArrayList<>();
+        }
+        final Iterator<String> iterator = lore.iterator();
+
+        boolean isActive = false;
+
+        HashMap<Enchantment, Integer> map = new HashMap<>();
+
+        while (iterator.hasNext()) {
+            final String next = iterator.next();
+
+
+            if (!isActive && next.equals(ID)) {
+                isActive = true;
+                iterator.remove();
+                continue;
+            } else if (isActive && next.equals(END_ID)) {
+                iterator.remove();
+                break;
+            } else if (!isActive) {
+                continue;
+            }
+
+            final String[] args = next.split(" ");
+            //Ignore args[0] since it is just args[0] == COLOR + "-"
+
+            final Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(args[1]));
+            final int level = Integer.valueOf(args[2]);
+
+            map.put(ench, level);
+            iterator.remove();
+        }
+
+        for (Map.Entry<Enchantment, Integer> entry : map.entrySet()) {
+
+            if (itemMeta.hasEnchant(entry.getKey()))
+                continue;
+
+            itemMeta.addEnchant(entry.getKey(), entry.getValue(), false);
+        }
+
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+    }
+
     @EventHandler
-    public void fish(PlayerFishEvent event) {
-        Player player = event.getPlayer();
-        Entity entity = event.getCaught();
+    public void onDrop(PlayerDropItemEvent event) {
 
-        if (entity == null)
-            return;
-
-        if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH)
-            return;
-
-        if (!isFishingRod(player.getInventory().getItemInMainHand()))
-            return;
-
-        Skill fishingSkill = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getFishing();
-
-        ArrayList<ItemStack> rewards = getRewards(fishingSkill.getLevel());
-
-        reward(player, entity, rewards);
-
-        fishingSkill.addXP(ADDED_XP);
-    }
-
-    private boolean isFishingRod(ItemStack itemStack) {
-        switch (itemStack.getType()) {
-            case FISHING_ROD:
-                return true;
+        if (event.getPlayer().getOpenInventory().getType() == InventoryType.ENCHANTING) {
+            if (event.getItemDrop() != null)
+                toEnchant(event.getItemDrop().getItemStack());
         }
 
-        return false;
     }
 
-    private void drop(Location location, Collection<ItemStack> ground, Vector velocity) {
-        for (ItemStack itemStack : ground) {
-            Entity entity = location.getWorld().dropItemNaturally(location, itemStack);
-            entity.setVelocity(velocity);
+    @EventHandler
+    public void onPrepareItem(PrepareItemEnchantEvent event) {
+
+        Player player = event.getEnchanter();
+        ItemStack itemStack = event.getItem();
+
+        if (itemStack == null)
+            return;
+
+        ItemStack clone = itemStack.clone();
+        toEnchant(clone);
+
+        final Map<Enchantment, Integer> enchantments = clone.getEnchantments();
+
+        int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getEnchanting().getLevel();
+
+        final ArrayList<BetterEnchantment> validEnchantments = getValidEnchantment(level);
+        filter(validEnchantments, clone.getType());
+        removeExclusives(validEnchantments, enchantments.keySet());
+        removeHigherLevels(validEnchantments, enchantments);
+
+        final BetterEnchantment[] three = getThree(validEnchantments);
+        final EnchantmentOffer[] enchantmentOffers = toEnchantmentOffer(three);
+
+        for (int i = 0; i < event.getOffers().length; i++) {
+            if (enchantmentOffers[i] == null) {
+                event.getOffers()[i] = null;
+                continue;
+            }
+
+            event.getOffers()[i] = enchantmentOffers[i];
+        }
+
+        SmartEnchantment smartEnchantment = trackMap.get(player.getUniqueId());
+
+        if (smartEnchantment == null) {
+
+            int emeraldCount = 0;
+
+            for (ItemStack iteratedItemStack : player.getInventory().getContents()) {
+                if (iteratedItemStack == null)
+                    continue;
+
+                if (iteratedItemStack.getType() == Material.EMERALD) {
+                    emeraldCount += iteratedItemStack.getAmount();
+                }
+            }
+
+            smartEnchantment = new SmartEnchantment();
+            smartEnchantment.oldXP = player.getLevel();
+            player.setLevel(emeraldCount);
+        }
+
+        smartEnchantment.offers = enchantmentOffers;
+
+
+        trackMap.put(player.getUniqueId(), smartEnchantment);
+
+    }
+
+    @EventHandler
+    public void onInventoryOpen(final InventoryOpenEvent event) {
+
+        if (event.getInventory().getType() == InventoryType.ENCHANTING) {
+
+            final HumanEntity entity = event.getPlayer();
+            if (!(entity instanceof Player))
+                return;
+            final Player player = (Player) entity;
+
+
+            int emeraldCount = 0;
+
+            for (ItemStack itemStack : player.getInventory().getContents()) {
+                if (itemStack == null)
+                    continue;
+
+                if (itemStack.getType() == Material.EMERALD) {
+                    emeraldCount += itemStack.getAmount();
+                }
+            }
+
+            int oldXP = player.getLevel();
+            player.setLevel(emeraldCount);
+
+            final SmartEnchantment smartEnchantment = new SmartEnchantment();
+            smartEnchantment.oldXP = oldXP;
+            trackMap.put(player.getUniqueId(), smartEnchantment);
+
+            event.getInventory().setItem(1, lapis);
+
+            for (ItemStack itemStack : player.getInventory()) {
+                if (itemStack == null)
+                    continue;
+                toLore(itemStack);
+            }
+
+
         }
     }
 
-    private void reward(Player player, Entity entity, ArrayList<ItemStack> rewards) {
+    @EventHandler
+    public void onInventoryClose(final InventoryCloseEvent event) {
+        if (event.getInventory() instanceof EnchantingInventory) {
+            final HumanEntity entity = event.getPlayer();
+            if (!(entity instanceof Player))
+                return;
+            final Player player = (Player) entity;
 
-        final Location fishedLocation = entity.getLocation();
+            final SmartEnchantment smartEnchantment = trackMap.get(player.getUniqueId());
 
-        for (ItemStack rewardedItemStack : rewards) {
+            if (smartEnchantment != null) {
+                player.setLevel(smartEnchantment.oldXP);
+                trackMap.remove(player.getUniqueId());
+            }
+
+            event.getInventory().setItem(1, null);
+
+            for (ItemStack itemStack : player.getInventory()) {
+                if (itemStack == null)
+                    continue;
+
+                toEnchant(itemStack);
+            }
+
+            if (event.getInventory().getItem(0) != null)
+                toEnchant(event.getInventory().getItem(0));
 
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Item rewardedItem = entity.getWorld().dropItem(fishedLocation, rewardedItemStack);
-                    Vector vector = player.getLocation().toVector().subtract(fishedLocation.toVector());
-                    vector =vector.multiply(0.1);
-                    rewardedItem.setVelocity(vector);
+                    if (player.isOnline())
+                        player.updateInventory();
                 }
-            }.runTaskLater(LostShardPlugin.plugin, 5);
+            }.runTask(LostShardPlugin.plugin);
         }
     }
 
-    private ArrayList<ItemStack> getRewards(float level) {
-        HashMap<ItemStack, Double> lootOfLevel = getLootOfLevel(level);
-        ArrayList<ItemStack> rewards = new ArrayList<>();
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() == null) {
+            return;
+        }
+        if (event.getCurrentItem() == null)
+            return;
+        if (event.getCurrentItem().getItemMeta() == null)
+            return;
+        if (event.getCurrentItem().getItemMeta().getDisplayName() == null)
+            return;
+        if (event.getClickedInventory() instanceof EnchantingInventory && event.getCurrentItem().getItemMeta().getDisplayName().equals(lapis.getItemMeta().getDisplayName()) && (event.getSlot() == 1 || event.getRawSlot() == 1)) {
+            event.setCancelled(true);
+        }
+    }
 
+    //WE WILL IMPLEMENT OUR OWN
+    @EventHandler
+    public void onEnchant(EnchantItemEvent event) {
+        if (!event.getView().getType().equals(InventoryType.ENCHANTING))
+            return;
 
-        for (Map.Entry<ItemStack, Double> entry : lootOfLevel.entrySet()) {
-            double random = Math.random();
+        final Player player = event.getEnchanter();
 
-            ItemStack item = entry.getKey();
-            double chance = entry.getValue();
+        final PlayerInventory inventory = player.getInventory();
 
-            if (random < chance) {
-                rewards.add(item);
+        int emeraldCount = 0;
+        final int emeraldCost = event.getExpLevelCost();
+
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null)
+                continue;
+
+            if (itemStack.getType() == Material.EMERALD) {
+                emeraldCount += itemStack.getAmount();
+
+                if (emeraldCount > emeraldCost)
+                    break;
             }
         }
 
-        return rewards;
-    }
 
-    private HashMap<ItemStack, Double> getLootOfLevel(float level) {
-        HashMap<ItemStack, Double> lootTable = new HashMap<>();
-
-        if (level >= 100) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.TRIPWIRE_HOOK, 1), 0.05);
-            lootTable.put(new ItemStack(Material.OBSIDIAN, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ROTTEN_FLESH, 1), 0.05);
-            lootTable.put(new ItemStack(Material.FERMENTED_SPIDER_EYE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.JACK_O_LANTERN, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ANVIL, 1), 0.05);
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.03);
-            lootTable.put(new ItemStack(Material.BUCKET, 1), 0.01);
-            lootTable.put(new ItemStack(Material.DIRT, 1), 0.01);
-            lootTable.put(new ItemStack(Material.GOLD_BLOCK, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COBWEB, 1), 0.03);
-            lootTable.put(new ItemStack(Material.DIAMOND_BLOCK, 1), 0.01);
-            lootTable.put(new ItemStack(Material.MOOSHROOM_SPAWN_EGG, 1), 0.0025);
-            lootTable.put(new ItemStack(Material.OAK_DOOR, 1), 0.02);
-            lootTable.put(new ItemStack(Material.DRAGON_EGG, 1), 0.0075);
-        } else if (90 <= level && level < 100) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.TRIPWIRE_HOOK, 1), 0.05);
-            lootTable.put(new ItemStack(Material.OBSIDIAN, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ROTTEN_FLESH, 1), 0.05);
-            lootTable.put(new ItemStack(Material.FERMENTED_SPIDER_EYE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.JACK_O_LANTERN, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ANVIL, 1), 0.05);
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.03);
-            lootTable.put(new ItemStack(Material.BUCKET, 1), 0.01);
-            lootTable.put(new ItemStack(Material.DIRT, 1), 0.01);
-            lootTable.put(new ItemStack(Material.GOLD_BLOCK, 1), 0.01);
-            lootTable.put(new ItemStack(Material.COBWEB, 1), 0.03);
-            lootTable.put(new ItemStack(Material.DIAMOND_BLOCK, 1), 0.01);
-            lootTable.put(new ItemStack(Material.MOOSHROOM_SPAWN_EGG, 1), 0.0025);
-            lootTable.put(new ItemStack(Material.OAK_DOOR, 1), 0.02);
-            lootTable.put(new ItemStack(Material.DRAGON_EGG, 1), 0.0075);
-        } else if (80 <= level && level < 90) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.BOOKSHELF, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ROTTEN_FLESH, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GHAST_TEAR, 1), 0.05);
-            lootTable.put(new ItemStack(Material.PUMPKIN, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ENCHANTING_TABLE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.DIAMOND_SWORD, 1), 0.03);
-            lootTable.put(new ItemStack(Material.GOLD_BLOCK, 1), 0.02);
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.02);
-            lootTable.put(new ItemStack(Material.COBWEB, 1), 0.03);
-            lootTable.put(new ItemStack(Material.DIAMOND_BLOCK, 1), 0.01);
-            lootTable.put(new ItemStack(Material.MOOSHROOM_SPAWN_EGG, 1), 0.0025);
-            lootTable.put(new ItemStack(Material.HONEY_BOTTLE, 1), 0.0075);
-
-        } else if (70 <= level && level < 80) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.HAY_BLOCK, 1), 0.05);
-            lootTable.put(new ItemStack(Material.HOPPER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON, 1), 0.05);
-            lootTable.put(new ItemStack(Material.ENCHANTING_TABLE, 1), 0.05);
-
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.02);
-            lootTable.put(new ItemStack(Material.EMERALD, 1), 0.03);
-            lootTable.put(new ItemStack(Material.GOLD_BLOCK, 1), 0.02);
-            lootTable.put(new ItemStack(Material.LAPIS_BLOCK, 1), 0.03);
-            lootTable.put(new ItemStack(Material.IRON_BLOCK, 1), 0.03);
-            lootTable.put(new ItemStack(Material.SLIME_BLOCK, 1), 0.02);
-        } else if (60 <= level && level < 70) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.1);
-            lootTable.put(new ItemStack(Material.IRON_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON_SEEDS, 1), 0.05);
-            lootTable.put(new ItemStack(Material.CAKE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON, 1), 0.05);
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.02);
-            lootTable.put(new ItemStack(Material.EMERALD, 1), 0.03);
-            lootTable.put(new ItemStack(Material.GOLD_BLOCK, 1), 0.02);
-            lootTable.put(new ItemStack(Material.LAPIS_BLOCK, 1), 0.03);
-        } else if (50 <= level && level < 60) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.1);
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.BOW, 1), 0.05);
-            lootTable.put(new ItemStack(Material.FISHING_ROD, 1), 0.05);
-            lootTable.put(new ItemStack(Material.REDSTONE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON_SEEDS, 1), 0.05);
-            lootTable.put(new ItemStack(Material.DIAMOND, 1), 0.02);
-            lootTable.put(new ItemStack(Material.EMERALD, 1), 0.03);
-        } else if (40 <= level && level < 50) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.1);
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.COBBLESTONE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.SLIME_BALL, 1), 0.05);
-            lootTable.put(new ItemStack(Material.EGG, 1), 0.05);
-            lootTable.put(new ItemStack(Material.LEAD, 1), 0.05);
-
-        } else if (30 <= level && level < 40) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.1);
-            lootTable.put(new ItemStack(Material.GOLD_ORE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.STICK, 1), 0.05);
-            lootTable.put(new ItemStack(Material.LEAD, 1), 0.05);
-            lootTable.put(new ItemStack(Material.SLIME_BALL, 1), 0.05);
-        } else if (20 <= level && level < 30) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.1);
-            lootTable.put(new ItemStack(Material.GOLD_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON, 1), 0.05);
-            lootTable.put(new ItemStack(Material.GOLDEN_SWORD, 1), 0.05);
-            lootTable.put(new ItemStack(Material.BONE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.EMERALD, 1), 0.05);
-        } else if (10 <= level && level < 20) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.05);
-            lootTable.put(new ItemStack(Material.IRON_INGOT, 1), 0.05);
-            lootTable.put(new ItemStack(Material.CAKE, 1), 0.05);
-            lootTable.put(new ItemStack(Material.CLOCK, 1), 0.05);
-            lootTable.put(new ItemStack(Material.MELON, 1), 0.10);
-            lootTable.put(new ItemStack(Material.ROTTEN_FLESH, 1), 0.05);
-        } else if (0 <= level && level < 10) {
-            lootTable.put(new ItemStack(Material.FEATHER, 1), 0.10);
-            lootTable.put(new ItemStack(Material.WHEAT_SEEDS, 1), 0.10);
-            lootTable.put(new ItemStack(Material.COBBLESTONE, 1), 0.10);
+        if (emeraldCost > emeraldCount) {
+            player.sendMessage(ERROR_COLOR + "You don't have enough emeralds (" + emeraldCount + "/" + emeraldCost + ").");
+            event.setCancelled(true);
+            return;
         }
-        return lootTable;
+
+        final SmartEnchantment smartEnchantment = trackMap.get(player.getUniqueId());
+
+        if (smartEnchantment == null) {
+            player.sendMessage(ERROR_COLOR + "There was an error with this selection. Contact staff!");
+            event.setCancelled(true);
+            return;
+        }
+
+
+        //Rework enchant
+        event.getEnchantsToAdd().clear();
+        event.getEnchantsToAdd().put(smartEnchantment.offers[event.whichButton()].getEnchantment(), smartEnchantment.offers[event.whichButton()].getEnchantmentLevel());
+
+        //Add XP
+        Skill enchantingSkill = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getEnchanting();
+        enchantingSkill.addXP(ADDED_XP + (emeraldCost * 2));
+
+        //Remove emerald
+        HelperMethods.remove(player.getInventory(), Material.EMERALD, emeraldCost);
+        player.setLevel(player.getLevel() + (event.whichButton() + 1));
+        //Show ALL
+        event.setExpLevelCost(1);
+        //To enchant
+        event.getInventory().setItem(1, lapis.clone());
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+//
+//            }
+//        }.runTask(LostShardPlugin.plugin);
+
     }
+
 }
 

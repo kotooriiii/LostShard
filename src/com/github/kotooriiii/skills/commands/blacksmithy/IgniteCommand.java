@@ -98,11 +98,14 @@ public class IgniteCommand implements CommandExecutor {
 
         BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.IGNITE);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
         //Harden
-        enchant(mainHand, playerSender);
+        if (!enchant(mainHand, playerSender)) {
+            playerSender.sendMessage(ERROR_COLOR + "You cannot add conflicting enchantments.");
+            return false;
+        }
         playerSender.sendMessage(ChatColor.GOLD + "You ignite the item.");
 
 
@@ -191,7 +194,7 @@ public class IgniteCommand implements CommandExecutor {
         return false;
     }
 
-    private void enchant(ItemStack itemStack, Player player) {
+    private boolean enchant(ItemStack itemStack, Player player) {
 
         switch (itemStack.getType()) {
             case DIAMOND_SWORD:
@@ -203,10 +206,19 @@ public class IgniteCommand implements CommandExecutor {
                 //STONE
             case STONE_SWORD:
             case WOODEN_SWORD:
+
+                if (itemStack.getItemMeta().hasConflictingEnchant(Enchantment.FIRE_ASPECT)) {
+                    return false;
+                }
+
                 itemStack.removeEnchantment(Enchantment.FIRE_ASPECT);
                 itemStack.addEnchantment(Enchantment.FIRE_ASPECT, 2);
                 break;
             case BOW:
+
+                if (itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_FIRE))
+                    return false;
+
                 itemStack.removeEnchantment(Enchantment.ARROW_FIRE);
                 itemStack.addEnchantment(Enchantment.ARROW_FIRE, 1);
                 break;
@@ -215,7 +227,7 @@ public class IgniteCommand implements CommandExecutor {
 
         clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the ignite buff!");
         clan.setIgniteTimer(0);
-
+        return true;
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {

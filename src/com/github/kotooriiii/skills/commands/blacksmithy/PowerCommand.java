@@ -3,7 +3,6 @@ package com.github.kotooriiii.skills.commands.blacksmithy;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.skills.Skill;
-import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
 import org.bukkit.ChatColor;
@@ -97,8 +96,12 @@ public class PowerCommand implements CommandExecutor {
             return false;
 
 
-        //Harden
-        enchant(mainHand, playerSender);
+        //Power
+        if (!enchant(mainHand, playerSender)) {
+            playerSender.sendMessage(ERROR_COLOR + "You cannot add conflicting enchantments.");
+            return false;
+        }
+
         playerSender.sendMessage(ChatColor.GOLD + "You power the item.");
 
 
@@ -172,7 +175,7 @@ public class PowerCommand implements CommandExecutor {
         return arrowLevel;
     }
 
-    private void enchant(ItemStack itemStack, Player player) {
+    private boolean enchant(ItemStack itemStack, Player player) {
 
         int MAXIMUM_POWER_FINAL = MAXIMUM_POWER;
         Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
@@ -186,6 +189,12 @@ public class PowerCommand implements CommandExecutor {
         int powerMaxLevel = Enchantment.ARROW_DAMAGE.getMaxLevel();
 
         if (powerLevel < nextLevel && nextLevel <= MAXIMUM_POWER_FINAL && nextLevel <= powerMaxLevel) {
+
+            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_DAMAGE))
+            {
+                return false;
+            }
+
             itemStack.removeEnchantment(Enchantment.ARROW_DAMAGE);
             itemStack.addEnchantment(Enchantment.ARROW_DAMAGE, nextLevel);
             if (nextLevel == 5) {
@@ -193,6 +202,7 @@ public class PowerCommand implements CommandExecutor {
                 clan.setEnhanceTimer(0);
             }
         }
+        return true;
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {

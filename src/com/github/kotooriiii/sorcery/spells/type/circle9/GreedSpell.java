@@ -547,11 +547,15 @@ public class GreedSpell extends Spell implements Listener {
         if (list == null || list.size() < 2) {
             list = new ArrayList<>();
         } else {
-            if (!list.get(list.size() - 1).equals(ID))
+
+            if(list.contains(ID))
                 return false;
-            if (!list.get(list.size() - 2).equals(OWNER + player.getName()))
+            if (list.contains(OWNER + player.getName()))
                 return false;
+
+            list = new ArrayList<>(list);
         }
+
 
         list.add(OWNER + player.getName());
         list.add(ID);
@@ -608,9 +612,28 @@ public class GreedSpell extends Spell implements Listener {
             return false;
 
 
-        if (!list.get(list.size() - 1).equals(ID))
+        if(!list.contains(ID))
             return false;
-        String name = list.get(list.size() - 2).substring(OWNER.length());
+
+        String name = null;
+        int index = -1;
+
+        for(int i = 0 ; i < list.size(); i++)
+        {
+
+            String s = list.get(i);
+
+            if(s.startsWith(OWNER))
+            {
+                name = s.substring(OWNER.length());
+                index = i;
+                break;
+            }
+        }
+
+        if(name == null)
+            return false;
+
         Player player = Bukkit.getPlayer(name);
         if (player != null && isVisible) {
             player.sendMessage(COLOR + "This item is no longer soulbound...");
@@ -619,8 +642,8 @@ public class GreedSpell extends Spell implements Listener {
 
         }
 
-        list.remove(list.size() - 1);
-        list.remove(list.size() - 1);
+        list.remove(ID);
+        list.remove(index);
         itemMeta.setLore(list);
         itemStack.setItemMeta(itemMeta);
         return true;

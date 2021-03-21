@@ -97,7 +97,12 @@ public class HardenCommand implements CommandExecutor {
             return false;
 
         //Harden
-        enchant(mainHand);
+        if(!enchant(mainHand))
+        {
+            playerSender.sendMessage(ERROR_COLOR + "You cannot add conflicting enchantments.");
+            return false;
+        }
+
         playerSender.sendMessage(ChatColor.GOLD + "You harden the item.");
 
 
@@ -245,7 +250,7 @@ public class HardenCommand implements CommandExecutor {
         return protectionLevel < unbreakingLevel ? protectionLevel : unbreakingLevel;
     }
 
-    private void enchant(ItemStack itemStack) {
+    private boolean enchant(ItemStack itemStack) {
         int nextLevel = getHardenLevel(itemStack) + 1;
 
         int protectionLevel = itemStack.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
@@ -254,16 +259,22 @@ public class HardenCommand implements CommandExecutor {
         int protectionMaxLevel = Enchantment.PROTECTION_ENVIRONMENTAL.getMaxLevel();
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
+
+
         if (protectionLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= protectionMaxLevel) {
+            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.PROTECTION_ENVIRONMENTAL))
+                return false;
             itemStack.removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
             itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, nextLevel);
         }
 
         if (unbreakingLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= unbreakingMaxLevel) {
+            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
+                return false;
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
         }
-
+return true;
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {

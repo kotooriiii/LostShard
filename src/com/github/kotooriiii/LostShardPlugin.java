@@ -756,7 +756,6 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerFirstJoinEvent(), this);
         pm.registerEvents(new SeedCommandListener(), this);
         pm.registerEvents(new VoidDamageListener(), this);
-        pm.registerEvents(new EnchantmentListener(), this);
         pm.registerEvents(new PlayerJoinCheckClanIfBuffListener(), this);
 
         pm.registerEvents(new MOTDListener(), this);

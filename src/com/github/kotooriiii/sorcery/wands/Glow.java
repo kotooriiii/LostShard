@@ -1,9 +1,11 @@
 package com.github.kotooriiii.sorcery.wands;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class Glow extends Enchantment {
 
@@ -13,9 +15,17 @@ public class Glow extends Enchantment {
         super(key);
     }
 
+
+
+
     @Override
     public boolean canEnchantItem(ItemStack arg0) {
         return false;
+    }
+
+    @Override
+    public @NotNull Component displayName(int i) {
+        return null;
     }
 
     @Override
