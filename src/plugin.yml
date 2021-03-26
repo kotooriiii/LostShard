@@ -10,6 +10,9 @@ loadbefore:
 version: 1.0
 api-version: 1.16
 commands:
+  banker:
+  buy:
+  vendor:
   spell:
     aliases:
       - spells
@@ -97,16 +100,6 @@ commands:
     usage:
     aliases:
       - bal
-  #Sale
-  buy:
-    description:
-    usage:
-  sell:
-    description:
-    usage:
-  price:
-    description:
-    usage:
   #Runebook stuff
   bind:
   cast:

@@ -2,10 +2,15 @@ package com.github.kotooriiii.plots.struct;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.hostility.Zone;
+import com.github.kotooriiii.npc.type.banker.BankerNPC;
+import com.github.kotooriiii.npc.type.vendor.VendorNPC;
+import com.github.kotooriiii.npc.type.vendor.VendorTrait;
 import com.github.kotooriiii.plots.PlotType;
+import com.github.kotooriiii.plots.privacy.PlotPrivacy;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.plots.listeners.SignChangeListener;
 import com.github.kotooriiii.util.HelperMethods;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,6 +39,11 @@ public class PlayerPlot extends Plot {
     private Location center;
 
     /**
+     * The Plot's privacy state. In other words, who can interact with the plot
+     */
+    private PlotPrivacy privacy;
+
+    /**
      * The default radius of a plot when first created
      */
     private final static int defaultRadius = LostShardPlugin.isTutorial() ? 5 : 5;
@@ -55,8 +65,19 @@ public class PlayerPlot extends Plot {
      * The plot's co-owners.
      */
     private ArrayList<UUID> jointOwners;
+
+    /**
+     * Plot Status
+     */
     private boolean isTown;
     private boolean isDungeon;
+    private boolean isVendor;
+    private boolean isKick;
+
+    /**
+     * The amount of purchased bankers in the plot. This DO NOT have to be existing.
+     */
+    private int purchasedBankers;
 
     /**
      * The cost to create a plot
@@ -84,6 +105,12 @@ public class PlayerPlot extends Plot {
 
         isTown = false;
         isDungeon = false;
+        isVendor = false;
+        isKick = false;
+
+        privacy = PlotPrivacy.PRIVATE;
+
+        purchasedBankers = 0;
 
     }
 
@@ -109,6 +136,28 @@ public class PlayerPlot extends Plot {
 
         Zone zone = new Zone(minX, maxX, minY, maxY, minZ, maxZ);
         return zone;
+    }
+
+    public ArrayList<NPC> getVendors() {
+        return VendorNPC.getVendorInPlot(this);
+    }
+
+    public ArrayList<NPC> getBankers() {
+        return BankerNPC.getBankersInPlot(this);
+    }
+
+    public int getCostOfNextVendor() {
+        switch (getVendors().size()) {
+            case 0:
+                return 100;
+            case 1:
+                return 250;
+            case 2:
+                return 500;
+            default:
+                return -1;
+
+        }
     }
 
     public void sendToMembers(String message) {
@@ -154,7 +203,7 @@ public class PlayerPlot extends Plot {
         int maxZ = centerZ + radius + distance + leeway;
 
 
-        for (Plot plot : allPlots) {
+        for (Plot plot : allPlots.values()) {
 
             int minStaffX = 0;
             int maxStaffX = 0;
@@ -167,14 +216,13 @@ public class PlayerPlot extends Plot {
             if (plot.equals(this))
                 continue;
 
-            if(plot.getType().isStaff())
-            {
+            if (plot.getType().isStaff()) {
                 minStaffX = MINIMUM_PLOT_EXPAND_RANGE;
                 maxStaffX = MINIMUM_PLOT_EXPAND_RANGE;
                 minStaffZ = MINIMUM_PLOT_EXPAND_RANGE;
                 maxStaffZ = MINIMUM_PLOT_EXPAND_RANGE;
             }
-            Zone expandedZone = new Zone(minX + minStaffX, maxX + maxStaffX, minY, maxY, minZ +minStaffZ, maxZ+maxStaffZ);
+            Zone expandedZone = new Zone(minX + minStaffX, maxX + maxStaffX, minY, maxY, minZ + minStaffZ, maxZ + maxStaffZ);
 
             if (expandedZone.overlaps(plot.getZone()))
                 return false;
@@ -189,7 +237,17 @@ public class PlayerPlot extends Plot {
      * @return a refund of what the player spent creating the plot and the expansion of the plot.
      */
     public double disband() {
-        LostShardPlugin.getPlotManager().removePlot(this);
+        return disband(true);
+    }
+
+    /**
+     * Disbands the plot. Removes the plot completely invoking the PlotManager#removePlot(Plot plot) method.
+     *
+     * @param checkVendorLives checks lives of vendors
+     * @return a refund of what the player spent creating the plot and the expansion of the plot.
+     */
+    private double disband(boolean checkVendorLives) {
+        LostShardPlugin.getPlotManager().removePlot(this, checkVendorLives);
         return refund();
     }
 
@@ -247,21 +305,20 @@ public class PlayerPlot extends Plot {
         ZoneId id = ZoneId.of("America/New_York");
 
         ZonedDateTime now = ZonedDateTime.now(id);
-        ZonedDateTime creationDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationMillisecondsDate),id);
+        ZonedDateTime creationDate = ZonedDateTime.ofInstant(Instant.ofEpochMilli(creationMillisecondsDate), id);
 
-        ZonedDateTime week1FromCreationDate =  creationDate.plusWeeks(1);
+        ZonedDateTime week1FromCreationDate = creationDate.plusWeeks(1);
 
 
         //If today's time is LESS THAN a week
-        if (now.compareTo(week1FromCreationDate) <= 0)
-        {
+        if (now.compareTo(week1FromCreationDate) <= 0) {
             //A week grace period for no tax
             return true;
         }
 
         if (getBalance() < getTax()) {
             this.balance = 0;
-            shrink();
+            smallify(false);
             return false;
         }
         this.balance = this.balance - getTax();
@@ -298,13 +355,29 @@ public class PlayerPlot extends Plot {
         LostShardPlugin.getPlotManager().savePlot(this);
     }
 
-    public void shrink() {
+    /**
+     * Shrinks the plot size by 1.
+     *
+     * @return true, if smallified, false if cannot shrink further
+     */
+    public boolean shrink() {
+        if (this.getRadius() <= PlayerPlot.defaultRadius) {
+            return false;
+        } else {
+            smallify(true);
+            return true;
+        }
+    }
+
+    private void smallify(boolean checkVendorLives) {
         setRadius(this.radius - 1);
         if (this.getRadius() == 0) {
-            disband();
+            disband(checkVendorLives);
         } else {
             LostShardPlugin.getPlotManager().savePlot(this);
         }
+        if (checkVendorLives)
+            VendorNPC.checkLives();
     }
 
     //Balance management
@@ -324,6 +397,26 @@ public class PlayerPlot extends Plot {
     //Friend management
     public UUID[] getFriends() {
         return friends.toArray(new UUID[friends.size()]);
+    }
+
+    public boolean hasPermissionToUse(UUID uuid)
+    {
+        return (privacy == PlotPrivacy.PUBLIC) || isMember(uuid);
+    }
+
+    public boolean hasPermissionToBuild(UUID uuid)
+    {
+        return isOwner(uuid) || isJointOwner(uuid);
+    }
+
+    public boolean hasPermissionToDamage(UUID uuid)
+    {
+        return isOwner(uuid) || isJointOwner(uuid);
+    }
+
+    public boolean hasPermissionToSpawn(UUID uuid)
+    {
+        return isOwner(uuid) || isJointOwner(uuid);
     }
 
     public boolean isFriend(UUID playerUUID) {
@@ -391,6 +484,10 @@ public class PlayerPlot extends Plot {
         return ownerUUID.equals(playerUUID);
     }
 
+    public boolean isMember(UUID uuid) {
+        return isOwner(uuid) || isJointOwner(uuid) || isFriend(uuid);
+    }
+
     public boolean isTown() {
         return this.isTown;
     }
@@ -399,6 +496,13 @@ public class PlayerPlot extends Plot {
         return this.isDungeon;
     }
 
+    public boolean isVendor() {
+        return isVendor;
+    }
+
+    public boolean isKick() {
+        return isKick;
+    }
 
     @Override
     public String info(Player perspectivePlayer) {
@@ -452,6 +556,18 @@ public class PlayerPlot extends Plot {
         String friendsConcat = "";
         String signBuilder = "";
         String statuses = "";
+        String vendors = "";
+
+        if (isVendor) {
+            final ArrayList<NPC> vendorInPlot = VendorNPC.getVendorInPlot(this);
+            if (!vendorInPlot.isEmpty()) {
+                vendors += "\n" + ChatColor.YELLOW + "Vendors:";
+            }
+            for (NPC npc : vendorInPlot) {
+                vendors += "\n" + ChatColor.YELLOW + "  - " + npc.getTrait(VendorTrait.class).getVendorName() + ": " + ChatColor.WHITE + "(" + npc.getStoredLocation().getBlockX() + ", " + npc.getStoredLocation().getBlockY() + ", " + npc.getStoredLocation().getBlockZ() + ")";
+            }
+
+        }
 
 
         //Show coowner and friends
@@ -459,6 +575,9 @@ public class PlayerPlot extends Plot {
         if (!relationshipToPlot.isEmpty()) {
             statuses = ChatColor.YELLOW + "\nTown Status: " + ChatColor.WHITE + this.isTown();
             statuses += ChatColor.YELLOW + "\nDungeon Status: " + ChatColor.WHITE + this.isDungeon();
+            statuses += ChatColor.YELLOW + "\nVendor Status: " + ChatColor.WHITE + this.isVendor();
+            statuses += ChatColor.YELLOW + "\nKick Status: " + ChatColor.WHITE + this.isKick();
+
 
             Location signBuildLoc = SignChangeListener.getSignBuilder(perspectivePlayer.getLocation());
             if (signBuildLoc != null)
@@ -486,7 +605,7 @@ public class PlayerPlot extends Plot {
         }
 
 
-        return header + relationshipToPlot + ownerString + size  + privacy + location +  statuses + signBuilder + jointOwnerConcat + friendsConcat;
+        return header + relationshipToPlot + ownerString + size + privacy + location + statuses + vendors + signBuilder + jointOwnerConcat + friendsConcat;
     }
 
     private String daysLeft() {
@@ -583,6 +702,19 @@ public class PlayerPlot extends Plot {
 
     //Getter /setter
 
+
+    public void setPurchasedBankers(int purchasedBankers) {
+        this.purchasedBankers = purchasedBankers;
+    }
+
+    public int getPurchasedBankers() {
+        return purchasedBankers;
+    }
+
+    public int getMaxBankers() {
+        return 1;
+    }
+
     public UUID getOwnerUUID() {
         return ownerUUID;
     }
@@ -629,7 +761,27 @@ public class PlayerPlot extends Plot {
         this.isDungeon = b;
     }
 
+    public void setVendor(boolean vendor) {
+        isVendor = vendor;
+    }
+
+    public void setKick(boolean kick) {
+        isKick = kick;
+    }
+
     public static int getDefaultRadius() {
         return defaultRadius;
+    }
+
+    public void setOwner(UUID uniqueId) {
+        this.ownerUUID = uniqueId;
+    }
+
+    public PlotPrivacy getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(PlotPrivacy privacy) {
+        this.privacy = privacy;
     }
 }

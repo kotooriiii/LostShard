@@ -72,6 +72,7 @@ public class EntityInteractPlotListener implements Listener {
 
     /**
      * Stops the RIGHT CLICK interaction on enemy plots with the exception of wooden stuff.
+     *
      * @param playerInteractEvent
      */
     @EventHandler
@@ -83,23 +84,33 @@ public class EntityInteractPlotListener implements Listener {
         final Player playerInteracting = playerInteractEvent.getPlayer();
         final UUID playerUUID = playerInteracting.getUniqueId();
 
+        //Staff override
         if (playerInteracting.hasPermission(STAFF_PERMISSION))
             return;
 
-        if((block.getType() == Material.BIRCH_DOOR || block.getType() == Material.ACACIA_DOOR || block.getType() == Material.DARK_OAK_DOOR || block.getType() == Material.JUNGLE_DOOR || block.getType() == Material.SPRUCE_DOOR || block.getType() == Material.OAK_DOOR ||
-                block.getType() == Material.BIRCH_BUTTON || block.getType() == Material.ACACIA_BUTTON || block.getType() == Material.DARK_OAK_BUTTON || block.getType() == Material.JUNGLE_BUTTON || block.getType() == Material.SPRUCE_BUTTON || block.getType() == Material.OAK_BUTTON)
+        //These "wooden" items CAN ALWAYS be used.
+        //todo add lever?
+        if ((block.getType() == Material.BIRCH_DOOR || block.getType() == Material.ACACIA_DOOR || block.getType() == Material.DARK_OAK_DOOR || block.getType() == Material.JUNGLE_DOOR || block.getType() == Material.SPRUCE_DOOR || block.getType() == Material.OAK_DOOR || block.getType() == Material.WARPED_DOOR || block.getType() == Material.CRIMSON_DOOR ||
+                block.getType() == Material.BIRCH_BUTTON || block.getType() == Material.ACACIA_BUTTON || block.getType() == Material.DARK_OAK_BUTTON || block.getType() == Material.JUNGLE_BUTTON || block.getType() == Material.SPRUCE_BUTTON || block.getType() == Material.OAK_BUTTON || block.getType() == Material.CRIMSON_BUTTON || block.getType() == Material.WARPED_BUTTON || block.getType() == Material.POLISHED_BLACKSTONE_BUTTON ||
+                block.getType() == Material.BIRCH_TRAPDOOR || block.getType() == Material.ACACIA_TRAPDOOR || block.getType() == Material.DARK_OAK_TRAPDOOR || block.getType() == Material.JUNGLE_TRAPDOOR || block.getType() == Material.SPRUCE_TRAPDOOR || block.getType() == Material.OAK_TRAPDOOR || block.getType() == Material.CRIMSON_TRAPDOOR || block.getType() == Material.WARPED_TRAPDOOR ||
+                block.getType() == Material.BIRCH_PRESSURE_PLATE || block.getType() == Material.ACACIA_PRESSURE_PLATE || block.getType() == Material.DARK_OAK_PRESSURE_PLATE || block.getType() == Material.JUNGLE_PRESSURE_PLATE || block.getType() == Material.SPRUCE_PRESSURE_PLATE || block.getType() == Material.OAK_PRESSURE_PLATE || block.getType() == Material.CRIMSON_PRESSURE_PLATE || block.getType() == Material.WARPED_PRESSURE_PLATE || block.getType() == Material.POLISHED_BLACKSTONE_PRESSURE_PLATE
                 && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
+        )
             return;
 
+        //Buggy so remove stairs
         if (block.getType().getKey().getKey().toLowerCase().endsWith("stairs") && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
             return;
+        //If it it isn't interactable, some glitchy stuff happens
         if (!block.getType().isInteractable() && (playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR))
             return;
 
+        //If it's a container, ANYONE can use it
         if (block.getState() instanceof Container)
             return;
 
-        if(!(playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR || playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK))
+        //Not a right click event, stop
+        if (!(playerInteractEvent.getAction() == Action.RIGHT_CLICK_AIR || playerInteractEvent.getAction() == Action.RIGHT_CLICK_BLOCK))
             return;
 
 
@@ -110,8 +121,9 @@ public class EntityInteractPlotListener implements Listener {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
+                //A staff plot can use powerables, buttons, pressure plate
                 if (!plot.getType().equals(PlotType.PLAYER)) {
-                    if (block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
+                    if (block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER)
                         return;
                     playerInteractEvent.setCancelled(true);
                     return;
@@ -121,7 +133,7 @@ public class EntityInteractPlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isFriend(playerUUID) || playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToUse(playerUUID)) {
                     playerInteractEvent.setCancelled(true);
                     return;
                 }

@@ -177,7 +177,7 @@ public class TutorialSettingsListener implements Listener {
         }
         LostShardPlugin.getBankManager().wrap(player.getUniqueId()).setCurrency(0.0f);
         for (Plot plot : ShardPlotPlayer.wrap(player.getUniqueId()).getPlotsOwned())
-            LostShardPlugin.getPlotManager().removePlot(plot);
+            LostShardPlugin.getPlotManager().removePlot(plot, true);
         MarkPlayer markPlayer = MarkPlayer.wrap(event.getPlayer().getUniqueId());
         if (markPlayer != null)
             markPlayer.remove();
@@ -548,7 +548,7 @@ public class TutorialSettingsListener implements Listener {
         }
         LostShardPlugin.getBankManager().wrap(player.getUniqueId()).setCurrency(0.0f);
         for (Plot plot : ShardPlotPlayer.wrap(player.getUniqueId()).getPlotsOwned())
-            LostShardPlugin.getPlotManager().removePlot(plot);
+            LostShardPlugin.getPlotManager().removePlot(plot, true);
         MarkPlayer markPlayer = MarkPlayer.wrap(event.getPlayer().getUniqueId());
         if (markPlayer != null)
             markPlayer.remove();

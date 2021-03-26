@@ -227,7 +227,7 @@ public class PlotBannerListener implements Listener {
             chestBlock.setType(Material.CHEST);
 
             Chest chest = (Chest) chestBlock.getState();
-            chest.getBlockInventory().addItem(new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), getChestBook());
+            chest.getBlockInventory().addItem(new ItemStack(Material.IRON_DOOR, 1), new ItemStack(Material.STONE_BUTTON, 2), new ItemStack(Material.FEATHER, 1), new ItemStack(Material.REDSTONE, 1), getChestBook());
 
             Directional directional = (Directional) chestBlock.getState().getBlockData();
             directional.setFacing(chestFacing.getOppositeFace());

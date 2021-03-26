@@ -73,6 +73,18 @@ public class ShardPlotPlayer {
         }
         return dungeons.toArray(new PlayerPlot[0]);
     }
+
+    public PlayerPlot[] getVendorPlots() {
+
+        ArrayList<PlayerPlot> vendorPlots = new ArrayList<>();
+        for (PlayerPlot playerPlot : plotsOwned) {
+            if (playerPlot.isVendor()) {
+                vendorPlots.add(playerPlot);
+            }
+        }
+        return vendorPlots.toArray(new PlayerPlot[0]);
+    }
+
     public boolean hasTownPlot() {
 
         for (PlayerPlot playerPlot : plotsOwned) {

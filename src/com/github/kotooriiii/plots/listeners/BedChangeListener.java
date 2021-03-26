@@ -48,8 +48,8 @@ public class BedChangeListener implements Listener {
         if (!playerPlot.isTown())
             return;
         UUID uuid = event.getPlayer().getUniqueId();
-        if (!(playerPlot.isFriend(uuid) || playerPlot.isJointOwner(uuid) || playerPlot.isOwner(uuid))) {
-            event.getPlayer().sendMessage(ERROR_COLOR + "You can not set your spawn here. This Town is private.");
+        if (!playerPlot.hasPermissionToUse(uuid)) {
+            event.getPlayer().sendMessage(ERROR_COLOR + "You do not have permission to set your spawn location here.");
             return;
         }
         event.getPlayer().sendMessage(ChatColor.GOLD + "Your spawnpoint has been set to the Town \"" + playerPlot.getName() + "\".");
@@ -141,7 +141,7 @@ public class BedChangeListener implements Listener {
                 continue;
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(stat.getSpawn());
             UUID uuid = stat.getPlayerUUID();
-            if (plot != null && plot instanceof PlayerPlot && ((PlayerPlot) plot).isTown() && (((PlayerPlot) plot).isFriend(uuid) || ((PlayerPlot) plot).isJointOwner(uuid) || ((PlayerPlot) plot).isOwner(uuid)))
+            if (plot instanceof PlayerPlot && ((PlayerPlot) plot).isTown() && ((PlayerPlot) plot).hasPermissionToUse(uuid))
                 continue;
             stat.setSpawn(null);
         }

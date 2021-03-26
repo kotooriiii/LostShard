@@ -4,7 +4,6 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
-import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKLevenshtein;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -120,7 +119,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot trample farmland here, " + plot.getName() + " is protected.");
                     event.setCancelled(true);
                     return;
@@ -167,7 +166,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
                     blockBreakEvent.setCancelled(true);
                     return;
@@ -181,7 +180,7 @@ public class BlockChangePlotListener implements Listener {
     }
 
     /**
-     * Called when a living Vehicle takes damage ( horse, mule, donkey, pig with saddle) in a staff plot OR in a plot
+     * Called when a living Vehicle takes damage ( horse, mule, donkey, pig with saddle) from a Player in a staff plot OR in a plot
      * they don't have permission in building.
      *
      * @param vehicleDamageEvent The event being called.
@@ -225,7 +224,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToDamage(playerUUID)) {
                     vehicleDamageEvent.setCancelled(true);
                     return;
                 }
@@ -283,7 +282,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     event.setCancelled(true);
                     return;
                 }
@@ -328,6 +327,11 @@ public class BlockChangePlotListener implements Listener {
 
     }
 
+    /**
+     * Called when a water flows to a plot.
+     * @param event
+     */
+
     @EventHandler
     public void onFlowToPlot(BlockFromToEvent event) {
 
@@ -353,67 +357,68 @@ public class BlockChangePlotListener implements Listener {
     }
 
 
-    /**
-     * Called when a Player left clicks a block (attempt to break) on a staff plot or plot with no permissions..
-     *
-     * @param playerInteractEvent
-     */
-    @EventHandler
-    public void onBlockChangePlot(PlayerInteractEvent playerInteractEvent) {
-
-        final Action action = playerInteractEvent.getAction();
-
-        if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR)
-            return;
-
-        final Block block = playerInteractEvent.getClickedBlock();
-
-        if (block == null)
-            return;
-
-
-              /*
-        So far it's a LEFT CLICK event
-        It's a block event
-         */
-
-        final Location location = block.getLocation();
-        //Check entity
-        final Player playerBlockBreak = playerInteractEvent.getPlayer();
-        //If entity is not a player then cancel it
-        final UUID playerUUID = playerBlockBreak.getUniqueId();
-
-        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
-            return;
-
-        //Iterate through all plots
-        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
-            //If the block being interacted is in the location of a plot
-            if (plot.contains(location)) {
-
-                //Staff no permission
-                if (plot.getType().isStaff()) {
-
-                    //playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
-                    //  playerInteractEvent.setCancelled(true);
-                    return;
-                }
-
-                PlayerPlot playerPlot = (PlayerPlot) plot;
-
-                //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
-                    //  playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
-                    //  playerInteractEvent.setCancelled(true);
-                    return;
-                }
-
-                //ALLOWED
-
-                break;
-            }
-        }
-    }
+    //Removed because too many messages
+//    /**
+//     * Called when a Player left clicks a block (attempt to break) on a staff plot or plot with no permissions..
+//     *
+//     * @param playerInteractEvent
+//     */
+//    @EventHandler
+//    public void onBlockChangePlot(PlayerInteractEvent playerInteractEvent) {
+//
+//        final Action action = playerInteractEvent.getAction();
+//
+//        if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR)
+//            return;
+//
+//        final Block block = playerInteractEvent.getClickedBlock();
+//
+//        if (block == null)
+//            return;
+//
+//
+//              /*
+//        So far it's a LEFT CLICK event
+//        It's a block event
+//         */
+//
+//        final Location location = block.getLocation();
+//        //Check entity
+//        final Player playerBlockBreak = playerInteractEvent.getPlayer();
+//        //If entity is not a player then cancel it
+//        final UUID playerUUID = playerBlockBreak.getUniqueId();
+//
+//        if (playerBlockBreak.hasPermission(STAFF_PERMISSION))
+//            return;
+//
+//        //Iterate through all plots
+//        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+//            //If the block being interacted is in the location of a plot
+//            if (plot.contains(location)) {
+//
+//                //Staff no permission
+//                if (plot.getType().isStaff()) {
+//
+//                    //playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+//                    //  playerInteractEvent.setCancelled(true);
+//                    return;
+//                }
+//
+//                PlayerPlot playerPlot = (PlayerPlot) plot;
+//
+//                //If don't have permissions
+//                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+//                    //  playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot break blocks here, " + plot.getName() + " is protected.");
+//                    //  playerInteractEvent.setCancelled(true);
+//                    return;
+//                }
+//
+//                //ALLOWED
+//
+//                break;
+//            }
+//        }
+//    }
 
     /**
      * Called when a Player right clicks a block (attempt to spawn entity) on a staff plot or plot with no permissions..
@@ -488,7 +493,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToSpawn(playerUUID)) {
                     playerBlockBreak.sendMessage(ERROR_COLOR + "Cannot spawn this here, " + plot.getName() + " is protected.");
                     playerInteractEvent.setCancelled(true);
                     return;
@@ -533,7 +538,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot drain buckets here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -580,7 +585,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot fill buckets here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -640,7 +645,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -655,7 +660,7 @@ public class BlockChangePlotListener implements Listener {
     }
 
     /**
-     * Called when a Player tries to remove an Item from an ItemFrame on a staff plot or plot with no building permission.
+     * Called when a Player tries to remove an Item from an ArmorStand on a staff plot or plot with no building permission.
      *
      * @param event
      */
@@ -690,7 +695,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot steal from armor stands here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -740,7 +745,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -793,7 +798,7 @@ public class BlockChangePlotListener implements Listener {
                 PlayerPlot playerPlot = (PlayerPlot) plot;
 
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     player.sendMessage(ERROR_COLOR + "Cannot break entities here, " + plot.getName() + " is protected.");
 
                     event.setCancelled(true);
@@ -928,7 +933,7 @@ public class BlockChangePlotListener implements Listener {
                 }
                 PlayerPlot playerPlot = (PlayerPlot) plot;
                 //If don't have permissions
-                if (!(playerPlot.isJointOwner(playerUUID) || playerPlot.isOwner(playerUUID))) {
+                if (!playerPlot.hasPermissionToBuild(playerUUID)) {
                     blockPlaceEvent.setCancelled(true);
                     return;
                 }

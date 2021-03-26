@@ -500,7 +500,7 @@ public class GreedSpell extends Spell implements Listener {
         return broke;
     }
 
-    private boolean isSoulbound(ItemStack itemStack) {
+    public static boolean isSoulbound(ItemStack itemStack) {
         if (itemStack == null)
             return false;
         ItemMeta itemMeta = itemStack.getItemMeta();
@@ -509,7 +509,7 @@ public class GreedSpell extends Spell implements Listener {
         if (itemMeta.getLore() == null || itemMeta.getLore().isEmpty())
             return false;
         List<String> list = itemMeta.getLore();
-        if (!list.get(list.size() - 1).equals(ID))
+        if (!list.contains(ID))
             return false;
         return true;
     }
@@ -523,9 +523,9 @@ public class GreedSpell extends Spell implements Listener {
         if (itemMeta.getLore() == null || itemMeta.getLore().size() < 2)
             return false;
         List<String> list = itemMeta.getLore();
-        if (!list.get(list.size() - 1).equals(ID))
+        if (!list.contains(equals(ID)))
             return false;
-        if (!list.get(list.size() - 2).equals(OWNER + player.getName()))
+        if (!list.contains(OWNER + player.getName()))
             return false;
         return true;
     }

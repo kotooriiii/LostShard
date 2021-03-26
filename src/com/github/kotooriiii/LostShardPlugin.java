@@ -44,8 +44,11 @@ import com.github.kotooriiii.npc.type.clone.CloneTrait;
 import com.github.kotooriiii.npc.type.guard.GuardTrait;
 import com.github.kotooriiii.npc.type.tutorial.TutorialTrait;
 import com.github.kotooriiii.npc.type.tutorial.murderer.MurdererTrait;
+import com.github.kotooriiii.npc.type.vendor.VendorNPC;
+import com.github.kotooriiii.npc.type.vendor.VendorTrait;
 import com.github.kotooriiii.plots.*;
-import com.github.kotooriiii.plots.commands.BuildCommand;
+import com.github.kotooriiii.plots.action.PlotActionListener;
+import com.github.kotooriiii.plots.commands.*;
 import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
@@ -110,6 +113,7 @@ import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.persistence.PersistenceLoader;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -267,6 +271,7 @@ public class LostShardPlugin extends JavaPlugin {
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(TutorialTrait.class).withName("TutorialTrait"));
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MurdererTrait.class).withName("MurdererTrait"));
         net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(BankerTrait.class).withName("BankerTrait"));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(VendorTrait.class).withName("VendorTrait"));
 
     }
 
@@ -574,9 +579,6 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("rest").setExecutor(new RestCommand());
         getCommand("stat").setExecutor(new StatCommand());
         getCommand("bind").setExecutor(new BindCommand());
-        getCommand("buy").setExecutor(new BuyCommand());
-        getCommand("sell").setExecutor(new SellCommand());
-        getCommand("price").setExecutor(new PriceCommand());
         getCommand("msg").setExecutor(new MsgCommand());
         getCommand("plot").setExecutor(new PlotCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
@@ -662,6 +664,10 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("toggle").setExecutor(new ToggleCommand());
         getCommand("sorcery").setExecutor(new SorceryCommand());
         getCommand("spell").setExecutor(new SpellCommand());
+
+        getCommand("buy").setExecutor(new BuyCommand());
+        getCommand("vendor").setExecutor(new VendorCommand());
+        getCommand("banker").setExecutor(new BankerCommand());
 
 
         //todo to use later -->
@@ -816,6 +822,11 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new SpellMonsterDropListener(), this);
         pm.registerEvents(new SpellDropAddListener(), this);
+
+        pm.registerEvents(new NewListingListener(), this);
+        pm.registerEvents(new ChoiceListingListener(), this);
+        pm.registerEvents(new PlotActionListener(), this);
+        pm.registerEvents(new PlotKickPlayerQuitListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
         registerCustomEventListener();
@@ -1079,6 +1090,13 @@ public class LostShardPlugin extends JavaPlugin {
             @Override
             public void run() {
 
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        newDayScheduler();
+                    }
+                }.runTaskLater(LostShardPlugin.plugin, 20 * 10);
+
                 //On every day, do all this code. 12:00am EST
 
                 //Set murder count less than one
@@ -1111,13 +1129,10 @@ public class LostShardPlugin extends JavaPlugin {
                     }
                 }
 
+                VendorNPC.checkLives();
 
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        newDayScheduler();
-                    }
-                }.runTaskLater(LostShardPlugin.plugin, 20 * 10);
+
+
             }
         }.runTaskLater(this.plugin, initialDelay);
 

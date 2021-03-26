@@ -14,6 +14,7 @@ import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.listeners.SignChangeListener;
+import com.github.kotooriiii.plots.privacy.PlotPrivacy;
 import com.github.kotooriiii.plots.struct.*;
 import com.github.kotooriiii.ranks.RankPlayer;
 import com.github.kotooriiii.ranks.RankType;
@@ -30,8 +31,6 @@ import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.status.shrine.Shrine;
 import com.github.kotooriiii.status.shrine.ShrineType;
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -667,6 +666,12 @@ public final class FileManager {
         Location center = yaml.getLocation("Center");
         boolean isTown = yaml.getBoolean("Town");
         boolean isDungeon = yaml.getBoolean("Dungeon");
+        boolean isVendor = yaml.getBoolean("Vendor", false);
+        boolean isKick = yaml.getBoolean("Kick", false);
+        int bankersPurchasedNum = yaml.getInt("BankersPurchasedNum", 0);
+        PlotPrivacy privacy = PlotPrivacy.valueOf(yaml.getString("Privacy", PlotPrivacy.PRIVATE.name()));
+
+
         long millis = yaml.getLong("CreationDateEpochMillis", ZonedDateTime.of(2020, 10, 29, 12 + 3, 0, 0, 0, ZoneId.of("America/New_York")).toInstant().toEpochMilli());
 
         List<String> friendsList = yaml.getStringList("Friends");
@@ -696,6 +701,10 @@ public final class FileManager {
         playerPlot.setJointOwners(jointOwnerUUIDList);
         playerPlot.setTown(isTown);
         playerPlot.setDungeon(isDungeon);
+        playerPlot.setVendor(isVendor);
+        playerPlot.setKick(isKick);
+        playerPlot.setPurchasedBankers(bankersPurchasedNum);
+        playerPlot.setPrivacy(privacy);
         playerPlot.setCreationMillisecondsDate(millis);
 
 
@@ -1251,7 +1260,7 @@ public final class FileManager {
     public static synchronized void write(PlayerPlot playerPlot) {
         File file;
 
-        file = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getID() + ".yml");
+        file = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getPlotUUID() + ".yml");
 
         if (file.exists()) {
             file.delete();
@@ -1282,6 +1291,13 @@ public final class FileManager {
         yaml.set("Center", center);
         yaml.set("Town", playerPlot.isTown());
         yaml.set("Dungeon", playerPlot.isDungeon());
+        yaml.set("Vendor", playerPlot.isVendor());
+        yaml.set("Kick", playerPlot.isKick());
+
+        yaml.set("BankersPurchasedNum", playerPlot.getPurchasedBankers());
+
+        yaml.set("Privacy", playerPlot.getPrivacy().name());
+
 
         yaml.set("CreationDateEpochMillis", playerPlot.getCreationMillisecondsDate());
 
@@ -1311,7 +1327,7 @@ public final class FileManager {
 
         File file;
 
-        file = new File(plots_staff_folder + File.separator + staffPlot.getID() + ".yml");
+        file = new File(plots_staff_folder + File.separator + staffPlot.getPlotUUID() + ".yml");
         if (file.exists()) {
             file.delete();
         }
@@ -1633,9 +1649,9 @@ public final class FileManager {
         File plotFile;
         if (!plot.getType().isStaff()) {
             PlayerPlot playerPlot = ((PlayerPlot) plot);
-            plotFile = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getID() + ".yml");
+            plotFile = new File(plots_players_folder + File.separator + playerPlot.getOwnerUUID() + File.separator + playerPlot.getPlotUUID() + ".yml");
         } else {
-            plotFile = new File(plots_staff_folder + File.separator + plot.getID() + ".yml");
+            plotFile = new File(plots_staff_folder + File.separator + plot.getPlotUUID() + ".yml");
         }
 
         if (plotFile.exists())

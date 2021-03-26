@@ -49,9 +49,12 @@ public abstract class Plot implements Serializable {
      */
     protected long creationMillisecondsDate;
 
+    protected boolean isDeleted;
+
     public Plot(World world, String name) {
         this.name = name;
         this.world = world;
+        this.isDeleted= false;
 
         //This is empty, must be calculated by subclass.
         this.zone = new Zone(0, 0, 0, 0, 0, 0);
@@ -120,7 +123,7 @@ public abstract class Plot implements Serializable {
 
     //Getters and setters
 
-    public UUID getID() {
+    public UUID getPlotUUID() {
         return id;
     }
 
@@ -163,6 +166,8 @@ public abstract class Plot implements Serializable {
 
     }
 
+
+
     public void setID(UUID uuid) {
         this.id = uuid;
         LostShardPlugin.getPlotManager().savePlot(this);
@@ -185,7 +190,7 @@ public abstract class Plot implements Serializable {
             UUID possibleID = UUID.randomUUID();
             plotLoop:
             for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
-                if (plot.getID().equals(possibleID))
+                if (plot.getPlotUUID().equals(possibleID))
                     continue uniqueLoop;
 
             }
@@ -202,7 +207,14 @@ public abstract class Plot implements Serializable {
         if(!(object instanceof Plot))
             return false;
         Plot otherPlot = (Plot) object;
-        return otherPlot.getID().equals(this.getID());
+        return otherPlot.getPlotUUID().equals(this.getPlotUUID());
+    }
+
+    public void setDeleted(boolean b) {
+        this.isDeleted = b;
+    }
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
 }

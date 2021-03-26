@@ -98,6 +98,10 @@ public class BankCommand implements CommandExecutor {
                                     }
                                     for (NPC createBankerNPC : BankerNPC.getAllBankerNPC()) {
                                         BankerTrait bankerTrait = createBankerNPC.getTrait(BankerTrait.class);
+
+                                        if(!bankerTrait.isStaffBanker())
+                                            continue;
+
                                         if (bankerTrait.getBankerName().equalsIgnoreCase(nameCreate)) {
                                             playerSender.sendMessage(ERROR_COLOR + "The name you chose is already taken by another Banker.");
                                             return true;
@@ -135,6 +139,10 @@ public class BankCommand implements CommandExecutor {
                                     String nameDelete = stringBuilder(args, 2, " ");
                                     for (NPC deleteBankerNPC : BankerNPC.getAllBankerNPC()) {
                                         BankerTrait bankerTrait = deleteBankerNPC.getTrait(BankerTrait.class);
+
+                                        if(!bankerTrait.isStaffBanker())
+                                            continue;
+
 
                                         if (bankerTrait.getBankerName().equalsIgnoreCase(nameDelete)) {
                                             playerSender.sendMessage(STANDARD_COLOR + "You have fired " + BANKER_COLOR + bankerTrait.getBankerName() + STANDARD_COLOR + " for stealing gold from players' chests.");

@@ -32,7 +32,7 @@ public class BalanceCommand implements CommandExecutor {
 //                        return true;
 //                    }
 
-                    DecimalFormat df = new DecimalFormat("#.##");
+                    DecimalFormat df = new DecimalFormat("0.00");
                     Bank bank = LostShardPlugin.getBankManager().wrap(playerUUID);
                     playerSender.sendMessage(ChatColor.GRAY + "You have " + df.format(bank.getCurrency()) + ChatColor.GRAY + " in your bank account.");
 

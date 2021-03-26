@@ -92,6 +92,20 @@ public class MarkPlayer {
         return false;
     }
 
+    public boolean removeMark(Mark mark) {
+
+        for (Iterator<Mark> markIterator = marks.iterator(); markIterator.hasNext(); ) {
+            Mark iteratingMark = markIterator.next();
+            if (iteratingMark.getName().equalsIgnoreCase(mark.getName())) {
+                markIterator.remove();
+                save();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public Mark getMark(String name) {
         for (Iterator<Mark> markIterator = marks.iterator(); markIterator.hasNext(); ) {
             Mark mark = markIterator.next();

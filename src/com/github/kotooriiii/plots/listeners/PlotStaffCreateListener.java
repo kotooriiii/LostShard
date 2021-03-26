@@ -147,7 +147,7 @@ public class PlotStaffCreateListener implements Listener {
                     }
 
                     if (isFound)
-                        LostShardPlugin.getPlotManager().removePlot(plotFound);
+                        LostShardPlugin.getPlotManager().removePlot(plotFound, true);
 
 
                     Plot plot;

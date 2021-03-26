@@ -31,6 +31,26 @@ public final class HelperMethods {
 
     private final static int CHAT_CENTER_PX = 154, BOOK_CENTER_PX = 46;
 
+    public static String materialName(Material type) {
+        String material = type.getKey().getKey();
+        material = material.replace("_", " ").toLowerCase();
+        return material;
+    }
+
+    public static Location getCenter(Location location) {
+        if(location==null)
+            return null;
+
+        return new Location(location.getWorld(), location.getBlockX()+0.5, location.getBlockY()+0.5, location.getBlockZ()+0.5);
+    }
+
+    public static Location getCenterWithDirection(Location location) {
+        if(location==null)
+            return null;
+
+        return new Location(location.getWorld(), location.getBlockX()+0.5, location.getBlockY()+0.5, location.getBlockZ()+0.5, location.getYaw(), location.getPitch());
+    }
+
 
     public enum CenteredType {
         CHAT, BOOK
@@ -700,6 +720,81 @@ public final class HelperMethods {
 
     }
 
+    public static String getTimeLeftShort(ZonedDateTime zonedDateTime) {
+
+        ZonedDateTime now = ZonedDateTime.now();
+        long left = Math.abs(Duration.between(now, zonedDateTime).toMillis());
+
+        String[] splitTime = getTimeLeftABBR(left).split(", ");
+
+        return splitTime[0];
+    }
+
+    private static String getTimeLeftABBR(long left) {
+
+        final long ms = 1;
+        final long sec = ms * 1000;
+        final long min = sec * 60;
+        final long hour = min * 60;
+        final long day = hour * 24;
+        final long week = day * 7;
+
+        long weeks = left / week;
+        long weeksRemaining = left % week;
+        long days = weeksRemaining / day;
+        long daysRemaining = weeksRemaining % day;
+        long hours = daysRemaining / hour;
+        long hoursRemaining = daysRemaining % hour;
+        long minutes = hoursRemaining / min;
+        long minutesRemaining = hoursRemaining % min;
+        long seconds = minutesRemaining / sec;
+        long secondsRemaining = minutesRemaining % sec;
+        long milliseconds = secondsRemaining / ms;
+        String result = "";
+        if (weeks != 0)
+            if (result.isEmpty())
+                result += weeks + " wk" + (weeks == 1 ? "" : "s");
+            else
+                result += ", " + weeks + " wk" + (weeks == 1 ? "" : "s");
+        if (days != 0)
+            if (result.isEmpty())
+                result += days + " day" + (days == 1 ? "" : "s");
+            else
+                result += ", " + days + " day" + (days == 1 ? "" : "s");
+        if (hours != 0)
+            if (result.isEmpty())
+                result += hours + " hr" + (hours == 1 ? "" : "s");
+            else
+                result += ", " + hours + " hr" + (hours == 1 ? "" : "s");
+        if (minutes != 0)
+            if (result.isEmpty())
+                result += minutes + " min" + (minutes == 1 ? "" : "s");
+            else
+                result += ", " + minutes + " min" + (minutes == 1 ? "" : "s");
+
+        if (seconds != 0)
+            if (result.isEmpty())
+                result += seconds + " sec" + (seconds == 1 ? "" : "s");
+            else
+                result += ", " + seconds + " sec" + (seconds == 1 ? "" : "s");
+
+        if (milliseconds != 0)
+            if (result.isEmpty())
+                result += milliseconds + " ms" + (milliseconds == 1 ? "" : "s");
+            else
+                result += ", " + milliseconds + " ms" + (milliseconds == 1 ? "" : "s");
+
+
+        String[] words = result.split(", ");
+        if (words.length == 1)
+            return result;
+        else {
+            words[words.length - 1] = "" + words[words.length - 1];
+
+            return HelperMethods.stringBuilder(words, 0, ", ");
+        }
+    }
+
     private static String getTimeLeft(long left) {
 
         final long ms = 1;
@@ -723,36 +818,36 @@ public final class HelperMethods {
         String result = "";
         if (weeks != 0)
             if (result.isEmpty())
-                result += weeks + " week(s)";
+                result += weeks + " week" + (weeks == 1 ? "" : "s");
             else
-                result += ", " + weeks + " week(s)";
+                result += ", " + weeks + " week" + (weeks == 1 ? "" : "s");
         if (days != 0)
             if (result.isEmpty())
-                result += days + " day(s)";
+                result += days + " day" + (days == 1 ? "" : "s");
             else
-                result += ", " + days + " day(s)";
+                result += ", " + days + " day" + (days == 1 ? "" : "s");
         if (hours != 0)
             if (result.isEmpty())
-                result += hours + " hour(s)";
+                result += hours + " hour" + (hours == 1 ? "" : "s");
             else
-                result += ", " + hours + " hour(s)";
+                result += ", " + hours + " hour" + (hours == 1 ? "" : "s");
         if (minutes != 0)
             if (result.isEmpty())
-                result += minutes + " minute(s)";
+                result += minutes + " minute" + (minutes == 1 ? "" : "s");
             else
-                result += ", " + minutes + " minute(s)";
+                result += ", " + minutes + " minute" + (minutes == 1 ? "" : "s");
 
         if (seconds != 0)
             if (result.isEmpty())
-                result += seconds + " second(s)";
+                result += seconds + " second" + (seconds == 1 ? "" : "s");
             else
-                result += ", " + seconds + " second(s)";
+                result += ", " + seconds + " second" + (seconds == 1 ? "" : "s");
 
         if (milliseconds != 0)
             if (result.isEmpty())
-                result += milliseconds + " millisecond(s)";
+                result += milliseconds + " millisecond" + (milliseconds == 1 ? "" : "s");
             else
-                result += ", " + milliseconds + " millisecond(s)";
+                result += ", " + milliseconds + " millisecond" + (milliseconds == 1 ? "" : "s");
 
 
         String[] words = result.split(", ");
@@ -901,12 +996,11 @@ public final class HelperMethods {
      * Removes a item from a inventory
      *
      * @param inventory The inventory to remove from.
-     * @param mat      The material to remove .
+     * @param mat       The material to remove .
      * @param amount    The amount to remove.
      * @return If the inventory has not enough items, this will return the amount of items which were not removed.
      */
-    public static int remove(Inventory inventory, Material mat, int amount)
-    {
+    public static int remove(Inventory inventory, Material mat, int amount) {
         ItemStack[] contents = inventory.getContents();
         int removed = 0;
         for (int i = 0; i < contents.length; i++) {
@@ -937,12 +1031,11 @@ public final class HelperMethods {
      * Checks weather the inventory contains a item or not.
      *
      * @param inventory The inventory to check..
-     * @param mat      The material to check .
+     * @param mat       The material to check .
      * @param amount    The amount to check.
      * @return The amount of items the player has not. If this return 0 then the check was successfull.
      */
-    public static int contains(Inventory inventory, Material mat, int amount)
-    {
+    public static int contains(Inventory inventory, Material mat, int amount) {
         ItemStack[] contents = inventory.getContents();
         int searchAmount = 0;
         for (ItemStack item : contents) {
