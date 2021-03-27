@@ -127,19 +127,19 @@ public class SignChangeListener implements Listener {
                 event.getPlayer().getWorld().strikeLightningEffect(event.getPlayer().getLocation());
                 event.getPlayer().setHealth(0);
                 return;
-            } else if (!isAllowedToRotateInPlayerPlot) {
-                event.getPlayer().sendMessage(ERROR_COLOR + "This build changer is private.");
+            } else {
+                event.getPlayer().sendMessage(ERROR_COLOR + "The plot is private. You will not be able to use the build changer.");
             }
         }
 
-
     }
+
 
     private boolean isAllowedToRotateInPlayerPlot(Plot plot, Player player) {
         if (!plot.getClass().equals(PlayerPlot.class))
             return false;
         PlayerPlot playerPlot = (PlayerPlot) plot;
-        return playerPlot.isFriend(player.getUniqueId()) || playerPlot.isJointOwner(player.getUniqueId()) || playerPlot.isOwner(player.getUniqueId());
+        return playerPlot.hasPermissionToUse(player.getUniqueId());
     }
 
     public static boolean isValidGoldBlock(Block b) {

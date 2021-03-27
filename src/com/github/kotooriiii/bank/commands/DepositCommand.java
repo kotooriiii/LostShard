@@ -5,6 +5,8 @@ import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.bank.events.BankDepositEvent;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import com.github.kotooriiii.plots.privacy.PlotPrivacy;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
 import net.citizensnpcs.api.npc.NPC;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.ChatColor;
@@ -59,6 +61,12 @@ public class DepositCommand implements CommandExecutor {
                     if (bankerNPC== null || !bankerTrait.isSocialDistance(playerLocation)) {
                         playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
+                    }
+
+                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && ((PlayerPlot) bankerTrait.getPlot()).getPrivacy() == PlotPrivacy.PRIVATE)
+                    {
+                        playerSender.sendMessage(ERROR_COLOR + "The plot is private. The bankers will not help you with any transaction.");
+                        return false;
                     }
 
 

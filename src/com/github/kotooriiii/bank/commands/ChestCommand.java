@@ -4,6 +4,8 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.bank.Bank;
 import com.github.kotooriiii.npc.type.banker.BankerNPC;
 import com.github.kotooriiii.npc.type.banker.BankerTrait;
+import com.github.kotooriiii.plots.privacy.PlotPrivacy;
+import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.ranks.RankPlayer;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
@@ -37,6 +39,13 @@ public class ChestCommand implements CommandExecutor {
                         playerSender.sendMessage(ERROR_COLOR + "No banker nearby.");
                         return true;
                     }
+
+                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && ((PlayerPlot) bankerTrait.getPlot()).getPrivacy() == PlotPrivacy.PRIVATE)
+                    {
+                        playerSender.sendMessage(ERROR_COLOR + "The plot is private. The bankers will not help you with any transaction.");
+                        return false;
+                    }
+
 
                     RankPlayer rankPlayer = RankPlayer.wrap(playerUUID);
                     //get rank player
