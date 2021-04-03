@@ -207,7 +207,7 @@ public class IgniteCommand implements CommandExecutor {
             case STONE_SWORD:
             case WOODEN_SWORD:
 
-                if (itemStack.getItemMeta().hasConflictingEnchant(Enchantment.FIRE_ASPECT)) {
+                if (!itemStack.getItemMeta().hasEnchant(Enchantment.FIRE_ASPECT) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.FIRE_ASPECT)) {
                     return false;
                 }
 
@@ -216,7 +216,7 @@ public class IgniteCommand implements CommandExecutor {
                 break;
             case BOW:
 
-                if (itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_FIRE))
+                if (!itemStack.getItemMeta().hasEnchant(Enchantment.ARROW_FIRE) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_FIRE))
                     return false;
 
                 itemStack.removeEnchantment(Enchantment.ARROW_FIRE);

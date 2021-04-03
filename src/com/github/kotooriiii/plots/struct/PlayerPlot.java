@@ -153,6 +153,8 @@ public class PlayerPlot extends Plot {
             case 1:
                 return 250;
             case 2:
+            case 3:
+            case 4:
                 return 500;
             default:
                 return -1;
@@ -172,6 +174,21 @@ public class PlayerPlot extends Plot {
                 continue;
             offlinePlayer.getPlayer().sendMessage(message);
 
+        }
+    }
+
+    public void verifyVendorAmount()
+    {
+        final RankPlayer wrap = RankPlayer.wrap(this.ownerUUID);
+        final ArrayList<NPC> vendors = this.getVendors();
+        if(wrap.getRankType().getVendorsPerPlot() < vendors.size())
+        {
+            int deleteNum = vendors.size() - wrap.getRankType().getVendorsPerPlot();
+
+            for(int i = vendors.size()-1; i >= 0 && deleteNum > 0; i--, deleteNum--) {
+                final NPC remove = vendors.remove(i);
+                remove.getTrait(VendorTrait.class).dieSomehow();
+            }
         }
     }
 
@@ -573,7 +590,7 @@ public class PlayerPlot extends Plot {
         //Show coowner and friends
 
         if (!relationshipToPlot.isEmpty()) {
-            statuses = ChatColor.YELLOW + "\nTown Status: " + ChatColor.WHITE + this.isTown();
+            statuses = ChatColor.YELLOW + "\nTown Status: " + ChatColor.WHITE + (this.isTown() ? this.privacy.name() : "false");
             statuses += ChatColor.YELLOW + "\nDungeon Status: " + ChatColor.WHITE + this.isDungeon();
             statuses += ChatColor.YELLOW + "\nVendor Status: " + ChatColor.WHITE + this.isVendor();
             statuses += ChatColor.YELLOW + "\nKick Status: " + ChatColor.WHITE + this.isKick();

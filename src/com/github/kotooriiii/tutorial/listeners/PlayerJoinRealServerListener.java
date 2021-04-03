@@ -54,7 +54,6 @@ public class PlayerJoinRealServerListener implements Listener {
             player.sendMessage(ChatColor.GOLD + "Great job on completing the tutorial! You have been rewarded 10 free gold in your balance. Go out and start your journey!");
         }
 
-        player.getInventory().addItem(PlotBanner.getInstance().getItem());
         player.getInventory().addItem(new ItemStack(Material.FEATHER, 32));
         player.getInventory().addItem(new ItemStack(Material.REDSTONE, 32));
         player.getInventory().addItem(new ItemStack(Material.MELON_SLICE, 16));

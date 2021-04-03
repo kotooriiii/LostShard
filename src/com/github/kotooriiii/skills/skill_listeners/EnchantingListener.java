@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
@@ -165,7 +166,7 @@ public class EnchantingListener implements Listener {
 
     //ID
     private final static String ID = ChatColor.DARK_PURPLE + "Enchantments: ";
-    private final static String END_ID = ChatColor.DARK_PURPLE + "-END_ENCHANT";
+    private final static String NONE = ChatColor.DARK_PURPLE + "-NONE";
 
     private final static HashMap<UUID, SmartEnchantment> trackMap = new HashMap<>();
 
@@ -180,6 +181,33 @@ public class EnchantingListener implements Listener {
     //
     //METHODS
     //
+
+    private String toReadable(String s) {
+        final String[] arr = s.split("_");
+        for (int i = 0; i < arr.length; i++) {
+
+            if (arr[i] == null || arr[i].isEmpty())
+                continue;
+
+            arr[i] = arr[i].substring(0, 1).toUpperCase() + arr[i].substring(1).toLowerCase();
+        }
+
+        return HelperMethods.stringBuilder(arr, 0, " ");
+    }
+
+    private static String toEnchantID(String s) {
+        final String[] arr = s.split(" ");
+        for (int i = 0; i < arr.length; i++) {
+
+            if (arr[i] == null || arr[i].isEmpty())
+                continue;
+
+            arr[i] = arr[i].toLowerCase();
+        }
+
+        return HelperMethods.stringBuilder(arr, 0, "_");
+    }
+
 
     private ArrayList<BetterEnchantment> getValidEnchantment(int level) {
         ArrayList<BetterEnchantment> betterEnchantments = new ArrayList<>();
@@ -266,14 +294,14 @@ public class EnchantingListener implements Listener {
             betterEnchantments.add(BetterEnchantment.PROJECTILE_PROTECTION_1);
         }
 
-        if( level >= 0) {
+        if (level >= 0) {
             betterEnchantments.add(BetterEnchantment.SMITE_1);
             betterEnchantments.add(BetterEnchantment.BLAST_PROTECTION_1);
             betterEnchantments.add(BetterEnchantment.LURE_1);
         }
 
         return betterEnchantments;
-}
+    }
 
     private void filter(ArrayList<BetterEnchantment> list, Material material) {
 
@@ -462,9 +490,6 @@ public class EnchantingListener implements Listener {
         }
     }
 
-
-
-
     private void removeHigherLevels(ArrayList<BetterEnchantment> list, Map<Enchantment, Integer> currentEnchantmentsOnItem) {
 
         for (Map.Entry<Enchantment, Integer> entry : currentEnchantmentsOnItem.entrySet()) {
@@ -518,23 +543,29 @@ public class EnchantingListener implements Listener {
 
          */
 
+//        int index = 0;
+//
+//        FillTheBE:
+//        while (index < SIZE) {
+//            int randomInt = (int) (Math.random() * list.size()); //random selection of list element
+//            BetterEnchantment betterEnchantmentIterated = list.get(randomInt);
+//
+//
+//            //WE DO NOT WANT DUPLICATES SO FIND IT
+//            Set:
+//            for (BetterEnchantment betterEnchantmentCheck : betterEnchantments) {
+//                if (betterEnchantmentCheck == betterEnchantmentIterated) {
+//                    continue FillTheBE;
+//                }
+//            }
+//
+//            betterEnchantments[index++] = betterEnchantmentIterated;
+//        }
+
         int index = 0;
-
-        FillTheBE:
         while (index < SIZE) {
-            int randomInt = (int) (Math.random() * list.size()); //random selection of list element
-            BetterEnchantment betterEnchantmentIterated = list.get(randomInt);
-
-
-            //WE DO NOT WANT DUPLICATES SO FIND IT
-            Set:
-            for (BetterEnchantment betterEnchantmentCheck : betterEnchantments) {
-                if (betterEnchantmentCheck == betterEnchantmentIterated) {
-                    continue FillTheBE;
-                }
-            }
-
-            betterEnchantments[index++] = betterEnchantmentIterated;
+            betterEnchantments[index] = list.get(index);
+            index++;
         }
 
         return betterEnchantments;
@@ -570,25 +601,27 @@ public class EnchantingListener implements Listener {
             lore = new ArrayList<>(lore);
         }
 
-        lore.add(ID);
+        if (enchants.isEmpty()) {
+            lore.add(NONE);
 
-        for (Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
-            final Enchantment key = entry.getKey();
-            final Integer value = entry.getValue();
-            lore.add(ChatColor.DARK_PURPLE + "- " + key.getKey().getKey() + " " + value);
+        } else {
+            lore.add(ID);
+
+            for (Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+                final Enchantment key = entry.getKey();
+                final Integer value = entry.getValue();
+                lore.add(ChatColor.DARK_PURPLE + "- " + toReadable(key.getKey().getKey()) + " " + value);
+            }
+
+            for (Enchantment enchantment : itemMeta.getEnchants().keySet())
+                itemMeta.removeEnchant(enchantment);
         }
-
-        lore.add(END_ID);
-
-        for (Enchantment enchantment : itemMeta.getEnchants().keySet())
-            itemMeta.removeEnchant(enchantment);
-
         itemMeta.setLore(lore);
         itemStack.setItemMeta(itemMeta);
 
     }
 
-    private void toEnchant(ItemStack itemStack) {
+    public static void toEnchant(ItemStack itemStack) {
         final ItemMeta itemMeta = itemStack.getItemMeta();
         List<String> lore = itemMeta.getLore();
         if (lore == null) {
@@ -603,13 +636,20 @@ public class EnchantingListener implements Listener {
         while (iterator.hasNext()) {
             final String next = iterator.next();
 
+            if (!isActive && next.equals(NONE)) {
+                iterator.remove();
+                break;
+            }
 
             if (!isActive && next.equals(ID)) {
                 isActive = true;
                 iterator.remove();
                 continue;
-            } else if (isActive && next.equals(END_ID)) {
-                iterator.remove();
+
+//           }  else if (isActive && next.startsWith(ChatColor.DARK_PURPLE + "- ")) {
+//                iterator.remove();
+//                break;
+            } else if (isActive && !next.startsWith(ChatColor.DARK_PURPLE + "- ")) {
                 break;
             } else if (!isActive) {
                 continue;
@@ -618,8 +658,9 @@ public class EnchantingListener implements Listener {
             final String[] args = next.split(" ");
             //Ignore args[0] since it is just args[0] == COLOR + "-"
 
-            final Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(args[1]));
-            final int level = Integer.valueOf(args[2]);
+            String enchantmentName = HelperMethods.stringBuilder(args, 1, args.length-1, " ");
+            final Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(toEnchantID(enchantmentName)));
+            final int level = Integer.parseInt(args[args.length-1]);
 
             map.put(ench, level);
             iterator.remove();
@@ -643,6 +684,16 @@ public class EnchantingListener implements Listener {
         if (event.getPlayer().getOpenInventory().getType() == InventoryType.ENCHANTING) {
             if (event.getItemDrop() != null)
                 toEnchant(event.getItemDrop().getItemStack());
+        }
+
+    }
+
+    @EventHandler
+    public void onDrop(PlayerAttemptPickupItemEvent event) {
+
+        if (event.getPlayer().getOpenInventory().getType() == InventoryType.ENCHANTING) {
+            if (event.getItem() != null)
+                toLore(event.getItem().getItemStack());
         }
 
     }
@@ -841,9 +892,11 @@ public class EnchantingListener implements Listener {
             return;
         }
 
+        toEnchant(event.getItem());
 
         //Rework enchant
         event.getEnchantsToAdd().clear();
+
         event.getEnchantsToAdd().put(smartEnchantment.offers[event.whichButton()].getEnchantment(), smartEnchantment.offers[event.whichButton()].getEnchantmentLevel());
 
         //Add XP
@@ -857,13 +910,14 @@ public class EnchantingListener implements Listener {
         event.setExpLevelCost(1);
         //To enchant
         event.getInventory().setItem(1, lapis.clone());
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-//
-//            }
-//        }.runTask(LostShardPlugin.plugin);
+
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                toLore(event.getItem());
+            }
+        }.runTask(LostShardPlugin.plugin);
 
     }
 

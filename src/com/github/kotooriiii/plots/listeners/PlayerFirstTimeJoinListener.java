@@ -1,6 +1,7 @@
 package com.github.kotooriiii.plots.listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.SpawnPlot;
@@ -37,6 +38,8 @@ public class PlayerFirstTimeJoinListener implements Listener {
         Location spawnLocation = spawnPlot.getSpawn();
         spawnLocation.getChunk().load(true);
         player.teleport(spawnLocation);
+        player.getInventory().addItem(PlotBanner.getInstance().getItem());
+
 
     }
 

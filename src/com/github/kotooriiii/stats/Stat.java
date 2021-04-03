@@ -114,10 +114,16 @@ public class Stat {
 
     public void setMaxStamina(double maxStamina) {
         this.maxStamina = maxStamina;
+        if(stamina > maxStamina)
+            stamina = maxStamina;
     }
 
     public void setMaxMana(double maxMana) {
         this.maxMana = maxMana;
+
+        if(mana > maxMana)
+            mana = maxMana;
+
     }
 
     public String getStaminaString() {

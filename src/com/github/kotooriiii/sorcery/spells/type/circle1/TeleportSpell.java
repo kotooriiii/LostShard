@@ -72,6 +72,19 @@ public class TeleportSpell extends Spell {
             }
         }
 
+        if(isDebug)
+        {
+            Bukkit.broadcastMessage("DEBUG: Select: " + (teleportLocation.getBlock().getRelative(BlockFace.DOWN).getType().getKey().getKey()));
+
+        }
+
+        if(teleportLocation.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && teleportLocation.getBlock().getRelative(BlockFace.DOWN).getRelative(getExactBlockFace(player,rangeTeleport)).getType().getKey().getKey().toLowerCase().endsWith("_slab")) {
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Slab on the side of solid block. false!");
+            player.sendMessage(ERROR_COLOR + "Invalid target.");
+            return false;
+        }
+
         if (!isAcceptableBlock(getExactBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
 
             if (isDebug)
@@ -175,6 +188,13 @@ public class TeleportSpell extends Spell {
         if (!block.getType().isSolid() && !isStrict && !block.getType().equals(Material.SNOW)) {
             if (isDebug)
                 Bukkit.broadcastMessage("DEBUG: Invoke not solid and not strict and not snow");
+            return true;
+        }
+
+        if(block.getRelative(BlockFace.DOWN).getType() == Material.LADDER)
+        {
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: is ladder");
             return true;
         }
 

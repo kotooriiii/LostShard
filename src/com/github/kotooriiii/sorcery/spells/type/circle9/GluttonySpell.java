@@ -96,7 +96,10 @@ public class GluttonySpell extends Spell implements Listener {
             return false;
         }
         final Player hitPlayer = (Player) result.getHitEntity();
-
+        if (CitizensAPI.getNPCRegistry().isNPC(hitPlayer)) {
+            player.sendMessage(ERROR_COLOR + "You can't turn an NPC into a cake.");
+            return false;
+        }
 
         if (result == null || hitPlayer == null) {
             player.sendMessage(ERROR_COLOR + "No player targeted.");
@@ -126,7 +129,7 @@ public class GluttonySpell extends Spell implements Listener {
     // Cake methods
     //
     private void cake(Player target, Player caster) {
-        Hologram hologram = HologramsAPI.createHologram(LostShardPlugin.plugin, target.getLocation().clone().add(0.5f, 1.5f, 0.5f));
+        Hologram hologram = HologramsAPI.createHologram(LostShardPlugin.plugin, new Location(target.getWorld(), target.getLocation().getBlockX() + 0.5f, target.getLocation().getBlockY() + 1.5f, target.getLocation().getBlockZ() + 0.5f));
 
         final StatusPlayer targetStatus = StatusPlayer.wrap(target.getUniqueId());
 
@@ -355,6 +358,7 @@ public class GluttonySpell extends Spell implements Listener {
             return;
 
         Cake cakeBlockData = (Cake) cakeBlock.getBlockData();
+
         if (cakeBlockData.getBites() <= cakeBlockData.getMaximumBites()) {
             gluttonyCake.addDamageDefault();
 
@@ -362,9 +366,10 @@ public class GluttonySpell extends Spell implements Listener {
                 cakeBlock.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, cakeBlock.getLocation(), 4, 0, 0.2f, 0);
                 gluttonyCake.setEaten(true);
                 cakeBaked(gluttonyCake);
+
             }
-            if (cakeBlockData.getBites() + 1 != 7)
-                cakeBlockData.setBites(cakeBlockData.getBites() + 1);
+            cakeBlockData.setBites(cakeBlockData.getBites() + 1);
+
         }
 
         final int foodLevel = event.getPlayer().getFoodLevel();
@@ -375,7 +380,8 @@ public class GluttonySpell extends Spell implements Listener {
 
         cakeBlock.getWorld().playSound(cakeBlock.getLocation(), Sound.ENTITY_PLAYER_BURP, 4.0f, 3f);
 
-        cakeBlock.setBlockData(cakeBlockData);
+        if (cakeBlockData.getMaximumBites()+1 != cakeBlockData.getBites())
+            cakeBlock.setBlockData(cakeBlockData);
 
         final Player eater = event.getPlayer();
         final Player eaten = Bukkit.getPlayer(gluttonyCake.getPlayerIsCakeUUID());

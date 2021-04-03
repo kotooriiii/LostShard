@@ -256,7 +256,7 @@ public class CreateFoodSpell extends Spell {
         for (Map.Entry<ItemStack, Integer> foodWeight : foodMap.entrySet()) {
             if (rnd < foodWeight.getValue()) {
                 ItemStack food = foodWeight.getKey().clone();
-                food.setAmount(new Random().nextInt(3)+1);
+                food.setAmount( Math.min(food.getType().getMaxStackSize(), new Random().nextInt(3)+1));
                 return food;
             }
             rnd -= foodWeight.getValue();

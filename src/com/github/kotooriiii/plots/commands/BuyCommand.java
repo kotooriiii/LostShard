@@ -42,7 +42,10 @@ public class BuyCommand implements CommandExecutor {
             Player playerSender = (Player) sender;
             //If the command is the "clan" command
             if (cmd.getName().equalsIgnoreCase("buy")) {
-                playerSender.performCommand("vendor buy");
+
+                final String s = stringBuilder(args, 0, " ");
+
+                playerSender.performCommand("vendor buy " + s);
                 return true;
             }
 

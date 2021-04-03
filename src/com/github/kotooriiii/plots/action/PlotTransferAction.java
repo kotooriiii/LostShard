@@ -6,7 +6,10 @@ import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -17,8 +20,7 @@ public class PlotTransferAction extends AbstractPlotAction {
     private static final int TRANSFER_COST = 100;
 
 
-    public PlotTransferAction(Player playerCommittingAction, Plot plot, PlotActionType type, String newOwnerName)
-    {
+    public PlotTransferAction(Player playerCommittingAction, Plot plot, PlotActionType type, String newOwnerName) {
         super(playerCommittingAction, plot, type);
         this.newOwnerName = newOwnerName;
     }
@@ -57,18 +59,27 @@ public class PlotTransferAction extends AbstractPlotAction {
         }
 
         ShardPlotPlayer shardPlotPlayer = ShardPlotPlayer.wrap(newOwnerPlayer.getUniqueId());
-        if(shardPlotPlayer.hasReachedMaxPlots())
-        {
+        if (shardPlotPlayer.hasReachedMaxPlots()) {
             getPlayer().sendMessage(ERROR_COLOR + "The player has already reached max plots.");
             return false;
         }
 
+        final RankType donatorRank = RankPlayer.wrap(newOwnerPlayer.getUniqueId()).getRankType();
+        if (donatorRank.getVendorsNum() <= shardPlotPlayer.getVendorPlots().length) {
+            getPlayer().sendMessage(ERROR_COLOR + "The player has already reached max Vendor plots.");
+
+            return false;
+        } else if (donatorRank.getDungeonsNum() <= shardPlotPlayer.getDungeonPlots().length) {
+            getPlayer().sendMessage(ERROR_COLOR + "The player has already reached max Dungeon plots.");
+
+            return false;
+        }
         return true;
     }
 
     @Override
     public boolean isKeyword(String keyword) {
-        return keyword.equalsIgnoreCase("YES");
+        return keyword.equalsIgnoreCase("TRANSFER");
     }
 
     @Override
@@ -83,8 +94,7 @@ public class PlotTransferAction extends AbstractPlotAction {
 
 
         ShardPlotPlayer shardPlotPlayer = ShardPlotPlayer.wrap(newOwnerPlayer.getUniqueId());
-        if(shardPlotPlayer.hasReachedMaxPlots())
-        {
+        if (shardPlotPlayer.hasReachedMaxPlots()) {
             getPlayer().sendMessage(ERROR_COLOR + "The player has already reached max plots.");
             return;
         }
@@ -107,5 +117,11 @@ public class PlotTransferAction extends AbstractPlotAction {
 
         //Cost
         playerPlot.withdraw(TRANSFER_COST);
+
+        playerPlot.verifyVendorAmount();
+
+        playerPlot.sendToMembers(ChatColor.GOLD + "Ownership of the plot \"" + playerPlot.getName() + "\" has been transferred to " + newOwnerPlayer.getName() + ".");
+
+
     }
 }

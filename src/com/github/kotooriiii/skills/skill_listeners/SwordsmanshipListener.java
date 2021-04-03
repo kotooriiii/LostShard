@@ -294,7 +294,6 @@ public class SwordsmanshipListener implements Listener {
     private float getXP(Entity entity) {
 
         switch (entity.getType()) {
-
             case DROPPED_ITEM:
             case EXPERIENCE_ORB:
             case AREA_EFFECT_CLOUD:

@@ -262,14 +262,14 @@ public class HardenCommand implements CommandExecutor {
 
 
         if (protectionLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= protectionMaxLevel) {
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.PROTECTION_ENVIRONMENTAL))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.PROTECTION_ENVIRONMENTAL) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.PROTECTION_ENVIRONMENTAL))
                 return false;
             itemStack.removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
             itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, nextLevel);
         }
 
         if (unbreakingLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= unbreakingMaxLevel) {
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.DURABILITY) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
                 return false;
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);

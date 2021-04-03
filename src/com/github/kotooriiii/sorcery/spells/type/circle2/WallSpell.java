@@ -7,6 +7,7 @@ import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
+import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
 import org.bukkit.*;
 import org.bukkit.Color;
 import org.bukkit.block.Block;
@@ -100,6 +101,7 @@ public class WallSpell extends Spell {
         List<Block> blocks = new ArrayList<>();
 
 
+        ArrayList<Block> list = new ArrayList<>();
 
 
         for (int x = negX *WALL_RADIUS_X; x <= WALL_RADIUS_X * times; x++) {
@@ -134,6 +136,7 @@ public class WallSpell extends Spell {
                             return;
 
                         if(block.getType().isAir()) {
+                            list.add(block);
                             block.setType(Material.STONE);
                             block.getWorld().playSound(block.getLocation(), Sound.BLOCK_STONE_PLACE, 5.0f, 0.0f);
                         }
@@ -145,7 +148,7 @@ public class WallSpell extends Spell {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (Block block : blocks) {
+                for (Block block : list) {
                     if(block.getType() == Material.STONE)
                     block.getWorld().spawnParticle(Particle.DRIP_LAVA, block.getLocation(), 7, 2, 2, 2);
                 }
@@ -156,7 +159,7 @@ public class WallSpell extends Spell {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (Block block : blocks) {
+                for (Block block : list) {
                     if (block.getType() == Material.STONE) {
                         block.setType(Material.AIR);
                         block.getWorld().playSound(block.getLocation(), Sound.BLOCK_STONE_BREAK, 5.0f, 0.0f);

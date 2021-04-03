@@ -73,7 +73,7 @@ public class HealOtherSpell extends Spell {
                 continue;
 
             double tempDistance = iplayer.getLocation().distance(player.getLocation());
-            if (tempDistance > distance) {
+            if (tempDistance < distance) {
                 distance = tempDistance;
                 clanPlayer = iplayer;
             }

@@ -223,7 +223,7 @@ public class SharpenCommand implements CommandExecutor {
 
         if (sharpnessLevel < nextLevel && nextLevel <= MAXIMUM_SHARPEN_LEVEL && nextLevel <= sharpnessMaxLevel) {
 
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DAMAGE_ALL))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.DAMAGE_ALL) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DAMAGE_ALL))
                 return false;
 
             itemStack.removeEnchantment(Enchantment.DAMAGE_ALL);

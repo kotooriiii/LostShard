@@ -104,6 +104,9 @@ public class BridgeSpell extends Spell {
         int timer = 0;
         int offset = 1;
 
+        final ArrayList<Block> list = new ArrayList<>();
+
+
         for (Block block : bridgeBlocks) {
             if (!block.getType().isAir())
                 continue;
@@ -148,10 +151,14 @@ public class BridgeSpell extends Spell {
                     break;
             }
 
+
             new BukkitRunnable() {
                 @Override
                 public void run() {
 
+                    if(block.getType().isAir())
+                        return;
+                    list.add(block);
                     block.setType(leaf);
 
                     if (block.getBlockData() instanceof Leaves) {
@@ -167,15 +174,15 @@ public class BridgeSpell extends Spell {
 
         }
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Block block : bridgeBlocks) {
-                    if (!block.getType().name().toUpperCase().endsWith("_LEAVES"))
-                        continue;
-                }
-            }
-        }.runTaskLater(LostShardPlugin.plugin, 20 * (BRIDGE_DURATION - 2) + offset * timer);
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                for (Block block : list) {
+//                    if (!block.getType().name().toUpperCase().endsWith("_LEAVES"))
+//                        continue;
+//                }
+//            }
+//        }.runTaskLater(LostShardPlugin.plugin, 20 * (BRIDGE_DURATION - 2) + offset * timer);
 
 
         final int[] timerLast = {0};
@@ -184,7 +191,7 @@ public class BridgeSpell extends Spell {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (Block block : bridgeBlocks) {
+                for (Block block : list) {
 
                     new BukkitRunnable() {
                         @Override

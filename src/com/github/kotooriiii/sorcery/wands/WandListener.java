@@ -2,6 +2,7 @@ package com.github.kotooriiii.sorcery.wands;
 
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.events.SpellCastEvent;
+import com.github.kotooriiii.sorcery.spells.SorceryPlayer;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import org.bukkit.entity.Player;
@@ -11,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 import static com.github.kotooriiii.sorcery.wands.Wand.getWielding;
 import static com.github.kotooriiii.sorcery.wands.Wand.isWielding;
 
@@ -27,6 +29,14 @@ public class WandListener implements Listener {
                 SpellType type = getWielding(player);
                 if (type == null)
                     return;
+
+                final SorceryPlayer wrap = LostShardPlugin.getSorceryManager().wrap(player.getUniqueId());
+                if(!wrap.hasSpell(type))
+                {
+                    player.sendMessage(ERROR_COLOR + "You've never seen this spell before... How do you even use it?");
+                    return;
+                }
+
                 Spell spell = Spell.of(type);
                 if (spell == null)
                     return;

@@ -1,15 +1,24 @@
 package com.github.kotooriiii.plots.listeners;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.sorcery.spells.Spell;
+import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -20,6 +29,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +37,18 @@ import java.util.UUID;
 import static com.github.kotooriiii.data.Maps.*;
 
 public class BlockChangePlotListener implements Listener {
+
+    public static void addListeners()
+    {
+//        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(LostShardPlugin.plugin, PacketType.Play.Client.BLOCK_PLACE) {
+//
+//            @Override
+//            public void onPacketSending(PacketEvent event) {
+//                if (event.getPacketType() != PacketType.Play.Client.BLOCK_PLACE)
+//                    return;
+//
+//        });
+    }
 
     /**
      * Called when a block burns in a plot.
@@ -504,6 +526,29 @@ public class BlockChangePlotListener implements Listener {
                 break;
             }
         }
+    }
+
+    @EventHandler
+    public void onDispense(BlockDispenseEvent event)
+    {
+        final Block block = event.getBlock();
+        Directional directional = (Directional) block.getBlockData();
+        final BlockFace facing = directional.getFacing();
+
+        final Block relative = block.getRelative(facing);
+
+        final Plot standingOnPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(relative.getLocation());
+        if(standingOnPlot == null)
+        {
+            return;
+        }
+
+        if(standingOnPlot.contains(block.getLocation()))
+            return;
+
+        //Plot does not contain the dispenser and its GOING IN the plot
+
+        event.setCancelled(true);
     }
 
     /**

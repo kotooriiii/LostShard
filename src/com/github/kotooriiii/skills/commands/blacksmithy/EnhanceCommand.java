@@ -285,7 +285,7 @@ public class EnhanceCommand implements CommandExecutor {
 
 
         if (efficiencyLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= efficiencyMaxLevel) {
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DIG_SPEED))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.DIG_SPEED) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DIG_SPEED))
                 return false;
             itemStack.removeEnchantment(Enchantment.DIG_SPEED);
             itemStack.addEnchantment(Enchantment.DIG_SPEED, nextLevel);
@@ -294,13 +294,13 @@ public class EnhanceCommand implements CommandExecutor {
 
             if (nextLevel == 4) {
 
-                if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+                if(!itemStack.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS) &&itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
                     return false;
 
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
             }
             else if (nextLevel == 5) {
-                if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+                if(!itemStack.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
                     return false;
                 itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
                 clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
@@ -309,7 +309,7 @@ public class EnhanceCommand implements CommandExecutor {
         }
 
         if (unbreakingLevel < nextLevel && nextLevel <= MAXIMUM_ENHANCE_FINAL && nextLevel <= unbreakingMaxLevel) {
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.DURABILITY) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
                 return false;
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);

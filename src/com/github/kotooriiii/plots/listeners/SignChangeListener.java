@@ -150,6 +150,8 @@ public class SignChangeListener implements Listener {
             case DARK_OAK_SIGN:
             case JUNGLE_SIGN:
             case OAK_SIGN:
+            case CRIMSON_SIGN:
+            case WARPED_SIGN:
                 return b.getRelative(BlockFace.DOWN).getType().equals(Material.GOLD_BLOCK);
             case SPRUCE_WALL_SIGN:
             case JUNGLE_WALL_SIGN:
@@ -157,6 +159,8 @@ public class SignChangeListener implements Listener {
             case BIRCH_WALL_SIGN:
             case DARK_OAK_WALL_SIGN:
             case OAK_WALL_SIGN:
+            case CRIMSON_WALL_SIGN:
+            case WARPED_WALL_SIGN:
                 WallSign sign = (WallSign) b.getBlockData();
                 return b.getRelative(sign.getFacing().getOppositeFace()).getType().equals(Material.GOLD_BLOCK);
             default:

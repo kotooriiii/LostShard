@@ -118,14 +118,20 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import org.bukkit.*;
+import org.bukkit.boss.DragonBattle;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -382,8 +388,16 @@ public class LostShardPlugin extends JavaPlugin {
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
 
-        for(GluttonyCake cake : GluttonySpell.getLocationCakeHashMap().values())
+        if(!EnderDragonLivesListener.isAlive())
         {
+            final World world = Bukkit.getWorld("LSWMAP3_the_end");
+            final EnderDragon enderDragon = (EnderDragon) world.spawnEntity(new Location(world, 0, 130, 0), EntityType.ENDER_DRAGON, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            final DragonBattle dragonBattle = enderDragon.getDragonBattle();
+            dragonBattle.initiateRespawn();
+            dragonBattle.generateEndPortal(false);
+        }
+
+        for (GluttonyCake cake : GluttonySpell.getLocationCakeHashMap().values()) {
             cake.getHologram().delete();
         }
 
@@ -435,6 +449,17 @@ public class LostShardPlugin extends JavaPlugin {
 
             bank.setInventory(view.getTopInventory());
             inventoryView.close();
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.closeInventory(InventoryCloseEvent.Reason.DISCONNECT);
+
+            for (ItemStack itemStack : player.getInventory()) {
+                if (itemStack == null)
+                    continue;
+
+                EnchantingListener.toEnchant(itemStack);
+            }
         }
 
         saveData();
@@ -543,10 +568,9 @@ public class LostShardPlugin extends JavaPlugin {
 
         }
 
-        for(SorceryPlayer sorceryPlayer : LostShardPlugin.getSorceryManager().getSorceryPlayers())
-        {
+        for (SorceryPlayer sorceryPlayer : LostShardPlugin.getSorceryManager().getSorceryPlayers()) {
             try {
-                    getSorceryManager().saveFile(sorceryPlayer);
+                getSorceryManager().saveFile(sorceryPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -668,6 +692,7 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("buy").setExecutor(new BuyCommand());
         getCommand("vendor").setExecutor(new VendorCommand());
         getCommand("banker").setExecutor(new BankerCommand());
+        getCommand("enderdragon").setExecutor(new EnderdragonCommand());
 
 
         //todo to use later -->
@@ -827,8 +852,14 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new ChoiceListingListener(), this);
         pm.registerEvents(new PlotActionListener(), this);
         pm.registerEvents(new PlotKickPlayerQuitListener(), this);
+        pm.registerEvents(new RemoveNetheriteDropListener(), this);
+        pm.registerEvents(new EnderDragonLivesListener(), this);
+
+        pm.registerEvents(new FixClanBuffListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
+        BlockChangePlotListener.addListeners();
+
         registerCustomEventListener();
 
         //todo to use later -->
@@ -852,6 +883,7 @@ public class LostShardPlugin extends JavaPlugin {
             e.printStackTrace();
         }
     }
+
 
     public void registerBuff() {
         for (Clan clan : LostShardPlugin.getClanManager().getAllClans()) {
@@ -1130,7 +1162,6 @@ public class LostShardPlugin extends JavaPlugin {
                 }
 
                 VendorNPC.checkLives();
-
 
 
             }

@@ -7,9 +7,7 @@ import com.github.kotooriiii.plots.PlotBanner;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.PlotType;
 import com.github.kotooriiii.plots.ShardPlotPlayer;
-import com.github.kotooriiii.plots.action.AbstractPlotAction;
-import com.github.kotooriiii.plots.action.PlotActionType;
-import com.github.kotooriiii.plots.action.PlotTransferAction;
+import com.github.kotooriiii.plots.action.*;
 import com.github.kotooriiii.plots.events.PlotCreateEvent;
 import com.github.kotooriiii.plots.events.PlotDepositEvent;
 import com.github.kotooriiii.plots.events.PlotExpandEvent;
@@ -143,30 +141,18 @@ public class PlotCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            if(this.actionMap.containsKey(playerUUID))
-                            {
+                            if (this.actionMap.containsKey(playerUUID)) {
                                 playerSender.sendMessage(ERROR_COLOR + "You must finish the plot action before disbanding.");
                                 return false;
                             }
 
-                            if (standingOnPlot == null) {
-                                playerSender.sendMessage(ERROR_COLOR + "You are not standing on any plot.");
+                            PlotDisbandAction plotDisbandAction = new PlotDisbandAction(playerSender, standingOnPlot, PlotActionType.DISBAND);
+                            if (!plotDisbandAction.isRequirementMet()) {
                                 return false;
                             }
 
-                            if (!standingOnPlot.getType().equals(PlotType.PLAYER)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't disband staff plots.");
-                                return false;
-                            }
-
-                            PlayerPlot disbandPlot = (PlayerPlot) standingOnPlot;
-
-                            if (!disbandPlot.isOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You can't disband a plot that you don't own.");
-                                return false;
-                            }
-
-                            disbandPlot(playerSender);
+                            playerSender.sendMessage(ChatColor.GOLD + "Are you sure you want to disband this plot? If so, type 'DISBAND' in chat.");
+                            actionMap.put(playerUUID, plotDisbandAction);
                             break;
                         case "transfer":
                             if (args.length != 2) {
@@ -174,19 +160,56 @@ public class PlotCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            if(actionMap.containsKey(playerUUID))
-                            {
+                            if (actionMap.containsKey(playerUUID)) {
                                 playerSender.sendMessage(ERROR_COLOR + "You must finish the plot action before transferring ownership.");
                                 return false;
                             }
 
                             PlotTransferAction plotTransferAction = new PlotTransferAction(playerSender, standingOnPlot, PlotActionType.TRANSFER, args[1]);
-                            if(!plotTransferAction.isRequirementMet())
-                            {
+                            if (!plotTransferAction.isRequirementMet()) {
                                 return false;
                             }
 
+                            playerSender.sendMessage(ChatColor.GOLD + "Are you sure you want to transfer this plot? If so, type 'TRANSFER' in chat.");
                             actionMap.put(playerUUID, plotTransferAction);
+                            break;
+                        case "public":
+                            if (args.length != 1) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to change your plot's status to public? /plot public");
+                                return false;
+                            }
+
+                            if (actionMap.containsKey(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You must finish the plot action before making your town public.");
+                                return false;
+                            }
+
+                            PlotPublicAction plotPublicAction = new PlotPublicAction(playerSender, standingOnPlot, PlotActionType.PUBLIC);
+                            if (!plotPublicAction.isRequirementMet()) {
+                                return false;
+                            }
+
+                            playerSender.sendMessage(ChatColor.GOLD + "Are you sure you want to make this town public? If so, type 'PUBLIC' in chat.");
+                            actionMap.put(playerUUID, plotPublicAction);
+                            break;
+                        case "private":
+                            if (args.length != 1) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to change your plot's status to private? /plot private");
+                                return false;
+                            }
+
+                            if (actionMap.containsKey(playerUUID)) {
+                                playerSender.sendMessage(ERROR_COLOR + "You must finish the plot action before making your town private.");
+                                return false;
+                            }
+
+                            PlotPrivateAction plotPrivateAction = new PlotPrivateAction(playerSender, standingOnPlot, PlotActionType.PRIVATE);
+                            if (!plotPrivateAction.isRequirementMet()) {
+                                return false;
+                            }
+
+                            playerSender.sendMessage(ChatColor.GOLD + "Are you sure you want to make this town private? If so, type 'PRIVATE' in chat.");
+                            actionMap.put(playerUUID, plotPrivateAction);
                             break;
                         case "friend":
                         case "f":
@@ -596,7 +619,7 @@ public class PlotCommand implements CommandExecutor {
 
                         case "upgrade":
                             if (args.length != 2) {
-                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to upgrade the plot you're standing on? /plot upgrade [town/dungeon]");
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to upgrade the plot you're standing on? /plot upgrade [town/dungeon/vendor/kick]");
                                 return false;
                             }
 
@@ -690,14 +713,14 @@ public class PlotCommand implements CommandExecutor {
 
                                 final int KICK_COST = 1000;
                                 if (upgradePlot.getBalance() < KICK_COST) {
-                                    playerSender.sendMessage(ERROR_COLOR + "You need " + KICK_COST +" gold to upgrade your plot to a Kick plot.");
+                                    playerSender.sendMessage(ERROR_COLOR + "You need " + KICK_COST + " gold to upgrade your plot to a Kick plot.");
                                     return false;
                                 }
                                 upgradePlot.withdraw(KICK_COST);
                                 upgradePlot.setKick(true);
                                 playerSender.sendMessage(ChatColor.GOLD + "Your plot is now a Kick plot.");
                                 playerSender.sendMessage(ChatColor.GOLD + "All players who are not members of your plot will now be 'kicked' to the top of your plot when they log back in.");
-                            }  else {
+                            } else {
                                 playerSender.sendMessage(ERROR_COLOR + args[1] + " is not a valid upgrade option.");
                                 return false;
                             }
@@ -929,46 +952,7 @@ public class PlotCommand implements CommandExecutor {
         playerSender.sendMessage(ERROR_COLOR + "Unknown command.");
     }
 
-    private void disbandPlot(Player playerSender) {
-        Bank bank = LostShardPlugin.getBankManager().wrap(playerSender.getUniqueId());
-        PlayerPlot plot = (PlayerPlot) LostShardPlugin.getPlotManager().getStandingOnPlot(playerSender.getLocation());
 
-        for (Stat stat : Stat.getStatMap().values()) {
-            Location loc = stat.getSpawn();
-            if (loc == null)
-                continue;
-
-            if (plot.contains(loc)) {
-
-                stat.setSpawn(null);
-                Player player = Bukkit.getPlayer(stat.getPlayerUUID());
-                if (player == null)
-                    continue;
-                player.sendMessage(ERROR_COLOR + "Your spawnpoint has been reset because your bed has been broken.");
-            }
-        }
-
-        for (Location loc : SignChangeListener.getBuildChangeLocations()) {
-            if (loc == null)
-                continue;
-
-            if (plot.contains(loc)) {
-                SignChangeListener.remove(loc);
-            }
-        }
-
-        double currentCurrency = bank.getCurrency();
-
-        DecimalFormat df = new DecimalFormat("#.##");
-        double refund = plot.disband();
-        double funds = plot.getBalance();
-
-        bank.setCurrency(currentCurrency + refund + funds);
-        plot.sendToMembers(ChatColor.GOLD + playerSender.getName() + " disbanded " + plot.getName() + ".");
-        playerSender.sendMessage(ChatColor.GOLD + "You have been refunded " + df.format(refund) + " gold for " + (PlayerPlot.REFUND_RATE * 100) + "% of the plot's value.");
-        playerSender.sendMessage(ChatColor.GOLD + "You have been given the remaining funds from your plot's balance (" + df.format(funds) + ").");
-
-    }
 
     public boolean hasCreatePlotCost(Player player) {
         Bank bank = LostShardPlugin.getBankManager().wrap(player.getUniqueId());

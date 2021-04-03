@@ -19,6 +19,7 @@ public class VendorNPC {
     private static final int WITHIN_DISTANCE = 5;
     private String name;
     private UUID plotUUID;
+    private boolean isStaff;
     private final static int MAX_HISTORY = 5, MAX_SLOTS = 5, MAX_INNER_SLOTS = 3;
 
     public VendorNPC() {
@@ -29,11 +30,22 @@ public class VendorNPC {
         this.name = name;
         this.plotUUID = plotUUID;
     }
+    public VendorNPC(String name, boolean isStaff) {
+        this.name = name;
+        this.plotUUID = null;
+        this.isStaff = isStaff;
+    }
 
     public static void checkLives() {
         for (NPC npc : getAllVendorNPC()) {
             if (!LostShardPlugin.getPlotManager().isStandingOnPlot(npc.getStoredLocation())) {
-                npc.getTrait(VendorTrait.class).dieSomehow();
+                final VendorTrait trait = npc.getTrait(VendorTrait.class);
+                if (trait.isStaff())
+                {
+                    continue;
+                }
+
+                    npc.getTrait(VendorTrait.class).dieSomehow();
             }
         }
 
@@ -56,6 +68,8 @@ public class VendorNPC {
         npc.spawn(location);
         npc.setProtected(true);
         VendorTrait vendorTrait = new VendorTrait(name, plotUUID, location);
+        if(isStaff)
+            vendorTrait.setStaff(true);
         npc.addTrait(vendorTrait);
     }
 

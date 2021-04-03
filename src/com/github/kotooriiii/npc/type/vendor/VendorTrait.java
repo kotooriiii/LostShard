@@ -80,6 +80,9 @@ public class VendorTrait extends Trait {
     //Items to sell
     private ArrayList<VendorItemStack> vendorItems = new ArrayList<>();
 
+    @Persist
+    private boolean isStaff;
+
     public VendorTrait() {
         super("VendorTrait");
     }
@@ -343,12 +346,12 @@ public class VendorTrait extends Trait {
         TextComponent finalComponent = new TextComponent("-" + getPlotName() + "'s Vendor" + name + "-\n");
         finalComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
 
-        TextComponent balanceComponent = new TextComponent("Balance" + ChatColor.WHITE + ": " + ChatColor.GOLD + format.format(this.balance) + "\n");
-        balanceComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+        TextComponent balanceComponent = new TextComponent("Balance: " + ChatColor.WHITE + format.format(this.balance) + "g\n");
+        balanceComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
         finalComponent.addExtra(balanceComponent);
 
         TextComponent purchasesComponent = new TextComponent("Purchases" + ChatColor.WHITE + ": \n");
-        purchasesComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+        purchasesComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
         finalComponent.addExtra(purchasesComponent);
 
         Stack<String> stack = new Stack<>();
@@ -374,33 +377,33 @@ public class VendorTrait extends Trait {
             String timeLeft = HelperMethods.getTimeLeftShort(then) + " ago";
 
             TextComponent component = new TextComponent(tab.substring(0, tab.indexOf("-")));
-            component.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            component.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ADDER.addExtra(component);
 
             TextComponent dash = new TextComponent("- ");
-            dash.setColor(net.md_5.bungee.api.ChatColor.WHITE);
+            dash.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ADDER.addExtra(dash);
 
             TextComponent qty = new TextComponent(tab.substring(tab.indexOf("-") + 2, tab.indexOf(" <")));
-            qty.setColor(net.md_5.bungee.api.ChatColor.GOLD);
-            qty.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quantity purchased.").color(net.md_5.bungee.api.ChatColor.GOLD).create()));
+            qty.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+            qty.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quantity purchased.").color(net.md_5.bungee.api.ChatColor.YELLOW).create()));
             ADDER.addExtra(qty);
 
             TextComponent spaceComponent = new TextComponent(" ");
-            spaceComponent.setColor(net.md_5.bungee.api.ChatColor.WHITE);
+            spaceComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ADDER.addExtra(spaceComponent);
 
             final BaseComponent[] niceMeta = getNiceMeta(tab.substring(tab.indexOf("<") + 1, tab.indexOf(">")));
 
             TextComponent materialName = new TextComponent(tab.substring(tab.lastIndexOf("<") + 1, tab.lastIndexOf(">")));
-            materialName.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            materialName.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             materialName.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, niceMeta));
             ADDER.addExtra(materialName);
 
             ADDER.addExtra(spaceComponent);
 
             TextComponent timeComponent = new TextComponent("(" + timeLeft + ")");
-            timeComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            timeComponent.setColor(net.md_5.bungee.api.ChatColor.WHITE);
             ADDER.addExtra(timeComponent);
 
             ADDER.addExtra(new TextComponent("\n"));
@@ -426,8 +429,13 @@ public class VendorTrait extends Trait {
 
     public BaseComponent[] getListings() {
 
-        final TextComponent completeComponent = new TextComponent("-" + getPlotName() + "'s Vendor " + name + "-\n" + "Hover over for more info\n");
+        final TextComponent completeComponent = new TextComponent("-" + getPlotName() + "'s Vendor " + name + "-\n");
         completeComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+
+        final TextComponent hoverComponent = new TextComponent("Hover over for more info\n");
+        hoverComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+
+        completeComponent.addExtra(hoverComponent);
 
         final TextComponent ADDER = new TextComponent();
 
@@ -436,28 +444,29 @@ public class VendorTrait extends Trait {
             double totalPrice = vendorItemStack.getTotalPrice();
 
             TextComponent amountComponent = new TextComponent(vendorItemStack.amount + "x");
-            amountComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
-            amountComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Total amount being sold.").color(net.md_5.bungee.api.ChatColor.GOLD).create()));
+            amountComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+            amountComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Total amount being sold.").color(net.md_5.bungee.api.ChatColor.YELLOW).create()));
 
             ADDER.addExtra(amountComponent);
             ADDER.addExtra(new TextComponent(" "));
 
             TextComponent materialComponent = new TextComponent(materialName);
-            materialComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            materialComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             materialComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, getNiceMeta(vendorItemStack.itemStack)));
 
             ADDER.addExtra(materialComponent);
             TextComponent dashComponent = new TextComponent(" - ");
-            dashComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            dashComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ADDER.addExtra(dashComponent);
 
             TextComponent priceComponent = new TextComponent(df.format(totalPrice) + "g");
-            priceComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
-            priceComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(
-                    "Individual (1x) Price: " + df.format(vendorItemStack.getIndividualPrice()) + "g\n" +
-                            "Stack (" + vendorItemStack.getMaxStackSize() + "x)" + " Price: " + df.format(vendorItemStack.getStackPrice()) + "g\n" +
-                            "Total (" + vendorItemStack.amount + "x)" + " Price: " + df.format(vendorItemStack.getTotalPrice()) + "g\n"
-            ).color(net.md_5.bungee.api.ChatColor.GOLD).create()));
+            priceComponent.setColor(net.md_5.bungee.api.ChatColor.WHITE);
+            priceComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Individual (1x) Price: ").color(net.md_5.bungee.api.ChatColor.YELLOW).append(df.format(vendorItemStack.getIndividualPrice()) + "g\n").color(net.md_5.bungee.api.ChatColor.WHITE)
+                    .append( "Stack (" + vendorItemStack.getMaxStackSize() + "x)" + " Price: ").color(net.md_5.bungee.api.ChatColor.YELLOW).append(df.format(vendorItemStack.getStackPrice()) + "g\n").color(net.md_5.bungee.api.ChatColor.WHITE)
+                    .append( "Total (" + vendorItemStack.amount + "x)" + " Price: ").color(net.md_5.bungee.api.ChatColor.YELLOW).append(df.format(vendorItemStack.getTotalPrice()) + "g\n").color(net.md_5.bungee.api.ChatColor.WHITE)
+                    .create()));
+
+
 
             ADDER.addExtra(priceComponent);
             ADDER.addExtra(new TextComponent("\n"));
@@ -476,6 +485,9 @@ public class VendorTrait extends Trait {
         ArrayList<BaseComponent> arrayList = new ArrayList();
         arrayList.add(completeComponent);
         arrayList.addAll(extra);
+        final TextComponent textComponent = new TextComponent("\nType '/vendor buy' to click on the items you want to purchase.");
+        textComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+        arrayList.add(textComponent);
 
 
         return arrayList.toArray(new BaseComponent[arrayList.size()]);
@@ -572,10 +584,13 @@ public class VendorTrait extends Trait {
                 throwMoney(vendorItemStack.itemStack);
             }
         }
+
         removeStockers();
 
         npc.getStoredLocation().getWorld().playSound(npc.getStoredLocation(), Sound.ENTITY_VILLAGER_DEATH, 5.0f, 0.0f);
         npc.getStoredLocation().getWorld().spawnParticle(Particle.SMOKE_NORMAL, npc.getStoredLocation(), 6, 0.5, 0.5f, 0.5f);
+
+        npc.destroy();
     }
 
     private void removeStockers() {
@@ -656,6 +671,15 @@ public class VendorTrait extends Trait {
 
     public void deposit(double deposit) {
         this.balance += deposit;
+    }
+
+    public void setStaff(boolean b) {
+        this.isStaff=  b;
+    }
+
+    public boolean isStaff()
+    {
+        return this.isStaff;
     }
 
 

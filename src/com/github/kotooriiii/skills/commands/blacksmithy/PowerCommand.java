@@ -190,7 +190,7 @@ public class PowerCommand implements CommandExecutor {
 
         if (powerLevel < nextLevel && nextLevel <= MAXIMUM_POWER_FINAL && nextLevel <= powerMaxLevel) {
 
-            if(itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_DAMAGE))
+            if(!itemStack.getItemMeta().hasEnchant(Enchantment.ARROW_DAMAGE) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_DAMAGE))
             {
                 return false;
             }

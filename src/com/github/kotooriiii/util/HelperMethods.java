@@ -52,6 +52,7 @@ public final class HelperMethods {
     }
 
 
+
     public enum CenteredType {
         CHAT, BOOK
     }
@@ -85,6 +86,24 @@ public final class HelperMethods {
         }
         return string;
     }
+
+
+
+    public static String stringBuilder(String[] args, int n, int length, String concat) {
+        String string = "";
+        for (int i = n; i < length; i++) {
+
+            if (args[i] == null || args[i].isEmpty())
+                continue;
+
+            if (i == n)
+                string += args[i];
+            else
+                string += concat + args[i];
+        }
+        return string;
+    }
+
 
     public static String getCenteredMessage(CenteredType type, boolean isUnderlined, String message) {
         if (message == null || message.equals("")) {
@@ -711,7 +730,7 @@ public final class HelperMethods {
     public static String getTimeLeft(ZonedDateTime zonedDateTime) {
 
         ZonedDateTime now = ZonedDateTime.now();
-        long left = Duration.between(now, zonedDateTime).toMillis();
+        long left = Math.abs(Duration.between(now, zonedDateTime).toMillis());
 
         String[] splitTime = getTimeLeft(left).split(", ");
         if (splitTime.length == 1)
@@ -997,12 +1016,14 @@ public final class HelperMethods {
      *
      * @param inventory The inventory to remove from.
      * @param mat       The material to remove .
-     * @param amount    The amount to remove.
-     * @return If the inventory has not enough items, this will return the amount of items which were not removed.
+     * @param desiredAmount    The desiredAmount to remove.
+     * @return If the inventory has not enough items, this will return the desiredAmount of items which were not removed.
      */
-    public static int remove(Inventory inventory, Material mat, int amount) {
+    public static int remove(Inventory inventory, Material mat, int desiredAmount) {
         ItemStack[] contents = inventory.getContents();
-        int removed = 0;
+
+        int counter = 0;
+
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
 
@@ -1010,20 +1031,27 @@ public final class HelperMethods {
                 continue;
             }
 
-            int remove = item.getAmount() - amount - removed;
+            //Conditions: 8 possible methods
 
-            if (removed > 0) {
-                removed = 0;
-            }
+            /*
+            If positive: Desired amount is LARGER than item amount and counter
 
-            if (remove <= 0) {
-                removed += Math.abs(remove);
+            If Negative: item amount is larger than desired amount
+            If negative: counter is larger than desired amount
+             */
+            int howManyWeWant = desiredAmount - item.getAmount() - counter;
+
+            if(howManyWeWant >= 0)
+            {
+                counter += howManyWeWant;
                 contents[i] = null;
-            } else {
-                item.setAmount(remove);
+            }
+            else if(howManyWeWant < 0) {
+                counter = desiredAmount;
+                item.setAmount(Math.abs(howManyWeWant));
             }
         }
-        return removed;
+        return desiredAmount-counter;
     }
 
 

@@ -196,6 +196,8 @@ public class BankerTrait extends Trait {
     public void dieSomehow() {
         npc.getStoredLocation().getWorld().playSound(npc.getStoredLocation(), Sound.ENTITY_VILLAGER_DEATH, 5.0f, 0.0f);
         npc.getStoredLocation().getWorld().spawnParticle(Particle.SMOKE_NORMAL, npc.getStoredLocation(), 6, 0.5, 0.5f, 0.5f);
+        npc.destroy();
+
     }
 
     public boolean isStaffBanker()

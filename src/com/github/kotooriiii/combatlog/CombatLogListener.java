@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.ArrayList;
@@ -45,8 +46,6 @@ public class CombatLogListener implements Listener {
         //enderpearl disable enderpearl
         if (event.getItem() == null)
             return;
-        if (event.getHand() != EquipmentSlot.HAND)
-            return;
         if (event.getItem().getType() != Material.ENDER_PEARL)
             return;
         Player shooterPlayer = event.getPlayer();
@@ -57,6 +56,18 @@ public class CombatLogListener implements Listener {
 
         shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled.");
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void throwEnderpearl(PlayerTeleportEvent event) {
+
+        if(event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)
+        {
+            Player shooterPlayer = event.getPlayer();
+            shooterPlayer.sendMessage(ERROR_COLOR + "Enderpearls are disabled.");
+            event.setCancelled(true);
+            return;
+        }
     }
 
 

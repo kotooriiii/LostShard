@@ -13,7 +13,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SpellMonsterDropListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
@@ -74,19 +80,46 @@ public class SpellMonsterDropListener implements Listener {
 
     public static void spawnFireworks(Location location, int amount) {
         Location loc = location;
-        Firework fw = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
-        FireworkMeta fwm = fw.getFireworkMeta();
 
-        fwm.setPower(2);
-
-        fwm.addEffect(FireworkEffect.builder().withColor(Color.OLIVE).flicker(true).build());
-
-        fw.setFireworkMeta(fwm);
-        fw.detonate();
 
         for (int i = 0; i < amount; i++) {
-            Firework fw2 = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
-            fw2.setFireworkMeta(fwm);
+            Firework fw = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
+            FireworkMeta fwm = fw.getFireworkMeta();
+
+            fwm.setPower(2);
+
+            fwm.addEffect(FireworkEffect.builder().withColor(Color.OLIVE).flicker(true).build());
+
+            fw.setMetadata("damage", new FixedMetadataValue(LostShardPlugin.plugin, 0));
+
+            fw.setFireworkMeta(fwm);
+
+            fw.detonate();
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event)
+    {
+
+
+        if(event.getDamager().getType() == EntityType.FIREWORK)
+        {
+
+            final List<MetadataValue> damage = event.getDamager().getMetadata("damage");
+
+            for(MetadataValue value : damage)
+            {
+
+                if(!(value.value() instanceof Integer))
+                    continue;
+                int val = (int) value.value();
+                if(val == 0)
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
         }
     }
 }

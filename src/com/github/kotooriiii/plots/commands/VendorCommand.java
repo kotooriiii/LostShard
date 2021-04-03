@@ -8,12 +8,16 @@ import com.github.kotooriiii.npc.type.vendor.VendorTrait;
 import com.github.kotooriiii.plots.PlotManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.sorcery.spells.type.circle9.GreedSpell;
+import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StatusPlayer;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.math.NumberUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -80,6 +84,59 @@ public class VendorCommand implements CommandExecutor {
                         case "help":
                             sendHelp(playerSender);
                             return true;
+                        case "staffcreate":
+                            if (!Staff.isStaff(playerUUID))
+                                return false;
+                            if (args.length < 2) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to create a vendor? Here's an example: \"/plot create James Scott\".");
+                                return false;
+                            }
+
+
+                            if (supply.length() > 20) {
+                                playerSender.sendMessage(ERROR_COLOR + "The name of the Vendor is too long! Try shortening it by " + (supply.length() - 20) + " character(s).");
+                                return false;
+                            }
+
+                            for (NPC npc : VendorNPC.getAllVendorNPC()) {
+                                final VendorTrait trait = npc.getTrait(VendorTrait.class);
+                                if (trait.getVendorName().equalsIgnoreCase(supply) && trait.isStaff()) {
+                                    playerSender.sendMessage(ERROR_COLOR + "Another Vendor in this plot shares the same name.. Be more unique!");
+                                    return false;
+                                }
+                            }
+
+
+                            if (VendorNPC.isWithinDistanceOfOtherVendor(playerSender.getLocation())) {
+                                playerSender.sendMessage(ERROR_COLOR + "This is too close to another Vendor. You must be at least " + VendorNPC.getWithinDistance() + " blocks away from the nearest Vendor.");
+                                return false;
+                            }
+
+
+                            playerSender.sendMessage(ChatColor.GOLD + "You have successfully added Staff Vendor \"" + supply + "\".");
+                            VendorNPC npc = new VendorNPC(supply, true);
+                            npc.spawn(HelperMethods.getCenterWithDirection(playerSender.getLocation()));
+                            return true;
+                        case "staffremove":
+                            if (!Staff.isStaff(playerUUID))
+                                return false;
+                            if (args.length < 2) {
+                                playerSender.sendMessage(ERROR_COLOR + "Did you mean to remove a vendor? Here's an example: \"/plot remove James Scott\".");
+                                return false;
+                            }
+
+                            for (NPC removeNPC : VendorNPC.getAllVendorNPC()) {
+                                VendorTrait vendorTrait = removeNPC.getTrait(VendorTrait.class);
+                                if (vendorTrait.getVendorName().equalsIgnoreCase(supply) && vendorTrait.isStaff()) {
+                                    playerSender.sendMessage(ChatColor.GOLD + "You have successfully removed Staff Vendor \"" + vendorTrait.getVendorName() + "\".");
+
+                                    vendorTrait.dieSomehow();
+                                    return true;
+                                }
+                            }
+
+                            playerSender.sendMessage(ERROR_COLOR + "No vendor was found with the name \"" + supply + "\".");
+                            return false;
                         case "create":
                             if (args.length < 2) {
                                 playerSender.sendMessage(ERROR_COLOR + "Did you mean to create a vendor? Here's an example: \"/plot create James Scott\".");
@@ -108,14 +165,21 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
+                            final RankType rankType = RankPlayer.wrap(playerUUID).getRankType();
+                            final ArrayList<NPC> vendors = playerPlot.getVendors();
+
+                            if (rankType.getVendorsPerPlot() <= vendors.size()) {
+                                playerSender.sendMessage(ERROR_COLOR + "You have reached the max amount of vendors per plot.");
+                                return false;
+                            }
 
                             if (supply.length() > 20) {
                                 playerSender.sendMessage(ERROR_COLOR + "The name of the Vendor is too long! Try shortening it by " + (supply.length() - 20) + " character(s).");
                                 return false;
                             }
 
-                            for (NPC npc : playerPlot.getVendors()) {
-                                if (npc.getTrait(VendorTrait.class).getVendorName().equalsIgnoreCase(supply)) {
+                            for (NPC iterateNPC : vendors) {
+                                if (iterateNPC.getTrait(VendorTrait.class).getVendorName().equalsIgnoreCase(supply)) {
                                     playerSender.sendMessage(ERROR_COLOR + "Another Vendor in this plot shares the same name.. Be more unique!");
                                     return false;
                                 }
@@ -140,8 +204,8 @@ public class VendorCommand implements CommandExecutor {
 
                             playerSender.sendMessage(ChatColor.GOLD + "You have successfully added Vendor \"" + supply + "\".");
                             playerPlot.withdraw(nextVendorCost);
-                            VendorNPC npc = new VendorNPC(supply, playerPlot.getPlotUUID());
-                            npc.spawn(HelperMethods.getCenterWithDirection(playerSender.getLocation()));
+                            VendorNPC venNPC = new VendorNPC(supply, playerPlot.getPlotUUID());
+                            venNPC.spawn(HelperMethods.getCenterWithDirection(playerSender.getLocation()));
                             return true;
                         case "remove":
                             if (args.length < 2) {
@@ -174,7 +238,6 @@ public class VendorCommand implements CommandExecutor {
                                     playerSender.sendMessage(ChatColor.GOLD + "You have successfully removed Vendor \"" + vendorTrait.getVendorName() + "\".");
 
                                     vendorTrait.dieSomehow();
-                                    removeNPC.destroy();
                                     return true;
                                 }
                             }
@@ -197,12 +260,22 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
+                            if (!traitRemoved.isStaff()) {
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot stockIndexPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(traitRemoved.getNPC().getStoredLocation());
-                            if (!(stockIndexPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot stockIndexPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(traitRemoved.getNPC().getStoredLocation());
+                                if (!(stockIndexPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
+
+                                PlayerPlot stockIndexPlayerPlot = (PlayerPlot) stockIndexPlot;
+
+                                //Plot permission missing?, STOP
+                                if (!stockIndexPlayerPlot.isJointOwner(playerUUID) && !stockIndexPlayerPlot.isOwner(playerUUID)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
+                                    return false;
+                                }
                             }
 
                             //If this vendor is already being stocked by another person, STOP
@@ -211,13 +284,6 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            PlayerPlot stockIndexPlayerPlot = (PlayerPlot) stockIndexPlot;
-
-                            //Plot permission missing?, STOP
-                            if (!stockIndexPlayerPlot.isJointOwner(playerUUID) && !stockIndexPlayerPlot.isOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
-                                return false;
-                            }
 
                             ItemStack handItemStack = playerSender.getInventory().getItemInMainHand();
 
@@ -259,7 +325,15 @@ public class VendorCommand implements CommandExecutor {
                             }
 
                             int stockIndexAmount = originalHandAmt - leftoverItemsInHand;
-                            stockIndexPlayerPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockIndexAmount + " " + materialName + " for " + df.format(vendorItemStackForStockIndex.getSelectPrice(stockIndexAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStackForStockIndex.getStackPrice()) + "g)");
+
+                            if (!traitRemoved.isStaff()) {
+
+                                PlayerPlot playerPlot1 = (PlayerPlot) standingOnPlot;
+                                playerPlot1.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockIndexAmount + " " + materialName + " for " + df.format(vendorItemStackForStockIndex.getSelectPrice(stockIndexAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStackForStockIndex.getStackPrice()) + "g)");
+                            } else {
+                                playerSender.sendMessage(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockIndexAmount + " " + materialName + " for " + df.format(vendorItemStackForStockIndex.getSelectPrice(stockIndexAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStackForStockIndex.getStackPrice()) + "g)");
+
+                            }
 
                             if (leftoverItemsInHand > 0) {
 
@@ -303,11 +377,21 @@ public class VendorCommand implements CommandExecutor {
                                     return false;
                                 }
 
-                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                                final Plot stockPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(stockNPC.getStoredLocation());
-                                if (!(stockPlot instanceof PlayerPlot)) {
-                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                    return false;
+                                if (!trait.isStaff()) {
+                                    //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                    final Plot stockPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(stockNPC.getStoredLocation());
+                                    if (!(stockPlot instanceof PlayerPlot)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                        return false;
+                                    }
+
+                                    PlayerPlot stockPlayerPlot = (PlayerPlot) stockPlot;
+
+                                    //Plot permission missing?, STOP
+                                    if (!stockPlayerPlot.isJointOwner(playerUUID) && !stockPlayerPlot.isOwner(playerUUID)) {
+                                        playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
+                                        return false;
+                                    }
                                 }
 
                                 //If this vendor is already being stocked by another person, STOP
@@ -316,13 +400,6 @@ public class VendorCommand implements CommandExecutor {
                                     return false;
                                 }
 
-                                PlayerPlot stockPlayerPlot = (PlayerPlot) stockPlot;
-
-                                //Plot permission missing?, STOP
-                                if (!stockPlayerPlot.isJointOwner(playerUUID) && !stockPlayerPlot.isOwner(playerUUID)) {
-                                    playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
-                                    return false;
-                                }
 
                                 ItemStack hand = playerSender.getInventory().getItemInMainHand();
 
@@ -480,7 +557,13 @@ public class VendorCommand implements CommandExecutor {
                                     //IsFilled will return true if items were filled in. Otherwise, if no matches in the slots, we create new one
                                     if (isFilled) {
 
-                                        stockPlayerPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockAmount + " " + material + " for " + df.format(vendorItem.getSelectPrice(stockAmount)) + "g. (" + "Stack Price: " + df.format(vendorItem.getStackPrice()) + "g)");
+                                        if (!trait.isStaff()) {
+                                            PlayerPlot tempPlot = (PlayerPlot) standingOnPlot;
+                                            tempPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockAmount + " " + material + " for " + df.format(vendorItem.getSelectPrice(stockAmount)) + "g. (" + "Stack Price: " + df.format(vendorItem.getStackPrice()) + "g)");
+                                        } else {
+                                            playerSender.sendMessage(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + stockAmount + " " + material + " for " + df.format(vendorItem.getSelectPrice(stockAmount)) + "g. (" + "Stack Price: " + df.format(vendorItem.getStackPrice()) + "g)");
+
+                                        }
 
                                         if (leftover > 0) {
 
@@ -523,8 +606,14 @@ public class VendorCommand implements CommandExecutor {
                                     vendorItemStack.setStackPriceBy(hand, originalHandAmount, selectPrice);
                                     trait.getVendorItems().add(vendorItemStack);
 
-                                    stockPlayerPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + originalHandAmount + " " + material + " for " + df.format(vendorItemStack.getSelectPrice(originalHandAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStack.getStackPrice()) + "g)");
-                                    stockPlayerPlot.sendToMembers(ChatColor.GOLD + trait.getVendorName() + " has filled a slot " + slotsFilled(trait) + ".");
+                                    if (!trait.isStaff()) {
+                                        PlayerPlot tempPlot = (PlayerPlot) standingOnPlot;
+                                        tempPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + originalHandAmount + " " + material + " for " + df.format(vendorItemStack.getSelectPrice(originalHandAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStack.getStackPrice()) + "g)");
+                                        tempPlot.sendToMembers(ChatColor.GOLD + trait.getVendorName() + " has filled a slot " + slotsFilled(trait) + ".");
+                                    } else {
+                                        playerSender.sendMessage(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " stocked " + originalHandAmount + " " + material + " for " + df.format(vendorItemStack.getSelectPrice(originalHandAmount)) + "g. (" + "Stack Price: " + df.format(vendorItemStack.getStackPrice()) + "g)");
+                                        playerSender.sendMessage(ChatColor.GOLD + trait.getVendorName() + " has filled a slot " + slotsFilled(trait) + ".");
+                                    }
                                     playerSender.getInventory().setItemInMainHand(null);
 
                                     //todo DO SOMETHJINGG COOL?
@@ -553,19 +642,21 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot stockPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(stockNPC.getStoredLocation());
-                            if (!(stockPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
-                            }
+                            if (!trait.isStaff()) {
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot stockPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(stockNPC.getStoredLocation());
+                                if (!(stockPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
 
-                            PlayerPlot stockPlayerPlot = (PlayerPlot) stockPlot;
+                                PlayerPlot stockPlayerPlot = (PlayerPlot) stockPlot;
 
-                            //Plot permission missing?, STOP
-                            if (!stockPlayerPlot.isJointOwner(playerUUID) && !stockPlayerPlot.isOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
-                                return false;
+                                //Plot permission missing?, STOP
+                                if (!stockPlayerPlot.isJointOwner(playerUUID) && !stockPlayerPlot.isOwner(playerUUID)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
+                                    return false;
+                                }
                             }
 
                             //Nothing to sell?, STOP
@@ -575,12 +666,18 @@ public class VendorCommand implements CommandExecutor {
                             }
 
 
-                            stockPlayerPlot.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " withdrew " +
-                                    (int) trait.getBalance() + "g from Vendor \"" + trait.getVendorName() + ChatColor.GOLD + ".");
-
+                            if (!trait.isStaff()) {
+                                PlayerPlot playerPlot1 = (PlayerPlot) standingOnPlot;
+                                playerPlot1.sendToMembers(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " withdrew " +
+                                        (int) trait.getBalance() + "g from Vendor " + trait.getVendorName() + ChatColor.GOLD + ".");
+                            } else {
+                                playerSender.sendMessage(statusPlayer.getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " withdrew " +
+                                        (int) trait.getBalance() + "g from Vendor " + trait.getVendorName() + ChatColor.GOLD + ".");
+                            }
                             trait.withdraw();
                             break;
                         case "sold":
+                        case "info":
                         case "history":
                         case "hist":
 
@@ -599,19 +696,21 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot histPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(historyNPC.getStoredLocation());
-                            if (!(histPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
-                            }
+                            if (!histNPCTrait.isStaff()) {
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot histPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(historyNPC.getStoredLocation());
+                                if (!(histPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
 
-                            PlayerPlot listPlayerPlot = (PlayerPlot) histPlot;
+                                PlayerPlot listPlayerPlot = (PlayerPlot) histPlot;
 
-                            //Plot permission missing?, STOP
-                            if (!listPlayerPlot.isJointOwner(playerUUID) && !listPlayerPlot.isOwner(playerUUID)) {
-                                playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
-                                return false;
+                                //Plot permission missing?, STOP
+                                if (!listPlayerPlot.isJointOwner(playerUUID) && !listPlayerPlot.isOwner(playerUUID)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "You must be a co-owner or owner of the plot to use this command.");
+                                    return false;
+                                }
                             }
 
                             playerSender.sendMessage(histNPCTrait.getPurchaseHistory());
@@ -633,11 +732,13 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot listPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(listNPC.getStoredLocation());
-                            if (!(listPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
+                            if (!listNPCTrait.isStaff()) {
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot listPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(listNPC.getStoredLocation());
+                                if (!(listPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
                             }
                             playerSender.sendMessage(listNPCTrait.getListings());
                             break;
@@ -656,13 +757,76 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot buyPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(buyNPC.getStoredLocation());
-                            if (!(buyPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
+                            if (!buyNPCTrait.isStaff()) {
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot buyPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(buyNPC.getStoredLocation());
+                                if (!(buyPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
                             }
-                            sendPage(1, playerSender, buyNPCTrait);
+
+                            if (args.length == 1)
+                                sendPage(1, playerSender, buyNPCTrait);
+                            else {
+
+                                if (args.length == 2) {
+                                    playerSender.sendMessage(ERROR_COLOR + "Did you mean to buy an item? Type: '/buy <item> <amount>'.");
+                                    return false;
+                                }
+
+                                String nameOfMaterial = HelperMethods.stringBuilder(args, 1, args.length - 1, " ");
+
+                                nameOfMaterial = nameOfMaterial.replace("_", " ").toLowerCase();
+                                final ArrayList<VendorItemStack> vendorItems = buyNPCTrait.getVendorItems();
+
+                                int count = 0;
+                                int index = -1;
+                                for (int i = 0; i < vendorItems.size(); i++) {
+                                    VendorItemStack iteratedVendorItemStack = vendorItems.get(i);
+                                    final String vendorMaterialName = HelperMethods.materialName(iteratedVendorItemStack.itemStack.getType());
+
+                                    if (vendorMaterialName.equals(nameOfMaterial)) {
+                                        count++;
+                                        index = i;
+                                    }
+
+                                }
+
+                                if (count <= 0) {
+                                    playerSender.sendMessage(ERROR_COLOR + "Vendor " + buyNPCTrait.getVendorName() + " was not able to find any " + nameOfMaterial + ".");
+                                    playerSender.sendMessage(ChatColor.YELLOW + "If you are having trouble finding an item. Try typing: '/buy' for a menu.");
+                                    return false;
+                                }
+
+                                if (count > 1) {
+                                    playerSender.sendMessage(ERROR_COLOR + "Vendor " + buyNPCTrait.getVendorName() + " found multiple " + nameOfMaterial + ".");
+                                    playerSender.sendMessage(ChatColor.YELLOW + "To clear confusion, Vendor " + buyNPCTrait.getVendorName() + " suggests typing '/buy' for a menu.");
+                                    return false;
+                                }
+
+                                /*
+                                Is number valid?
+                                 */
+                                int qty;
+                                try {
+                                    qty = Integer.parseInt(args[args.length - 1]);
+                                } catch (NumberFormatException e) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The amount of items you want to buy must be a positive integer.");
+                                    return false;
+                                }
+
+                                if (qty < 0) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The amount of items you want to buy must be a positive integer.");
+                                    return false;
+                                }
+                                /*
+                                Number valid
+                                 */
+
+                                playerSender.performCommand("vendor " + BUY_INDEX_COMMAND_ARGUMENT + " " + index + " " + qty + " " + hashItemStack(vendorItems.get(index).itemStack));
+
+                            }
                             break;
                         case BUY_INDEX_COMMAND_ARGUMENT:
                             int index = Integer.parseInt(args[1]);
@@ -683,24 +847,24 @@ public class VendorCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
-                            final Plot buyIndexPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(buyIndexNPC.getStoredLocation());
-                            if (!(buyIndexPlot instanceof PlayerPlot)) {
-                                playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
-                                return false;
-                            }
-                            PlayerPlot indexPlayerPlot = (PlayerPlot) buyIndexPlot;
 
-                            if(buyIndexTrait.getVendorItems().size() <= index)
-                            {
-                                playerSender.sendMessage(ERROR_COLOR + "The item no longer exists.");
-                                return false;
+                            if (!buyIndexTrait.isStaff()) {
+                                //If the Vendor isn't in a Plot, STOP (THIS IS A BAD ERROR, THIS SHOULD NEVER  HAPPEN!
+                                final Plot buyIndexPlot = LostShardPlugin.getPlotManager().getStandingOnPlot(buyIndexNPC.getStoredLocation());
+                                if (!(buyIndexPlot instanceof PlayerPlot)) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The Vendor is not in a player plot. Contact staff.");
+                                    return false;
+                                }
+                            }
+                                if (buyIndexTrait.getVendorItems().size() <= index) {
+                                    playerSender.sendMessage(ERROR_COLOR + "The item no longer exists.");
+                                    return false;
+
                             }
 
                             final VendorItemStack vendorItemStack = buyIndexTrait.getVendorItems().get(index);
 
-                            if(hashItemStack(vendorItemStack.itemStack) != hashCode)
-                            {
+                            if (hashItemStack(vendorItemStack.itemStack) != hashCode) {
                                 playerSender.sendMessage(ERROR_COLOR + "The item no longer exists");
                                 return false;
                             }
@@ -730,7 +894,17 @@ public class VendorCommand implements CommandExecutor {
                                 }
 
                                 playerSender.sendMessage(ChatColor.GRAY + "You have bought " + vendorItemStack.amount + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
-                                indexPlayerPlot.sendToMembers(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + vendorItemStack.amount + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
+
+                                if(!buyIndexTrait.isStaff()) {
+                                    PlayerPlot indexPlayerPlot = (PlayerPlot) standingOnPlot;
+
+                                    indexPlayerPlot.sendToMembers(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + vendorItemStack.amount + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
+                                }
+                                else
+                                {
+                                    playerSender.sendMessage(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + vendorItemStack.amount + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
+
+                                }
 
                                 if (!moreStacks.isEmpty())
                                     playerSender.sendMessage(moreStacks);
@@ -748,7 +922,17 @@ public class VendorCommand implements CommandExecutor {
                                 buyIndexTrait.deposit(totalPrice);
                                 buyIndexTrait.getVendorItems().remove(index);
 
-                                indexPlayerPlot.sendToMembers(ChatColor.GOLD + buyIndexTrait.getVendorName() + " has freed a slot " + slotsFilled(buyIndexTrait) + ".");
+                                if(!buyIndexTrait.isStaff()) {
+                                    PlayerPlot indexPlayerPlot = (PlayerPlot) standingOnPlot;
+
+                                    indexPlayerPlot.sendToMembers(ChatColor.GOLD + buyIndexTrait.getVendorName() + " has freed a slot " + slotsFilled(buyIndexTrait) + ".");
+                                }
+                                else
+                                {
+                                    playerSender.sendMessage(ChatColor.GOLD + buyIndexTrait.getVendorName() + " has freed a slot " + slotsFilled(buyIndexTrait) + ".");
+
+                                }
+
                                 buyIndexTrait.addEntry(playerSender.getName(), vendorItemStack.amount, vendorItemStack.itemStack, ZonedDateTime.now(ZoneId.of("America/New_York")).toInstant().toEpochMilli());
 
 
@@ -764,9 +948,19 @@ public class VendorCommand implements CommandExecutor {
                                         playerSender.getWorld().dropItemNaturally(playerSender.getLocation(), itemStack);
                                     }
                                 }
-                                indexPlayerPlot.sendToMembers(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + qty + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
 
-                                buyIndexTrait.addEntry(playerSender.getName(),qty, vendorItemStack.itemStack, ZonedDateTime.now(ZoneId.of("America/New_York")).toInstant().toEpochMilli());
+                                if(!buyIndexTrait.isStaff()) {
+                                    PlayerPlot indexPlayerPlot = (PlayerPlot) standingOnPlot;
+
+                                    indexPlayerPlot.sendToMembers(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + qty + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
+                                }
+                                else
+                                {
+                                    playerSender.sendMessage(StatusPlayer.wrap(playerUUID).getStatus().getChatColor() + playerSender.getName() + ChatColor.GOLD + " bought " + qty + " " + materialNameBuy + " for " + df.format(totalPrice) + "g.");
+
+                                }
+
+                                buyIndexTrait.addEntry(playerSender.getName(), qty, vendorItemStack.itemStack, ZonedDateTime.now(ZoneId.of("America/New_York")).toInstant().toEpochMilli());
                                 bank.removeCurrency(totalPrice);
                                 buyIndexTrait.deposit(totalPrice);
                                 vendorItemStack.amount -= qty;
@@ -795,7 +989,7 @@ public class VendorCommand implements CommandExecutor {
             stacks--;
         }
 
-        if(leftover != 0) {
+        if (leftover != 0) {
             itemStack.setAmount(leftover);
             itemStacks.add(itemStack);
         }
@@ -834,10 +1028,10 @@ public class VendorCommand implements CommandExecutor {
 
         } else {
             final TextComponent hoverComponent = new TextComponent("Hover over for more info\n");
-            hoverComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            hoverComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
 
             final TextComponent pagesComponent = new TextComponent("Pg " + pageCounter + " of " + pages + "\n");
-            pagesComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            pagesComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
 
             completeComponent.addExtra(hoverComponent);
             completeComponent.addExtra(pagesComponent);
@@ -855,18 +1049,18 @@ public class VendorCommand implements CommandExecutor {
 
 
             final TextComponent itemComponent = new TextComponent(vendorItemStack.amount + "x");
-            itemComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
-            itemComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Amount in stock.").color(net.md_5.bungee.api.ChatColor.GOLD).create()));
+            itemComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+            itemComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Amount in stock.").color(net.md_5.bungee.api.ChatColor.YELLOW).create()));
 
             final TextComponent spaceComponent = new TextComponent(" ");
 
             final String materialName = HelperMethods.materialName(vendorItemStack.itemStack.getType());
             final TextComponent materialComponent = new TextComponent(materialName);
-            materialComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            materialComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             materialComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, VendorTrait.getNiceMeta(vendorItemStack.itemStack)));
 
             final TextComponent dashComponent = new TextComponent(" - ");
-            dashComponent.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            dashComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
 
 
             ADDER.addExtra(itemComponent);
@@ -882,14 +1076,18 @@ public class VendorCommand implements CommandExecutor {
 
 
         final List<BaseComponent> extra = ADDER.getExtra();
-        extra.remove(extra.size()-1);
+        extra.remove(extra.size() - 1);
 
-        ArrayList<BaseComponent> arrayList = new ArrayList();
+        ArrayList<BaseComponent> arrayList = new ArrayList<>();
         arrayList.add(completeComponent);
         arrayList.addAll(extra);
 
+        final TextComponent textComponent = new TextComponent("\nClick on the number to purchase that quantity of the item.");
+        textComponent.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+        arrayList.add(textComponent);
 
-        playerSender.spigot().sendMessage(arrayList.toArray(new BaseComponent[arrayList.size()]));
+
+        playerSender.spigot().sendMessage(arrayList.toArray(new BaseComponent[0]));
 
     }
 
@@ -903,12 +1101,12 @@ public class VendorCommand implements CommandExecutor {
             final int quantity = numbers[i];
 
             final TextComponent purchaseA = new TextComponent("" + quantity);
-            purchaseA.setColor(net.md_5.bungee.api.ChatColor.GOLD);
+            purchaseA.setColor(net.md_5.bungee.api.ChatColor.WHITE);
 
 
-            String canOnlyBuy = quantity <=  vendorItemStack.amount ? "" :  ChatColor.RED + "\nMax. Items Available: " + vendorItemStack.amount;
+            String canOnlyBuy = quantity <= vendorItemStack.amount ? "" : ChatColor.RED + "\nMax. Items Available: " + vendorItemStack.amount;
 
-            purchaseA.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Price: " + df.format(vendorItemStack.getRealityPriceOf(quantity))).color(net.md_5.bungee.api.ChatColor.GOLD).append(canOnlyBuy).color(net.md_5.bungee.api.ChatColor.RED).append("\n\nClick to buy!").color(net.md_5.bungee.api.ChatColor.GOLD).create()));
+            purchaseA.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Price: " + ChatColor.WHITE + df.format(vendorItemStack.getRealityPriceOf(quantity)) + "g").color(net.md_5.bungee.api.ChatColor.YELLOW).append(canOnlyBuy).color(net.md_5.bungee.api.ChatColor.RED).append("\n\nClick to buy!").color(net.md_5.bungee.api.ChatColor.YELLOW).create()));
             purchaseA.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vendor " + VendorCommand.BUY_INDEX_COMMAND_ARGUMENT + " " + index + " " + quantity + " " + hashItemStack(vendorItemStack.itemStack)));
 
 
@@ -937,6 +1135,7 @@ public class VendorCommand implements CommandExecutor {
         sendMessage(player, prefix + " list ", "", "Lists all the items a vendor nearby is selling.");
         sendMessage(player, prefix + " sold ", "", "Shows the history of what was sold in the last 48 hours and the total balance the vendor.\nYou can also use '/vendor history' for the same effect.");
         sendMessage(player, "/buy ", "", "Buys an item from a nearby vendor.");
+        sendMessage(player, "/buy ", "(item) (quantity)", "Buys an item from a nearby vendor.");
 
     }
 
