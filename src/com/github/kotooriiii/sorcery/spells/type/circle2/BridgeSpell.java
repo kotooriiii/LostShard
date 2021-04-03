@@ -102,12 +102,15 @@ public class BridgeSpell extends Spell {
         final List<Block> bridgeBlocks = getBridgeBlocks(player.getLocation(), finalBridgeLocation);
 
         int timer = 0;
-        int offset = 1;
+       final int offset = 1;
 
         final ArrayList<Block> list = new ArrayList<>();
 
 
         for (Block block : bridgeBlocks) {
+
+            if(block.getType().name().equals("_LEAVES"))
+                continue;
             if (!block.getType().isAir())
                 continue;
 
@@ -156,8 +159,6 @@ public class BridgeSpell extends Spell {
                 @Override
                 public void run() {
 
-                    if(block.getType().isAir())
-                        return;
                     list.add(block);
                     block.setType(leaf);
 

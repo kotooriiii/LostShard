@@ -73,6 +73,7 @@ public class FireWalkSpell extends Spell  implements Listener {
         getFireWalkActiveSet().add(uuid);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, DURATION*20, 2, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, DURATION*20, 2, false, false, false));
 
         new BukkitRunnable() {
             @Override
