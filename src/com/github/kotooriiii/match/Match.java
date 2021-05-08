@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -172,6 +173,24 @@ public class Match {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
         meta.setOwningPlayer(offlinePlayer);
+        ArrayList<String> list = new ArrayList<>();
+
+        if(offlinePlayer.getUniqueId().equals(fighterA))
+        {
+            Player winner = Bukkit.getPlayer(fighterB);
+            if(winner != null) {
+                list.add(ChatColor.DARK_RED + "Killed by " + winner.getName());
+            }
+        }
+        else
+        {
+            Player winner = Bukkit.getPlayer(fighterA);
+            if(winner != null) {
+                list.add(ChatColor.DARK_RED + "Killed by " + winner.getName());
+            }
+        }
+
+        meta.setLore(list);
         skull.setItemMeta(meta);
 
         if(offlinePlayer.isOnline())
