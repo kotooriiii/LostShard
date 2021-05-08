@@ -6,7 +6,10 @@ import com.github.kotooriiii.scoreboard.ShardScoreboardManager;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
+import com.github.kotooriiii.stats.Stat;
+import com.github.kotooriiii.status.Staff;
 import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -41,7 +44,7 @@ public class PerceptionSpell extends Spell implements Listener {
 
     private PerceptionSpell() {
         super(SpellType.PERCEPTION,
-                "Highlights all players within a " + PERCEPTION_DISTANCE + " block radius of you for " + PERCEPTION_DURATION +" seconds.",
+                "Highlights all players within a " + PERCEPTION_DISTANCE + " block radius of you for " + PERCEPTION_DURATION + " seconds.",
                 8,
                 ChatColor.BLUE,
                 new ItemStack[]{new ItemStack(Material.ENDER_EYE, 1), new ItemStack(Material.REDSTONE, 1)},
@@ -52,7 +55,8 @@ public class PerceptionSpell extends Spell implements Listener {
     }
 
 
-    private  static PerceptionSpell instance;
+    private static PerceptionSpell instance;
+
     public static PerceptionSpell getInstance() {
         if (instance == null) {
             synchronized (PerceptionSpell.class) {
@@ -72,11 +76,13 @@ public class PerceptionSpell extends Spell implements Listener {
                 .name(this.getName())
                 .build();
 
-        for(Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), PERCEPTION_DISTANCE, PERCEPTION_DISTANCE, PERCEPTION_DISTANCE))
-        {
-            if(entity.getType() != EntityType.PLAYER)
+        for (Player iplayer : Bukkit.getOnlinePlayers())
+            glow.hideFrom(iplayer);
+
+        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), PERCEPTION_DISTANCE, PERCEPTION_DISTANCE, PERCEPTION_DISTANCE)) {
+            if (entity.getType() != EntityType.PLAYER)
                 continue;
-            if(CitizensAPI.getNPCRegistry().isNPC(entity))
+            if (CitizensAPI.getNPCRegistry().isNPC(entity))
                 continue;
             glow.addHolders(entity);
         }
@@ -86,10 +92,18 @@ public class PerceptionSpell extends Spell implements Listener {
             @Override
             public void run() {
                 glow.destroy();
-                if(player.isOnline())
-                ShardScoreboardManager.registerScoreboard(player);
+
+                        if (player.isOnline()) {
+                            ShardScoreboardManager.registerScoreboard(player);
+                            if(Staff.isStaff(player.getUniqueId()))
+                            {
+                                ShardScoreboardManager.add(player, Staff.wrap(player.getUniqueId()).getType().getName());
+                            }
+                        }
+
+
             }
-        }.runTaskLater(LostShardPlugin.plugin, 20*PERCEPTION_DURATION);
+        }.runTaskLater(LostShardPlugin.plugin, 20 * PERCEPTION_DURATION);
 
 
         return true;
@@ -117,17 +131,15 @@ public class PerceptionSpell extends Spell implements Listener {
 
         if (!Spell.isLapisNearby(event.getTo(), Spell.getDefaultLapisNearbyValue()))
             return;
-        boolean exists =false;
-        for (IGlow glow : GlowsManager.getInstance().getGlows())
-        {
-            if(glow.getViewers().contains(event.getPlayer()))
-            {
+        boolean exists = false;
+        for (IGlow glow : GlowsManager.getInstance().getGlows()) {
+            if (glow.getViewers().contains(event.getPlayer())) {
                 glow.hideFrom(event.getPlayer());
-                exists=true;
+                exists = true;
             }
         }
 
-        if(!exists)
+        if (!exists)
             return;
 
         event.getPlayer().sendMessage(ERROR_COLOR + "Something doesn't seem to help you see anymore...");

@@ -64,7 +64,7 @@ public class HealOtherSpell extends Spell {
             return false;
         }
 
-        double distance = -1f;
+        double distance = Double.MAX_VALUE;
         Player clanPlayer = null;
         for (Player iplayer : clan.getOnlinePlayers()) {
             if (!iplayer.getWorld().equals(player.getWorld()))

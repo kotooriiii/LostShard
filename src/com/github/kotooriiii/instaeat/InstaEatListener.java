@@ -3,6 +3,7 @@ package com.github.kotooriiii.instaeat;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -11,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
@@ -45,6 +48,7 @@ public class InstaEatListener implements Listener {
             return;
 
 
+
         Stat stat = Stat.wrap(player);
 
         double currentStamina = stat.getStamina();
@@ -60,12 +64,12 @@ public class InstaEatListener implements Listener {
         double maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue();
         double maxFoodLevel = 20;
 
+
         //Check if already have more than what you need in both categories
         if (!instaEatType.isSplashPotion())
             if (currentHealth >= maxHealth
                     && currentFoodLevel >= maxFoodLevel)
                 return;
-
 
         //If it's health/regen pot OR if its not a splash potion
         if (instaEatType.isHealOrRegen(player.getInventory().getItemInMainHand()) || !instaEatType.isSplashPotion()) {
@@ -113,6 +117,14 @@ public class InstaEatListener implements Listener {
             player.setFoodLevel((int) maxFoodLevel);
         else
             player.setFoodLevel((int) newFoodLevel);
+
+        if(instaEatType == InstaEatType.ROTTEN_FLESH)
+        {
+            if(Math.random() < 0.5d)
+            {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20*10, 1, false, false, false));
+            }
+        }
 
         // Add player to cooldown list
         foodOnCooldown.put(player.getUniqueId(), new Object[]{instaEatType, new Double(instaEatType.getCooldown() * 20)});

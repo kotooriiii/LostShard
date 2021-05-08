@@ -109,8 +109,11 @@ public class PlotTransferAction extends AbstractPlotAction {
         //Add it to the new player
         shardPlotPlayer.addPlot(playerPlot);
 
+        playerPlot.removeFriend(newOwnerPlayer.getUniqueId());
+        playerPlot.removeJointOwner(newOwnerPlayer.getUniqueId());
+
         //Change ownership
-        playerPlot.setOwner(getPlayer().getUniqueId());
+        playerPlot.setOwner(newOwnerPlayer.getUniqueId());
 
         //Make old owner coowner
         playerPlot.addJointOwner(this.getPlayer().getUniqueId());

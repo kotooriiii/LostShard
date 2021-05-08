@@ -63,6 +63,85 @@ public class NoMoreOldEnchantsListener implements Listener {
         ((AnvilInventory) source).setRepairCost(30);
     }
 
+
+    @EventHandler
+    public void onSmith(InventoryClickEvent event) {
+
+        Inventory source = event.getClickedInventory();
+
+        if (source == null)
+            return;
+
+        if (!source.getType().equals(InventoryType.SMITHING))
+            return;
+
+        if (event.getSlot() != 2)
+            return;
+
+        if (!hasTwoItems(source)) //only one item, naming?
+            return;
+
+        /*
+        At this point, guaranteed to be:
+        - Existing inventory
+        - Anvil inventory
+        - Clicking on result item
+        - More than one item
+         */
+
+        if (!hasCombinable(source)) {
+            sendMessage(source, ERROR_COLOR + "You must use a " + ChatColor.GREEN + "Combinable" + ERROR_COLOR + " item.");
+
+//            //DEBUGGING
+//            //todo remove this
+//            ItemStack fireAspectItemStack = new ItemStack(Material.ENCHANTED_BOOK, 1);
+//            EnchantmentStorageMeta fireAspectMeta = (EnchantmentStorageMeta) fireAspectItemStack.getItemMeta();
+//            fireAspectMeta.addStoredEnchant(Enchantment.FIRE_ASPECT, 1, true);
+//            fireAspectMeta.setLore(Arrays.asList(COMBINABLE_PREFIX));
+//            fireAspectItemStack.setItemMeta(fireAspectMeta);
+//            event.getWhoClicked().getInventory().addItem(fireAspectItemStack);
+//            //REMOVE ^
+
+
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player) {
+                Player clickedPlayer = (Player) event.getWhoClicked();
+                clickedPlayer.updateInventory();
+            }
+            return;
+        }
+               /*
+        At this point, guaranteed to be:
+        - Existing inventory
+        - Anvil inventory
+        - Clicking on result item
+        - More than one item
+        - One item is a Combinable item
+         */
+
+        if ((int) LostShardPlugin.getSkillManager().getSkillPlayer(event.getWhoClicked().getUniqueId()).getActiveBuild().getBlacksmithy().getLevel() != 100) {
+            sendMessage(source, ERROR_COLOR + "You must be Blacksmithy level 100 to combine.");
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player) {
+                Player clickedPlayer = (Player) event.getWhoClicked();
+                clickedPlayer.updateInventory();
+            }
+            return;
+        }
+
+        if (event.getWhoClicked() instanceof Player) {
+            Player clickedPlayer = (Player) event.getWhoClicked();
+            if (clickedPlayer.getLevel() < COMBINABLE_LEVEL) {
+                sendMessage(source, ERROR_COLOR + "Insufficient levels. You must be at least xp level 30 to combine.");
+                event.setCancelled(true);
+                clickedPlayer.updateInventory();
+                return;
+            }
+        }
+
+
+    }
+
     @EventHandler
     public void onEnchant(InventoryClickEvent event) {
 

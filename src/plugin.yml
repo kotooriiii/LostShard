@@ -1,7 +1,7 @@
 name: LostShardK
 main: com.github.kotooriiii.LostShardPlugin
 author: kotooriiii
-depend: [LuckPerms, PacketListenerApi, Citizens, ProtocolLib]
+depend: [LuckPerms, XGlow, PacketListenerApi, Citizens, ProtocolLib]
 softdepend:
   - WorldBorder
   - HolographicDisplays

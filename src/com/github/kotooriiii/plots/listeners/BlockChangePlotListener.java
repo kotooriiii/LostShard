@@ -12,10 +12,7 @@ import com.github.kotooriiii.plots.struct.Plot;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.type.circle7.SilentWalkSpell;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
@@ -92,6 +89,37 @@ public class BlockChangePlotListener implements Listener {
                 //Check entity
                 //If entity is not a player then cancel it
                 if (en instanceof Enderman) {
+                    entityChangeBlockEvent.setCancelled(true);
+                    return;
+                }
+                //ALLOWED
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Called when a Wither  changes a block in a plot.
+     *
+     * @param entityChangeBlockEvent The event being called
+     */
+    @EventHandler
+    public void onWitherChange(EntityChangeBlockEvent entityChangeBlockEvent) {
+        final Block block = entityChangeBlockEvent.getBlock();
+        final Location location = block.getLocation();
+        final Entity en = entityChangeBlockEvent.getEntity();
+
+        if (en == null || block == null)
+            return;
+
+        //Iterate through all plots
+        for (Plot plot : LostShardPlugin.getPlotManager().getAllPlots()) {
+            //If the block being interacted is in the location of a plot
+            if (plot.contains(location)) {
+                //Check entity
+                //If entity is not a player then cancel it
+                if (en instanceof Wither || en instanceof WitherSkull) {
                     entityChangeBlockEvent.setCancelled(true);
                     return;
                 }
@@ -881,6 +909,8 @@ public class BlockChangePlotListener implements Listener {
         if (!isHostile(entitySpawnEvent.getEntity()))
             return;
 
+        if(plot.getWorld().getEnvironment() == World.Environment.THE_END)
+            return;
         entitySpawnEvent.setCancelled(true);
 
     }
@@ -892,15 +922,29 @@ public class BlockChangePlotListener implements Listener {
      */
     @EventHandler
     public void onExplosion(BlockExplodeEvent event) {
+
         List<Block> blocksExploding = event.blockList();
-        for (Block block : blocksExploding) {
+        final Iterator<Block> iterator = event.blockList().iterator();
+
+        while (iterator.hasNext())
+
+        {
+            final Block block = iterator.next();
             Location loc = block.getLocation();
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
             if (plot == null)
                 continue;
-
-            event.setCancelled(true);
+            iterator.remove();
         }
+
+//        for (Block block : blocksExploding) {
+//            Location loc = block.getLocation();
+//            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
+//            if (plot == null)
+//                continue;
+//
+//            event.setCancelled(true);
+//        }
     }
 
     /**
@@ -911,14 +955,27 @@ public class BlockChangePlotListener implements Listener {
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         List<Block> blocksExploding = event.blockList();
-        for (Block block : blocksExploding) {
+        final Iterator<Block> iterator = event.blockList().iterator();
+
+        while (iterator.hasNext())
+
+        {
+            final Block block = iterator.next();
             Location loc = block.getLocation();
             Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
             if (plot == null)
                 continue;
-
-            event.setCancelled(true);
+            iterator.remove();
         }
+
+//        for (Block block : blocksExploding) {
+//            Location loc = block.getLocation();
+//            Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(loc);
+//            if (plot == null)
+//                continue;
+//
+//            event.setCancelled(true);
+//        }
     }
 
     /**

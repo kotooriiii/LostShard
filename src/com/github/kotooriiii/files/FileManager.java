@@ -815,7 +815,7 @@ public final class FileManager {
             for (SkillType type : SkillType.values()) {
                 float level = (float) yaml.getDouble(i + "." + type.name() + ".Level");
                 float xp = (float) yaml.getDouble(i + "." + type.name() + ".XP");
-                boolean isLocked = (boolean) yaml.getBoolean(i + "." + type.getName() + ".isLocked", false);
+                boolean isLocked = (boolean) yaml.getBoolean(i + "." + type.name() + ".isLocked", false);
                 Skill skill = new Skill(skillBuild, type);
                 skill.setLevel(level, xp);
                 skill.setLocked(isLocked);
@@ -853,16 +853,45 @@ public final class FileManager {
 
     public static MarkPlayer readMarks(File markFile) {
 
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(markFile);
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(markFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         String uuidString = markFile.getName().substring(0, markFile.getName().indexOf('.'));
 
         MarkPlayer markPlayer = new MarkPlayer(UUID.fromString(uuidString));
 
-        final Set<String> keys = yaml.getKeys(false);
-        for (String markName : keys) {
-            Location markLocation = yaml.getLocation(markName);
-            markPlayer.addMark(markName, markLocation);
+        try {
+            if (br.readLine() == null) {
+
+            }
+
+            else {
+
+                try {
+                    YamlConfiguration yaml = YamlConfiguration.loadConfiguration(markFile);
+                    final Set<String> keys = yaml.getKeys(false);
+                    for (String markName : keys) {
+                        Location markLocation = yaml.getLocation(markName);
+                        markPlayer.addMark(markName, markLocation);
+                    }
+                }
+                 catch (IllegalArgumentException e)
+                 {
+                     System.out.println("ERROR FOUND IN FILE " + markFile.getName() + ".");
+                 }
+
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+
+
 
         return markPlayer;
     }
@@ -1611,7 +1640,7 @@ public final class FileManager {
     }
 
     public static void removeFile(HostilityPlatform platform) {
-        File clanFile = new File(clans_folder + File.separator + platform.getName() + ".obj");
+        File clanFile = new File(hostility_platform_folder + File.separator + platform.getName() + ".obj");
 
         if (clanFile.exists())
             clanFile.delete();

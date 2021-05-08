@@ -399,7 +399,6 @@ public class TamingListener implements Listener {
     public static boolean isHostile(Entity entity) {
 
         switch (entity.getType()) {
-
             case DROPPED_ITEM:
             case EXPERIENCE_ORB:
             case AREA_EFFECT_CLOUD:
@@ -526,7 +525,6 @@ public class TamingListener implements Listener {
     private boolean isPassive(Entity entity) {
 
         switch (entity.getType()) {
-
 
             case DROPPED_ITEM:
             case EXPERIENCE_ORB:

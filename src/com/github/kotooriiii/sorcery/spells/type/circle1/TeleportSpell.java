@@ -5,6 +5,7 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
+import net.minecraft.server.v1_16_R3.BlockFireAbstract;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -78,13 +79,6 @@ public class TeleportSpell extends Spell {
 
         }
 
-        if(teleportLocation.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() && teleportLocation.getBlock().getRelative(BlockFace.DOWN).getRelative(getExactBlockFace(player,rangeTeleport)).getType().getKey().getKey().toLowerCase().endsWith("_slab")) {
-            if (isDebug)
-                Bukkit.broadcastMessage("DEBUG: Slab on the side of solid block. false!");
-            player.sendMessage(ERROR_COLOR + "Invalid target.");
-            return false;
-        }
-
         if (!isAcceptableBlock(getExactBlockFace(player, rangeTeleport), teleportLocation.clone().add(0, 1, 0).getBlock(), true)) {
 
             if (isDebug)
@@ -104,6 +98,16 @@ public class TeleportSpell extends Spell {
         }
 
         final Location finalTeleportLocation = new Location(teleportLocation.getWorld(), teleportLocation.getBlockX() + 0.5, teleportLocation.getBlockY(), teleportLocation.getBlockZ() + 0.5, player.getLocation().getYaw(), player.getLocation().getPitch());
+
+
+        if(finalTeleportLocation.getBlock().getType().name().toLowerCase().endsWith("_pane") || finalTeleportLocation.getBlock().getType().name().toLowerCase().endsWith("_bars"))
+        {
+            if (isDebug)
+                Bukkit.broadcastMessage("DEBUG: Pane or Bar ");
+            player.sendMessage(ERROR_COLOR + "Invalid target.");
+            return false;
+        }
+
 
         if (isLapisNearby(finalTeleportLocation, DEFAULT_LAPIS_NEARBY)) {
             player.sendMessage(ERROR_COLOR + "You cannot seem to cast " + getName() + " here...");
@@ -138,6 +142,26 @@ public class TeleportSpell extends Spell {
             }
         };
         runnable.runTaskTimer(LostShardPlugin.plugin, 0, 1);
+    }
+
+    private boolean isThin(BlockFace facing, Block block)
+    {
+        if (facing.equals(BlockFace.WEST) || facing.equals(BlockFace.EAST)) {
+            if (block.getBoundingBox().getWidthZ() < 0.5) {
+                if (isDebug)
+                    Bukkit.broadcastMessage("DEBUG: Invoke bounding box widthZ is less than size");
+                return true;
+            }
+        }
+
+        if (facing.equals(BlockFace.NORTH) || facing.equals(BlockFace.SOUTH)) {
+            if (block.getBoundingBox().getWidthX() < 0.5) {
+                if (isDebug)
+                    Bukkit.broadcastMessage("DEBUG: Invoke bounding box widthX is less than size");
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isCooldown(Player player) {
@@ -180,6 +204,7 @@ public class TeleportSpell extends Spell {
                     Bukkit.broadcastMessage("DEBUG: Invoke not solid AND bounding box is at least a certain size");
                 return true;
             }
+
             if (isDebug)
                 Bukkit.broadcastMessage("DEBUG: Invoke bounding box is at least a certain size");
             return false;

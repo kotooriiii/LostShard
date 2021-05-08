@@ -198,8 +198,8 @@ public class GluttonySpell extends Spell implements Listener {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.showPlayer(LostShardPlugin.plugin, cakee);
             }
-            cakee.setSwimming(true);
-            cakee.setCollidable(false);
+            cakee.setSwimming(false);
+            cakee.setCollidable(true);
             HelperMethods.customDamage(cakee, EntityDamageEvent.DamageCause.CUSTOM, cake.getDamage());
             return;
         }

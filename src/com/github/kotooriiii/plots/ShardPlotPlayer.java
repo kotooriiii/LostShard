@@ -1,8 +1,10 @@
 package com.github.kotooriiii.plots;
 
+import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.files.FileManager;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,8 +16,6 @@ public class ShardPlotPlayer {
     private HashSet<PlayerPlot> plotsOwned;
 
     private static HashMap<UUID, ShardPlotPlayer> shardPlotPlayer = new HashMap<>();
-    private static int MAX_PLOTS = 3;
-
     public ShardPlotPlayer(UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
         plotsOwned = new HashSet<>();
@@ -46,7 +46,7 @@ public class ShardPlotPlayer {
     }
 
     public int getMaxPlots() {
-        return MAX_PLOTS;
+        return RankPlayer.wrap(ownerUUID).getRankType().getPlotNum();
     }
 
     public boolean hasPlot(PlayerPlot playerPlot) {

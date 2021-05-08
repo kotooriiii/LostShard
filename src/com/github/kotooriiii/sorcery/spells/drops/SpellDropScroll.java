@@ -21,6 +21,8 @@ public class SpellDropScroll {
     private final static String OWNER_ID = ChatColor.WHITE + "Owner ID: ";
     private final static String SPELL_ID = ChatColor.WHITE + "Spell ID: ";
 
+    private final static String ANYONE_ID = "ANYONE";
+
     private SpellDropScroll()
     {
 
@@ -42,7 +44,16 @@ public class SpellDropScroll {
        // lore.add(ChatColor.DARK_PURPLE + "Spell of " + spell.getName());
         lore.add(ChatColor.DARK_PURPLE + "Right-click to add to your spellbook!");
         lore.add(" ");
-        lore.add(OWNER_ID + player.getUniqueId());
+        if(spell.getCircle() == 9)
+        {
+            lore.add(OWNER_ID + ANYONE_ID);
+
+        }
+        else
+        {
+            lore.add(OWNER_ID + player.getUniqueId());
+
+        }
         lore.add(SPELL_ID + spell.getName());
 
         itemMeta.setLore(lore);
@@ -84,6 +95,9 @@ public class SpellDropScroll {
 
         String spellName = lore.get(lore.size() - 1).substring(SPELL_ID.length());
         String ownerUUID = lore.get(lore.size()-2).substring(OWNER_ID.length());
+
+        if(ownerUUID.equals(ANYONE_ID))
+            return false;
 
         SpellType type = SpellType.matchSpellType(spellName);
         UUID uuid = UUID.fromString(ownerUUID);

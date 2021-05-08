@@ -223,7 +223,7 @@ public class CreateFoodSpell extends Spell {
 
             if (random < foodWeight.getValue()) {
                 ItemStack food = foodWeight.getKey().clone();
-                food.setAmount(new Random().nextInt(3)+1);
+                food.setAmount( Math.min(food.getType().getMaxStackSize(), new Random().nextInt(3)+1));
                 foods.add(food);
             }
         }

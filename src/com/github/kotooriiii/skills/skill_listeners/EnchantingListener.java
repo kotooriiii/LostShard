@@ -781,7 +781,7 @@ public class EnchantingListener implements Listener {
             }
 
             int oldXP = player.getLevel();
-            player.setLevel(emeraldCount);
+            player.setLevel(emeraldCount+100000);
 
             final SmartEnchantment smartEnchantment = new SmartEnchantment();
             smartEnchantment.oldXP = oldXP;

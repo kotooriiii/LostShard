@@ -84,6 +84,8 @@ public class PlotCommand implements CommandExecutor {
                                 playerSender.sendMessage(ERROR_COLOR + "This plot name has its place in history already. Create your own history!");
                             else if (plotManager.isPlot(supply))
                                 playerSender.sendMessage(ERROR_COLOR + "That plot name has already been taken.");
+                            else if(playerSender.getWorld().getEnvironment() == World.Environment.THE_END)
+                                playerSender.sendMessage(ERROR_COLOR + "Plots cannot be created in The End.");
                             else if (!hasCreatePlotCost(playerSender)) {
                                 //The message is already taken care of.
                             } else {

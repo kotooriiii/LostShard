@@ -82,7 +82,7 @@ public class PrideSpell extends Spell implements Listener {
         // We will use these for drawing our parametric curve on the plane:
         double twopi = 2 * Math.PI;
         double times = 1 * twopi;
-        double division = twopi / 100;
+        double division = twopi / 24;
 
         //This is how far away we want the plane's origin to be:
         double radius = 1d;
@@ -130,7 +130,6 @@ public class PrideSpell extends Spell implements Listener {
                 if(particle == Particle.REDSTONE)
                 player.getWorld().spawnParticle(Particle.REDSTONE, prideLocation, 2, 0, 0, 0, new Particle.DustOptions(Color.fromRGB(26, 5, 4), 1f));
                 else {
-
                     player.getWorld().spawnParticle(particle, prideLocation, 2);
                 }
 
@@ -160,7 +159,7 @@ public class PrideSpell extends Spell implements Listener {
 
         Particle particle = Particle.FALLING_LAVA;
 
-        final int PARTICLE_FREQUENCY = 1;
+        final int PARTICLE_FREQUENCY = 10;
 
         new BukkitRunnable() {
             @Override

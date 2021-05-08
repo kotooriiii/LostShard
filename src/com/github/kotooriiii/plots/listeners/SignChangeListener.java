@@ -182,6 +182,10 @@ public class SignChangeListener implements Listener {
             case BIRCH_WALL_SIGN:
             case DARK_OAK_WALL_SIGN:
             case OAK_WALL_SIGN:
+            case WARPED_SIGN:
+            case CRIMSON_SIGN:
+            case CRIMSON_WALL_SIGN:
+            case WARPED_WALL_SIGN:
                 return true;
             default:
                 return false;

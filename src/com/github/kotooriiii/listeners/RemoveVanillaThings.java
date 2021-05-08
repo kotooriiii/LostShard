@@ -4,6 +4,7 @@ import com.github.kotooriiii.LostShardPlugin;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,6 +24,8 @@ public class RemoveVanillaThings implements Listener {
         if (CitizensAPI.getNPCRegistry().isNPC(entity))
             return;
         if (!(entity instanceof Phantom))
+            return;
+        if(entity.getWorld().getEnvironment() == World.Environment.THE_END)
             return;
         event.setCancelled(true);
     }

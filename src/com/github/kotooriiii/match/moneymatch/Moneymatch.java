@@ -55,8 +55,8 @@ public class Moneymatch extends Match {
             fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
         if(fighterB.isOnline())
             fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
-        depositA.removeCurrency(wagerAmount);
-        depositB.removeCurrency(wagerAmount);
+        depositA.addCurrency(wagerAmount);
+        depositB.addCurrency(wagerAmount);
     }
 
     @Override

@@ -1044,7 +1044,7 @@ public final class HelperMethods {
             if(howManyWeWant >= 0)
             {
                 counter += howManyWeWant;
-                contents[i] = null;
+                inventory.setItem(i, null);
             }
             else if(howManyWeWant < 0) {
                 counter = desiredAmount;

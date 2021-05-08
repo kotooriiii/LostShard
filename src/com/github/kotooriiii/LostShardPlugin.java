@@ -19,6 +19,11 @@ import com.github.kotooriiii.clans.commands.FriendlyFireCommand;
 import com.github.kotooriiii.combatlog.CombatLogListener;
 import com.github.kotooriiii.combatlog.CombatLogManager;
 import com.github.kotooriiii.discord.client.DC4JBot;
+import com.github.kotooriiii.enderdragon.EnderDragonManager;
+import com.github.kotooriiii.enderdragon.commands.EnderdragonCommand;
+import com.github.kotooriiii.enderdragon.listeners.TheEndListener;
+import com.github.kotooriiii.enderdragon.listeners.bossbars.PlayerChangeWorldListener;
+import com.github.kotooriiii.enderdragon.strategy.fight.DragonDamageListener;
 import com.github.kotooriiii.events.PlayerStrengthPotionEffectEvent;
 import com.github.kotooriiii.hostility.commands.HostilityCommand;
 import com.github.kotooriiii.hostility.listeners.HostilityCreateListener;
@@ -113,20 +118,15 @@ import com.github.kotooriiii.weather.WeatherManager;
 import com.github.kotooriiii.weather.WeatherManagerListener;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.persistence.PersistenceLoader;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import org.bukkit.*;
-import org.bukkit.boss.DragonBattle;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
@@ -144,6 +144,10 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -183,6 +187,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static TutorialReader tutorialReader;
     private static TipsManager tipsManager;
     private static SorceryManager sorceryManager;
+    private static EnderDragonManager enderDragonManager;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -312,7 +317,7 @@ public class LostShardPlugin extends JavaPlugin {
         gatheringManager = new GatheringManager();
         ignoreManager = new IgnoreManager();
         sorceryManager = new SorceryManager();
-
+        enderDragonManager = new EnderDragonManager();
 
         if (isTutorial()) {
             tutorialManager = new TutorialManager(true, true);
@@ -372,14 +377,17 @@ public class LostShardPlugin extends JavaPlugin {
         registerCriminals();
         registerStaff();
 
+        //Nicely  done sets
         HelperMethods.initLookingSet();
         HelperMethods.initIgnoreLiquids();
+
+        //Load
+        loadConfig();
+        ShardScoreboardManager.updateScoreboard();
 
         //All was successfully enabled
         logger.info(pluginDescriptionFile.getName() + " has been successfully enabled on the server.");
 
-        loadConfig();
-        ShardScoreboardManager.updateScoreboard();
     }
 
 
@@ -388,14 +396,7 @@ public class LostShardPlugin extends JavaPlugin {
 
         //  LostShardPlugin.getDiscord().getClient().logout().block();
 
-        if(!EnderDragonLivesListener.isAlive())
-        {
-            final World world = Bukkit.getWorld("LSWMAP3_the_end");
-            final EnderDragon enderDragon = (EnderDragon) world.spawnEntity(new Location(world, 0, 130, 0), EntityType.ENDER_DRAGON, CreatureSpawnEvent.SpawnReason.CUSTOM);
-            final DragonBattle dragonBattle = enderDragon.getDragonBattle();
-            dragonBattle.initiateRespawn();
-            dragonBattle.generateEndPortal(false);
-        }
+        LostShardPlugin.getEnderDragonManager().kill();
 
         for (GluttonyCake cake : GluttonySpell.getLocationCakeHashMap().values()) {
             cake.getHologram().delete();
@@ -701,6 +702,24 @@ public class LostShardPlugin extends JavaPlugin {
 
     }
 
+    public static World getEndWorld() {
+        try (final DatagramSocket socket = new DatagramSocket()) {
+
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+
+            String ipName = socket.getLocalAddress().getHostAddress();
+
+            socket.disconnect();
+
+            return !ipName.equals("192.168.0.17") ? Bukkit.getWorld("LSWMAP3_the_end") : Bukkit.getWorld("world_the_end");
+
+        } catch (UnknownHostException |
+                SocketException e) {
+            e.printStackTrace();
+        }
+        return Bukkit.getWorld("LSWMAP3_the_end");
+    }
+
     public void registerDiscord() {
         dc4JBot = new DC4JBot();
     }
@@ -853,9 +872,15 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new PlotActionListener(), this);
         pm.registerEvents(new PlotKickPlayerQuitListener(), this);
         pm.registerEvents(new RemoveNetheriteDropListener(), this);
-        pm.registerEvents(new EnderDragonLivesListener(), this);
+
+        //dragon
+        pm.registerEvents(new PlayerChangeWorldListener(), this);
+        pm.registerEvents(new TheEndListener(), this);
 
         pm.registerEvents(new FixClanBuffListener(), this);
+
+        pm.registerEvents(new GuaranteedWitherSkullDropListener(), this);
+        pm.registerEvents(new DragonDamageListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
         BlockChangePlotListener.addListeners();
@@ -1289,6 +1314,10 @@ public class LostShardPlugin extends JavaPlugin {
         return sorceryManager;
     }
 
+    public static EnderDragonManager getEnderDragonManager() {
+        return enderDragonManager;
+    }
+
     public static LSBorder getBorder(String worldName) {
         return fetchBorder(worldName);
     }
@@ -1299,6 +1328,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static boolean isTutorial() {
         return isTutorial;
+    }
+
+    public static ZoneId getZoneID() {
+        return ZoneId.of("America/New_York");
     }
 
 

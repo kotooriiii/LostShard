@@ -1,16 +1,22 @@
 package com.github.kotooriiii.instaeat;
 
+import com.google.common.reflect.TypeToken;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+
+import java.math.BigDecimal;
 
 public enum InstaEatType {
     MELON("Melon", Material.MELON_SLICE, 4, 4, 0, 10),
-    ROTTEN_FLESH("Rotten Flesh", Material.ROTTEN_FLESH, 5, 5, 0, 13),
+    ROTTEN_FLESH("Rotten Flesh", Material.ROTTEN_FLESH, 5, 3, 0, 13),
     SOUP("Soup", Material.MUSHROOM_STEW, 8, 7, 0, 15),
     COOKIE("Cookie", Material.COOKIE, 1, 1, 0, 7),
 
@@ -36,20 +42,23 @@ public enum InstaEatType {
         return name;
     }
 
-    public boolean isSplashPotion()
-    {
+    public boolean isSplashPotion() {
         return material.equals(Material.SPLASH_POTION);
     }
 
-    public boolean isHealOrRegen(ItemStack itemStack)
-    {
-        if(itemStack.getItemMeta() instanceof PotionMeta)
-        {
-            for(PotionEffect effect : ((PotionMeta) itemStack.getItemMeta()).getCustomEffects())
-            {
-                if(effect.getType() == PotionEffectType.REGENERATION || effect.getType() == PotionEffectType.HEAL || effect.getType() == PotionEffectType.HEALTH_BOOST)
-                    return true;
-            }
+    public boolean isHealOrRegen(ItemStack itemStack) {
+//        final TypeToken<? extends ItemMeta>.TypeSet tt = TypeToken.of(itemStack.getItemMeta().getClass()).getTypes().interfaces();
+//
+//        final TypeToken<? extends ItemMeta>.TypeSet interfaces = tt.interfaces();
+//
+//        Bukkit.broadcastMessage(interfaces.toString());
+
+        if (itemStack.getItemMeta() instanceof PotionMeta) {
+
+            final PotionType type = ((PotionMeta) itemStack.getItemMeta()).getBasePotionData().getType();
+            if (type.getEffectType() == PotionEffectType.REGENERATION || type.getEffectType() == PotionEffectType.HEAL || type.getEffectType() == PotionEffectType.HEALTH_BOOST)
+                return true;
+
         }
         return false;
     }

@@ -122,6 +122,35 @@ public class GoldEquipmentListener implements Listener {
     }
 
     @EventHandler
+    public void onBlast(EntityDamageEvent entityDamageEvent) {
+        Entity entity = entityDamageEvent.getEntity();
+        DamageCause damageCause = entityDamageEvent.getCause();
+
+        if (CitizensAPI.getNPCRegistry().isNPC(entityDamageEvent.getEntity()))
+            return;
+
+        //must be player
+        if (!(entity instanceof Player))
+            return;
+        //is drowning
+        if (!damageCause.equals(DamageCause.BLOCK_EXPLOSION) && !damageCause.equals(DamageCause.ENTITY_EXPLOSION))
+            return;
+
+        Player player = (Player) entity;
+        ItemStack chestplate = player.getInventory().getChestplate();
+        //helmet must be gold
+        if (chestplate == null || chestplate.getType() != Material.GOLDEN_CHESTPLATE)
+            return;
+
+        //Code if anything else wants to be added
+        entityDamageEvent.setCancelled(true);
+
+    }
+
+
+
+
+    @EventHandler
     public void onFire(EntityDamageEvent entityDamageEvent) {
         Entity entity = entityDamageEvent.getEntity();
         DamageCause damageCause = entityDamageEvent.getCause();

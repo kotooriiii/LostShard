@@ -63,7 +63,7 @@ public class DepositCommand implements CommandExecutor {
                         return true;
                     }
 
-                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && ((PlayerPlot) bankerTrait.getPlot()).getPrivacy() == PlotPrivacy.PRIVATE)
+                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && !((PlayerPlot) bankerTrait.getPlot()).hasPermissionToUse(playerUUID))
                     {
                         playerSender.sendMessage(ERROR_COLOR + "The plot is private. The bankers will not help you with any transaction.");
                         return false;

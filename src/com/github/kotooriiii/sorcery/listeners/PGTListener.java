@@ -319,6 +319,7 @@ public class PGTListener implements Listener {
     public void onPGTBreak(BlockPhysicsEvent e) {
 
         //If the source is not air AND we are changing portal
+
         if (isRelativelyNearPortal(e.getSourceBlock()) && LostShardPlugin.getGateManager().hasGateNearby(e.getSourceBlock().getLocation())) {
             e.setCancelled(true);
         }

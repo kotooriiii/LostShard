@@ -1,30 +1,29 @@
 package com.github.kotooriiii.skills.skill_listeners;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.google.common.collect.Lists;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.inventory.AbstractHorseInventory;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.kotooriiii.util.HelperMethods.*;
 import static com.github.kotooriiii.util.HelperMethods.getPlayerDamagerONLY;
@@ -219,6 +218,7 @@ public class SurvivalismListener implements Listener {
         }
     }
 
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onFireCampfire(EntityDamageEvent event) {
         Entity damagedEntity = event.getEntity();
@@ -305,6 +305,90 @@ public class SurvivalismListener implements Listener {
         //addXP(damagerPlayer, defenderPlayer); players dont count as far as im concernced
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPredeath(EntityDamageEvent event) {
+        final Entity entity = event.getEntity();
+
+        if (!(entity instanceof Creature))
+            return;
+
+        Creature defenderEntity = (Creature) entity;
+
+        if (!(defenderEntity.getHealth() - event.getFinalDamage() <= 0))
+            return;
+
+        if (defenderEntity.getEquipment() == null)
+            return;
+
+
+        ArrayList<ItemStack> stacks = new ArrayList<>();
+
+        for (int i = 0; i < 6; i++) {
+
+            if(Math.random() >= 0.085)
+                continue;
+            switch (i) {
+                case 0:
+                    stacks.add(defenderEntity.getEquipment().getItemInMainHand());
+                    break;
+                case 1:
+                    stacks.add(defenderEntity.getEquipment().getItemInOffHand());
+                    break;
+                case 2:
+                    stacks.add(defenderEntity.getEquipment().getHelmet());
+                    break;
+                case 3:
+                    stacks.add(defenderEntity.getEquipment().getChestplate());
+                    break;
+                case 4:
+                    stacks.add(defenderEntity.getEquipment().getLeggings());
+                    break;
+                case 5:
+                    stacks.add(defenderEntity.getEquipment().getBoots());
+                    break;
+            }
+        }
+
+        if (defenderEntity instanceof ChestedHorse) {
+            ChestedHorse chestedHorse = (ChestedHorse) defenderEntity;
+            final List<@NonNull ItemStack> itemStacks = Arrays.asList(chestedHorse.getInventory().getContents());
+            stacks.addAll(itemStacks);
+            stacks.add(new ItemStack(Material.CHEST,1));
+            if (chestedHorse.getInventory().getSaddle() != null)
+                stacks.add(chestedHorse.getInventory().getSaddle());
+            if (chestedHorse.getInventory() instanceof HorseInventory) {
+                HorseInventory horseInventory = (HorseInventory) chestedHorse.getInventory();
+                if (horseInventory.getArmor() != null)
+                    stacks.add(horseInventory.getArmor());
+            }
+        }
+
+        final ItemStack[] equipmentArr = stacks.toArray(new ItemStack[0]);
+
+
+        for (int i = 0; i < equipmentArr.length; i++) {
+            if (equipmentArr[i] == null || equipmentArr[i].getType().isAir())
+                continue;
+            defenderEntity.getWorld().dropItem(defenderEntity.getLocation(), equipmentArr[i]);
+        }
+
+        defenderEntity.getEquipment().clear();
+
+        if (defenderEntity instanceof ChestedHorse) {
+            ChestedHorse chestedHorse = (ChestedHorse) defenderEntity;
+            chestedHorse.getInventory().clear();
+            if (chestedHorse.getInventory().getSaddle() != null)
+                chestedHorse.getInventory().setSaddle(null);
+            if (chestedHorse.getInventory() instanceof HorseInventory) {
+                HorseInventory horseInventory = (HorseInventory) chestedHorse.getInventory();
+                if (horseInventory.getArmor() != null)
+                    horseInventory.setArmor(null);
+            }
+        }
+
+
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onXPEntityDeath(EntityDeathEvent event) {
 
@@ -344,34 +428,15 @@ public class SurvivalismListener implements Listener {
                     return;
 
 
+            final List<ItemStack> drops = event.getDrops();
+            final Iterator<ItemStack> iterator = drops.iterator();
+
             dropsLoop:
-            for (ItemStack itemStack : event.getDrops()) {
+            while (iterator.hasNext()) {
+                final ItemStack itemStack = iterator.next();
 
                 if (isBlacklisted(itemStack.getType()))
                     continue;
-
-                final EntityEquipment equipment = defenderEntity.getEquipment();
-                final ItemStack[] equipmentArr = new ItemStack[]
-                        {
-                                equipment.getItemInMainHand(),
-                                equipment.getItemInOffHand(),
-                                equipment.getHelmet(),
-                                equipment.getChestplate(),
-                                equipment.getLeggings(),
-                                equipment.getBoots()
-                        };
-
-                equipmentLoop:
-                for (int i = 0; i < equipmentArr.length; i++) {
-                    if (itemStack == null)
-                        break;
-                    if (equipmentArr[i] == null)
-                        continue;
-                    if (!itemStack.equals(equipmentArr[i]))
-                        continue;
-                    equipmentArr[i] = null;
-                    continue dropsLoop;
-                }
 
                 double random = Math.random();
                 if (random <= 0.75) {

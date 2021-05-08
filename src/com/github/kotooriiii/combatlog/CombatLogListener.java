@@ -135,9 +135,9 @@ public class CombatLogListener implements Listener {
 
                 GuardTrait guardTrait = CitizensAPI.getNPCRegistry().getNPC(realKiller).getTrait(GuardTrait.class);
                 if (guardTrait.getOwner() == null) {
-                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred" + ChatColor.WHITE + ".");
+                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] " + guardTrait.getGuardName() + ChatColor.WHITE + ".");
                 } else {
-                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred " + ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
+                    event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] " + guardTrait.getGuardName() + " " +  ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
                 }
             }
             LostShardPlugin.getCombatLogManager().remove(player.getUniqueId());
@@ -162,9 +162,9 @@ public class CombatLogListener implements Listener {
 
             GuardTrait guardTrait = CitizensAPI.getNPCRegistry().getNPC(realKiller).getTrait(GuardTrait.class);
             if (guardTrait.getOwner() == null) {
-                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred" + ChatColor.WHITE + ".");
+                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] " + guardTrait.getGuardName() + ChatColor.WHITE + ".");
             } else {
-                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] Fred " + ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
+                event.setDeathMessage(ChatColor.WHITE + "The " + sp.getStatus().getChatColor() + sp.getStatus().getName().toLowerCase() + " " + player.getName() + ChatColor.WHITE + " was killed by " + ChatColor.YELLOW + "[Guard] " + guardTrait.getGuardName() + " " +  ChatColor.WHITE + "for attacking " + StatusPlayer.wrap(guardTrait.getOwner()).getStatus().getChatColor() + "" + guardTrait.getCachedOwnerName() + ChatColor.WHITE + ".");
             }
             LostShardPlugin.getCombatLogManager().remove(player.getUniqueId());
             return;

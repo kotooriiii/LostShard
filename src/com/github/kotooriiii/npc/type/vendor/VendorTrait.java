@@ -1,8 +1,5 @@
 package com.github.kotooriiii.npc.type.vendor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.npc.Skin;
 import com.github.kotooriiii.plots.commands.VendorCommand;
@@ -14,7 +11,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.persistence.DelegatePersistence;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.trait.Equipment;
@@ -29,9 +25,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
@@ -72,6 +65,9 @@ public class VendorTrait extends Trait {
     @Persist
     private double balance = 0;
 
+    @Persist
+    private boolean isStaff = false;
+
     //Residing plot
     private UUID plotUUID = null;
     private Plot plot = null;
@@ -80,8 +76,7 @@ public class VendorTrait extends Trait {
     //Items to sell
     private ArrayList<VendorItemStack> vendorItems = new ArrayList<>();
 
-    @Persist
-    private boolean isStaff;
+
 
     public VendorTrait() {
         super("VendorTrait");
@@ -674,7 +669,7 @@ public class VendorTrait extends Trait {
     }
 
     public void setStaff(boolean b) {
-        this.isStaff=  b;
+        this.isStaff =  b;
     }
 
     public boolean isStaff()

@@ -1,4 +1,20 @@
 public class Cs111 {
+
+    public static class A {
+        public A(String a, String b)
+        {
+
+        }
+    }
+
+    public static class B extends A
+    {
+
+        public B(String a, String b) {
+            super(a, b);
+        }
+    }
+
     public static void main(String[] args) {
 
         System.out.println("Yes".replace("[A-Za-z]", "?"));

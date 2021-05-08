@@ -106,7 +106,17 @@ public class EnhanceCommand implements CommandExecutor {
 
 
         //Give rewards/xp/consequence.
-        blacksmithy.addXP(ADDED_XP);
+
+        if(mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50)
+        {
+
+        }
+        else if (mainHand.getType().name().toLowerCase().startsWith("iron_")  && level > 75)
+        {
+
+        } else {
+            blacksmithy.addXP(ADDED_XP);
+        }
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         invHelper.removeIngredients();
         return true;
@@ -292,17 +302,17 @@ public class EnhanceCommand implements CommandExecutor {
 
 
 
-            if (nextLevel == 4) {
-
-                if(!itemStack.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS) &&itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
-                    return false;
-
-                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
-            }
-            else if (nextLevel == 5) {
+//            if (nextLevel == 4) {
+//
+//                if(!itemStack.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS) &&itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+//                    return false;
+//
+//                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
+//            } else
+             if (nextLevel == 5) {
                 if(!itemStack.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.LOOT_BONUS_BLOCKS))
                     return false;
-                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
+                itemStack.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 3);
                 clan.broadcast(ChatColor.YELLOW + player.getName() + STANDARD_COLOR + " has exhausted the enhance buff!");
                 clan.setEnhanceTimer(0);
             }

@@ -68,7 +68,7 @@ public class BankCommand implements CommandExecutor {
                                         return false;
                                     }
                                     double money = Double.parseDouble(args[3]);
-                                    LostShardPlugin.getBankManager().wrap(playerUUID).setCurrency(money);
+                                    LostShardPlugin.getBankManager().wrap(playerSet.getUniqueId()).setCurrency(money);
                                     playerSender.sendMessage(STANDARD_COLOR + playerSet.getName() + "'s bank balance has been updated to " + money + ".");
                                     break;
                                 case "get":
@@ -82,7 +82,7 @@ public class BankCommand implements CommandExecutor {
                                         playerSender.sendMessage(ERROR_COLOR + "Player could not be found.");
                                         return false;
                                     }
-                                    double moneyGetted = LostShardPlugin.getBankManager().wrap(playerUUID).getCurrency();
+                                    double moneyGetted = LostShardPlugin.getBankManager().wrap(playerGet.getUniqueId()).getCurrency();
                                     playerSender.sendMessage(STANDARD_COLOR + playerGet.getName() + "'s bank balance is " + moneyGetted + ".");
                                     break;
                                 case "create":

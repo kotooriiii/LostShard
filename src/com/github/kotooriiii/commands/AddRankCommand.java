@@ -21,56 +21,50 @@ public class AddRankCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
         //If the player is sending this message
-        if (sender instanceof Player) {
-            final Player playerSender = (Player) sender;
-            final UUID playerUUID = playerSender.getUniqueId();
-            //If the command is the "guards" command
-            if (cmd.getName().equalsIgnoreCase("addrank")) {
-                //No arguments regarding this command
+        //If the command is the "guards" command
+        if (cmd.getName().equalsIgnoreCase("addrank")) {
+            //No arguments regarding this command
 
-                if (!playerSender.hasPermission(STAFF_PERMISSION)) {
-                    playerSender.sendMessage(ERROR_COLOR + "You don't have permission to add a rank to a player. You must be a staff member in order to access these set of commands.");
-                    return false;
-                }
+            if (!sender.hasPermission(STAFF_PERMISSION)) {
+                sender.sendMessage(ERROR_COLOR + "You don't have permission to add a rank to a player. You must be a staff member in order to access these set of commands.");
+                return false;
+            }
 
-                if (args.length != 2) {
-                    playerSender.sendMessage(ERROR_COLOR + "Did you mean to add a rank to a player? /addrank (username) (rankName)");
-                    return false;
-                }
+            if (args.length != 2) {
+                sender.sendMessage(ERROR_COLOR + "Did you mean to add a rank to a player? /addrank (username) (rankName)");
+                return false;
+            }
 
-                String possibleName = args[0];
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(possibleName);
+            String possibleName = args[0];
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(possibleName);
 
-                if(!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline())
-                {
-                    playerSender.sendMessage(ERROR_COLOR + "The player you are searching for does not exist.");
-                    return false;
-                }
+            if (!offlinePlayer.hasPlayedBefore() && !offlinePlayer.isOnline()) {
+                sender.sendMessage(ERROR_COLOR + "The player you are searching for does not exist.");
+                return false;
+            }
 
-                String rankName = HelperMethods.stringBuilder(args, 1, " ");
-                RankType rankType = RankType.matchRankType(rankName);
+            String rankName = HelperMethods.stringBuilder(args, 1, " ");
+            RankType rankType = RankType.matchRankType(rankName);
 
-                if(rankType == null)
-                {
-                    playerSender.sendMessage(ERROR_COLOR + "That is not a valid rank type.");
-                    return false;
-                }
+            if (rankType == null) {
+                sender.sendMessage(ERROR_COLOR + "That is not a valid rank type.");
+                return false;
+            }
 
 
-                RankPlayer rankPlayer = RankPlayer.wrap(offlinePlayer.getUniqueId());
+            RankPlayer rankPlayer = RankPlayer.wrap(offlinePlayer.getUniqueId());
 
-                if(rankPlayer.getRankType().equals(rankType))
-                {
-                    playerSender.sendMessage(ERROR_COLOR + "The player is already this rank.");
-                    return false;
-                }
+            if (rankPlayer.getRankType().equals(rankType)) {
+                sender.sendMessage(ERROR_COLOR + "The player is already this rank.");
+                return false;
+            }
 
-                rankPlayer.setRankType(rankType);
-                for(Player player : Bukkit.getOnlinePlayers())
+            rankPlayer.setRankType(rankType);
+            for (Player player : Bukkit.getOnlinePlayers())
                 player.sendMessage(PLAYER_COLOR + offlinePlayer.getName() + STANDARD_COLOR + " has now been promoted to " + rankType.getName() + ".");
 
-            }
         }
+
 
         return true;
     }
