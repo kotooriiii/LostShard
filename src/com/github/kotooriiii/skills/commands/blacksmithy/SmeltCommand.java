@@ -125,7 +125,16 @@ public class SmeltCommand implements CommandExecutor {
 
         //Give xp for trying.
         stat.setStamina(stat.getStamina() - STAMINA_COST);
-        blacksmithy.addXP(getXP(mainHand));
+        if(mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50)
+        {
+
+        }
+        else if (mainHand.getType().name().toLowerCase().startsWith("iron_")  && level > 75)
+        {
+
+        } else {
+            blacksmithy.addXP(getXP(mainHand));
+        }
         mainHand.setItemMeta(meta);
         playerSender.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
         playerSender.updateInventory();

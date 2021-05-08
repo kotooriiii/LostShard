@@ -41,7 +41,7 @@ public class TeleportSpell extends Spell {
                 ChatColor.DARK_PURPLE,
                 new ItemStack[]{new ItemStack(Material.FEATHER, 1)},
                 1.0f,
-                15,
+                10,
                 true, true, false,
                 new SpellMonsterDrop(new EntityType[]{}, 0.00));
     }

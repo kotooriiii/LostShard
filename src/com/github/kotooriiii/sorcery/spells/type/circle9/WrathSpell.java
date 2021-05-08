@@ -239,7 +239,7 @@ public class WrathSpell extends Spell {
                     if (Math.random() <= 0.30d) {
                         Plot plot = LostShardPlugin.getPlotManager().getStandingOnPlot(burnLocation);
 
-                        player.getLocation().getWorld().strikeLightning(burnLocation);
+                        player.getLocation().getWorld().spigot().strikeLightningEffect(burnLocation, false);
                      //   damage(player, burnLocation);
 
                         if (plot != null) {

@@ -3,7 +3,6 @@ package com.github.kotooriiii.instaeat;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -72,7 +71,7 @@ public class InstaEatListener implements Listener {
                 return;
 
         //If it's health/regen pot OR if its not a splash potion
-        if (instaEatType.isHealOrRegen(player.getInventory().getItemInMainHand()) || !instaEatType.isSplashPotion()) {
+        if (instaEatType.isApplicableSplash(player.getInventory().getItemInMainHand()) || !instaEatType.isSplashPotion()) {
 
             //If you dont have enough mana stop
             if (currentStamina < staminaCost) {

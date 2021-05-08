@@ -106,7 +106,13 @@ public class PowerCommand implements CommandExecutor {
 
 
         //Give rewards/xp/consequence.
-        blacksmithy.addXP(ADDED_XP);
+        if (mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50) {
+
+        } else if (mainHand.getType().name().toLowerCase().startsWith("iron_") && level > 75) {
+
+        } else {
+            blacksmithy.addXP(ADDED_XP);
+        }
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         invHelper.removeIngredients();
         return true;
@@ -190,8 +196,7 @@ public class PowerCommand implements CommandExecutor {
 
         if (powerLevel < nextLevel && nextLevel <= MAXIMUM_POWER_FINAL && nextLevel <= powerMaxLevel) {
 
-            if(!itemStack.getItemMeta().hasEnchant(Enchantment.ARROW_DAMAGE) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_DAMAGE))
-            {
+            if (!itemStack.getItemMeta().hasEnchant(Enchantment.ARROW_DAMAGE) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.ARROW_DAMAGE)) {
                 return false;
             }
 

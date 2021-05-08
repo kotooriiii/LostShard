@@ -104,7 +104,13 @@ public class SharpenCommand implements CommandExecutor {
 
 
         //Give rewards/xp/consequence.
-        blacksmithy.addXP(ADDED_XP);
+        if (mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50) {
+
+        } else if (mainHand.getType().name().toLowerCase().startsWith("iron_") && level > 75) {
+
+        } else {
+            blacksmithy.addXP(ADDED_XP);
+        }
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         invHelper.removeIngredients();
         return true;

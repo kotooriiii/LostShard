@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -252,5 +253,29 @@ public class CombatLogListener implements Listener {
 
         LostShardPlugin.getCombatLogManager().add(damagerPlayer.getUniqueId(), defender.getUniqueId());
         LostShardPlugin.getCombatLogManager().add(defenderPlayer.getUniqueId(), damager.getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onTag(PlayerFishEvent event) {
+        if (event.isCancelled())
+            return;
+
+        final Player shooter = event.getPlayer();
+        if (event.getCaught() instanceof Player) {
+            final Player caught = (Player) event.getCaught();
+
+            if (CitizensAPI.getNPCRegistry().isNPC(shooter) || CitizensAPI.getNPCRegistry().isNPC(caught))
+                return;
+
+            if (shooter.equals(caught))
+                return;
+
+            //
+            //The code for each skill will follow on the bottom
+            //
+
+            LostShardPlugin.getCombatLogManager().add(shooter.getUniqueId(), caught.getUniqueId());
+            LostShardPlugin.getCombatLogManager().add(caught.getUniqueId(), shooter.getUniqueId());
+        }
     }
 }

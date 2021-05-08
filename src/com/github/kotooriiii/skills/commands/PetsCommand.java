@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 
@@ -57,15 +58,15 @@ public class PetsCommand implements CommandExecutor {
     private void killPets(Player playerSender)
     {
 
-        Wolf[] wolves = TamingListener.getWolves(playerSender);
+        Creature[] creatures = TamingListener.getPets(playerSender);
 
-        if (wolves.length == 0) {
+        if (creatures.length == 0) {
             playerSender.sendMessage(ERROR_COLOR + "You have no pets.");
             return;
         }
 
-        for (Wolf wolf : wolves) {
-            wolf.damage(wolf.getHealth()*2);
+        for (Creature creature : creatures) {
+            creature.damage(creature.getHealth()*2);
         }
         playerSender.sendMessage(ChatColor.GRAY + "You have killed your pets.");
     }
@@ -77,15 +78,15 @@ public class PetsCommand implements CommandExecutor {
         }
 
 
-        Wolf[] wolves = TamingListener.getWolves(playerSender);
+        Creature[] creatures = TamingListener.getPets(playerSender);
 
-        if (wolves.length == 0) {
+        if (creatures.length == 0) {
             playerSender.sendMessage(ERROR_COLOR + "You have no pets.");
             return;
         }
 
-        for (Wolf wolf : wolves) {
-            wolf.teleport(playerSender);
+        for (Creature creature : creatures) {
+            creature.teleport(playerSender);
         }
         playerSender.sendMessage(ChatColor.GRAY + "You have teleported your pets to you.");
     }

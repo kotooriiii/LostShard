@@ -93,12 +93,11 @@ public class HardenCommand implements CommandExecutor {
 
         BlacksmithySkillEvent event = new BlacksmithySkillEvent(playerSender, BlacksmithyType.HARDEN);
         LostShardPlugin.plugin.getServer().getPluginManager().callEvent(event);
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
         //Harden
-        if(!enchant(mainHand))
-        {
+        if (!enchant(mainHand)) {
             playerSender.sendMessage(ERROR_COLOR + "You cannot add conflicting enchantments.");
             return false;
         }
@@ -107,7 +106,14 @@ public class HardenCommand implements CommandExecutor {
 
 
         //Give rewards/xp/consequence.
-        blacksmithy.addXP(ADDED_XP);
+        if (mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50) {
+
+        } else if (mainHand.getType().name().toLowerCase().startsWith("iron_") && level > 75) {
+
+        } else {
+            blacksmithy.addXP(ADDED_XP);
+        }
+
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         invHelper.removeIngredients();
         return true;
@@ -174,7 +180,7 @@ public class HardenCommand implements CommandExecutor {
                     return -1;
         }
 
-        return  0;
+        return 0;
     }
 
     private boolean isArmor(ItemStack itemStack) {
@@ -242,9 +248,9 @@ public class HardenCommand implements CommandExecutor {
         if (protectionLevel == unbreakingLevel)
             return protectionLevel;
 
-        if(unbreakingLevel == unbreakingMaxLevel)
+        if (unbreakingLevel == unbreakingMaxLevel)
             return protectionLevel;
-        if(protectionLevel == protectionMaxLevel)
+        if (protectionLevel == protectionMaxLevel)
             return unbreakingLevel;
 
         return protectionLevel < unbreakingLevel ? protectionLevel : unbreakingLevel;
@@ -260,21 +266,20 @@ public class HardenCommand implements CommandExecutor {
         int unbreakingMaxLevel = Enchantment.DURABILITY.getMaxLevel();
 
 
-
         if (protectionLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= protectionMaxLevel) {
-            if(!itemStack.getItemMeta().hasEnchant(Enchantment.PROTECTION_ENVIRONMENTAL) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.PROTECTION_ENVIRONMENTAL))
+            if (!itemStack.getItemMeta().hasEnchant(Enchantment.PROTECTION_ENVIRONMENTAL) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.PROTECTION_ENVIRONMENTAL))
                 return false;
             itemStack.removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
             itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, nextLevel);
         }
 
         if (unbreakingLevel < nextLevel && nextLevel <= MAXIUMUM_HARDEN && nextLevel <= unbreakingMaxLevel) {
-            if(!itemStack.getItemMeta().hasEnchant(Enchantment.DURABILITY) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
+            if (!itemStack.getItemMeta().hasEnchant(Enchantment.DURABILITY) && itemStack.getItemMeta().hasConflictingEnchant(Enchantment.DURABILITY))
                 return false;
             itemStack.removeEnchantment(Enchantment.DURABILITY);
             itemStack.addEnchantment(Enchantment.DURABILITY, nextLevel);
         }
-return true;
+        return true;
     }
 
     private ItemStack[] getCost(ItemStack itemStack) {

@@ -1,19 +1,25 @@
 package com.github.kotooriiii.sorcery.spells.type.circle3;
 
 import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.hostility.HostilityMatch;
 import com.github.kotooriiii.hostility.HostilityPlatform;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.google.common.base.Function;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
@@ -86,7 +92,35 @@ public class IceSpell extends Spell {
             player.sendMessage(ERROR_COLOR + "You can not cast Ice Ball on hostility platforms.");
             return false;
         }
+
         setIceShape(player.getUniqueId(), centerBlock, Material.SNOW_BLOCK, block -> block.isEmpty() || block.getType() == Material.LEGACY_LONG_GRASS);
+
+        Clan clan = LostShardPlugin.getClanManager().getClan(player.getUniqueId());
+
+        for(Entity entity : centerBlock.getNearbyEntities(1,0,1))
+        {
+            if(entity.getType() != EntityType.PLAYER)
+                continue;
+            if(CitizensAPI.getNPCRegistry().isNPC(entity))
+                continue;
+            Player iteratedPlayer = (Player) entity;
+            if(iteratedPlayer.equals(player))
+                continue;
+
+            Clan iteratedClan = LostShardPlugin.getClanManager().getClan(iteratedPlayer.getUniqueId());
+            if(iteratedClan != null &&  clan != null)
+            {
+                if(iteratedClan.equals(clan))
+                {
+                    if(!clan.isFriendlyFire())
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            iteratedPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20*5, 1, false ,false ,false));
+        }
 
         // This runnable will remove the player from cooldown list after a given time
         new BukkitRunnable() {

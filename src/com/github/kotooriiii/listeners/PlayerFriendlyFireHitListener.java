@@ -3,6 +3,7 @@ package com.github.kotooriiii.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.clans.Clan;
 import com.github.kotooriiii.util.HelperMethods;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -10,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.metadata.MetadataValue;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -20,6 +23,8 @@ import static com.github.kotooriiii.util.HelperMethods.getPlayerInduced;
 public class PlayerFriendlyFireHitListener implements Listener {
 
     ArrayList<Player> players = new ArrayList<>();
+
+
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onEntityDamage(EntityDamageByEntityEvent event) {
@@ -46,6 +51,33 @@ public class PlayerFriendlyFireHitListener implements Listener {
         }
 
         //end
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onTag(PlayerFishEvent event) {
+        if (event.isCancelled())
+            return;
+
+        final Player shooter = event.getPlayer();
+        if (event.getCaught() instanceof Player) {
+            final Player caught = (Player) event.getCaught();
+
+            if (CitizensAPI.getNPCRegistry().isNPC(shooter) || CitizensAPI.getNPCRegistry().isNPC(caught))
+                return;
+
+            Clan attackerClan = LostShardPlugin.getClanManager().getClan(shooter.getUniqueId());
+            Clan defenderClan = LostShardPlugin.getClanManager().getClan(caught.getUniqueId());
+
+
+            if (attackerClan != null && defenderClan != null) {
+                if (attackerClan.equals(defenderClan)) {
+                    if (!attackerClan.isFriendlyFire()) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+
+        }
     }
 
 //    @EventHandler

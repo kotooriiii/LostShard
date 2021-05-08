@@ -3,6 +3,8 @@ package com.github.kotooriiii.plots.listeners;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.util.HelperMethods;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +36,8 @@ public class PlotKickPlayerQuitListener implements Listener {
         //Playerplot
         //isKick
 
-        final Block highestBlockAt = player.getLocation().getWorld().getHighestBlockAt(player.getLocation().getBlockX(), player.getLocation().getBlockZ());
-        player.teleport(highestBlockAt.getLocation());
+        final Location highestBlockAt = HelperMethods.
+                getHighestBlock(player.getWorld(), player.getLocation().getBlockX(), player.getLocation().getBlockZ());
+        player.teleport(highestBlockAt);
     }
 }

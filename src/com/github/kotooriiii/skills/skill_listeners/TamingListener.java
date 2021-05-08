@@ -964,6 +964,42 @@ public class TamingListener implements Listener {
         return wolves.toArray(new Wolf[wolves.size()]);
     }
 
+    public static Creature[] getPets(Player player) {
+        ArrayList<Creature> creatures = new ArrayList<>();
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getLivingEntities()) {
+                if (entity instanceof Wolf) {
+                    Wolf wolf = (Wolf) entity;
+                    if (!wolf.isTamed())
+                        continue;
+
+                    AnimalTamer tamer = wolf.getOwner();
+                    if (!(tamer instanceof Player))
+                        continue;
+
+                    Player owner = (Player) tamer;
+
+                    if (player.equals(owner))
+                        creatures.add(wolf);
+                }
+                else if (entity instanceof Fox)
+                {
+                    Fox fox = (Fox) entity;
+                    if(fox.getFirstTrustedPlayer() != null && fox.getFirstTrustedPlayer().equals(player))
+                    {
+                        creatures.add(fox);
+                    }
+                    else if (fox.getSecondTrustedPlayer() != null && fox.getSecondTrustedPlayer().equals(player))
+                    {
+                        creatures.add(fox);
+                    }
+                }
+            }
+        }
+        return creatures.toArray(new Creature[creatures.size()]);
+    }
+
     private static final ArrayList<Chunk> chunks = new ArrayList<>();
     private boolean initialized = false;
 

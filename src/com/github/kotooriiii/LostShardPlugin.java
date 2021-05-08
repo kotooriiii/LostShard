@@ -881,6 +881,9 @@ public class LostShardPlugin extends JavaPlugin {
 
         pm.registerEvents(new GuaranteedWitherSkullDropListener(), this);
         pm.registerEvents(new DragonDamageListener(), this);
+        pm.registerEvents(new FeatherTickleListener(), this);
+        pm.registerEvents(new DragonEggFireListener(), this);
+        pm.registerEvents(new TotemDropListener(), this);
 
         SilentWalkListener.initSilentWalkListener();
         BlockChangePlotListener.addListeners();

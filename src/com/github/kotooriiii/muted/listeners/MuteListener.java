@@ -11,9 +11,13 @@ import static com.github.kotooriiii.data.Maps.STAFF_PERMISSION;
 
 public class MuteListener implements Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMute(ShardChatEvent event) {
         if (MutedPlayer.getMutedPlayers().containsKey(event.getPlayer().getUniqueId())) {
+
+            if(event.isCancelled())
+                return;
+
             if(event.getPlayer().hasPermission(STAFF_PERMISSION))
             {
                 MutedPlayer.getMutedPlayers().get(event.getPlayer().getUniqueId()).remove();

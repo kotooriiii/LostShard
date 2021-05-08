@@ -46,7 +46,7 @@ public enum InstaEatType {
         return material.equals(Material.SPLASH_POTION);
     }
 
-    public boolean isHealOrRegen(ItemStack itemStack) {
+    public boolean isApplicableSplash(ItemStack itemStack) {
 //        final TypeToken<? extends ItemMeta>.TypeSet tt = TypeToken.of(itemStack.getItemMeta().getClass()).getTypes().interfaces();
 //
 //        final TypeToken<? extends ItemMeta>.TypeSet interfaces = tt.interfaces();
@@ -56,7 +56,10 @@ public enum InstaEatType {
         if (itemStack.getItemMeta() instanceof PotionMeta) {
 
             final PotionType type = ((PotionMeta) itemStack.getItemMeta()).getBasePotionData().getType();
-            if (type.getEffectType() == PotionEffectType.REGENERATION || type.getEffectType() == PotionEffectType.HEAL || type.getEffectType() == PotionEffectType.HEALTH_BOOST)
+            if (type.getEffectType() == PotionEffectType.REGENERATION ||
+                    type.getEffectType() == PotionEffectType.HEAL ||
+                    type.getEffectType() == PotionEffectType.HEALTH_BOOST ||
+                    type.getEffectType() == PotionEffectType.HARM)
                 return true;
 
         }

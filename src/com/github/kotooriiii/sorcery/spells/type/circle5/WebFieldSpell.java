@@ -40,7 +40,7 @@ public class WebFieldSpell extends Spell {
                 1.0f,
                 15,
                 true, true, false,
-                new SpellMonsterDrop(new EntityType[]{EntityType.SPIDER}, 0.01));
+                new SpellMonsterDrop(new EntityType[]{EntityType.SPIDER, EntityType.CAVE_SPIDER}, 0.01));
     }
 
     private  static WebFieldSpell instance;

@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -30,6 +31,23 @@ public final class HelperMethods {
     private static Set<Material> ignoreLiquidsSet = new HashSet<>();
 
     private final static int CHAT_CENTER_PX = 154, BOOK_CENTER_PX = 46;
+
+    public static Location getHighestBlock(World world, int x, int z){
+        int i = 255;
+        while(i>0){
+            if(new Location(world, x, i, z).getBlock().getType()!=Material.AIR)
+                return new Location(world, x, i, z).add(0,1,0);
+            i--;
+        }
+        return new Location(world, x, 1, z);
+    }
+
+    public static boolean isVanished(Player player) {
+        for (MetadataValue meta : player.getMetadata("vanished")) {
+            if (meta.asBoolean()) return true;
+        }
+        return false;
+    }
 
     public static String materialName(Material type) {
         String material = type.getKey().getKey();

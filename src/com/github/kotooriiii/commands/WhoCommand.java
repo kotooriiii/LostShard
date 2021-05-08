@@ -7,6 +7,7 @@ import com.github.kotooriiii.status.Staff;
 import com.github.kotooriiii.status.StaffType;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
+import com.github.kotooriiii.util.HelperMethods;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -62,7 +63,7 @@ public class WhoCommand implements CommandExecutor {
         for (int i = 0; i < onlinePlayers.size(); i++) {
             Player player = onlinePlayers.get(i);
 
-            if(player.hasMetadata("vanished"))
+            if(HelperMethods.isVanished(player))
                 continue;
 
             if (!Staff.isStaff(player.getUniqueId()))

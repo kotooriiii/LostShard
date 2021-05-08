@@ -102,7 +102,16 @@ public class RepairCommand implements CommandExecutor {
 
         //Give xp for trying.
         stat.setStamina(stat.getStamina() - STAMINA_COST);
-        blacksmithy.addXP(getXP(mainHand));
+        if(mainHand.getType().name().toLowerCase().startsWith("stone_") && level > 50)
+        {
+
+        }
+        else if (mainHand.getType().name().toLowerCase().startsWith("iron_")  && level > 75)
+        {
+
+        } else {
+            blacksmithy.addXP(getXP(mainHand));
+        }
         mainHand.setItemMeta(meta);
         invHelper.removeIngredients();
         playerSender.updateInventory();
@@ -174,6 +183,7 @@ public class RepairCommand implements CommandExecutor {
 
                 //BOW
             case BOW:
+            case CROSSBOW:
 
 
             case CHAINMAIL_BOOTS:
@@ -286,6 +296,7 @@ public class RepairCommand implements CommandExecutor {
 
                 //BOW
             case BOW:
+            case CROSSBOW:
             case CHAINMAIL_BOOTS:
             case CHAINMAIL_HELMET:
             case CHAINMAIL_CHESTPLATE:
@@ -316,22 +327,8 @@ public class RepairCommand implements CommandExecutor {
                 return new ItemStack[]{new ItemStack(Material.STRING, 1)};
             //BOW
             case BOW:
-                return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
-            //NETHERITE
-            //DIAMOND
-            case NETHERITE_AXE:
-            case NETHERITE_SWORD:
-            case NETHERITE_PICKAXE:
-            case NETHERITE_HOE:
-            case NETHERITE_SHOVEL:
-
-            case NETHERITE_BOOTS:
-            case NETHERITE_HELMET:
-            case NETHERITE_CHESTPLATE:
-            case NETHERITE_LEGGINGS:
-                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, 1)};
-
-            //DIAMOND
+            case CROSSBOW:
+                //DIAMOND
             case DIAMOND_AXE:
             case DIAMOND_SWORD:
             case DIAMOND_PICKAXE:
@@ -343,6 +340,18 @@ public class RepairCommand implements CommandExecutor {
             case DIAMOND_CHESTPLATE:
             case DIAMOND_LEGGINGS:
                 return new ItemStack[]{new ItemStack(Material.DIAMOND, 1)};
+            //NETHERITE
+            case NETHERITE_AXE:
+            case NETHERITE_SWORD:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_HOE:
+            case NETHERITE_SHOVEL:
+
+            case NETHERITE_BOOTS:
+            case NETHERITE_HELMET:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_LEGGINGS:
+                return new ItemStack[]{new ItemStack(Material.NETHERITE_INGOT, 1)};
 
             //GOLD
             case GOLDEN_AXE:

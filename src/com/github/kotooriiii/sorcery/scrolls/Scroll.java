@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Scroll {
     private Spell spell;
-    private final static Material scrollMaterial = Material.GLOBE_BANNER_PATTERN;
+    public final static Material scrollMaterial = Material.GLOBE_BANNER_PATTERN;
 
     public Scroll(Spell spell) {
         // Set local variables to the given variables
@@ -51,6 +51,22 @@ public class Scroll {
 
     public static boolean isWielding(Player player) {
         ItemStack itemStack = player.getInventory().getItemInMainHand();
+        if (itemStack == null || itemStack.getItemMeta() == null || itemStack.getItemMeta().getLore() == null || itemStack.getItemMeta().getLore().isEmpty())
+            return false;
+        if (!itemStack.getType().equals(scrollMaterial))
+            return false;
+
+        for (SpellType type : SpellType.values()) {
+            String lastLine = itemStack.getItemMeta().getLore().get(itemStack.getItemMeta().getLore().size() - 1);
+            if (lastLine.equals("ID:" + type.getName()))
+                if (Spell.of(type) != null)
+                    if (Spell.of(type).isScrollable())
+                        return true;
+        }
+        return false;
+    }
+
+    public static boolean isScroll(ItemStack itemStack) {
         if (itemStack == null || itemStack.getItemMeta() == null || itemStack.getItemMeta().getLore() == null || itemStack.getItemMeta().getLore().isEmpty())
             return false;
         if (!itemStack.getType().equals(scrollMaterial))

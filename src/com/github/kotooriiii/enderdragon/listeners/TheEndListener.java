@@ -24,7 +24,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.UUID;
+
+import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class TheEndListener implements Listener {
 
@@ -153,14 +156,32 @@ public class TheEndListener implements Listener {
             event.getDrops().add(new ItemStack(Material.DRAGON_EGG, 1));
         }
 
+        //CLEAR ALL DROPS SINCE WE ARE CHANGING IT. NOW IT GOES TO PLAYER INVENTORY
 
         final EnderDragonManager enderDragonManager = LostShardPlugin.getEnderDragonManager();
 
-        UUID lastKillerUUID = null;
-        if (event.getEntity().getKiller() != null) {
-            final Player playerDamagerONLY = HelperMethods.getPlayerDamagerONLY(event.getEntity(), event.getEntity().getKiller());
 
+        Player killer = event.getEntity().getKiller();
+        UUID lastKillerUUID = null;
+        if (killer != null) {
+            final Player playerDamagerONLY = HelperMethods.getPlayerDamagerONLY(event.getEntity(), killer);
            lastKillerUUID = playerDamagerONLY == null ? null : playerDamagerONLY.getUniqueId();
+
+           if(playerDamagerONLY != null)
+           {
+               event.getDrops().clear();
+               HashMap<Integer, ItemStack> map = playerDamagerONLY.getInventory().addItem(new ItemStack(Material.DRAGON_EGG, 1));
+               if(!map.isEmpty())
+               {
+                   playerDamagerONLY.sendMessage(ERROR_COLOR + "Your inventory is full. The Dragon Egg has dropped around you.");
+                   playerDamagerONLY.getWorld().dropItemNaturally(playerDamagerONLY.getLocation(), new ItemStack(Material.DRAGON_EGG, 1));
+               }
+               else
+               {
+                   playerDamagerONLY.sendMessage(ChatColor.RED + "You found a Dragon Egg!");
+
+               }
+           }
         }
 
 

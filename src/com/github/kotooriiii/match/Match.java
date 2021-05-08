@@ -6,6 +6,8 @@ import com.github.kotooriiii.plots.listeners.PlayerStatusRespawnListener;
 import com.github.kotooriiii.plots.struct.Plot;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -166,8 +168,73 @@ public class Match {
     }
 
     public void lose(OfflinePlayer offlinePlayer) {
-        sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " was defeated in a " + getName() + ".");
+        //sendToAll(ChatColor.YELLOW + offlinePlayer.getName() + ChatColor.BLUE + " was defeated in a " + getName() + ".");
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) skull.getItemMeta();
+        meta.setOwningPlayer(offlinePlayer);
+        skull.setItemMeta(meta);
 
+        if(offlinePlayer.isOnline())
+        {
+            Player player = (Player) offlinePlayer;
+            player.getWorld().dropItemNaturally(player.getLocation(), skull);
+
+            if(offlinePlayer.getUniqueId().equals(fighterA))
+            {
+                Player winner = Bukkit.getPlayer(fighterB);
+                if(winner != null) {
+                    winner.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head was dropped near the corpse.");
+                }
+
+            }
+            else {
+                Player winner = Bukkit.getPlayer(fighterA);
+                if(winner != null) {
+                    winner.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head was dropped near the corpse.");
+                }
+            }
+        }
+        else
+        {
+            if(offlinePlayer.getUniqueId().equals(fighterA))
+            {
+                Player player = Bukkit.getPlayer(fighterB);
+                if(player != null)
+                {
+                    HashMap<Integer, ItemStack>  map = player.getInventory().addItem(skull);
+
+                    if(!map.isEmpty())
+                    {
+                        player.getWorld().dropItemNaturally(player.getLocation(), skull);
+                        player.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head was dropped nearby.");
+                    }
+                    else
+                    {
+                        player.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head has been moved to your inventory.");
+                    }
+
+                }
+            }
+            else if(offlinePlayer.getUniqueId().equals(fighterB))
+            {
+                Player player = Bukkit.getPlayer(fighterA);
+                if(player != null)
+                {
+                    HashMap<Integer, ItemStack>  map = player.getInventory().addItem(skull);
+
+                    if(!map.isEmpty())
+                    {
+                        player.getWorld().dropItemNaturally(player.getLocation(), skull);
+                        player.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head was dropped nearby.");
+                    }
+                    else
+                    {
+                        player.sendMessage(ChatColor.GREEN + offlinePlayer.getName() + "'s head has been moved to your inventory.");
+                    }
+
+                }
+            }
+        }
     }
 
     private void significantTime(int counter) {

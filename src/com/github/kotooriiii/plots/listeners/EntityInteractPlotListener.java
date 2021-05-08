@@ -55,8 +55,9 @@ public class EntityInteractPlotListener implements Listener {
             //If the block being interacted is in the location of a plot
             if (plot.contains(location)) {
 
+                // block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE")  has been removed to PREVENT entities from opening
                 //if not a player plot AND its a redstone thingy, then return other wise cancel
-                if (block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType().getKey().getKey().toUpperCase().endsWith("_PRESSURE_PLATE") || block.getType() == Material.LEVER) {
+                if (block.getType().getKey().getKey().toUpperCase().endsWith("BUTTON") || block.getBlockData() instanceof Powerable || block.getType().getKey().getKey().toUpperCase().endsWith("_BUTTON") || block.getType() == Material.LEVER) {
                     return;
                 } else {
                     entityInteractEvent.setCancelled(true);

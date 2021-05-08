@@ -149,13 +149,13 @@ public class PlayerPlot extends Plot {
     public int getCostOfNextVendor() {
         switch (getVendors().size()) {
             case 0:
-                return 100;
+                return 50;
             case 1:
-                return 250;
+                return 100;
             case 2:
             case 3:
             case 4:
-                return 500;
+                return 150;
             default:
                 return -1;
 
@@ -290,7 +290,31 @@ public class PlayerPlot extends Plot {
                 adder += 40;
             }
         }
-        return percentage * (adder + CREATE_COST);
+
+        double total = 0;
+        total = (adder + CREATE_COST);
+
+        if(isTown)
+        {
+            total += 1000;
+        }
+
+        if(isDungeon)
+        {
+            total += 200;
+        }
+
+        if(isVendor)
+        {
+            total += 500;
+        }
+
+        if(isKick)
+        {
+            total += 1000;
+        }
+
+        return percentage * (total);
     }
 
     /**

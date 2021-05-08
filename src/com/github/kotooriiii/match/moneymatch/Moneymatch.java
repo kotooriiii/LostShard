@@ -22,38 +22,36 @@ public class Moneymatch extends Match {
 
 
     public Moneymatch(UUID fighterA, UUID fighterB) {
-      super(fighterA, fighterB);
-      super.NAME = "Money match";
-      wagerAmount = -1;
+        super(fighterA, fighterB);
+        super.NAME = "Money match";
+        wagerAmount = -1;
     }
 
     @Override
-    public void initializer()
-    {
+    public void initializer() {
         BankManager bankManager = LostShardPlugin.getBankManager();
         Bank withdrawalA = bankManager.wrap(getFighterA());
         Bank withdrawalB = bankManager.wrap(getFighterB());
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
-        if(fighterA.isOnline())
+        if (fighterA.isOnline())
             fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
-        if(fighterB.isOnline())
+        if (fighterB.isOnline())
             fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been taken out of your account.");
         withdrawalA.removeCurrency(wagerAmount);
         withdrawalB.removeCurrency(wagerAmount);
     }
 
     @Override
-    public void deinitializer()
-    {
+    public void deinitializer() {
         BankManager bankManager = LostShardPlugin.getBankManager();
         Bank depositA = bankManager.wrap(getFighterA());
         Bank depositB = bankManager.wrap(getFighterB());
         OfflinePlayer fighterA = Bukkit.getOfflinePlayer(getFighterA());
         OfflinePlayer fighterB = Bukkit.getOfflinePlayer(getFighterB());
-        if(fighterA.isOnline())
+        if (fighterA.isOnline())
             fighterA.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
-        if(fighterB.isOnline())
+        if (fighterB.isOnline())
             fighterB.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount + " has been returned to your account.");
         depositA.addCurrency(wagerAmount);
         depositB.addCurrency(wagerAmount);
@@ -64,16 +62,17 @@ public class Moneymatch extends Match {
         sendToAll(PLAYER_COLOR + offlinePlayer.getName() + ChatColor.GREEN + " has won the money match.");
         BankManager bankManager = LostShardPlugin.getBankManager();
         Bank winnerBank = bankManager.wrap(offlinePlayer.getUniqueId());
-        winnerBank.addCurrency(wagerAmount*2);
-        if(offlinePlayer.isOnline())
-        {
-            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount*2 + " gold has been deposited into your account.");
+        winnerBank.addCurrency(wagerAmount * 2);
+        if (offlinePlayer.isOnline()) {
+            offlinePlayer.getPlayer().sendMessage(ChatColor.GOLD + "" + wagerAmount * 2 + " gold has been deposited into your account.");
         }
     }
 
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
-}
+
+        super.lose(offlinePlayer);
+    }
 
     public double getWagerAmount() {
         return wagerAmount;
@@ -96,7 +95,7 @@ public class Moneymatch extends Match {
         information += "\n" + DEFAULT + "Protection " + toRoman(getProtection()) + " " + proper(getArmorType().getKey().getKey()) + " Armor";
         information += "\n" + DEFAULT + "Sharpness " + toRoman(getSharpness()) + " Fire " + toRoman(getFireAspect()) + " " + proper(getSwordType().getKey().getKey()) + " Sword";
         information += "\n" + DEFAULT + "Power " + toRoman(getPower()) + " Bow";
-        information += "\n" + IDENTITY + "Wager: " + DEFAULT + wagerAmount*2;
+        information += "\n" + IDENTITY + "Wager: " + DEFAULT + wagerAmount * 2;
         information += "\n" + IDENTITY + "Event will begin in: " + DEFAULT + getBeginCountdown() + " min";
 
 

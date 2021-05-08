@@ -34,8 +34,9 @@ public class PlayerStatusRespawnListener implements Listener {
         StatusPlayer statusPlayer = StatusPlayer.wrap(player.getUniqueId());
         Stat stat = Stat.wrap(statusPlayer.getPlayerUUID());
 
-        stat.setMana(stat.getMaxMana());
-        stat.setStamina(stat.getMaxStamina());
+        //Disabled to prevent skill xp grind
+        //stat.setMana(stat.getMaxMana());
+        //stat.setStamina(stat.getMaxStamina());
 
         Location possibleSpawn = stat.getSpawn();
         if(possibleSpawn!=null)

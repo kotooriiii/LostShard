@@ -150,7 +150,7 @@ public class MarkCommand implements CommandExecutor {
     public void sendPage(int page, Player playerSender) {
         UUID playerUUID = playerSender.getUniqueId();
 
-        final int amtOfMarksPerPage = 3;
+        final int amtOfMarksPerPage = 8;
 
         int size;
         MarkPlayer.Mark[] marks;

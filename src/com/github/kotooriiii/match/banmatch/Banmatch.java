@@ -46,6 +46,7 @@ public class Banmatch extends Match {
     @Override
     public void lose(OfflinePlayer offlinePlayer) {
 
+        super.lose(offlinePlayer);
 
         LostShardPlugin.getCombatLogManager().remove(offlinePlayer.getUniqueId());
 
