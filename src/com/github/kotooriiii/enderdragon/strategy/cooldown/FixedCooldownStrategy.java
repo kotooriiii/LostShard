@@ -16,15 +16,15 @@ public class FixedCooldownStrategy extends CooldownStrategy {
 
         final ZonedDateTime now = ZonedDateTime.now(LostShardPlugin.getZoneID());
 
-        ZonedDateTime nextRun= now.withHour(1).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime nextRun= now.withHour(12+3).withMinute(0).withSecond(0).withNano(0);
 
         if (now.compareTo(nextRun) >= 0)
         {
-            nextRun = now.withHour(12+1).withMinute(0).withSecond(0).withNano(0);
+            nextRun = now.withHour(12+8).withMinute(0).withSecond(0).withNano(0);
 
             if (now.compareTo(nextRun) >= 0)
             {
-                nextRun =  now.plusDays(1).withHour(1).withMinute(0).withSecond(0).withNano(0);
+                nextRun =  now.plusDays(1).withHour(12+3).withMinute(0).withSecond(0).withNano(0);
             }
         }
 
