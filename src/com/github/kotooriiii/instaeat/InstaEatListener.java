@@ -97,8 +97,9 @@ public class InstaEatListener implements Listener {
         double newHealth = currentHealth + replenishedHealth;
         double newFoodLevel = currentFoodLevel + replenishedFoodLevel;
 
+        final float survivalismLevel = LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel();
         //if has perk
-        if ((int) LostShardPlugin.getSkillManager().getSkillPlayer(player.getUniqueId()).getActiveBuild().getSurvivalism().getLevel() >= 50) {
+        if ((int) survivalismLevel >= 50) {
             //if its a survivalist food
             if (SurvivalismListener.SurvivalistFood.isSurvivalistFood(instaEatType.getMaterial())) {
                 SurvivalismListener.SurvivalistFood survivalistFood = SurvivalismListener.SurvivalistFood.getSurvivalistFood(instaEatType.getMaterial());
@@ -119,7 +120,7 @@ public class InstaEatListener implements Listener {
 
         if(instaEatType == InstaEatType.ROTTEN_FLESH)
         {
-            if(Math.random() < 0.5d)
+            if(survivalismLevel < 50 && Math.random() < 0.5d)
             {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20*10, 1, false, false, false));
             }

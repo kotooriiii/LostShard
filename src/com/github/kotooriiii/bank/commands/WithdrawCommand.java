@@ -50,6 +50,12 @@ public class WithdrawCommand implements CommandExecutor {
                     }
 
                     double withdraw = Double.parseDouble(args[0]);
+
+                    if (withdraw <= 0) {
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
+                        return true;
+                    }
+
                     DecimalFormat df = new DecimalFormat("#.##");
                     withdraw = Double.valueOf(df.format(withdraw));
                     final Location playerLocation = playerSender.getLocation();
@@ -60,8 +66,7 @@ public class WithdrawCommand implements CommandExecutor {
                         return true;
                     }
 
-                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && !((PlayerPlot) bankerTrait.getPlot()).hasPermissionToUse(playerUUID))
-                    {
+                    if (!bankerTrait.isStaffBanker() && bankerTrait.getPlot() instanceof PlayerPlot && !((PlayerPlot) bankerTrait.getPlot()).hasPermissionToUse(playerUUID)) {
                         playerSender.sendMessage(ERROR_COLOR + "The plot is private. The bankers will not help you with any transaction.");
                         return false;
                     }

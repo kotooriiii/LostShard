@@ -53,6 +53,12 @@ public class DepositCommand implements CommandExecutor {
                     }
 
                     double deposit = Double.parseDouble(args[0]);
+
+                    if (deposit <= 0) {
+                        playerSender.sendMessage(ChatColor.RED + "You can only deposit positive integers into your bank account.");
+                        return true;
+                    }
+
                     DecimalFormat df = new DecimalFormat("#.##");
                     deposit = Double.valueOf(df.format(deposit));
                     final Location playerLocation = playerSender.getLocation();

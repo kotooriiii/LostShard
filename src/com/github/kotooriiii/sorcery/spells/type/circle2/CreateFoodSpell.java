@@ -42,7 +42,7 @@ public class CreateFoodSpell extends Spell {
 
         if (foodMap.isEmpty()) {
 
-            final int S = 1, A = 10, B = 50, C = 75, D = 125, E = 175;
+            final int S = 1, A = 1, B = 50, C = 75, D = 125, E = 175;
 
             //foodMap.put(new ItemStack(Material.ENCHANTED_GOLDEN_APPLE), S);
 
