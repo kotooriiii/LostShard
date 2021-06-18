@@ -8,10 +8,8 @@ import com.github.kotooriiii.skills.events.PlayerTrackEvent;
 import com.github.kotooriiii.skills.skill_listeners.SurvivalismListener;
 import com.github.kotooriiii.stats.Stat;
 import com.github.kotooriiii.util.HelperMethods;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import ru.xezard.glow.data.glow.Glow;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -164,6 +163,22 @@ public class TrackCommand implements CommandExecutor {
                     direction = direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
                     playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
                     playerSender.sendMessage(ChatColor.GOLD + howClose(trackedPlayer.getLocation().distance(playerSender.getLocation())));
+
+                    //Animating
+                    if(LostShardPlugin.getAnimatorPackage().isAnimating(playerUUID))
+                    {
+                        final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation(), trackedPlayer.getLocation());
+
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                for(Block block : bridgeBlocks)
+                                {
+                                    block.getWorld().spawnParticle(Particle.REDSTONE, block.getLocation(), 2, 0,0,0, new Particle.DustOptions(Color.RED, 1f));
+                                }
+                            }
+                        }.runTaskAsynchronously(LostShardPlugin.plugin);
+                    }
                 }
 
             } else {
@@ -229,6 +244,23 @@ public class TrackCommand implements CommandExecutor {
                 playerSender.sendMessage(ChatColor.GOLD + "You see tracks leading off to the " + direction + "...");
                 playerSender.sendMessage(ChatColor.GOLD + howClose(distance));
                 //Successful look up
+
+                //Animating
+                if(LostShardPlugin.getAnimatorPackage().isAnimating(playerUUID) && !LostShardPlugin.isTutorial())
+                {
+                    final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation().add(0,1,0), closestEntity.getLocation().add(0,1,0), 5);
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            for(Block block : bridgeBlocks)
+                            {
+                                block.getWorld().spawnParticle(Particle.REDSTONE, block.getLocation(), 2, 0,0,0, new Particle.DustOptions(Color.RED, 1f));
+                            }
+                        }
+                    }.runTaskAsynchronously(LostShardPlugin.plugin);
+                }
+
             }
 
 

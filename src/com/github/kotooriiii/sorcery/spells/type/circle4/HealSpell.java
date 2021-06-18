@@ -7,6 +7,7 @@ import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -26,12 +27,11 @@ public class HealSpell extends Spell {
     private final static int HALF_HEARTS_HEALED = 8;
 
 
-    private HealSpell()
-    {
+    private HealSpell() {
         super(SpellType.HEAL,
-                "Heals you for " + new BigDecimal(HALF_HEARTS_HEALED/2).setScale(1,RoundingMode.UNNECESSARY) + " hearts.",
+                "Heals you for " + new BigDecimal(HALF_HEARTS_HEALED / 2).setScale(1, RoundingMode.UNNECESSARY) + " hearts.",
                 4,
-            ChatColor.GREEN,
+                ChatColor.GREEN,
                 new ItemStack[]{new ItemStack(Material.STRING, 1), new ItemStack(Material.WHEAT_SEEDS, 1)},
                 0.5d,
                 20,
@@ -41,7 +41,8 @@ public class HealSpell extends Spell {
     }
 
 
-    private  static HealSpell instance;
+    private static HealSpell instance;
+
     public static HealSpell getInstance() {
         if (instance == null) {
             synchronized (HealSpell.class) {
@@ -60,12 +61,18 @@ public class HealSpell extends Spell {
         if (health > player.getMaxHealth())
             health = player.getMaxHealth();
         player.setHealth(health);
+
+        if (LostShardPlugin.getAnimatorPackage().isAnimating(player.getUniqueId())) {
+            player.getWorld().spawnParticle(Particle.COMPOSTER, player.getLocation(), 5, 0.5f, 1.5f, 0.5f);
+            player.getWorld().spawnParticle(Particle.COMPOSTER, player.getLocation().add(0, 1, 0), 5, 0.5f, 1.5f, 0.5f);
+
+        }
+
         return true;
     }
 
     @Override
-    public void updateCooldown(Player player)
-    {
+    public void updateCooldown(Player player) {
         healSpellCooldownMap.put(player.getUniqueId(), this.getCooldown() * 20);
         // This runnable will remove the player from cooldown list after a given time
         BukkitRunnable runnable = new BukkitRunnable() {

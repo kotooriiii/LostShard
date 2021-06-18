@@ -57,6 +57,9 @@ import com.github.kotooriiii.plots.commands.*;
 import com.github.kotooriiii.plots.listeners.*;
 import com.github.kotooriiii.plots.struct.PlayerPlot;
 import com.github.kotooriiii.plots.struct.Plot;
+import com.github.kotooriiii.ranks.animation.AnimationManager;
+import com.github.kotooriiii.ranks.animation.TrailCommand;
+import com.github.kotooriiii.ranks.animation.TrailListener;
 import com.github.kotooriiii.register_system.GatheringManager;
 import com.github.kotooriiii.register_system.JoinCommand;
 import com.github.kotooriiii.register_system.LeaveCommand;
@@ -87,6 +90,7 @@ import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDropListener;
 import com.github.kotooriiii.sorcery.spells.type.circle1.LightSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.MarkSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle1.RecallSpell;
+import com.github.kotooriiii.sorcery.spells.type.circle3.MagicArrowSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle3.MoonJumpSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle4.ScreechSpell;
 import com.github.kotooriiii.sorcery.spells.type.circle5.GateTravelSpell;
@@ -188,6 +192,7 @@ public class LostShardPlugin extends JavaPlugin {
     private static TipsManager tipsManager;
     private static SorceryManager sorceryManager;
     private static EnderDragonManager enderDragonManager;
+    private static AnimationManager animationManager;
 
     private final static FFACommand FFA_COMMAND = new FFACommand();
 
@@ -318,6 +323,11 @@ public class LostShardPlugin extends JavaPlugin {
         ignoreManager = new IgnoreManager();
         sorceryManager = new SorceryManager();
         enderDragonManager = new EnderDragonManager();
+        animationManager = new AnimationManager();
+
+        animationManager.tick();
+        RespirateSpell.getInstance().onTick();
+        MagicArrowSpell.getInstance().tick();
 
         if (isTutorial()) {
             tutorialManager = new TutorialManager(true, true);
@@ -518,6 +528,8 @@ public class LostShardPlugin extends JavaPlugin {
 
         LostShardPlugin.plugin.getLogger().info(ChatColor.DARK_PURPLE + "[Async Thread]" + ChatColor.YELLOW + " Saving data.");
 
+        FileManager.writeAnimators();
+
         for (Bank bank : LostShardPlugin.getBankManager().getBanks().values()) {
             try {
                 LostShardPlugin.getBankManager().saveBank(bank);
@@ -695,6 +707,8 @@ public class LostShardPlugin extends JavaPlugin {
         getCommand("banker").setExecutor(new BankerCommand());
         getCommand("enderdragon").setExecutor(new EnderdragonCommand());
 
+        getCommand("trail").setExecutor(new TrailCommand());
+
 
         //todo to use later -->
         //getCommand("opt").setExecutor(new LinkListener());
@@ -860,6 +874,7 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(SlothSpell.getInstance(), this);
         pm.registerEvents(PrideSpell.getInstance(), this);
         pm.registerEvents(GluttonySpell.getInstance(), this);
+        pm.registerEvents(MagicArrowSpell.getInstance(), this);
 
         pm.registerEvents(new SpellChanneleableQuitDeathListener(), this);
         pm.registerEvents(new DayListener(), this);
@@ -884,6 +899,8 @@ public class LostShardPlugin extends JavaPlugin {
         pm.registerEvents(new FeatherTickleListener(), this);
         pm.registerEvents(new DragonEggFireListener(), this);
         pm.registerEvents(new TotemDropListener(), this);
+
+        TrailListener.onTick();
 
         SilentWalkListener.initSilentWalkListener();
         BlockChangePlotListener.addListeners();
@@ -1327,6 +1344,10 @@ public class LostShardPlugin extends JavaPlugin {
 
     public static String getPatchUpdateVersion(String majorUpdate) {
         return ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "News -> " + majorUpdate;
+    }
+
+    public static AnimationManager getAnimatorPackage() {
+        return animationManager;
     }
 
     public static boolean isTutorial() {

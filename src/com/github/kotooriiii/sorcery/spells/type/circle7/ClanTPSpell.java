@@ -3,15 +3,14 @@ package com.github.kotooriiii.sorcery.spells.type.circle7;
 import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.channels.events.ShardChatEvent;
 import com.github.kotooriiii.clans.Clan;
+import com.github.kotooriiii.sorcery.spells.KVectorUtils;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.sorcery.spells.type.circle6.WaterWalkSpell;
 import com.github.kotooriiii.stats.Stat;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -22,6 +21,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -212,6 +212,9 @@ public class ClanTPSpell extends Spell implements Listener {
         Stat stat = Stat.wrap(playerSender.getUniqueId());
         stat.setMana(0);
         stat.setStamina(0);
+
+        if(LostShardPlugin.getAnimatorPackage().isAnimating(playerSender.getUniqueId()))
+            drawInPlane(clanMemberPlayer.getLocation(), Particle.REDSTONE, 1, 1);
         return true;
 
     }
@@ -310,6 +313,74 @@ public class ClanTPSpell extends Spell implements Listener {
         }
 
         return true;
+    }
+
+    public void drawInPlane(Location location, Particle particle, double chance, double distance) {
+
+        if (Math.random() < chance && particle != Particle.REDSTONE)
+            return;
+
+        // We will use these for drawing our parametric curve on the plane:
+        double twopi = 2 * Math.PI;
+        double times = 1 * twopi;
+        double division = twopi / 24;
+
+        //This is how far away we want the plane's origin to be:
+        double radius = 1d;
+
+        //Get the normal vector to the plane, nv:
+        Location c = location;
+        Vector nv = new Vector(0.0000000001f, 1, 0.0000000001f); // c.getDirection().normalize();
+
+        // Coordinates where we want the origin to appear
+        double nx = radius * nv.getX() + c.getX();
+        double ny = radius * nv.getY() + c.getY();
+        double nz = radius * nv.getZ() + c.getZ();
+
+        // Get your basis vectors for the plane
+        Vector ya = KVectorUtils.perp(nv, new Vector(0, 1, 0)).normalize();
+        Vector xa = ya.getCrossProduct(nv).normalize();
+
+        //nv.multiply(-1);
+
+        // For loop for your parametric equation
+        for (double theta = chance == 1 ? 0 : Math.random() * twopi; theta < times; theta += division) {
+
+
+            // Coordinates with respect to our basis
+            double xb = distance * Math.cos(theta); //calculate x coordinate
+            double yb = distance * Math.sin(theta); //calculate y coordinate
+
+            // Multiply the transformation matrix with our coordinates for the change of basis
+            double xi = xa.getX() * xb + ya.getX() * yb + nv.getX();
+            double yi = xa.getY() * xb + ya.getY() * yb + nv.getY();
+            double zi = xa.getZ() * xb + ya.getZ() * yb + nv.getZ();
+
+            // Translate the coordinates in front of the player
+            double x = xi + nx;
+            double y = yi + ny;
+            double z = zi + nz;
+
+//
+//            // 6 = RED
+//            double ran = 6d / 24d;
+
+            Location spawnLocation0 = new Location(c.getWorld(), x, y, z);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (particle == Particle.REDSTONE)
+                    player.getWorld().spawnParticle(Particle.REDSTONE, spawnLocation0, 2, 0, 0, 0, new Particle.DustOptions(Color.fromRGB(53, 81, 92), 1f));
+                else {
+                    player.getWorld().spawnParticle(particle, spawnLocation0, 2);
+                }
+
+            }
+            if (chance != 1)
+                break;
+
+
+            //player.spawnParticle(Particle.NOTE, new Location(c.getWorld(), x, y, z), 0, ran, 0, 0, 1);
+        }
+
     }
 
 }

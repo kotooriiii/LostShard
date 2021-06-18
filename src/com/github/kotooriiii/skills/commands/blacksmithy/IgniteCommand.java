@@ -6,8 +6,7 @@ import com.github.kotooriiii.skills.Skill;
 import com.github.kotooriiii.skills.SkillPlayer;
 import com.github.kotooriiii.skills.events.BlacksmithySkillEvent;
 import com.github.kotooriiii.stats.Stat;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -120,6 +119,12 @@ public class IgniteCommand implements CommandExecutor {
 
         stat.setStamina(stat.getStamina() - STAMINA_COST);
         invHelper.removeIngredients();
+
+        if(LostShardPlugin.getAnimatorPackage().isAnimating(playerUUID))
+        {
+            playerSender.getWorld().spawnParticle(Particle.REDSTONE, playerSender.getLocation().add(0,1,0), 30, 0.5,0.5,0.5, new Particle.DustOptions(Color.fromRGB(0, 0, 0), 1f));
+            playerSender.getWorld().playSound(playerSender.getLocation(), Sound.BLOCK_ANVIL_USE, 5,3);
+        }
         return true;
     }
 

@@ -911,6 +911,11 @@ public class EnchantingListener implements Listener {
         //To enchant
         event.getInventory().setItem(1, lapis.clone());
 
+        if(LostShardPlugin.getAnimatorPackage().isAnimating(player.getUniqueId()))
+        {
+            player.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, event.getEnchantBlock().getLocation(), 7, 0,0,0);
+            player.getWorld().playSound(event.getEnchantBlock().getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 6, 6);
+        }
 
         new BukkitRunnable() {
             @Override

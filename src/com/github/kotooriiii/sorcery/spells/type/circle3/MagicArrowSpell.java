@@ -4,15 +4,16 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.entity.AbstractArrow;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import io.papermc.paper.event.entity.EntityMoveEvent;
+import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.*;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,7 +22,9 @@ import org.bukkit.util.Vector;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
@@ -40,7 +43,8 @@ public class MagicArrowSpell extends Spell implements Listener {
 
     }
 
-    private  static MagicArrowSpell instance;
+    private static MagicArrowSpell instance;
+
     public static MagicArrowSpell getInstance() {
         if (instance == null) {
             synchronized (MagicArrowSpell.class) {
@@ -98,25 +102,70 @@ public class MagicArrowSpell extends Spell implements Listener {
         return false;
     }
 
+    private static ArrayList<Arrow> arrows = new ArrayList<>();
+    private Color[] colors = {Color.fromRGB(255, 0, 0), Color.fromRGB(255, 165, 0), Color.fromRGB(255, 255, 0), Color.fromRGB(0, 128, 0), Color.fromRGB(0, 0, 255), Color.fromRGB(75, 0, 130), Color.fromRGB(238, 130, 238)};
+    private int index = 0;
+
+
     @Override
     public boolean executeSpell(Player player) {
 
-        final float MAGNITUDE = 15/4;
+        final float MAGNITUDE = 15 / 4;
 
-        Arrow a1 = player.launchProjectile(Arrow.class, player.getLocation().getDirection());
-        a1.setVelocity(a1.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1,MAGNITUDE)));
-        a1.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        final boolean isAnimating = LostShardPlugin.getAnimatorPackage().isAnimating(player.getUniqueId());
 
-        Arrow a2 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(45)));
-        a2.setVelocity(a2.getVelocity().clone().multiply(new Vector(MAGNITUDE,1,MAGNITUDE)));
-        a2.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+//        Arrow a1 = player.launchProjectile(Arrow.class, player.getLocation().getDirection());
+//        arrows.add(a1);
+//        a1.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+//        a1.setVelocity(a1.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
+//        a1.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+//
+//        Arrow a2 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(45)));
+//        arrows.add(a2);
+//        a2.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+//        a2.setVelocity(a2.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
+//        a2.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
-        Arrow a3 =player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(360-45)));
-        a3.setVelocity(a3.getVelocity().clone().multiply(new Vector(MAGNITUDE,1,MAGNITUDE)));
+
+        Arrow a3 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(360 - 45)));
+        arrows.add(a3);
+        a3.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+        a3.setVelocity(a3.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
         a3.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
-
 
 
         return true;
     }
+
+
+    public void tick() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                final Iterator<Arrow> iterator = arrows.iterator();
+
+                if (index == colors.length)
+                    index = 0;
+
+                while (iterator.hasNext()) {
+                    final Arrow next = iterator.next();
+                    final Location location = next.getLocation();
+
+                    location.getWorld().spawnParticle(Particle.REDSTONE, location, 2, 0.25, 0.25, 0.25, new Particle.DustOptions(colors[index], 1f));
+                }
+                index++;
+            }
+        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 1);
+    }
+
+    @EventHandler
+    public void onArrowLand(ProjectileHitEvent event) {
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+            return;
+        final Projectile entity = event.getEntity();
+        if (entity.getType() != EntityType.ARROW)
+            return;
+        arrows.remove(entity);
+    }
+
 }

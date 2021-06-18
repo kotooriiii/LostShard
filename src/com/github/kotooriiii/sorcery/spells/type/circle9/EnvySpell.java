@@ -135,8 +135,8 @@ public class EnvySpell extends Spell implements Listener {
         attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 5.0f, 5.333f);
         defender.getWorld().playSound(defender.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 5.0f, 5.333f);
 
-        Vector dir = oldAttackerLocation.toVector().subtract(oldDefenderLocation.toVector());
-        BlockIterator blockIterator = new BlockIterator(oldAttackerLocation.getWorld(), oldDefenderEyeHeight.toVector(), dir, 0, 120);
+        Vector direction = oldAttackerLocation.toVector().subtract(oldDefenderLocation.toVector());
+        BlockIterator blockIterator = new BlockIterator(oldAttackerLocation.getWorld(), oldDefenderEyeHeight.toVector(), direction, 0,  (int) Math.round(Math.sqrt(direction.getX()*direction.getX() + direction.getY()*direction.getY() + direction.getZ()*direction.getZ())));
 
         new BukkitRunnable() {
             @Override

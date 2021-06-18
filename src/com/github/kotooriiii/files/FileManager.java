@@ -34,12 +34,14 @@ import com.github.kotooriiii.status.shrine.ShrineType;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -66,6 +68,8 @@ public final class FileManager {
 
     private static File muted_folder = new File(plugin_folder + File.separator + "muted");
     private static File ranks_folder = new File(plugin_folder + File.separator + "ranks");
+    private static File animators_file = new File(ranks_folder, "animators.txt");
+
     private static File discord_folder = new File(plugin_folder + File.separator + "discord");
     private static File links_folder = new File(discord_folder + File.separator + "links");
     private static File shrines_folder = new File(plugin_folder + File.separator + "shrines");
@@ -114,6 +118,11 @@ public final class FileManager {
         muted_folder.mkdirs();
         banned_folder.mkdirs();
         ranks_folder.mkdirs();
+        try {
+            animators_file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         discord_folder.mkdirs();
         links_folder.mkdirs();
         shrines_folder.mkdirs();
@@ -200,6 +209,8 @@ public final class FileManager {
                 continue;
             }
         }
+
+        readAnimators();
 
         for (File file : bank_folder.listFiles()) {
             if (!file.getName().endsWith(".yml"))
@@ -1023,6 +1034,33 @@ public final class FileManager {
         LostShardPlugin.getSorceryManager().addSorceryPlayer(sorceryPlayer, false);
     }
 
+    public static void readAnimators()
+    {
+        String fullString = "";
+        try {
+            fullString = FileUtils.readFileToString(animators_file, StandardCharsets.UTF_8);
+            LostShardPlugin.getAnimatorPackage().fromString(fullString);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void writeAnimators()
+    {
+        String animatorString = LostShardPlugin.getAnimatorPackage().toString();
+        FileWriter myWriter = null;
+        try {
+            myWriter = new FileWriter(animators_file, false);
+            myWriter.write(animatorString);
+            myWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static synchronized void write(Clan clan) {
         UUID clanID = clan.getID();
         String fileName = clanID + ".yml";
@@ -1727,6 +1765,8 @@ public final class FileManager {
             sorceryPlayerFile.delete();
 
     }
+
+
 
     public static void removeFile(LinkPlayer linkPlayer) {
         File linkPlayerFile = new File(links_folder + File.separator + linkPlayer.getUserSnowflake() + ".obj");

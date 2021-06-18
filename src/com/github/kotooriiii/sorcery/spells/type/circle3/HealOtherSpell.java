@@ -8,6 +8,7 @@ import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -100,6 +101,11 @@ public class HealOtherSpell extends Spell {
         clanPlayer.sendMessage(STANDARD_COLOR + "" + StatusPlayer.wrap(player.getUniqueId()).getStatus().getChatColor() + player.getName() + " heals you.");
         player.sendMessage(STANDARD_COLOR + "You healed " + StatusPlayer.wrap(clanPlayer.getUniqueId()).getStatus().getChatColor() + player.getName() + STANDARD_COLOR + ".");
 
+        if (LostShardPlugin.getAnimatorPackage().isAnimating(player.getUniqueId())) {
+            clanPlayer.getWorld().spawnParticle(Particle.COMPOSTER, clanPlayer.getLocation(), 5, 0.5f, 1.5f, 0.5f);
+            clanPlayer.getWorld().spawnParticle(Particle.COMPOSTER, clanPlayer.getLocation().add(0, 1, 0), 5, 0.5f, 1.5f, 0.5f);
+
+        }
 
         return true;
     }

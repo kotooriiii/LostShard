@@ -3,6 +3,7 @@ package com.github.kotooriiii.util;
 import com.github.kotooriiii.status.Status;
 import com.github.kotooriiii.status.StatusPlayer;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 import java.awt.*;
@@ -31,6 +33,47 @@ public final class HelperMethods {
     private static Set<Material> ignoreLiquidsSet = new HashSet<>();
 
     private final static int CHAT_CENTER_PX = 154, BOOK_CENTER_PX = 46;
+
+
+    public static List<Block> getBridgeBlocks(Location initialLocation, Location endingLocation) {
+return getBridgeBlocks(initialLocation, endingLocation, -1) ;}
+
+    public static List<Block> getBridgeBlocks(Location initialLocation, Location endingLocation, int distance) {
+
+
+
+        ArrayList<Block> blocks = new ArrayList<Block>();
+
+
+        Location clonedInitialLocation = initialLocation.clone().add(0, 0, 0);
+        endingLocation.setY(endingLocation.getY());
+        Vector direction = new Vector(endingLocation.getBlockX() - clonedInitialLocation.getBlockX(), endingLocation.getBlockY() - clonedInitialLocation.getBlockY(), endingLocation.getBlockZ() - clonedInitialLocation.getBlockZ());
+
+
+
+        Iterator<Block> itr = new BlockIterator(initialLocation.getWorld(), clonedInitialLocation.toVector(), direction, 0, distance == -1 ? (int) Math.round(Math.sqrt(direction.getX()*direction.getX() + direction.getY()*direction.getY() + direction.getZ()*direction.getZ())) : distance);
+
+        while (itr.hasNext()) {
+            Block block = itr.next();
+            Block leftBlock = block.getLocation().clone().add(getLeftHeadDirection(direction).multiply(1.0D)).getBlock();
+            Block rightBlock = block.getLocation().clone().add(getRightHeadDirection(direction).multiply(1.0D)).getBlock();
+
+          //  blocks.add(leftBlock);
+            blocks.add(block);
+         //   blocks.add(rightBlock);
+        }
+        return blocks;
+    }
+
+    public static Vector getRightHeadDirection(Vector vector) {
+        Vector direction = vector.normalize();
+        return new Vector(-direction.getZ(), 0.0, direction.getX()).normalize();
+    }
+
+    public static Vector getLeftHeadDirection(Vector vector) {
+        Vector direction = vector.normalize();
+        return new Vector(direction.getZ(), 0.0, -direction.getX()).normalize();
+    }
 
     public static Location getHighestBlock(World world, int x, int z){
         int i = 255;

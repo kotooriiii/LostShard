@@ -4,13 +4,19 @@ import com.github.kotooriiii.LostShardPlugin;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+
+import java.util.List;
 
 import static com.github.kotooriiii.util.HelperMethods.*;
 
@@ -31,9 +37,9 @@ public class ArcheryListener implements Listener {
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(damager))
+        if (CitizensAPI.getNPCRegistry().isNPC(damager))
             return;
-        if(CitizensAPI.getNPCRegistry().isNPC(defender))
+        if (CitizensAPI.getNPCRegistry().isNPC(defender))
             return;
 
 
@@ -66,7 +72,7 @@ public class ArcheryListener implements Listener {
         Entity damager = event.getDamager();
         Entity defender = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
+        if (CitizensAPI.getNPCRegistry().isNPC(damager) || CitizensAPI.getNPCRegistry().isNPC(defender))
             return;
 
         if (!HelperMethods.isPlayerDamagerONLY(defender, damager))
@@ -92,7 +98,7 @@ public class ArcheryListener implements Listener {
 
         Player defenderPlayer = event.getEntity();
 
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
 
@@ -126,13 +132,13 @@ public class ArcheryListener implements Listener {
     public void onXPEntityDeath(EntityDeathEvent event) {
 
         Entity defenderEntity = event.getEntity();
-        if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
             return;
 
 
         EntityDamageEvent damagerCause = defenderEntity.getLastDamageCause();
 
-        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent) )
+        if (damagerCause == null || !(damagerCause instanceof EntityDamageByEntityEvent))
             return;
         EntityDamageByEntityEvent betterDamageCause = (EntityDamageByEntityEvent) damagerCause;
 
@@ -157,21 +163,25 @@ public class ArcheryListener implements Listener {
 
     }
 
-    private void applyPierce(Player damager, Player defender,AbstractArrow arrow, EntityDamageByEntityEvent event, double chance) {
+    private void applyPierce(Player damager, Player defender, AbstractArrow arrow, EntityDamageByEntityEvent event, double chance) {
         double randomValue = Math.random();
 
         if (randomValue <= chance) {
             if (defender.getHealth() - 10 <= 0) {
                 defender.setHealth(0.5);
-            }
-            else {
-                defender.setHealth(defender.getHealth()-10);
+            } else {
+                defender.setHealth(defender.getHealth() - 10);
             }
 
             arrow.remove();
             event.setCancelled(true);
             damager.sendMessage(ChatColor.GREEN + "Your arrow pierced through " + defender.getName() + "'s armor.");
             defender.sendMessage(ChatColor.GREEN + "The arrow pierces through your armor.");
+
+            if (LostShardPlugin.getAnimatorPackage().isAnimating(damager.getUniqueId())) {
+                defender.getLocation().getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, defender.getLocation().add(0, 0.5, 0), 1);
+            }
+
         }
     }
 
@@ -182,7 +192,27 @@ public class ArcheryListener implements Listener {
 
             Vector vec = arrow.getVelocity();
             Vector norm = vec.normalize();
-            Vector finalized = norm.multiply(new Vector(7,2.5,7));
+            Vector finalized = norm.multiply(new Vector(7, 2.5, 7));
+
+
+            if (LostShardPlugin.getAnimatorPackage().isAnimating(damager.getUniqueId())) {
+                final Location initialLocation = defender.getLocation();
+                final Location finalLocation = initialLocation.clone().add(finalized);
+
+                final List<Block> bridgeBlocks = getBridgeBlocks(initialLocation, finalLocation);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        for (Block block : bridgeBlocks) {
+                            block.getWorld().spawnParticle(Particle.BLOCK_DUST, block.getLocation(), 3, 0.6, 0.7, 0.6);
+                        }
+                    }
+                }.runTaskAsynchronously(LostShardPlugin.plugin);
+
+            }
+
+
             defender.setVelocity(finalized);
 
             damager.sendMessage(ChatColor.GREEN + defender.getName() + " has been knocked back!");
@@ -194,7 +224,7 @@ public class ArcheryListener implements Listener {
         int level = (int) LostShardPlugin.getSkillManager().getSkillPlayer(damager.getUniqueId()).getActiveBuild().getArchery().getLevel();
 
         AbstractArrow arrow = (AbstractArrow) event.getDamager();
-        if(arrow.getCustomName() == null)
+        if (arrow.getCustomName() == null)
             return;
         String[] properties = arrow.getCustomName().split(":");
 
@@ -214,32 +244,23 @@ public class ArcheryListener implements Listener {
 
         double archeryBonusDamage = 0;
 
-        if(level>=100)
-        {
+        if (level >= 100) {
             archeryBonusDamage += 4;
             applyKnockback(damager, defender, arrow, 0.2);
             applyPierce(damager, defender, arrow, event, 0.15);
-        }
-        else if(75 <= level && level < 100)
-        {
+        } else if (75 <= level && level < 100) {
             archeryBonusDamage += 3;
             applyKnockback(damager, defender, arrow, 0.15);
             applyPierce(damager, defender, arrow, event, 0.10);
-        }
-        else if(50 <= level && level < 75)
-        {
+        } else if (50 <= level && level < 75) {
             archeryBonusDamage += 2;
             applyKnockback(damager, defender, arrow, 0.10);
             applyPierce(damager, defender, arrow, event, 0.075);
-        }
-        else if(25 <= level && level < 50)
-        {
+        } else if (25 <= level && level < 50) {
             archeryBonusDamage += 1;
             applyKnockback(damager, defender, arrow, 0.07);
             applyPierce(damager, defender, arrow, event, 0.05);
-        }
-        else if(0 <= level && level < 25)
-        {
+        } else if (0 <= level && level < 25) {
 
         }
 
@@ -247,10 +268,10 @@ public class ArcheryListener implements Listener {
         //power
         if (power == 0) power = -1;
         double powerRatio = 0.25 * (power + 1);
-        double powerDamage = powerRatio*(damage+archeryBonusDamage);
+        double powerDamage = powerRatio * (damage + archeryBonusDamage);
 
 
-        double finalDamage = (damage+archeryBonusDamage) + powerDamage;
+        double finalDamage = (damage + archeryBonusDamage) + powerDamage;
 
         event.setDamage(finalDamage);
     }

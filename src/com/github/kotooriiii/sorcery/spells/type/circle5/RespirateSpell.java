@@ -5,9 +5,7 @@ import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -122,6 +120,36 @@ public class RespirateSpell extends Spell implements Listener {
         return respirateSet;
     }
 
+    public void onTick()
+    {
+
+        final double[] offset = {0};
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                if(offset[0] >= 2)
+                {
+                    offset[0] = 0;
+                }
+
+                for(UUID uuid : getRespirators())
+                {
+                    if(LostShardPlugin.getAnimatorPackage().isAnimating(uuid))
+                    {
+                        final Player player = Bukkit.getPlayer(uuid);
+                        if(player == null)
+                            continue;
+
+                        player.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, player.getLocation().add(0,1 + (offset[0]),0), 1 ,0,0,0, 0.05);
+                    }
+                }
+
+                offset[0] = offset[0] + 0.2;
+
+            }
+        }.runTaskTimerAsynchronously(LostShardPlugin.plugin, 0, 20);
+    }
 
     @EventHandler
     public void onMovePerceptionListener(PlayerMoveEvent event) {

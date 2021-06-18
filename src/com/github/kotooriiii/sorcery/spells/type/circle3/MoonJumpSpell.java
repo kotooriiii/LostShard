@@ -10,10 +10,7 @@ import com.github.kotooriiii.sorcery.spells.SpellType;
 import com.github.kotooriiii.sorcery.spells.drops.SpellMonsterDrop;
 import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -135,6 +132,35 @@ public class MoonJumpSpell extends Spell implements Listener {
        // player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20*DURATION, 1, false, false, false));
 
         return true;
+    }
+
+    @EventHandler
+    public void onMoonJumpingAnimating(PlayerMoveEvent event)
+    {
+        if (CitizensAPI.getNPCRegistry().isNPC(event.getPlayer()))
+            return;
+        if(!getJumpers().contains(event.getPlayer().getUniqueId()))
+            return;
+
+        final int x_initial, y_initial, z_initial,
+                x_final, y_final, z_final;
+
+        x_initial = event.getFrom().getBlockX();
+        y_initial = event.getFrom().getBlockY();
+        z_initial = event.getFrom().getBlockZ();
+
+        x_final = event.getTo().getBlockX();
+        y_final = event.getTo().getBlockY();
+        z_final = event.getTo().getBlockZ();
+
+        if (x_initial == x_final && y_initial == y_final && z_initial == z_final)
+            return;
+
+        if (LostShardPlugin.getAnimatorPackage().isAnimating(event.getPlayer().getUniqueId())) {
+            event.getPlayer().getWorld().spawnParticle(Particle.SNOW_SHOVEL, event.getFrom(), 3, 0.5f, 0.5f, 0.5f);
+            event.getPlayer().getWorld().spawnParticle(Particle.SNOW_SHOVEL, event.getTo(), 3, 0.5f, 0.5f, 0.5f);
+
+        }
     }
 
     @EventHandler

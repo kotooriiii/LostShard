@@ -5,6 +5,7 @@ import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -174,7 +175,12 @@ public class BrawlingListener implements Listener {
         if (randomValue <= chance) {
 
             damager.sendMessage(ChatColor.GREEN + defender.getName() + " has been stunned!");
-            ((Player) defender).sendMessage(ChatColor.GREEN + "You have been stunned!");
+            defender.sendMessage(ChatColor.GREEN + "You have been stunned!");
+
+            if(LostShardPlugin.getAnimatorPackage().isAnimating(damager.getUniqueId()))
+            {
+                defender.getWorld().spawnParticle(Particle.SMOKE_NORMAL, defender.getLocation().add(0,1,0), 10, 0.7,0.5, 0.7);
+            }
 
             //Remove in case old entry
             if (getStunMap().containsKey(defender.getUniqueId())) {

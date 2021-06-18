@@ -1,5 +1,8 @@
 package com.github.kotooriiii.sorcery.commands;
 
+import com.github.kotooriiii.LostShardPlugin;
+import com.github.kotooriiii.ranks.RankPlayer;
+import com.github.kotooriiii.ranks.RankType;
 import com.github.kotooriiii.sorcery.spells.Spell;
 import com.github.kotooriiii.sorcery.spells.SpellToggleable;
 import com.github.kotooriiii.sorcery.spells.SpellType;
@@ -33,9 +36,23 @@ public class ToggleCommand implements CommandExecutor {
 
         if(args.length == 0)
         {
-            sender.sendMessage(ERROR_COLOR  + "Type /toggle <spellName> to toggle a toggleable spell off.");
+            sender.sendMessage(ERROR_COLOR  + "Type /toggle [spellName] or /toggle effects to toggle an effect.");
             return true;
         }
+
+
+        if(args[0].equalsIgnoreCase("effects") || args[0].equalsIgnoreCase("effect") || args[0].equalsIgnoreCase("fx"))
+        {
+            final RankPlayer wrap = RankPlayer.wrap(((Player) sender).getUniqueId());
+            if(wrap.getRankType() != RankType.SUBSCRIBER_PLUS)
+            {
+                sender.sendMessage(ChatColor.DARK_RED + "You must be a Subscriber+ in order to use Trails.");
+                return false;
+            }
+            LostShardPlugin.getAnimatorPackage().toggleAnimate(((Player) sender));
+            return false;
+        }
+
 
         boolean exists = false;
         Spell spell = null;

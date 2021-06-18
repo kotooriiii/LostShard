@@ -138,8 +138,7 @@ public class ForcePushSpell extends Spell {
 
             int timer = 0;
             int offset = 1;
-            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1, 120);
-
+            BlockIterator iterator = new BlockIterator(entity.getLocation().getWorld(), entity.getLocation().toVector(), direction, 1,  (int) Math.round(Math.sqrt(direction.getX()*direction.getX() + direction.getY()*direction.getY() + direction.getZ()*direction.getZ())));
             new BukkitRunnable() {
                 @Override
                 public void run() {
