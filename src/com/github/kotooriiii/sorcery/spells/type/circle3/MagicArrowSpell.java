@@ -114,24 +114,24 @@ public class MagicArrowSpell extends Spell implements Listener {
 
         final boolean isAnimating = LostShardPlugin.getAnimatorPackage().isAnimating(player.getUniqueId());
 
-//        Arrow a1 = player.launchProjectile(Arrow.class, player.getLocation().getDirection());
-//        arrows.add(a1);
-//        a1.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
-//        a1.setVelocity(a1.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
-//        a1.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
-//
-//        Arrow a2 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(45)));
-//        arrows.add(a2);
-//        a2.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
-//        a2.setVelocity(a2.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
-//        a2.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        Arrow a1 = player.launchProjectile(Arrow.class, player.getLocation().getDirection());
+        arrows.add(a1);
+        a1.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+        a1.setVelocity(a1.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
+        a1.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+
+        Arrow a2 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(45)));
+        arrows.add(a2);
+        a2.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+        a2.setVelocity(a2.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
+        a2.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
 
-        Arrow a3 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(360 - 45)));
-        arrows.add(a3);
-        a3.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
-        a3.setVelocity(a3.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
-        a3.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+            Arrow a3 = player.launchProjectile(Arrow.class, player.getLocation().getDirection().clone().rotateAroundY(Math.toRadians(10)));
+            arrows.add(a3);
+            a3.setMetadata("magicArrow", new FixedMetadataValue(LostShardPlugin.plugin, isAnimating));
+            a3.setVelocity(a3.getVelocity().clone().multiply(new Vector(MAGNITUDE, 1, MAGNITUDE)));
+            a3.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
 
 
         return true;
@@ -151,7 +151,7 @@ public class MagicArrowSpell extends Spell implements Listener {
                     final Arrow next = iterator.next();
                     final Location location = next.getLocation();
 
-                    location.getWorld().spawnParticle(Particle.REDSTONE, location, 2, 0.25, 0.25, 0.25, new Particle.DustOptions(colors[index], 1f));
+                    location.getWorld().spawnParticle(Particle.REDSTONE, location, 4, 0.25, 0.25, 0.25, new Particle.DustOptions(colors[index], 1f));
                 }
                 index++;
             }
