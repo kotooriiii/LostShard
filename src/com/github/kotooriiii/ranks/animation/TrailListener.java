@@ -3,6 +3,7 @@ package com.github.kotooriiii.ranks.animation;
 import com.github.kotooriiii.LostShardPlugin;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,8 +25,10 @@ public class TrailListener {
                         final AnimationManager.Trail trail = animatorPackage.getTrail(player.getUniqueId());
                         if (animatorPackage.isAnimating(player.getUniqueId()) && trail != AnimationManager.Trail.NONE) {
 
-                            for (int i = 0; i < 15; i++)
-                                player.getWorld().spawnParticle(trail.getParticle(), player.getLocation(), 0, 0.4f, 0.4f, 0.4f, 0.05);
+
+                            Location spawnedLoc = player.getLocation().clone().add(0,0.25,0);
+                            for (int i = 0; i < 3; i++)
+                                player.getWorld().spawnParticle(trail.getParticle(), spawnedLoc, 0, 0.0f, -0.1f, 0.0f, 0.05);
 
 
                         }

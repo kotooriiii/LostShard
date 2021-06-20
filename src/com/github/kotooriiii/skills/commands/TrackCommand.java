@@ -26,6 +26,8 @@ import java.util.UUID;
 import static com.github.kotooriiii.data.Maps.ERROR_COLOR;
 
 public class TrackCommand implements CommandExecutor {
+
+    private final static int RANGE_ANIM = 10;
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
         if (!(sender instanceof Player))
@@ -167,7 +169,7 @@ public class TrackCommand implements CommandExecutor {
                     //Animating
                     if(LostShardPlugin.getAnimatorPackage().isAnimating(playerUUID))
                     {
-                        final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation(), trackedPlayer.getLocation());
+                        final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation().clone().add(0,1,0), trackedPlayer.getLocation().clone().add(0,1,0), RANGE_ANIM);
 
                         new BukkitRunnable() {
                             @Override
@@ -179,6 +181,7 @@ public class TrackCommand implements CommandExecutor {
                             }
                         }.runTaskAsynchronously(LostShardPlugin.plugin);
                     }
+
                 }
 
             } else {
@@ -248,7 +251,7 @@ public class TrackCommand implements CommandExecutor {
                 //Animating
                 if(LostShardPlugin.getAnimatorPackage().isAnimating(playerUUID) && !LostShardPlugin.isTutorial())
                 {
-                    final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation().add(0,1,0), closestEntity.getLocation().add(0,1,0), 5);
+                    final List<Block> bridgeBlocks = HelperMethods.getBridgeBlocks(playerSender.getLocation().add(0,1,0), closestEntity.getLocation().add(0,1,0), RANGE_ANIM);
 
                     new BukkitRunnable() {
                         @Override

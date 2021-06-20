@@ -5,6 +5,7 @@ import com.github.kotooriiii.util.HelperMethods;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -179,7 +180,7 @@ public class ArcheryListener implements Listener {
             defender.sendMessage(ChatColor.GREEN + "The arrow pierces through your armor.");
 
             if (LostShardPlugin.getAnimatorPackage().isAnimating(damager.getUniqueId())) {
-                defender.getLocation().getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, defender.getLocation().add(0, 0.5, 0), 1);
+                defender.getLocation().getWorld().spawnParticle(Particle.EXPLOSION_LARGE, defender.getLocation().add(0, 0.5, 0), 1);
             }
 
         }
@@ -205,7 +206,7 @@ public class ArcheryListener implements Listener {
                     @Override
                     public void run() {
                         for (Block block : bridgeBlocks) {
-                            block.getWorld().spawnParticle(Particle.BLOCK_DUST, block.getLocation(), 3, 0.6, 0.7, 0.6);
+                            block.getWorld().spawnParticle(Particle.BLOCK_DUST, block.getLocation(), 3, 0.6, 0.7, 0.6, Material.ANDESITE.createBlockData());
                         }
                     }
                 }.runTaskAsynchronously(LostShardPlugin.plugin);
