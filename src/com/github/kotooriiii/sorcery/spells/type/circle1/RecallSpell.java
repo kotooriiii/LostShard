@@ -306,7 +306,7 @@ public class RecallSpell extends Spell implements Listener {
         mark.getLocation().getWorld().strikeLightningEffect(mark.getLocation());
 
         if(LostShardPlugin.getAnimatorPackage().isAnimating(playerSender.getUniqueId()))
-        drawInPlane(mark.getLocation().add(0,-1,0), Particle.REDSTONE, 1, 1);
+        drawInPlane(mark.getLocation().clone().add(0,-1,0), Particle.REDSTONE, 1, 1);
 
         return true;
     }

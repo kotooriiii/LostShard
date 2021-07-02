@@ -159,6 +159,10 @@ public class DefaultSpawnStrategy extends SpawnStrategy {
             public void run() {
                 if(!manager.getCooldownStrategy().isAlive())
                     return;
+
+                if(true)
+                    return;
+
                 final TextComponent textComponent = new TextComponent("The Ender Dragon has fled.");
                 textComponent.setColor(ChatColor.RED);
                 Bukkit.broadcast(textComponent);

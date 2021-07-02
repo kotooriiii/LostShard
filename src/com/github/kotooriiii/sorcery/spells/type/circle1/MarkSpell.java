@@ -275,7 +275,7 @@ public class MarkSpell extends Spell implements Listener {
         //message
         playerSender.sendMessage(ChatColor.GOLD + "You have created a mark called \"" + name + "\".");
         //add mark
-        MarkPlayer.wrap(playerSender.getUniqueId()).addMark(name, location);
+        MarkPlayer.wrap(playerSender.getUniqueId()).addMark(name, location.clone());
 
         //effects
 
@@ -286,7 +286,7 @@ public class MarkSpell extends Spell implements Listener {
         if(ground.getType() != replacementType && LostShardPlugin.getAnimatorPackage().isAnimating(playerSender.getUniqueId()))
         {
             playerSender.getWorld().playSound(playerSender.getLocation(), Sound.BLOCK_COMPOSTER_FILL_SUCCESS, 10, 0);
-            drawInPlane(playerSender.getLocation().add(0,-1,0), Particle.REDSTONE, 1, 3);
+            drawInPlane(playerSender.getLocation().clone().add(0,-1,0), Particle.REDSTONE, 1, 3);
 
             playerSender.sendBlockChange(ground.getLocation(), replacementType.createBlockData());
             LostShardPlugin.getAnimatorPackage().blockAdd(ground.getLocation(), 10*20);
